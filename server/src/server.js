@@ -1,27 +1,27 @@
-import Express from 'express';
-import bodyParser from 'body-parser';
-import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
+ 
+import express from 'express'
+import { mapOrder } from '~/utils/sorts.js'
 
-const app = Express();
-const PORT = process.env.PORT || 3000;
+const app = express()
 
-// Middlewares
-app.use(helmet());
-app.use(cors());
-app.use(morgan('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+const hostname = 'localhost'
+const port = 8017
 
-// Routes 
-
-//test
 app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
+  // Test Absolute import mapOrder
+  console.log(mapOrder(
+    [ { id: 'id-1', name: 'One' },
+      { id: 'id-2', name: 'Two' },
+      { id: 'id-3', name: 'Three' },
+      { id: 'id-4', name: 'Four' },
+      { id: 'id-5', name: 'Five' } ],
+    ['id-5', 'id-4', 'id-2', 'id-3', 'id-1'],
+    'id'
+  ))
+  res.end('<h1>Hello World!</h1><hr>')
+})
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+app.listen(port, hostname, () => {
+  // eslint-disable-next-line no-console
+  console.log(`Hello , I am running at https://${ hostname }:${ port }/`)
+})
