@@ -1,0 +1,304 @@
+'use client';
+
+import Link from 'next/link';
+import {
+  DocumentTextIcon,
+  EyeIcon,
+  PhoneIcon,
+  HeartIcon,
+  ChartBarIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  PlusIcon
+} from '@heroicons/react/24/outline';
+
+// Mock data - trong thực tế sẽ fetch từ API
+const stats = [
+  {
+    name: 'Tổng tin đăng',
+    value: '12',
+    change: '+2',
+    changeType: 'increase',
+    icon: DocumentTextIcon,
+  },
+  {
+    name: 'Lượt xem tháng này',
+    value: '2,847',
+    change: '+12%',
+    changeType: 'increase',
+    icon: EyeIcon,
+  },
+  {
+    name: 'Số cuộc gọi',
+    value: '156',
+    change: '+8%',
+    changeType: 'increase',
+    icon: PhoneIcon,
+  },
+  {
+    name: 'Lượt yêu thích',
+    value: '89',
+    change: '-2%',
+    changeType: 'decrease',
+    icon: HeartIcon,
+  },
+];
+
+const recentActivities = [
+  {
+    id: 1,
+    type: 'view',
+    message: 'Có người xem tin "Phòng trọ gần ĐH Bách Khoa"',
+    time: '2 phút trước',
+    property: 'Phòng trọ gần ĐH Bách Khoa',
+  },
+  {
+    id: 2,
+    type: 'call',
+    message: 'Có cuộc gọi từ 098****567',
+    time: '15 phút trước',
+    property: 'Căn hộ mini Hai Bà Trưng',
+  },
+  {
+    id: 3,
+    type: 'like',
+    message: 'Tin đăng được thêm vào yêu thích',
+    time: '1 giờ trước',
+    property: 'Phòng trọ full nội thất',
+  },
+  {
+    id: 4,
+    type: 'approved',
+    message: 'Tin đăng đã được duyệt',
+    time: '3 giờ trước',
+    property: 'Nhà nguyên căn 2PN',
+  },
+];
+
+const myPostings = [
+  {
+    id: '1',
+    title: 'Phòng trọ gần ĐH Bách Khoa, full nội thất',
+    price: '3.5 triệu/tháng',
+    area: '25 m²',
+    location: 'Hai Bà Trưng, Hà Nội',
+    image: '/placeholder-room.svg',
+    status: 'active',
+    views: 234,
+    likes: 12,
+    posted: '2 ngày trước',
+  },
+  {
+    id: '2',
+    title: 'Căn hộ mini 1PN, có ban công, gần chợ',
+    price: '4.2 triệu/tháng',
+    area: '35 m²',
+    location: 'Thanh Xuân, Hà Nội',
+    image: '/placeholder-room.svg',
+    status: 'pending',
+    views: 89,
+    likes: 5,
+    posted: '1 ngày trước',
+  },
+  {
+    id: '3',
+    title: 'Phòng trọ giá rẻ, gần trường ĐH Kinh tế',
+    price: '2.8 triệu/tháng',
+    area: '20 m²',
+    location: 'Đống Đa, Hà Nội',
+    image: '/placeholder-room.svg',
+    status: 'expired',
+    views: 567,
+    likes: 23,
+    posted: '1 tuần trước',
+  },
+];
+
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case 'active':
+      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Đang hiển thị</span>;
+    case 'pending':
+      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Chờ duyệt</span>;
+    case 'expired':
+      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Hết hạn</span>;
+    default:
+      return null;
+  }
+};
+
+const getActivityIcon = (type: string) => {
+  switch (type) {
+    case 'view':
+      return <EyeIcon className="h-5 w-5 text-blue-500" />;
+    case 'call':
+      return <PhoneIcon className="h-5 w-5 text-green-500" />;
+    case 'like':
+      return <HeartIcon className="h-5 w-5 text-red-500" />;
+    case 'approved':
+      return <DocumentTextIcon className="h-5 w-5 text-purple-500" />;
+    default:
+      return <ChartBarIcon className="h-5 w-5 text-gray-500" />;
+  }
+};
+
+export default function DashboardOverview() {
+  return (
+    <div className="space-y-6">
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
+        <h2 className="text-2xl font-bold mb-2">Chào mừng trở lại!</h2>
+        <p className="text-blue-100 mb-4">
+          Bạn có 2 tin đăng mới cần được duyệt và 15 lượt xem mới trong hôm nay.
+        </p>
+        <Link
+          href="/dang-tin"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50"
+        >
+          <PlusIcon className="h-4 w-4 mr-2" />
+          Đăng tin mới
+        </Link>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat) => (
+          <div key={stat.name} className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <stat.icon className="h-6 w-6 text-gray-400" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">{stat.name}</dt>
+                    <dd className="flex items-baseline">
+                      <div className="text-2xl font-semibold text-gray-900">{stat.value}</div>
+                      <div className={`ml-2 flex items-baseline text-sm font-semibold ${
+                        stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {stat.changeType === 'increase' ? (
+                          <ArrowTrendingUpIcon className="self-center flex-shrink-0 h-4 w-4" />
+                        ) : (
+                          <ArrowTrendingDownIcon className="self-center flex-shrink-0 h-4 w-4" />
+                        )}
+                        <span className="sr-only">
+                          {stat.changeType === 'increase' ? 'Increased' : 'Decreased'} by
+                        </span>
+                        {stat.change}
+                      </div>
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Activities */}
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900">Hoạt động gần đây</h3>
+          </div>
+          <div className="p-6">
+            <div className="space-y-4">
+              {recentActivities.map((activity) => (
+                <div key={activity.id} className="flex items-start space-x-3">
+                  <div className="flex-shrink-0">
+                    {getActivityIcon(activity.type)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-gray-900">{activity.message}</p>
+                    <p className="text-sm text-gray-500">{activity.property}</p>
+                    <p className="text-xs text-gray-400">{activity.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6">
+              <Link
+                href="/dashboard/hoat-dong"
+                className="text-sm font-medium text-blue-600 hover:text-blue-500"
+              >
+                Xem tất cả hoạt động →
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Stats Chart Placeholder */}
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900">Thống kê lượt xem</h3>
+          </div>
+          <div className="p-6">
+            <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+              <div className="text-center">
+                <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">Biểu đồ thống kê</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Tính năng sẽ được cập nhật trong phiên bản tiếp theo
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* My Recent Postings */}
+      <div className="bg-white shadow rounded-lg">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium text-gray-900">Tin đăng gần đây</h3>
+            <Link
+              href="/dashboard/tin-dang"
+              className="text-sm font-medium text-blue-600 hover:text-blue-500"
+            >
+              Xem tất cả →
+            </Link>
+          </div>
+        </div>
+        <div className="p-6">
+          <div className="space-y-4">
+            {myPostings.map((posting) => (
+              <div key={posting.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <img
+                  src={posting.image}
+                  alt={posting.title}
+                  className="h-16 w-16 object-cover rounded-lg"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <h4 className="text-sm font-medium text-gray-900 truncate">
+                      {posting.title}
+                    </h4>
+                    {getStatusBadge(posting.status)}
+                  </div>
+                  <p className="text-sm text-gray-500 mb-1">
+                    {posting.location} • {posting.area}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-green-600">{posting.price}</span>
+                    <div className="flex items-center space-x-4 text-xs text-gray-500">
+                      <span className="flex items-center">
+                        <EyeIcon className="h-4 w-4 mr-1" />
+                        {posting.views}
+                      </span>
+                      <span className="flex items-center">
+                        <HeartIcon className="h-4 w-4 mr-1" />
+                        {posting.likes}
+                      </span>
+                      <span>{posting.posted}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
