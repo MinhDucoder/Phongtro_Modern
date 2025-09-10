@@ -1,0 +1,23 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "server phong tro",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon --watch src --ext js,json --exec node ./src/server.js",
+    "styles": "sass --watch src/resource/scss/app.scss:src/public/css/app.css",
+    "start": "node ./src/index.js"
+  },
+  "author": "minhducoder",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
