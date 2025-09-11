@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   HeartIcon, 
   ShareIcon, 
@@ -16,9 +17,11 @@ import {
   HomeIcon,
   AcademicCapIcon,
   BuildingStorefrontIcon,
-  PlusIcon
+  PlusIcon,
+  HandRaisedIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import toast from 'react-hot-toast';
 
 interface PropertyDetailProps {
   property: {
@@ -60,19 +63,31 @@ const getPlaceIcon = (type: string) => {
 };
 
 export default function PropertyDetail({ property }: PropertyDetailProps) {
+  const router = useRouter();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [showAllImages, setShowAllImages] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Mock auth state
 
   useEffect(() => {
     setMounted(true);
+    // Mock authentication check
+    setIsAuthenticated(true);
   }, []);
 
-  const handleImageClick = (index: number) => {
-    setCurrentImageIndex(index);
-    setShowAllImages(true);
+  const handleRequestToRent = () => {
+    if (!isAuthenticated) {
+      // Show login modal or redirect to login
+      toast.error('Vui lòng đăng nhập để gửi yêu cầu thuê');
+      router.push('/dang-nhap?redirect=' + encodeURIComponent(`/phong-tro/${property.id}`));
+      return;
+    }
+
+    // Navigate to request sent page
+    router.push(`/yeu-cau-da-gui?propertyId=${property.id}`);
   };
+
 
   if (!mounted) {
     return (
@@ -304,6 +319,15 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               </div>
 
               <div className="space-y-3">
+                {/* Request to Rent Button */}
+                <button
+                  onClick={handleRequestToRent}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-colors"
+                >
+                  <HandRaisedIcon className="w-5 h-5 mr-2" />
+                  Gửi yêu cầu thuê
+                </button>
+
                 <Link
                   href={`tel:${property.contact.phone}`}
                   className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-colors"
@@ -312,13 +336,13 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   {property.contact.phone}
                 </Link>
                 
-                <a
-                  href="/chat"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-colors"
-                >
+              <Link
+                href="/chat"
+                className="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-colors"
+              >
                   <ChatBubbleLeftIcon className="w-5 h-5 mr-2" />
                   Nhắn tin
-                </a>
+                </Link>
 
                 <button className="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 py-3 px-4 rounded-lg font-medium transition-colors">
                   Xem thêm tin của {property.contact.name}

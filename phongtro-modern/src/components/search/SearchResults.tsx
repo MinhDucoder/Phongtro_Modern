@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import PropertyCard from '@/components/ui/PropertyCard';
 import Pagination from '@/components/ui/Pagination';
 import {
@@ -113,7 +114,7 @@ export default function SearchResults({ searchParams }: SearchResultsProps) {
             <p className="text-sm text-gray-600">
               Tìm thấy <span className="font-medium">{filteredProperties.length}</span> kết quả
               {searchParams.keyword && (
-                <span> cho từ khóa "<span className="font-medium">{searchParams.keyword}</span>"</span>
+                <span> cho từ khóa &ldquo;<span className="font-medium">{searchParams.keyword}</span>&rdquo;</span>
               )}
             </p>
           </div>
@@ -231,9 +232,11 @@ export default function SearchResults({ searchParams }: SearchResultsProps) {
               {paginatedProperties.map((property) => (
                 <div key={property.id} className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start space-x-4">
-                    <img
+                    <Image
                       src={property.images[0]}
                       alt={property.title}
+                      width={128}
+                      height={96}
                       className="w-32 h-24 object-cover rounded-lg"
                     />
                     <div className="flex-1 min-w-0">
@@ -305,7 +308,7 @@ export default function SearchResults({ searchParams }: SearchResultsProps) {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h4 className="font-medium text-blue-900 mb-2">💡 Mẹo tìm kiếm hiệu quả</h4>
         <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Sử dụng từ khóa cụ thể như "gần trường đại học", "có ban công"</li>
+          <li>• Sử dụng từ khóa cụ thể như &ldquo;gần trường đại học&rdquo;, &ldquo;có ban công&rdquo;</li>
           <li>• Kết hợp nhiều bộ lọc để thu hẹp kết quả</li>
           <li>• Lưu tìm kiếm để nhận thông báo tin mới</li>
           <li>• Xem trên bản đồ để chọn vị trí phù hợp</li>

@@ -74,11 +74,11 @@ const mockProperty = {
     'Báo trước khi có khách qua đêm'
   ],
   nearbyPlaces: [
-    { name: 'Đại học Dược Hà Nội', distance: '200m', type: 'university' },
-    { name: 'Đại học Bách Khoa', distance: '500m', type: 'university' },
-    { name: 'Chợ Hôm', distance: '300m', type: 'market' },
-    { name: 'Bệnh viện Bạch Mai', distance: '1km', type: 'hospital' },
-    { name: 'Siêu thị Big C', distance: '800m', type: 'supermarket' },
+    { name: 'Đại học Dược Hà Nội', distance: '200m', type: 'university' as const },
+    { name: 'Đại học Bách Khoa', distance: '500m', type: 'university' as const },
+    { name: 'Chợ Hôm', distance: '300m', type: 'market' as const },
+    { name: 'Bệnh viện Bạch Mai', distance: '1km', type: 'hospital' as const },
+    { name: 'Siêu thị Big C', distance: '800m', type: 'supermarket' as const },
   ]
 };
 
@@ -98,7 +98,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 }
 
 export async function generateMetadata({ params }: PageProps) {
-  const { id } = await params;
+  await params;
   
   // Trong thực tế sẽ fetch data từ API
   return {

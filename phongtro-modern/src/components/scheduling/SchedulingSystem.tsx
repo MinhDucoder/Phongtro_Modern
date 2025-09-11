@@ -9,10 +9,7 @@ import {
   UserIcon,
   PhoneIcon,
   MapPinIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ChatBubbleLeftIcon,
-  TrashIcon
+  ChatBubbleLeftIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -126,10 +123,10 @@ export default function SchedulingSystem() {
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       setAppointments(prev => prev.map(apt =>
-        apt.id === appointmentId ? { ...apt, status: newStatus as any } : apt
+        apt.id === appointmentId ? { ...apt, status: newStatus as 'pending' | 'confirmed' | 'completed' | 'cancelled' } : apt
       ));
       toast.success('Cập nhật trạng thái thành công');
-    } catch (error) {
+    } catch {
       toast.error('Có lỗi xảy ra');
     } finally {
       setIsLoading(false);

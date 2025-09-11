@@ -6,7 +6,6 @@ import {
   PaperAirplaneIcon,
   FaceSmileIcon,
   PaperClipIcon,
-  PhotoIcon,
   PhoneIcon,
   VideoCameraIcon,
   InformationCircleIcon,
@@ -55,7 +54,7 @@ interface ChatWindowProps {
     name: string;
     avatar: string;
   };
-  onNewMessage: (conversationId: string, message: any) => void;
+  onNewMessage: (conversationId: string, message: {id: string, text: string, timestamp: string, sender: string}) => void;
 }
 
 // Mock messages data
@@ -128,9 +127,10 @@ export default function ChatWindow({ conversation, currentUser, onNewMessage }: 
 
     setMessages(prev => [...prev, message]);
     onNewMessage(conversation.id, {
-      content: newMessage,
-      timestamp: new Date(),
-      senderId: currentUser.id,
+      id: Date.now().toString(),
+      text: newMessage,
+      timestamp: new Date().toISOString(),
+      sender: currentUser.id,
     });
     
     setNewMessage('');
@@ -157,9 +157,10 @@ export default function ChatWindow({ conversation, currentUser, onNewMessage }: 
 
       setMessages(prev => [...prev, responseMessage]);
       onNewMessage(conversation.id, {
-        content: response,
-        timestamp: new Date(),
-        senderId: conversation.participant.id,
+        id: Date.now().toString(),
+        text: response,
+        timestamp: new Date().toISOString(),
+        sender: conversation.participant.id,
       });
     }, Math.random() * 3000 + 2000);
   };

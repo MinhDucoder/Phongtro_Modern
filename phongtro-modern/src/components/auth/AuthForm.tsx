@@ -24,11 +24,78 @@ export default function AuthForm({ type }: AuthFormProps) {
     agreeTerms: false,
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  const validateField = (name: string, value: string | boolean) => {
+    let error = '';
+    
+    switch (name) {
+      case 'name':
+        if (type === 'register' && !value.toString().trim()) {
+          error = 'Vui lòng nhập họ tên';
+        }
+        break;
+      case 'email':
+        if (!value.toString().trim()) {
+          error = 'Vui lòng nhập email';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.toString())) {
+          error = 'Email không hợp lệ';
+        }
+        break;
+      case 'phone':
+        if (type === 'register' && !value.toString().trim()) {
+          error = 'Vui lòng nhập số điện thoại';
+        } else if (type === 'register' && !/^[0-9]{10}$/.test(value.toString().replace(/\s/g, ''))) {
+          error = 'Số điện thoại phải có 10 chữ số';
+        }
+        break;
+      case 'password':
+        if (!value.toString().trim()) {
+          error = 'Vui lòng nhập mật khẩu';
+        } else if (value.toString().length < 6) {
+          error = 'Mật khẩu phải có ít nhất 6 ký tự';
+        }
+        break;
+      case 'confirmPassword':
+        if (type === 'register' && !value.toString().trim()) {
+          error = 'Vui lòng xác nhận mật khẩu';
+        } else if (type === 'register' && value !== formData.password) {
+          error = 'Mật khẩu xác nhận không khớp';
+        }
+        break;
+      case 'agreeTerms':
+        if (type === 'register' && !value) {
+          error = 'Vui lòng đồng ý với điều khoản sử dụng';
+        }
+        break;
+    }
+    
+    return error;
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type: inputType, checked } = e.target;
+    const newValue = inputType === 'checkbox' ? checked : value;
+    
     setFormData(prev => ({
       ...prev,
-      [name]: inputType === 'checkbox' ? checked : value
+      [name]: newValue
+    }));
+
+    // Validate field
+    const error = validateField(name, newValue);
+    setErrors(prev => ({
+      ...prev,
+      [name]: error
+    }));
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name } = e.target;
+    setTouched(prev => ({
+      ...prev,
+      [name]: true
     }));
   };
 
@@ -37,25 +104,30 @@ export default function AuthForm({ type }: AuthFormProps) {
     setIsLoading(true);
 
     try {
-      // Validation
-      if (type === 'register') {
-        if (!formData.name.trim()) {
-          throw new Error('Vui lòng nhập họ tên');
-        }
-        if (formData.password !== formData.confirmPassword) {
-          throw new Error('Mật khẩu xác nhận không khớp');
-        }
-        if (!formData.agreeTerms) {
-          throw new Error('Vui lòng đồng ý với điều khoản sử dụng');
-        }
-      }
+      // Mark all fields as touched
+      const allFields = type === 'register' 
+        ? ['name', 'email', 'phone', 'password', 'confirmPassword', 'agreeTerms']
+        : ['email', 'password'];
+      
+      const newTouched = allFields.reduce((acc, field) => {
+        acc[field] = true;
+        return acc;
+      }, {} as Record<string, boolean>);
+      setTouched(newTouched);
 
-      if (!formData.email.includes('@')) {
-        throw new Error('Email không hợp lệ');
-      }
+      // Validate all fields
+      const newErrors: Record<string, string> = {};
+      allFields.forEach(field => {
+        const error = validateField(field, formData[field as keyof typeof formData]);
+        if (error) {
+          newErrors[field] = error;
+        }
+      });
 
-      if (formData.password.length < 6) {
-        throw new Error('Mật khẩu phải có ít nhất 6 ký tự');
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        setIsLoading(false);
+        return;
       }
 
       // Simulate API call
@@ -91,9 +163,17 @@ export default function AuthForm({ type }: AuthFormProps) {
                 required
                 value={formData.name}
                 onChange={handleInputChange}
-                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                onBlur={handleBlur}
+                className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 ${
+                  touched.name && errors.name
+                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                    : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                }`}
                 placeholder="Nhập họ và tên"
               />
+              {touched.name && errors.name && (
+                <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+              )}
             </div>
           </div>
         )}
@@ -111,9 +191,17 @@ export default function AuthForm({ type }: AuthFormProps) {
               required
               value={formData.email}
               onChange={handleInputChange}
-              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              onBlur={handleBlur}
+              className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 ${
+                touched.email && errors.email
+                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                  : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+              }`}
               placeholder="Nhập địa chỉ email"
             />
+            {touched.email && errors.email && (
+              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+            )}
           </div>
         </div>
 
@@ -130,9 +218,17 @@ export default function AuthForm({ type }: AuthFormProps) {
                 required
                 value={formData.phone}
                 onChange={handleInputChange}
-                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                onBlur={handleBlur}
+                className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 ${
+                  touched.phone && errors.phone
+                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                    : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                }`}
                 placeholder="Nhập số điện thoại"
               />
+              {touched.phone && errors.phone && (
+                <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+              )}
             </div>
           </div>
         )}
@@ -150,7 +246,12 @@ export default function AuthForm({ type }: AuthFormProps) {
               required
               value={formData.password}
               onChange={handleInputChange}
-              className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              onBlur={handleBlur}
+              className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 ${
+                touched.password && errors.password
+                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                  : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+              }`}
               placeholder="Nhập mật khẩu"
             />
             <button
@@ -165,6 +266,9 @@ export default function AuthForm({ type }: AuthFormProps) {
               )}
             </button>
           </div>
+          {touched.password && errors.password && (
+            <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+          )}
         </div>
 
         {type === 'register' && (
@@ -181,7 +285,12 @@ export default function AuthForm({ type }: AuthFormProps) {
                 required
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
-                className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                onBlur={handleBlur}
+                className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 ${
+                  touched.confirmPassword && errors.confirmPassword
+                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                    : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                }`}
                 placeholder="Nhập lại mật khẩu"
               />
               <button
@@ -196,6 +305,9 @@ export default function AuthForm({ type }: AuthFormProps) {
                 )}
               </button>
             </div>
+            {touched.confirmPassword && errors.confirmPassword && (
+              <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+            )}
           </div>
         )}
 
@@ -222,26 +334,34 @@ export default function AuthForm({ type }: AuthFormProps) {
         )}
 
         {type === 'register' && (
-          <div className="flex items-center">
-            <input
-              id="agreeTerms"
-              name="agreeTerms"
-              type="checkbox"
-              required
-              checked={formData.agreeTerms}
-              onChange={handleInputChange}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="agreeTerms" className="ml-2 block text-sm text-gray-900">
-              Tôi đồng ý với{' '}
-              <a href="#" className="text-blue-600 hover:text-blue-500">
-                điều khoản sử dụng
-              </a>{' '}
-              và{' '}
-              <a href="#" className="text-blue-600 hover:text-blue-500">
-                chính sách bảo mật
-              </a>
-            </label>
+          <div>
+            <div className="flex items-start">
+              <input
+                id="agreeTerms"
+                name="agreeTerms"
+                type="checkbox"
+                required
+                checked={formData.agreeTerms}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                className={`h-4 w-4 mt-0.5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded ${
+                  touched.agreeTerms && errors.agreeTerms ? 'border-red-300' : ''
+                }`}
+              />
+              <label htmlFor="agreeTerms" className="ml-2 block text-sm text-gray-900">
+                Tôi đồng ý với{' '}
+                <a href="#" className="text-blue-600 hover:text-blue-500">
+                  điều khoản sử dụng
+                </a>{' '}
+                và{' '}
+                <a href="#" className="text-blue-600 hover:text-blue-500">
+                  chính sách bảo mật
+                </a>
+              </label>
+            </div>
+            {touched.agreeTerms && errors.agreeTerms && (
+              <p className="mt-1 text-sm text-red-600">{errors.agreeTerms}</p>
+            )}
           </div>
         )}
 

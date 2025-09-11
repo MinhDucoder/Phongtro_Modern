@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import ConversationList from './ConversationList';
 import ChatWindow from './ChatWindow';
 import { 
@@ -113,7 +114,6 @@ export default function ChatLayout({ activeConversationId }: ChatLayoutProps) {
     activeConversationId || null
   );
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   // Current user info
   const currentUser = {
@@ -177,12 +177,16 @@ export default function ChatLayout({ activeConversationId }: ChatLayoutProps) {
     router.push(`/chat/${conversationId}`);
   };
 
-  const handleNewMessage = (conversationId: string, message: any) => {
+  const handleNewMessage = (conversationId: string, message: {id: string, text: string, timestamp: string, sender: string}) => {
     setConversations(prev => prev.map(conv =>
       conv.id === conversationId
         ? {
             ...conv,
-            lastMessage: message,
+            lastMessage: {
+              content: message.text,
+              timestamp: new Date(message.timestamp),
+              senderId: message.sender
+            },
             updatedAt: new Date(),
           }
         : conv
@@ -218,9 +222,11 @@ export default function ChatLayout({ activeConversationId }: ChatLayoutProps) {
             
             {activeConversation && (
               <div className="hidden sm:flex items-center">
-                <img
+                <Image
                   src={activeConversation.participant.avatar}
                   alt={activeConversation.participant.name}
+                  width={32}
+                  height={32}
                   className="w-8 h-8 rounded-full mr-2"
                 />
                 <div>

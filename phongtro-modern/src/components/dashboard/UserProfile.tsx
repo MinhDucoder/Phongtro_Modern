@@ -3,17 +3,9 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import {
-  UserIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  MapPinIcon,
   CameraIcon,
   CheckCircleIcon,
-  EyeSlashIcon,
-  EyeIcon,
-  ShieldCheckIcon,
-  BellIcon,
-  CogIcon
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -90,7 +82,7 @@ export default function UserProfile() {
       setUser(prev => ({ ...prev, ...formData }));
       setIsEditing(false);
       toast.success('Cập nhật thông tin thành công!');
-    } catch (error) {
+    } catch {
       toast.error('Có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
@@ -120,7 +112,7 @@ export default function UserProfile() {
       });
       setShowChangePassword(false);
       toast.success('Đổi mật khẩu thành công!');
-    } catch (error) {
+    } catch {
       toast.error('Mật khẩu hiện tại không đúng');
     } finally {
       setIsLoading(false);
@@ -133,7 +125,7 @@ export default function UserProfile() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       toast.success('Cập nhật cài đặt thông báo thành công!');
-    } catch (error) {
+    } catch {
       toast.error('Có lỗi xảy ra');
     } finally {
       setIsLoading(false);
@@ -157,7 +149,7 @@ export default function UserProfile() {
       const imageUrl = URL.createObjectURL(file);
       setUser(prev => ({ ...prev, avatar: imageUrl }));
       toast.success('Cập nhật ảnh đại diện thành công!');
-    } catch (error) {
+    } catch {
       toast.error('Có lỗi xảy ra khi tải ảnh lên');
     } finally {
       setIsLoading(false);

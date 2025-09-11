@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   DocumentTextIcon,
   EyeIcon,
@@ -9,7 +10,11 @@ import {
   ChartBarIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
-  PlusIcon
+  PlusIcon,
+  CreditCardIcon,
+  HandRaisedIcon,
+  ClockIcon,
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 
 // Mock data - trong thực tế sẽ fetch từ API
@@ -22,6 +27,13 @@ const stats = [
     icon: DocumentTextIcon,
   },
   {
+    name: 'Yêu cầu thuê',
+    value: '8',
+    change: '+3',
+    changeType: 'increase',
+    icon: HandRaisedIcon,
+  },
+  {
     name: 'Lượt xem tháng này',
     value: '2,847',
     change: '+12%',
@@ -29,49 +41,42 @@ const stats = [
     icon: EyeIcon,
   },
   {
-    name: 'Số cuộc gọi',
-    value: '156',
-    change: '+8%',
+    name: 'Doanh thu tháng',
+    value: '2.5M',
+    change: '+18%',
     changeType: 'increase',
-    icon: PhoneIcon,
-  },
-  {
-    name: 'Lượt yêu thích',
-    value: '89',
-    change: '-2%',
-    changeType: 'decrease',
-    icon: HeartIcon,
+    icon: CreditCardIcon,
   },
 ];
 
 const recentActivities = [
   {
     id: 1,
+    type: 'request',
+    message: 'Có yêu cầu thuê mới từ Nguyễn Văn A',
+    time: '5 phút trước',
+    property: 'Phòng trọ gần ĐH Bách Khoa',
+  },
+  {
+    id: 2,
     type: 'view',
     message: 'Có người xem tin "Phòng trọ gần ĐH Bách Khoa"',
     time: '2 phút trước',
     property: 'Phòng trọ gần ĐH Bách Khoa',
   },
   {
-    id: 2,
+    id: 3,
     type: 'call',
     message: 'Có cuộc gọi từ 098****567',
     time: '15 phút trước',
     property: 'Căn hộ mini Hai Bà Trưng',
   },
   {
-    id: 3,
+    id: 4,
     type: 'like',
     message: 'Tin đăng được thêm vào yêu thích',
     time: '1 giờ trước',
     property: 'Phòng trọ full nội thất',
-  },
-  {
-    id: 4,
-    type: 'approved',
-    message: 'Tin đăng đã được duyệt',
-    time: '3 giờ trước',
-    property: 'Nhà nguyên căn 2PN',
   },
 ];
 
@@ -129,6 +134,8 @@ const getStatusBadge = (status: string) => {
 
 const getActivityIcon = (type: string) => {
   switch (type) {
+    case 'request':
+      return <HandRaisedIcon className="h-5 w-5 text-orange-500" />;
     case 'view':
       return <EyeIcon className="h-5 w-5 text-blue-500" />;
     case 'call':
@@ -149,7 +156,7 @@ export default function DashboardOverview() {
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
         <h2 className="text-2xl font-bold mb-2">Chào mừng trở lại!</h2>
         <p className="text-blue-100 mb-4">
-          Bạn có 2 tin đăng mới cần được duyệt và 15 lượt xem mới trong hôm nay.
+          Bạn có 3 yêu cầu thuê mới cần xử lý và 15 lượt xem mới trong hôm nay.
         </p>
         <Link
           href="/dang-tin"
@@ -228,6 +235,60 @@ export default function DashboardOverview() {
           </div>
         </div>
 
+        {/* Recent Rental Requests */}
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium text-gray-900">Yêu cầu thuê gần đây</h3>
+              <Link
+                href="/dashboard/yeu-cau-thue"
+                className="text-sm font-medium text-blue-600 hover:text-blue-500"
+              >
+                Xem tất cả →
+              </Link>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
+                <HandRaisedIcon className="h-5 w-5 text-orange-500 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-900">Nguyễn Văn A</p>
+                  <p className="text-sm text-gray-500">Phòng trọ gần ĐH Bách Khoa</p>
+                  <p className="text-xs text-orange-600">5 phút trước</p>
+                </div>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  Chờ xử lý
+                </span>
+              </div>
+              
+              <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+                <CheckCircleIcon className="h-5 w-5 text-green-500 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-900">Trần Thị B</p>
+                  <p className="text-sm text-gray-500">Căn hộ mini Hai Bà Trưng</p>
+                  <p className="text-xs text-green-600">2 giờ trước</p>
+                </div>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Đã chấp nhận
+                </span>
+              </div>
+              
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                <ClockIcon className="h-5 w-5 text-gray-500 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-900">Lê Văn C</p>
+                  <p className="text-sm text-gray-500">Phòng trọ full nội thất</p>
+                  <p className="text-xs text-gray-600">1 ngày trước</p>
+                </div>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  Chờ xử lý
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Quick Stats Chart Placeholder */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
@@ -264,9 +325,11 @@ export default function DashboardOverview() {
           <div className="space-y-4">
             {myPostings.map((posting) => (
               <div key={posting.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                <img
+                <Image
                   src={posting.image}
                   alt={posting.title}
+                  width={64}
+                  height={64}
                   className="h-16 w-16 object-cover rounded-lg"
                 />
                 <div className="flex-1 min-w-0">

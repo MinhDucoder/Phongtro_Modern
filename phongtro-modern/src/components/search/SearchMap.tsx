@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import Image from 'next/image';
 import {
   MapPinIcon,
-  HomeIcon,
   EyeIcon,
   HeartIcon,
   XMarkIcon,
-  MagnifyingGlassIcon,
   AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline';
 
@@ -69,7 +68,6 @@ interface SearchMapProps {
 
 export default function SearchMap({ searchParams }: SearchMapProps) {
   const [selectedProperty, setSelectedProperty] = useState<typeof mockMapProperties[0] | null>(null);
-  const [mapCenter, setMapCenter] = useState({ lat: 21.0285, lng: 105.8542 }); // Hà Nội center
   const [zoomLevel, setZoomLevel] = useState(12);
   const [showFilters, setShowFilters] = useState(false);
   const [mapStyle, setMapStyle] = useState<'roadmap' | 'satellite'>('roadmap');
@@ -86,7 +84,6 @@ export default function SearchMap({ searchParams }: SearchMapProps) {
 
   const handlePropertyClick = (property: typeof mockMapProperties[0]) => {
     setSelectedProperty(property);
-    setMapCenter(property.coordinates);
     setZoomLevel(15);
   };
 
@@ -99,7 +96,6 @@ export default function SearchMap({ searchParams }: SearchMapProps) {
   };
 
   const handleResetView = () => {
-    setMapCenter({ lat: 21.0285, lng: 105.8542 });
     setZoomLevel(12);
     setSelectedProperty(null);
   };
@@ -251,9 +247,11 @@ export default function SearchMap({ searchParams }: SearchMapProps) {
               </div>
               
               <div className="flex items-center space-x-4">
-                <img
+                <Image
                   src={selectedProperty.image}
                   alt={selectedProperty.title}
+                  width={64}
+                  height={48}
                   className="w-16 h-12 object-cover rounded"
                 />
                 <div className="flex-1">

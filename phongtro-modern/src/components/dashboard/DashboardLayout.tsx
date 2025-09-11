@@ -2,31 +2,36 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import {
-  HomeIcon,
-  DocumentTextIcon,
-  HeartIcon,
-  UserIcon,
-  CogIcon,
-  ChartBarIcon,
-  BellIcon,
-  Bars3Icon,
-  XMarkIcon,
-  PlusIcon,
-  ArrowRightOnRectangleIcon,
-  CalendarDaysIcon,
-  ChatBubbleLeftRightIcon
+import { 
+  HomeIcon, 
+  DocumentTextIcon, 
+  HeartIcon, 
+  UserIcon, 
+  CogIcon, 
+  ChartBarIcon, 
+  BellIcon, 
+  Bars3Icon, 
+  XMarkIcon, 
+  PlusIcon, 
+  ArrowRightOnRectangleIcon, 
+  CalendarDaysIcon, 
+  ChatBubbleLeftRightIcon, 
+  CreditCardIcon,
+  HandRaisedIcon
 } from '@heroicons/react/24/outline';
 
 const navigation = [
   { name: 'Tổng quan', href: '/dashboard', icon: HomeIcon },
   { name: 'Tin đăng của tôi', href: '/dashboard/tin-dang', icon: DocumentTextIcon },
+  { name: 'Yêu cầu thuê', href: '/dashboard/yeu-cau-thue', icon: HandRaisedIcon },
   { name: 'Phân tích tin đăng', href: '/dashboard/analytics', icon: ChartBarIcon },
   { name: 'Lịch hẹn xem phòng', href: '/lich-hen', icon: CalendarDaysIcon },
   { name: 'Tin đã lưu', href: '/dashboard/yeu-thich', icon: HeartIcon },
   { name: 'Tin nhắn', href: '/chat', icon: ChatBubbleLeftRightIcon },
   { name: 'Thông báo', href: '/thong-bao', icon: BellIcon },
+  { name: 'Lịch sử thanh toán', href: '/dashboard/thanh-toan', icon: CreditCardIcon },
   { name: 'Thông tin cá nhân', href: '/dashboard/profile', icon: UserIcon },
   { name: 'Cài đặt', href: '/dashboard/settings', icon: CogIcon },
 ];
@@ -108,10 +113,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="mt-6 px-4">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <img
+                  <Image
                     className="h-10 w-10 rounded-full"
                     src={user.avatar}
                     alt={user.name}
+                    width={40}
+                    height={40}
                   />
                 </div>
                 <div className="ml-3">
@@ -179,10 +186,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <button className="text-gray-500 hover:text-gray-900">
                 <BellIcon className="h-6 w-6" />
               </button>
-              <img
+              <Image
                 className="h-8 w-8 rounded-full"
                 src={user.avatar}
                 alt={user.name}
+                width={32}
+                height={32}
               />
             </div>
           </div>
@@ -200,10 +209,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <BellIcon className="h-6 w-6" />
                 </button>
                 <div className="flex items-center space-x-2">
-                  <img
+                  <Image
                     className="h-8 w-8 rounded-full"
                     src={user.avatar}
                     alt={user.name}
+                    width={32}
+                    height={32}
                   />
                   <span className="text-sm font-medium text-gray-900">{user.name}</span>
                 </div>

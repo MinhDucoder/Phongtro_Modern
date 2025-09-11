@@ -1,8 +1,10 @@
 import SearchFilter from '@/components/ui/SearchFilter';
 import PropertyCard from '@/components/ui/PropertyCard';
+import Pagination from '@/components/ui/Pagination';
+import StructuredData from '@/components/seo/StructuredData';
 
 // Mock data for demonstration
-const mockProperties = [
+export const properties = [
   {
     id: '1',
     title: 'PHÒNG TRỌ GIÁ MỀM CHỈ TỪ 3TR GẦN DƯỢC, BÁCH KHOA, NEU,...',
@@ -14,9 +16,13 @@ const mockProperties = [
     contact: {
       name: 'Lê Nhật Duy',
       phone: '0365349437',
+      isVerified: true,
     },
     postedTime: 'Hôm nay',
     isFeatured: true,
+    viewCount: 1234,
+    rating: 4.5,
+    amenities: ['Điều hòa', 'Nóng lạnh', 'WiFi miễn phí'],
   },
   {
     id: '2',
@@ -29,8 +35,12 @@ const mockProperties = [
     contact: {
       name: 'Nhà Trọ Ngõ Sen',
       phone: '0909814679',
+      isVerified: false,
     },
     postedTime: 'Hôm nay',
+    viewCount: 856,
+    rating: 4.2,
+    amenities: ['WiFi miễn phí', 'Bảo vệ 24/7', 'Thang máy'],
   },
   {
     id: '3',
@@ -43,8 +53,12 @@ const mockProperties = [
     contact: {
       name: 'Hoàng Phúc',
       phone: '0931313570',
+      isVerified: true,
     },
     postedTime: 'Hôm nay',
+    viewCount: 2341,
+    rating: 4.8,
+    amenities: ['Giường', 'Tủ quần áo', 'Bàn học', 'WiFi miễn phí'],
   },
   {
     id: '4',
@@ -57,14 +71,27 @@ const mockProperties = [
     contact: {
       name: 'Chủ nhà',
       phone: '0987654321',
+      isVerified: true,
     },
     postedTime: '2 giờ trước',
+    viewCount: 567,
+    rating: 4.0,
+    amenities: ['Điều hòa', 'Nóng lạnh', 'Tủ lạnh'],
   },
 ];
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <StructuredData 
+        type="website" 
+        data={null} 
+      />
+      <StructuredData 
+        type="organization" 
+        data={null} 
+      />
+      <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 text-center">
@@ -121,16 +148,18 @@ export default function Home() {
 
         {/* Property Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockProperties.map((property) => (
+          {properties.map((property) => (
             <PropertyCard key={property.id} {...property} />
           ))}
         </div>
 
-        {/* Load More */}
-        <div className="text-center mt-12">
-          <button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-            Xem thêm tin đăng
-          </button>
+        {/* Pagination */}
+        <div className="mt-12">
+          <Pagination 
+            currentPage={1} 
+            totalPages={10} 
+            baseUrl="/" 
+          />
         </div>
       </section>
 
@@ -199,7 +228,8 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
-    </div>
+        </section>
+      </div>
+    </>
   );
 }

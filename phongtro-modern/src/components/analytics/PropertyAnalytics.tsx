@@ -4,14 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  ChartBarIcon,
   EyeIcon,
   HeartIcon,
   PhoneIcon,
   ChatBubbleLeftIcon,
-  CalendarDaysIcon,
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
   MapPinIcon,
   ClockIcon,
   UserGroupIcon,
@@ -105,7 +101,15 @@ const analyticsData = {
   }
 };
 
-const StatCard = ({ title, value, change, icon: Icon, color }: any) => (
+interface StatCardProps {
+  title: string;
+  value: string;
+  change: string;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+}
+
+const StatCard = ({ title, value, change, icon: Icon, color }: StatCardProps) => (
   <div className="bg-white p-6 rounded-lg shadow-sm border">
     <div className="flex items-center">
       <div className={`flex-shrink-0 p-3 rounded-lg ${color}`}>
@@ -183,21 +187,21 @@ export default function PropertyAnalytics() {
         />
         <StatCard
           title="Lượt yêu thích"
-          value={analyticsData.overview.totalLikes}
+          value={analyticsData.overview.totalLikes.toString()}
           change={analyticsData.overview.likesChange}
           icon={HeartIcon}
           color="bg-red-500"
         />
         <StatCard
           title="Cuộc gọi"
-          value={analyticsData.overview.totalCalls}
+          value={analyticsData.overview.totalCalls.toString()}
           change={analyticsData.overview.callsChange}
           icon={PhoneIcon}
           color="bg-green-500"
         />
         <StatCard
           title="Tin nhắn"
-          value={analyticsData.overview.totalMessages}
+          value={analyticsData.overview.totalMessages.toString()}
           change={analyticsData.overview.messagesChange}
           icon={ChatBubbleLeftIcon}
           color="bg-purple-500"
@@ -210,7 +214,7 @@ export default function PropertyAnalytics() {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Lượt xem theo thời gian</h3>
           <div className="h-64 bg-gray-50 rounded-lg flex items-end justify-around p-4">
-            {analyticsData.timeAnalytics.bestDays.map((day, index) => (
+            {analyticsData.timeAnalytics.bestDays.map((day) => (
               <div key={day.day} className="flex flex-col items-center">
                 <div
                   className="bg-blue-500 rounded-t w-8 mb-2"

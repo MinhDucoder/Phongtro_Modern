@@ -1,17 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   MagnifyingGlassIcon,
-  MapPinIcon,
-  HomeIcon,
   CurrencyDollarIcon,
   Square2StackIcon,
   CalendarDaysIcon,
-  UserGroupIcon,
-  WifiIcon,
-  CarIcon,
   AdjustmentsHorizontalIcon,
   XMarkIcon,
   BookmarkIcon
@@ -88,11 +83,10 @@ interface AdvancedSearchProps {
 
 export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [savedSearches, setSavedSearches] = useState<string[]>([]);
   
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<Record<string, string | number | boolean | string[]>>({
     keyword: (initialParams.keyword as string) || '',
     propertyType: (initialParams.propertyType as string) || '',
     province: (initialParams.province as string) || '',
@@ -118,16 +112,16 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
     }
   }, []);
 
-  const handleFilterChange = (key: string, value: any) => {
+  const handleFilterChange = (key: string, value: string | number | boolean) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
   const handleAmenityToggle = (amenity: string) => {
     setFilters(prev => ({
       ...prev,
-      amenities: prev.amenities.includes(amenity)
-        ? prev.amenities.filter(a => a !== amenity)
-        : [...prev.amenities, amenity]
+      amenities: (prev.amenities as string[]).includes(amenity)
+        ? (prev.amenities as string[]).filter(a => a !== amenity)
+        : [...(prev.amenities as string[]), amenity]
     }));
   };
 
@@ -135,7 +129,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
     const params = new URLSearchParams();
     
     Object.entries(filters).forEach(([key, value]) => {
-      if (value && value !== '' && value !== false) {
+      if (value && value !== '' && value !== 0) {
         if (Array.isArray(value)) {
           if (value.length > 0) {
             params.set(key, value.join(','));
@@ -175,7 +169,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
     if (searchName) {
       const searchQuery = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
-        if (value && value !== '' && value !== false) {
+        if (value !== null && value !== undefined && value !== '' && value !== false && value !== 0) {
           if (Array.isArray(value)) {
             if (value.length > 0) {
               searchQuery.set(key, value.join(','));
@@ -195,7 +189,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
   const activeFiltersCount = Object.entries(filters).filter(([key, value]) => {
     if (key === 'sortBy') return false;
     if (Array.isArray(value)) return value.length > 0;
-    return value && value !== '' && value !== false;
+    return value !== null && value !== undefined && value !== '' && value !== false && value !== 0;
   }).length;
 
   return (
@@ -210,7 +204,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
               <input
                 type="text"
                 placeholder="Tìm kiếm theo từ khóa, địa chỉ..."
-                value={filters.keyword}
+                value={filters.keyword as string}
                 onChange={(e) => handleFilterChange('keyword', e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
@@ -220,7 +214,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
           {/* Property Type */}
           <div>
             <select
-              value={filters.propertyType}
+              value={filters.propertyType as string}
               onChange={(e) => handleFilterChange('propertyType', e.target.value)}
               className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
@@ -233,7 +227,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
           {/* Province */}
           <div>
             <select
-              value={filters.province}
+              value={filters.province as string}
               onChange={(e) => handleFilterChange('province', e.target.value)}
               className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
@@ -303,7 +297,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
                 Mức giá
               </label>
               <select
-                value={filters.priceRange}
+                value={filters.priceRange as string}
                 onChange={(e) => handleFilterChange('priceRange', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
@@ -317,14 +311,14 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
                 <input
                   type="number"
                   placeholder="Giá từ"
-                  value={filters.minPrice}
+                  value={filters.minPrice as string}
                   onChange={(e) => handleFilterChange('minPrice', e.target.value)}
                   className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 <input
                   type="number"
                   placeholder="Giá đến"
-                  value={filters.maxPrice}
+                  value={filters.maxPrice as string}
                   onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
                   className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -338,7 +332,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
                 Diện tích
               </label>
               <select
-                value={filters.areaRange}
+                value={filters.areaRange as string}
                 onChange={(e) => handleFilterChange('areaRange', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
@@ -352,14 +346,14 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
                 <input
                   type="number"
                   placeholder="DT từ (m²)"
-                  value={filters.minArea}
+                  value={filters.minArea as string}
                   onChange={(e) => handleFilterChange('minArea', e.target.value)}
                   className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 <input
                   type="number"
                   placeholder="DT đến (m²)"
-                  value={filters.maxArea}
+                  value={filters.maxArea as string}
                   onChange={(e) => handleFilterChange('maxArea', e.target.value)}
                   className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -373,7 +367,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
                 Thời gian đăng
               </label>
               <select
-                value={filters.postedWithin}
+                value={filters.postedWithin as string}
                 onChange={(e) => handleFilterChange('postedWithin', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
@@ -391,7 +385,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
                 Sắp xếp theo
               </label>
               <select
-                value={filters.sortBy}
+                value={filters.sortBy as string}
                 onChange={(e) => handleFilterChange('sortBy', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
@@ -410,7 +404,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
                 <label className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={filters.hasImages}
+                    checked={filters.hasImages as boolean}
                     onChange={(e) => handleFilterChange('hasImages', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
@@ -419,7 +413,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
                 <label className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={filters.verifiedOwner}
+                    checked={filters.verifiedOwner as boolean}
                     onChange={(e) => handleFilterChange('verifiedOwner', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
@@ -439,7 +433,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
                 <label key={amenity.value} className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={filters.amenities.includes(amenity.value)}
+                    checked={(filters.amenities as string[]).includes(amenity.value)}
                     onChange={() => handleAmenityToggle(amenity.value)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />

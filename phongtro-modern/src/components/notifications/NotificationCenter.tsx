@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import {
   BellIcon,
   EyeIcon,
@@ -12,12 +11,9 @@ import {
   DocumentTextIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ExclamationTriangleIcon,
   InformationCircleIcon,
   TrashIcon,
-  CheckIcon,
-  FunnelIcon,
-  EllipsisVerticalIcon
+  CheckIcon
 } from '@heroicons/react/24/outline';
 import { BellIcon as BellSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
@@ -215,7 +211,7 @@ export default function NotificationCenter() {
       if (Math.random() > 0.98) { // 2% chance every 3 seconds
         const newNotification: Notification = {
           id: Date.now().toString(),
-          type: ['view', 'like', 'message'][Math.floor(Math.random() * 3)] as any,
+          type: ['view', 'like', 'message'][Math.floor(Math.random() * 3)] as 'view' | 'like' | 'message',
           title: 'Thông báo mới',
           message: 'Bạn có hoạt động mới trên tin đăng',
           timestamp: new Date(),
@@ -240,7 +236,7 @@ export default function NotificationCenter() {
           : notification
       ));
       toast.success(`Đã đánh dấu ${notificationIds.length} thông báo là đã đọc`);
-    } catch (error) {
+    } catch {
       toast.error('Có lỗi xảy ra');
     } finally {
       setIsLoading(false);
@@ -256,7 +252,7 @@ export default function NotificationCenter() {
       setNotifications(prev => prev.filter(n => !notificationIds.includes(n.id)));
       setSelectedNotifications([]);
       toast.success('Đã xóa thông báo');
-    } catch (error) {
+    } catch {
       toast.error('Có lỗi xảy ra');
     } finally {
       setIsLoading(false);

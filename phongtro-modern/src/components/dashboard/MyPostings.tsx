@@ -142,7 +142,7 @@ export default function MyPostings() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       setPostings(prev => prev.filter(p => p.id !== id));
       toast.success('Xóa tin đăng thành công');
-    } catch (error) {
+    } catch {
       toast.error('Có lỗi xảy ra');
     } finally {
       setIsLoading(false);
@@ -160,7 +160,7 @@ export default function MyPostings() {
           : p
       ));
       toast.success('Gia hạn tin đăng thành công');
-    } catch (error) {
+    } catch {
       toast.error('Có lỗi xảy ra');
     } finally {
       setIsLoading(false);
@@ -178,7 +178,7 @@ export default function MyPostings() {
           : p
       ));
       toast.success('Cập nhật trạng thái thành công');
-    } catch (error) {
+    } catch {
       toast.error('Có lỗi xảy ra');
     } finally {
       setIsLoading(false);

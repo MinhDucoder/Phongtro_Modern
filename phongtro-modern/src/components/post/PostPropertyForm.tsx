@@ -8,11 +8,6 @@ import {
   XMarkIcon, 
   MapPinIcon,
   HomeIcon,
-  CurrencyDollarIcon,
-  DocumentTextIcon,
-  UserIcon,
-  PhoneIcon,
-  EnvelopeIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
@@ -279,7 +274,7 @@ export default function PostPropertyForm() {
       
       toast.success('Đăng tin thành công! Tin của bạn đang chờ duyệt.');
       router.push('/');
-    } catch (error) {
+    } catch {
       toast.error('Có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);

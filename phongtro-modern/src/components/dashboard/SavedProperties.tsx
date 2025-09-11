@@ -8,7 +8,6 @@ import {
   EyeIcon,
   PhoneIcon,
   MapPinIcon,
-  TrashIcon,
   MagnifyingGlassIcon,
   FunnelIcon
 } from '@heroicons/react/24/outline';
@@ -173,7 +172,7 @@ export default function SavedProperties() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       setSavedProperties(prev => prev.filter(p => p.id !== id));
       toast.success('Đã xóa khỏi danh sách yêu thích');
-    } catch (error) {
+    } catch {
       toast.error('Có lỗi xảy ra');
     } finally {
       setIsLoading(false);
