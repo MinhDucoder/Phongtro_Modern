@@ -21,6 +21,7 @@ export default function AuthForm({ type }: AuthFormProps) {
     phone: '',
     password: '',
     confirmPassword: '',
+    role: 'tenant', // 'tenant' or 'landlord'
     agreeTerms: false,
   });
 
@@ -137,7 +138,8 @@ export default function AuthForm({ type }: AuthFormProps) {
         toast.success('Đăng nhập thành công!');
         router.push('/');
       } else {
-        toast.success('Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.');
+        const roleText = formData.role === 'tenant' ? 'người thuê' : 'chủ nhà';
+        toast.success(`Đăng ký thành công với vai trò ${roleText}! Vui lòng kiểm tra email để xác thực tài khoản.`);
         router.push('/dang-nhap');
       }
     } catch (error) {
@@ -152,7 +154,7 @@ export default function AuthForm({ type }: AuthFormProps) {
       <form className="space-y-6" onSubmit={handleSubmit}>
         {type === 'register' && (
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="name" className="block text-sm font-medium text-dark">
               Họ và tên *
             </label>
             <div className="mt-1">
@@ -178,8 +180,77 @@ export default function AuthForm({ type }: AuthFormProps) {
           </div>
         )}
 
+        {type === 'register' && (
+          <div>
+            <label className="block text-sm font-medium text-dark mb-3">
+              Bạn là *
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <label className={`relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                formData.role === 'tenant' 
+                  ? 'border-blue-500 bg-blue-50' 
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}>
+                <input
+                  type="radio"
+                  name="role"
+                  value="tenant"
+                  checked={formData.role === 'tenant'}
+                  onChange={handleInputChange}
+                  className="sr-only"
+                />
+                <div className="flex items-center space-x-3">
+                  <div className={`w-4 h-4 rounded-full border-2 ${
+                    formData.role === 'tenant' 
+                      ? 'border-blue-500 bg-blue-500' 
+                      : 'border-gray-300'
+                  }`}>
+                    {formData.role === 'tenant' && (
+                      <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5"></div>
+                    )}
+                  </div>
+                  <div>
+                    <div className="font-medium text-dark">Người thuê</div>
+                    <div className="text-sm text-gray-600">Tìm phòng trọ, nhà thuê</div>
+                  </div>
+                </div>
+              </label>
+
+              <label className={`relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                formData.role === 'landlord' 
+                  ? 'border-blue-500 bg-blue-50' 
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}>
+                <input
+                  type="radio"
+                  name="role"
+                  value="landlord"
+                  checked={formData.role === 'landlord'}
+                  onChange={handleInputChange}
+                  className="sr-only"
+                />
+                <div className="flex items-center space-x-3">
+                  <div className={`w-4 h-4 rounded-full border-2 ${
+                    formData.role === 'landlord' 
+                      ? 'border-blue-500 bg-blue-500' 
+                      : 'border-gray-300'
+                  }`}>
+                    {formData.role === 'landlord' && (
+                      <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5"></div>
+                    )}
+                  </div>
+                  <div>
+                    <div className="font-medium text-dark">Chủ nhà</div>
+                    <div className="text-sm text-gray-600">Đăng tin cho thuê</div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+        )}
+
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="block text-sm font-medium text-dark">
             Email *
           </label>
           <div className="mt-1">
@@ -207,7 +278,7 @@ export default function AuthForm({ type }: AuthFormProps) {
 
         {type === 'register' && (
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="phone" className="block text-sm font-medium text-dark">
               Số điện thoại *
             </label>
             <div className="mt-1">
@@ -234,7 +305,7 @@ export default function AuthForm({ type }: AuthFormProps) {
         )}
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="password" className="block text-sm font-medium text-dark">
             Mật khẩu *
           </label>
           <div className="mt-1 relative">
@@ -273,7 +344,7 @@ export default function AuthForm({ type }: AuthFormProps) {
 
         {type === 'register' && (
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-dark">
               Xác nhận mật khẩu *
             </label>
             <div className="mt-1 relative">
@@ -348,7 +419,7 @@ export default function AuthForm({ type }: AuthFormProps) {
                   touched.agreeTerms && errors.agreeTerms ? 'border-red-300' : ''
                 }`}
               />
-              <label htmlFor="agreeTerms" className="ml-2 block text-sm text-gray-900">
+              <label htmlFor="agreeTerms" className="ml-2 block text-sm text-dark">
                 Tôi đồng ý với{' '}
                 <a href="#" className="text-blue-600 hover:text-blue-500">
                   điều khoản sử dụng

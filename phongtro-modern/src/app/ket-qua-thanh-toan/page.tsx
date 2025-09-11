@@ -338,6 +338,6 @@ export default function PaymentResultPage() {
 }
 
 export const metadata = {
-  title: 'Kết quả thanh toán | Phongtro123.com',
+  title: 'Kết quả thanh toán | NhaTroVN',
   description: 'Xem kết quả thanh toán đơn hàng thuê phòng trọ.',
 };

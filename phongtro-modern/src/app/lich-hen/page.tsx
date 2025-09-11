@@ -19,6 +19,6 @@ export default function SchedulingPage() {
 }
 
 export const metadata = {
-  title: 'Lịch hẹn xem phòng | Phongtro123.com',
+  title: 'Lịch hẹn xem phòng | NhaTroVN',
   description: 'Quản lý lịch hẹn xem phòng trọ và căn hộ.',
 };

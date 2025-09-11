@@ -288,7 +288,7 @@ export default function BangGiaPage() {
 }
 
 export const metadata = {
-  title: 'Bảng giá dịch vụ | Phongtro123.com',
+  title: 'Bảng giá dịch vụ | NhaTroVN',
   description: 'Xem bảng giá các gói dịch vụ đăng tin, nâng cấp tin đăng để tiếp cận nhiều khách hàng hơn',
   keywords: 'bảng giá, gói dịch vụ, đăng tin, nâng cấp tin đăng, phongtro123'
 };

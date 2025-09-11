@@ -19,6 +19,6 @@ export default function NotificationsPage() {
 }
 
 export const metadata = {
-  title: 'Thông báo | Phongtro123.com',
+  title: 'Thông báo | NhaTroVN',
   description: 'Trung tâm thông báo - theo dõi tất cả hoạt động và cập nhật.',
 };

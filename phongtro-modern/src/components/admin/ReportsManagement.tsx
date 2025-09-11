@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   ExclamationTriangleIcon,
   EyeIcon,
@@ -130,7 +130,7 @@ export default function ReportsManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Báo cáo vi phạm</h1>
+          <h1 className="text-2xl font-bold text-darker">Báo cáo vi phạm</h1>
           <p className="text-gray-600">Quản lý và xử lý các báo cáo vi phạm từ người dùng</p>
         </div>
       </div>
@@ -144,7 +144,7 @@ export default function ReportsManagement() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng báo cáo</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-2xl font-bold text-darker">{stats.total}</p>
             </div>
           </div>
         </div>
@@ -156,7 +156,7 @@ export default function ReportsManagement() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Chờ xử lý</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
+              <p className="text-2xl font-bold text-darker">{stats.pending}</p>
             </div>
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function ReportsManagement() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Đang điều tra</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.investigating}</p>
+              <p className="text-2xl font-bold text-darker">{stats.investigating}</p>
             </div>
           </div>
         </div>
@@ -180,7 +180,7 @@ export default function ReportsManagement() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Đã xử lý</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.resolved}</p>
+              <p className="text-2xl font-bold text-darker">{stats.resolved}</p>
             </div>
           </div>
         </div>
@@ -192,7 +192,7 @@ export default function ReportsManagement() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Bỏ qua</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.dismissed}</p>
+              <p className="text-2xl font-bold text-darker">{stats.dismissed}</p>
             </div>
           </div>
         </div>
@@ -271,18 +271,18 @@ export default function ReportsManagement() {
                 return (
                   <tr key={report.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm font-medium text-gray-900">{report.id}</p>
+                      <p className="text-sm font-medium text-darker">{report.id}</p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <UserIcon className="w-4 h-4 text-gray-400 mr-2" />
-                        <p className="text-sm text-gray-900">{report.reporter}</p>
+                        <p className="text-sm text-darker">{report.reporter}</p>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <UserIcon className="w-4 h-4 text-gray-400 mr-2" />
-                        <p className="text-sm text-gray-900">{report.reportedUser}</p>
+                        <p className="text-sm text-darker">{report.reportedUser}</p>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -329,7 +329,7 @@ export default function ReportsManagement() {
         {filteredReports.length === 0 && (
           <div className="text-center py-12">
             <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Không có báo cáo nào</h3>
+            <h3 className="mt-2 text-sm font-medium text-darker">Không có báo cáo nào</h3>
             <p className="mt-1 text-sm text-gray-500">
               {searchTerm || filter !== 'all' 
                 ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.'
@@ -354,7 +354,7 @@ export default function ReportsManagement() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   ID Báo cáo
                 </label>
-                <p className="text-sm text-gray-900">{selectedReport.id}</p>
+                <p className="text-sm text-darker">{selectedReport.id}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -371,13 +371,13 @@ export default function ReportsManagement() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Người báo cáo
                 </label>
-                <p className="text-sm text-gray-900">{selectedReport.reporter}</p>
+                <p className="text-sm text-darker">{selectedReport.reporter}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Người bị báo cáo
                 </label>
-                <p className="text-sm text-gray-900">{selectedReport.reportedUser}</p>
+                <p className="text-sm text-darker">{selectedReport.reportedUser}</p>
               </div>
             </div>
 
@@ -386,7 +386,7 @@ export default function ReportsManagement() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Tin đăng bị báo cáo
                 </label>
-                <p className="text-sm text-gray-900 line-clamp-2">{selectedReport.reportedPost}</p>
+                <p className="text-sm text-darker line-clamp-2">{selectedReport.reportedPost}</p>
               </div>
             )}
 
@@ -394,7 +394,7 @@ export default function ReportsManagement() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Lý do báo cáo
               </label>
-              <p className="text-sm text-gray-900">{selectedReport.reason}</p>
+              <p className="text-sm text-darker">{selectedReport.reason}</p>
             </div>
 
             <div>
@@ -402,7 +402,7 @@ export default function ReportsManagement() {
                 Trạng thái hiện tại
               </label>
               <Badge variant={statusConfig[selectedReport.status].variant} size="sm">
-                <statusConfig[selectedReport.status].icon className="w-3 h-3 mr-1" />
+                {React.createElement(statusConfig[selectedReport.status].icon, { className: "w-3 h-3 mr-1" })}
                 {statusConfig[selectedReport.status].label}
               </Badge>
             </div>
@@ -412,7 +412,7 @@ export default function ReportsManagement() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Ghi chú của admin
                 </label>
-                <p className="text-sm text-gray-900">{selectedReport.adminNote}</p>
+                <p className="text-sm text-darker">{selectedReport.adminNote}</p>
               </div>
             )}
 

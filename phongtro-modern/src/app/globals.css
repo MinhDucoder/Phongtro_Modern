@@ -2,7 +2,10 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #111827;
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-muted: #6b7280;
 }
 
 @theme inline {
@@ -15,7 +18,10 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #f9fafb;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
   }
 }
 
@@ -23,6 +29,67 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Force better text contrast for input fields only */
+input[type="text"], 
+input[type="email"], 
+input[type="password"], 
+input[type="tel"], 
+input[type="search"],
+textarea,
+select {
+  color: #111827 !important;
+}
+
+input[type="text"]::placeholder, 
+input[type="email"]::placeholder, 
+input[type="password"]::placeholder, 
+input[type="tel"]::placeholder, 
+input[type="search"]::placeholder,
+textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+/* Consistent focus states for all inputs */
+input[type="text"]:focus, 
+input[type="email"]:focus, 
+input[type="password"]:focus, 
+input[type="tel"]:focus, 
+input[type="search"]:focus,
+textarea:focus,
+select:focus {
+  outline: none !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+}
+
+/* Ensure consistent border styling */
+input[type="text"], 
+input[type="email"], 
+input[type="password"], 
+input[type="tel"], 
+input[type="search"],
+textarea,
+select {
+  border: 1px solid #d1d5db !important;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+}
+
+.text-darker {
+  color: #0f172a !important;
+}
+
+.text-dark {
+  color: #111827 !important;
+}
+
+.text-medium {
+  color: #374151 !important;
+}
+
+.text-light {
+  color: #6b7280 !important;
 }
 
 /* Custom utility classes */
@@ -46,5 +113,35 @@ body {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+  }
+
+  /* Text color utilities */
+  .text-primary {
+    color: var(--text-primary);
+  }
+  
+  .text-secondary {
+    color: var(--text-secondary);
+  }
+  
+  .text-muted {
+    color: var(--text-muted);
+  }
+
+  /* Enhanced contrast text colors */
+  .text-dark {
+    color: #111827;
+  }
+  
+  .text-darker {
+    color: #0f172a;
+  }
+  
+  .text-medium {
+    color: #374151;
+  }
+  
+  .text-light {
+    color: #6b7280;
   }
 }

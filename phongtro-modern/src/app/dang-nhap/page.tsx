@@ -23,6 +23,6 @@ export default function LoginPage() {
 }
 
 export const metadata = {
-  title: 'Đăng nhập | Phongtro123.com',
-  description: 'Đăng nhập vào tài khoản Phongtro123.com để đăng tin cho thuê phòng trọ và quản lý tin đăng.',
+  title: 'Đăng nhập | NhaTroVN',
+  description: 'Đăng nhập vào tài khoản NhaTroVN để đăng tin cho thuê phòng trọ và quản lý tin đăng.',
 };

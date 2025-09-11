@@ -58,7 +58,7 @@ export default function AnalyticsDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Phân tích dữ liệu</h1>
+          <h1 className="text-2xl font-bold text-darker">Phân tích dữ liệu</h1>
           <p className="text-gray-600">Thống kê và phân tích hiệu suất website</p>
         </div>
         
@@ -86,7 +86,7 @@ export default function AnalyticsDashboard() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng người dùng</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalUsers.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-darker">{stats.totalUsers.toLocaleString()}</p>
               <div className="flex items-center mt-1">
                 {getGrowthIcon(stats.userGrowth)}
                 <span className={`text-sm ml-1 ${getGrowthColor(stats.userGrowth)}`}>
@@ -105,7 +105,7 @@ export default function AnalyticsDashboard() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng tin đăng</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalPosts.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-darker">{stats.totalPosts.toLocaleString()}</p>
               <div className="flex items-center mt-1">
                 {getGrowthIcon(stats.postGrowth)}
                 <span className={`text-sm ml-1 ${getGrowthColor(stats.postGrowth)}`}>
@@ -124,7 +124,7 @@ export default function AnalyticsDashboard() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng lượt xem</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalViews.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-darker">{stats.totalViews.toLocaleString()}</p>
               <div className="flex items-center mt-1">
                 {getGrowthIcon(stats.viewGrowth)}
                 <span className={`text-sm ml-1 ${getGrowthColor(stats.viewGrowth)}`}>
@@ -143,7 +143,7 @@ export default function AnalyticsDashboard() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Người dùng hoạt động</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.activeUsers.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-darker">{stats.activeUsers.toLocaleString()}</p>
               <div className="flex items-center mt-1">
                 {getGrowthIcon(stats.activeUserGrowth)}
                 <span className={`text-sm ml-1 ${getGrowthColor(stats.activeUserGrowth)}`}>
@@ -159,7 +159,7 @@ export default function AnalyticsDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Chart Placeholder */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Lượt truy cập theo thời gian</h3>
+          <h3 className="text-lg font-semibold text-darker mb-4">Lượt truy cập theo thời gian</h3>
           <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
             <div className="text-center">
               <ChartBarIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
@@ -170,7 +170,7 @@ export default function AnalyticsDashboard() {
 
         {/* Top Locations */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Top địa điểm</h3>
+          <h3 className="text-lg font-semibold text-darker mb-4">Top địa điểm</h3>
           <div className="space-y-4">
             {topLocations.map((location, index) => (
               <div key={location.name} className="flex items-center justify-between">
@@ -178,10 +178,10 @@ export default function AnalyticsDashboard() {
                   <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium mr-3">
                     {index + 1}
                   </span>
-                  <span className="font-medium text-gray-900">{location.name}</span>
+                  <span className="font-medium text-darker">{location.name}</span>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">{location.posts.toLocaleString()} tin</p>
+                  <p className="text-sm font-medium text-darker">{location.posts.toLocaleString()} tin</p>
                   <p className="text-xs text-gray-500">{location.views.toLocaleString()} lượt xem</p>
                 </div>
               </div>
@@ -193,7 +193,7 @@ export default function AnalyticsDashboard() {
       {/* Recent Activity */}
       <div className="bg-white rounded-lg shadow">
         <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Hoạt động gần đây</h3>
+          <h3 className="text-lg font-semibold text-darker">Hoạt động gần đây</h3>
         </div>
         <div className="p-6">
           <div className="space-y-4">
@@ -205,7 +205,7 @@ export default function AnalyticsDashboard() {
                   'bg-purple-500'
                 }`} />
                 <div className="flex-1">
-                  <p className="text-sm text-gray-900">{activity.message}</p>
+                  <p className="text-sm text-darker">{activity.message}</p>
                   <p className="text-xs text-gray-500">{activity.time}</p>
                 </div>
               </div>

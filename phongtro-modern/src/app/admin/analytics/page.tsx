@@ -10,6 +10,6 @@ export default function AnalyticsPage() {
 }
 
 export const metadata = {
-  title: 'Phân tích dữ liệu | Admin Panel | Phongtro123.com',
+  title: 'Phân tích dữ liệu | Admin Panel | NhaTroVN',
   description: 'Thống kê và phân tích dữ liệu website cho thuê phòng trọ.',
 };

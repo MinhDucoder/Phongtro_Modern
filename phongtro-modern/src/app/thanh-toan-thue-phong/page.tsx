@@ -315,6 +315,6 @@ export default function RentalPaymentPage() {
 }
 
 export const metadata = {
-  title: 'Thanh toán thuê phòng | Phongtro123.com',
+  title: 'Thanh toán thuê phòng | NhaTroVN',
   description: 'Thanh toán an toàn cho đơn hàng thuê phòng trọ.',
 };

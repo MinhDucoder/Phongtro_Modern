@@ -130,7 +130,7 @@ export default function Home() {
       {/* Property Listings */}
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-darker">
             Tin đăng cho thuê
           </h2>
           <div className="flex items-center space-x-4">
@@ -167,11 +167,11 @@ export default function Home() {
       <section className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Tại sao lại chọn PhongTro123.com?
+            <h2 className="text-3xl font-bold text-darker mb-4">
+              Tại sao lại chọn NhaTroVN?
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Chúng tôi biết bạn có rất nhiều lựa chọn, nhưng Phongtro123.com tự hào là trang web 
+              Chúng tôi biết bạn có rất nhiều lựa chọn, nhưng NhaTroVN tự hào là trang web 
               đứng top google về các từ khóa: cho thuê phòng trọ, nhà trọ, thuê nhà nguyên căn...
             </p>
           </div>
@@ -181,7 +181,7 @@ export default function Home() {
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🏠</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Đa dạng</h3>
+              <h3 className="font-semibold text-darker mb-2">Đa dạng</h3>
               <p className="text-sm text-gray-600">
                 Hàng nghìn tin đăng được cập nhật liên tục
               </p>
@@ -191,7 +191,7 @@ export default function Home() {
               <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">✅</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Uy tín</h3>
+              <h3 className="font-semibold text-darker mb-2">Uy tín</h3>
               <p className="text-sm text-gray-600">
                 Thông tin chính xác, đã được kiểm duyệt
               </p>
@@ -201,7 +201,7 @@ export default function Home() {
               <div className="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">⚡</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Hiệu quả</h3>
+              <h3 className="font-semibold text-darker mb-2">Hiệu quả</h3>
               <p className="text-sm text-gray-600">
                 Tìm kiếm nhanh chóng, kết nối trực tiếp
               </p>
@@ -211,7 +211,7 @@ export default function Home() {
               <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">💰</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Tiết kiệm</h3>
+              <h3 className="font-semibold text-darker mb-2">Tiết kiệm</h3>
               <p className="text-sm text-gray-600">
                 Chi phí thấp, nhiều gói dịch vụ
               </p>
@@ -221,7 +221,7 @@ export default function Home() {
               <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🔄</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Cải tiến</h3>
+              <h3 className="font-semibold text-darker mb-2">Cải tiến</h3>
               <p className="text-sm text-gray-600">
                 Luôn cập nhật, nâng cấp trải nghiệm
               </p>

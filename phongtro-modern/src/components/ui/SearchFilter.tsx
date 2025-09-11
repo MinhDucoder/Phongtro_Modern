@@ -118,7 +118,7 @@ export default function SearchFilter() {
             {/* Search input */}
             <div className="flex-1">
               <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
                 <input
                   type="text"
                   placeholder="Tìm kiếm theo từ khóa, địa chỉ..."
@@ -130,7 +130,7 @@ export default function SearchFilter() {
                 {searchKeyword && (
                   <button
                     onClick={() => setSearchKeyword('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   >
                     <XMarkIcon className="h-4 w-4" />
                   </button>
@@ -141,7 +141,7 @@ export default function SearchFilter() {
             {/* Province selector */}
             <div className="lg:w-48">
               <div className="relative">
-                <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <select
                   value={selectedProvince}
                   onChange={(e) => setSelectedProvince(e.target.value)}
@@ -181,7 +181,7 @@ export default function SearchFilter() {
               className={`px-4 py-3 border rounded-lg transition-colors flex items-center ${
                 showAdvancedFilters || hasActiveFilters
                   ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-300 hover:bg-gray-50'
+                  : 'border-gray-300 hover:bg-gray-50 text-blue-800'
               }`}
             >
               <FunnelIcon className="h-5 w-5 mr-2" />
@@ -205,12 +205,12 @@ export default function SearchFilter() {
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center ${
                   selectedCategory === category.id
                     ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
+                    : 'bg-gray-100 text-dark hover:bg-gray-200 hover:shadow-sm'
                 }`}
               >
                 <HomeIcon className="w-4 h-4 mr-2" />
                 {category.name} 
-                <span className="ml-2 text-xs opacity-75">
+                <span className="ml-2 text-xs text-gray-600">
                   ({mounted ? category.count.toLocaleString() : category.count})
                 </span>
               </button>
@@ -222,7 +222,7 @@ export default function SearchFilter() {
         {showAdvancedFilters && (
           <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <h3 className="text-lg font-semibold text-blue-800 flex items-center">
                 <FunnelIcon className="w-5 h-5 mr-2" />
                 Bộ lọc nâng cao
               </h3>

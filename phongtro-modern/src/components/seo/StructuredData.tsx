@@ -10,7 +10,7 @@ export default function StructuredData({ type, data }: StructuredDataProps) {
         return {
           "@context": "https://schema.org",
           "@type": "WebSite",
-          "name": "Phongtro123.com",
+          "name": "NhaTroVN",
           "url": "https://phongtro123.com",
           "description": "Kênh thông tin Phòng Trọ số 1 Việt Nam",
           "potentialAction": {
@@ -24,7 +24,7 @@ export default function StructuredData({ type, data }: StructuredDataProps) {
         return {
           "@context": "https://schema.org",
           "@type": "Organization",
-          "name": "Phongtro123.com",
+          "name": "NhaTroVN",
           "url": "https://phongtro123.com",
           "logo": "https://phongtro123.com/logo.png",
           "description": "Kênh thông tin Phòng Trọ số 1 Việt Nam",

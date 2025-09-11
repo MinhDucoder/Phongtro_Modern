@@ -10,6 +10,6 @@ export default function SettingsPage() {
 }
 
 export const metadata = {
-  title: 'Cài đặt hệ thống | Admin Panel | Phongtro123.com',
+  title: 'Cài đặt hệ thống | Admin Panel | NhaTroVN',
   description: 'Cài đặt và cấu hình hệ thống quản trị.',
 };

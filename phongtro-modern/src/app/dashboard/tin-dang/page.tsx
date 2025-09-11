@@ -10,6 +10,6 @@ export default function MyPostingsPage() {
 }
 
 export const metadata = {
-  title: 'Tin đăng của tôi | Phongtro123.com',
+  title: 'Tin đăng của tôi | NhaTroVN',
   description: 'Quản lý tất cả tin đăng cho thuê phòng trọ của bạn.',
 };

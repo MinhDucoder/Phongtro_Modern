@@ -53,6 +53,6 @@ export default function PostPropertyPage() {
 }
 
 export const metadata = {
-  title: 'Đăng tin cho thuê phòng trọ miễn phí | Phongtro123.com',
+  title: 'Đăng tin cho thuê phòng trọ miễn phí | NhaTroVN',
   description: 'Đăng tin cho thuê phòng trọ, nhà trọ miễn phí. Tiếp cận hàng nghìn khách thuê tiềm năng.',
 };

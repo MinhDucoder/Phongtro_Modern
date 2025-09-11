@@ -10,6 +10,6 @@ export default function SavedPropertiesPage() {
 }
 
 export const metadata = {
-  title: 'Tin đã lưu | Phongtro123.com',
+  title: 'Tin đã lưu | NhaTroVN',
   description: 'Danh sách các tin đăng phòng trọ bạn đã lưu để xem sau.',
 };

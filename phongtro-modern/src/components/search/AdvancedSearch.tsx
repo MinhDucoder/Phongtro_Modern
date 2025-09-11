@@ -245,7 +245,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-blue-800"
             >
               <AdjustmentsHorizontalIcon className="h-5 w-5 mr-2" />
               Bộ lọc nâng cao
@@ -270,7 +270,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
           <div className="flex items-center space-x-3">
             <button
               onClick={handleSaveSearch}
-              className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-blue-800"
             >
               <BookmarkIcon className="h-5 w-5 mr-2" />
               Lưu tìm kiếm

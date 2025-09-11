@@ -13,6 +13,6 @@ export default function ChatPage() {
 }
 
 export const metadata = {
-  title: 'Tin nhắn | Phongtro123.com',
+  title: 'Tin nhắn | NhaTroVN',
   description: 'Trò chuyện trực tiếp với chủ nhà và người thuê phòng.',
 };

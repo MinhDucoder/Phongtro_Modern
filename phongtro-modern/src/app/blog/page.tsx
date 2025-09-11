@@ -79,7 +79,7 @@ export default function BlogPage() {
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Blog Phongtro123</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Blog NhaTroVN</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Cập nhật tin tức, kinh nghiệm và hướng dẫn về bất động sản cho thuê
           </p>
@@ -226,7 +226,7 @@ export default function BlogPage() {
 }
 
 export const metadata = {
-  title: 'Blog | Phongtro123.com',
+  title: 'Blog | NhaTroVN',
   description: 'Cập nhật tin tức, kinh nghiệm và hướng dẫn về bất động sản cho thuê',
   keywords: 'blog bất động sản, kinh nghiệm thuê nhà, tin tức bds, hướng dẫn thuê phòng'
 };

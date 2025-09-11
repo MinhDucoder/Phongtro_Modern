@@ -10,6 +10,6 @@ export default function NotificationsPage() {
 }
 
 export const metadata = {
-  title: 'Thông báo hệ thống | Admin Panel | Phongtro123.com',
+  title: 'Thông báo hệ thống | Admin Panel | NhaTroVN',
   description: 'Quản lý và gửi thông báo hệ thống cho người dùng.',
 };

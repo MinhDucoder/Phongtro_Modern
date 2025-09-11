@@ -21,7 +21,7 @@ export default function CanHoPage() {
 }
 
 export const metadata = {
-  title: 'Cho thuê căn hộ chung cư | Phongtro123.com',
+  title: 'Cho thuê căn hộ chung cư | NhaTroVN',
   description: 'Tìm kiếm căn hộ chung cư cho thuê giá rẻ, hiện đại, an ninh tại Hà Nội, TP.HCM',
   keywords: 'cho thuê căn hộ, căn hộ chung cư, thuê căn hộ, chung cư cho thuê'
 };
