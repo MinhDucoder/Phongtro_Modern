@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -125,6 +125,11 @@ export default function MyPostings() {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const filteredPostings = postings.filter(posting => {
     const matchesStatus = selectedStatus === 'all' || posting.status === selectedStatus;
@@ -250,7 +255,7 @@ export default function MyPostings() {
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-500">Tổng lượt xem</p>
               <p className="text-lg font-semibold text-gray-900">
-                {postings.reduce((sum, p) => sum + p.views, 0).toLocaleString()}
+                {mounted ? postings.reduce((sum, p) => sum + p.views, 0).toLocaleString() : postings.reduce((sum, p) => sum + p.views, 0)}
               </p>
             </div>
           </div>

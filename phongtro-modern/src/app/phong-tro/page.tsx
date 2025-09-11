@@ -106,7 +106,7 @@ export default async function PhongTroPage({ searchParams }: PageProps) {
               đảm bảo thông tin chính xác và đáng tin cậy.
             </p>
             <p className="mb-4">
-              <strong>Ưu điểm khi thuê phòng trọ qua Phongtro123.com:</strong>
+              <strong>Ưu điểm khi thuê phòng trọ qua NhaTroVN:</strong>
             </p>
             <ul className="list-disc pl-6 mb-4">
               <li>Thông tin chi tiết, hình ảnh rõ nét</li>
@@ -126,6 +126,6 @@ export default async function PhongTroPage({ searchParams }: PageProps) {
 }
 
 export const metadata = {
-  title: 'Cho thuê phòng trọ giá rẻ, chính chủ | Phongtro123.com',
+  title: 'Cho thuê phòng trọ giá rẻ, chính chủ | NhaTroVN',
   description: 'Tìm kiếm phòng trọ cho thuê giá rẻ, chất lượng tại Hà Nội, TP.HCM. Hàng nghìn tin đăng chính chủ, cập nhật liên tục.',
 };

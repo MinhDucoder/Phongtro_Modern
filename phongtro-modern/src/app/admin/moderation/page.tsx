@@ -10,6 +10,6 @@ export default function ModerationPage() {
 }
 
 export const metadata = {
-  title: 'Kiểm duyệt tin đăng | Admin Panel | Phongtro123.com',
+  title: 'Kiểm duyệt tin đăng | Admin Panel | NhaTroVN',
   description: 'Quản lý và kiểm duyệt tin đăng cho thuê phòng trọ.',
 };

@@ -72,7 +72,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="h-0 flex-1 overflow-y-auto pt-5 pb-4">
               <div className="flex flex-shrink-0 items-center px-4">
                 <Link href="/" className="text-xl font-bold text-blue-600">
-                  Phongtro123.com
+                  NhaTroVN
                 </Link>
               </div>
               <nav className="mt-5 space-y-1 px-2">
@@ -105,7 +105,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
             <div className="flex flex-shrink-0 items-center px-4">
               <Link href="/" className="text-xl font-bold text-blue-600">
-                Phongtro123.com
+                NhaTroVN
               </Link>
             </div>
             
@@ -180,7 +180,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Bars3Icon className="h-6 w-6" />
             </button>
             <Link href="/" className="text-lg font-bold text-blue-600">
-              Phongtro123.com
+              NhaTroVN
             </Link>
             <div className="flex items-center space-x-4">
               <button className="text-gray-500 hover:text-gray-900">

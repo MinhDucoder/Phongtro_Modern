@@ -130,7 +130,7 @@ export default function ModerationPanel() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Kiểm duyệt tin đăng</h1>
+          <h1 className="text-2xl font-bold text-darker">Kiểm duyệt tin đăng</h1>
           <p className="text-gray-600">Quản lý và kiểm duyệt tin đăng cho thuê phòng trọ</p>
         </div>
       </div>
@@ -144,7 +144,7 @@ export default function ModerationPanel() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Chờ duyệt</p>
-              <p className="text-2xl font-bold text-gray-900">{counts.pending}</p>
+              <p className="text-2xl font-bold text-darker">{counts.pending}</p>
             </div>
           </div>
         </div>
@@ -156,7 +156,7 @@ export default function ModerationPanel() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Đã duyệt</p>
-              <p className="text-2xl font-bold text-gray-900">{counts.approved}</p>
+              <p className="text-2xl font-bold text-darker">{counts.approved}</p>
             </div>
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function ModerationPanel() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Từ chối</p>
-              <p className="text-2xl font-bold text-gray-900">{counts.rejected}</p>
+              <p className="text-2xl font-bold text-darker">{counts.rejected}</p>
             </div>
           </div>
         </div>
@@ -180,7 +180,7 @@ export default function ModerationPanel() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng cộng</p>
-              <p className="text-2xl font-bold text-gray-900">{counts.total}</p>
+              <p className="text-2xl font-bold text-darker">{counts.total}</p>
             </div>
           </div>
         </div>
@@ -252,7 +252,7 @@ export default function ModerationPanel() {
                   <tr key={post.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="max-w-xs">
-                        <p className="text-sm font-medium text-gray-900 line-clamp-2">
+                        <p className="text-sm font-medium text-darker line-clamp-2">
                           {post.title}
                         </p>
                         <p className="text-sm text-gray-500">
@@ -261,7 +261,7 @@ export default function ModerationPanel() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm text-gray-900">{post.author}</p>
+                      <p className="text-sm text-darker">{post.author}</p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Badge variant={statusInfo.variant} size="sm">
@@ -313,7 +313,7 @@ export default function ModerationPanel() {
         {filteredPosts.length === 0 && (
           <div className="text-center py-12">
             <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Không có tin đăng nào</h3>
+            <h3 className="mt-2 text-sm font-medium text-darker">Không có tin đăng nào</h3>
             <p className="mt-1 text-sm text-gray-500">
               {searchTerm || filter !== 'all' 
                 ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.'
@@ -334,13 +334,13 @@ export default function ModerationPanel() {
         {selectedPost && (
           <div className="space-y-4">
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">Tin đăng:</h4>
+              <h4 className="font-medium text-darker mb-2">Tin đăng:</h4>
               <p className="text-sm text-gray-600 line-clamp-2">{selectedPost.title}</p>
             </div>
 
             {action === 'reject' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-dark mb-2">
                   Lý do từ chối *
                 </label>
                 <textarea

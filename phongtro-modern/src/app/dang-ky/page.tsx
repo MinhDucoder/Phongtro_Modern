@@ -23,6 +23,6 @@ export default function RegisterPage() {
 }
 
 export const metadata = {
-  title: 'Đăng ký | Phongtro123.com',
-  description: 'Tạo tài khoản Phongtro123.com để đăng tin cho thuê phòng trọ miễn phí và quản lý tin đăng dễ dàng.',
+  title: 'Đăng ký | NhaTroVN',
+  description: 'Tạo tài khoản NhaTroVN để đăng tin cho thuê phòng trọ miễn phí và quản lý tin đăng dễ dàng.',
 };

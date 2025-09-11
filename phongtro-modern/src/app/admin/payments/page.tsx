@@ -10,6 +10,6 @@ export default function PaymentsPage() {
 }
 
 export const metadata = {
-  title: 'Quản lý thanh toán | Admin Panel | Phongtro123.com',
+  title: 'Quản lý thanh toán | Admin Panel | NhaTroVN',
   description: 'Quản lý và theo dõi các giao dịch thanh toán.',
 };

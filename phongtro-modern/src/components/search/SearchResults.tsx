@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import PropertyCard from '@/components/ui/PropertyCard';
@@ -73,6 +73,11 @@ export default function SearchResults({ searchParams }: SearchResultsProps) {
   const [allProperties] = useState(generateMockProperties(48)); // Generate 48 properties for pagination
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showMap, setShowMap] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const page = Number(searchParams.page) || 1;
   const limit = 12;
@@ -161,15 +166,21 @@ export default function SearchResults({ searchParams }: SearchResultsProps) {
             <div className="text-xs text-blue-600">Tổng tin đăng</div>
           </div>
           <div className="text-center p-3 bg-green-50 rounded-lg">
-            <div className="text-lg font-semibold text-green-600">{totalViews.toLocaleString()}</div>
+            <div className="text-lg font-semibold text-green-600">
+              {mounted ? totalViews.toLocaleString() : totalViews}
+            </div>
             <div className="text-xs text-green-600">Lượt xem</div>
           </div>
           <div className="text-center p-3 bg-red-50 rounded-lg">
-            <div className="text-lg font-semibold text-red-600">{totalLikes}</div>
+            <div className="text-lg font-semibold text-red-600">
+              {mounted ? totalLikes.toLocaleString() : totalLikes}
+            </div>
             <div className="text-xs text-red-600">Yêu thích</div>
           </div>
           <div className="text-center p-3 bg-purple-50 rounded-lg">
-            <div className="text-lg font-semibold text-purple-600">{avgPrice.toFixed(1)}tr</div>
+            <div className="text-lg font-semibold text-purple-600">
+              {mounted ? avgPrice.toFixed(1) : Math.round(avgPrice * 10) / 10}tr
+            </div>
             <div className="text-xs text-purple-600">Giá TB</div>
           </div>
         </div>

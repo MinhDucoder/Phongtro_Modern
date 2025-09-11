@@ -21,7 +21,7 @@ export default function OGhepPage() {
 }
 
 export const metadata = {
-  title: 'Tìm người ở ghép | Phongtro123.com',
+  title: 'Tìm người ở ghép | NhaTroVN',
   description: 'Tìm kiếm phòng ở ghép, chia sẻ chi phí, kết bạn mới tại Hà Nội, TP.HCM',
   keywords: 'tìm người ở ghép, ở ghép, chia phòng, share room, ở chung'
 };

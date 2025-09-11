@@ -130,7 +130,7 @@ const mockNotifications: Notification[] = [
     id: '7',
     type: 'system',
     title: 'Cập nhật hệ thống',
-    message: 'Phongtro123.com vừa ra mắt tính năng chat real-time!',
+    message: 'NhaTroVN vừa ra mắt tính năng chat real-time!',
     timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     isRead: true,
     actionUrl: '/chat',

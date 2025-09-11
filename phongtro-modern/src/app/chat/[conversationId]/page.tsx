@@ -19,6 +19,6 @@ export default async function ConversationPage({ params }: PageProps) {
 }
 
 export const metadata = {
-  title: 'Trò chuyện | Phongtro123.com',
+  title: 'Trò chuyện | NhaTroVN',
   description: 'Trò chuyện trực tiếp với chủ nhà và người thuê phòng.',
 };

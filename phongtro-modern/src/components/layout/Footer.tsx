@@ -60,7 +60,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
           {Object.entries(footerSections).map(([title, links]) => (
             <div key={title}>
-              <h3 className="text-sm font-semibold text-gray-900 mb-4">{title}</h3>
+              <h3 className="text-sm font-semibold text-darker mb-4">{title}</h3>
               <ul className="space-y-2">
                 {links.map((link) => (
                   <li key={link}>
@@ -78,7 +78,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 pt-8 border-t border-gray-200">
           {companyInfo.map((section) => (
             <div key={section.title}>
-              <h3 className="text-sm font-semibold text-gray-900 mb-4">{section.title}</h3>
+              <h3 className="text-sm font-semibold text-darker mb-4">{section.title}</h3>
               <ul className="space-y-2">
                 {section.links.map((link) => (
                   <li key={link}>
@@ -94,7 +94,7 @@ export default function Footer() {
 
         {/* Payment methods */}
         <div className="mb-8">
-          <h3 className="text-sm font-semibold text-gray-900 mb-4">Phương thức thanh toán</h3>
+          <h3 className="text-sm font-semibold text-darker mb-4">Phương thức thanh toán</h3>
           <div className="flex space-x-4">
             {['Visa', 'Mastercard', 'JCB', 'MoMo', 'ZaloPay', 'ShopeePay'].map((method) => (
               <div key={method} className="bg-white border rounded px-3 py-1 text-xs text-gray-600">
@@ -107,7 +107,7 @@ export default function Footer() {
         {/* Company details */}
         <div className="pt-8 border-t border-gray-200">
           <div className="mb-4">
-            <h4 className="font-semibold text-gray-900">CÔNG TY TNHH LBKCORP</h4>
+            <h4 className="font-semibold text-darker">CÔNG TY TNHH LBKCORP</h4>
             <p className="text-sm text-gray-600 mt-2">
               Căn 02.34, Lầu 2, Tháp 3, The Sun Avenue, Số 28 Mai Chí Thọ, Phường An Phú, 
               Thành phố Thủ Đức, Thành phố Hồ Chí Minh, Việt Nam.
@@ -129,7 +129,7 @@ export default function Footer() {
             ĐT: 0909316890 Zalo: 0909316890
           </p>
           <p className="text-sm text-blue-800 mt-2">
-            Hỗ trợ ngoài giờ: Zalo: Phongtro123
+            Hỗ trợ ngoài giờ: Zalo: NhaTroVN
           </p>
         </div>
       </div>

@@ -34,20 +34,20 @@ export default function AdminSettings() {
   const renderGeneralSettings = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Thông tin website</h3>
+        <h3 className="text-lg font-medium text-darker mb-4">Thông tin website</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark mb-2">
               Tên website
             </label>
             <input
               type="text"
-              defaultValue="Phongtro123.com"
+              defaultValue="NhaTroVN"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark mb-2">
               Email liên hệ
             </label>
             <input
@@ -57,7 +57,7 @@ export default function AdminSettings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark mb-2">
               Số điện thoại
             </label>
             <input
@@ -67,7 +67,7 @@ export default function AdminSettings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark mb-2">
               Địa chỉ
             </label>
             <input
@@ -80,25 +80,25 @@ export default function AdminSettings() {
       </div>
 
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Cài đặt hiển thị</h3>
+        <h3 className="text-lg font-medium text-darker mb-4">Cài đặt hiển thị</h3>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">Hiển thị số lượng tin đăng</p>
+              <p className="text-sm font-medium text-darker">Hiển thị số lượng tin đăng</p>
               <p className="text-sm text-gray-500">Hiển thị số lượng tin đăng trên trang chủ</p>
             </div>
             <input type="checkbox" defaultChecked className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">Hiển thị thống kê</p>
+              <p className="text-sm font-medium text-darker">Hiển thị thống kê</p>
               <p className="text-sm text-gray-500">Hiển thị thống kê trên trang chủ</p>
             </div>
             <input type="checkbox" defaultChecked className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">Hiển thị banner quảng cáo</p>
+              <p className="text-sm font-medium text-darker">Hiển thị banner quảng cáo</p>
               <p className="text-sm text-gray-500">Hiển thị banner quảng cáo trên trang chủ</p>
             </div>
             <input type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
@@ -111,25 +111,25 @@ export default function AdminSettings() {
   const renderNotificationSettings = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Thông báo email</h3>
+        <h3 className="text-lg font-medium text-darker mb-4">Thông báo email</h3>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">Thông báo tin đăng mới</p>
+              <p className="text-sm font-medium text-darker">Thông báo tin đăng mới</p>
               <p className="text-sm text-gray-500">Gửi email khi có tin đăng mới</p>
             </div>
             <input type="checkbox" defaultChecked className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">Thông báo người dùng mới</p>
+              <p className="text-sm font-medium text-darker">Thông báo người dùng mới</p>
               <p className="text-sm text-gray-500">Gửi email khi có người dùng mới đăng ký</p>
             </div>
             <input type="checkbox" defaultChecked className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">Thông báo báo cáo</p>
+              <p className="text-sm font-medium text-darker">Thông báo báo cáo</p>
               <p className="text-sm text-gray-500">Gửi email báo cáo hàng ngày</p>
             </div>
             <input type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
@@ -138,10 +138,10 @@ export default function AdminSettings() {
       </div>
 
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Cài đặt SMTP</h3>
+        <h3 className="text-lg font-medium text-darker mb-4">Cài đặt SMTP</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark mb-2">
               SMTP Server
             </label>
             <input
@@ -151,7 +151,7 @@ export default function AdminSettings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark mb-2">
               Port
             </label>
             <input
@@ -161,7 +161,7 @@ export default function AdminSettings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark mb-2">
               Email
             </label>
             <input
@@ -171,7 +171,7 @@ export default function AdminSettings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark mb-2">
               Mật khẩu
             </label>
             <input
@@ -188,18 +188,18 @@ export default function AdminSettings() {
   const renderSecuritySettings = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Bảo mật đăng nhập</h3>
+        <h3 className="text-lg font-medium text-darker mb-4">Bảo mật đăng nhập</h3>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">Xác thực 2 yếu tố</p>
+              <p className="text-sm font-medium text-darker">Xác thực 2 yếu tố</p>
               <p className="text-sm text-gray-500">Yêu cầu xác thực 2 yếu tố cho admin</p>
             </div>
             <input type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">Giới hạn đăng nhập</p>
+              <p className="text-sm font-medium text-darker">Giới hạn đăng nhập</p>
               <p className="text-sm text-gray-500">Khóa tài khoản sau 5 lần đăng nhập sai</p>
             </div>
             <input type="checkbox" defaultChecked className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
@@ -208,10 +208,10 @@ export default function AdminSettings() {
       </div>
 
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Thay đổi mật khẩu</h3>
+        <h3 className="text-lg font-medium text-darker mb-4">Thay đổi mật khẩu</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark mb-2">
               Mật khẩu hiện tại
             </label>
             <input
@@ -220,7 +220,7 @@ export default function AdminSettings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark mb-2">
               Mật khẩu mới
             </label>
             <input
@@ -229,7 +229,7 @@ export default function AdminSettings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark mb-2">
               Xác nhận mật khẩu mới
             </label>
             <input
@@ -263,7 +263,7 @@ export default function AdminSettings() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Cài đặt hệ thống</h1>
+        <h1 className="text-2xl font-bold text-darker">Cài đặt hệ thống</h1>
         <p className="text-gray-600">Quản lý cài đặt và cấu hình hệ thống</p>
       </div>
 
@@ -280,7 +280,7 @@ export default function AdminSettings() {
                   className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                     activeTab === tab.id
                       ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-darker'
                   }`}
                 >
                   <Icon className="w-5 h-5 mr-3" />

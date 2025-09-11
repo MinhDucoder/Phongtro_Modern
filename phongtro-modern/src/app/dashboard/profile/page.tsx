@@ -10,6 +10,6 @@ export default function ProfilePage() {
 }
 
 export const metadata = {
-  title: 'Thông tin cá nhân | Phongtro123.com',
+  title: 'Thông tin cá nhân | NhaTroVN',
   description: 'Cập nhật thông tin cá nhân và cài đặt tài khoản.',
 };

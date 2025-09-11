@@ -181,7 +181,7 @@ export default function NotificationManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Thông báo hệ thống</h1>
+          <h1 className="text-2xl font-bold text-darker">Thông báo hệ thống</h1>
           <p className="text-gray-600">Quản lý và gửi thông báo cho người dùng</p>
         </div>
         <Button
@@ -202,7 +202,7 @@ export default function NotificationManagement() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng thông báo</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-2xl font-bold text-darker">{stats.total}</p>
             </div>
           </div>
         </div>
@@ -214,7 +214,7 @@ export default function NotificationManagement() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Bản nháp</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.draft}</p>
+              <p className="text-2xl font-bold text-darker">{stats.draft}</p>
             </div>
           </div>
         </div>
@@ -226,7 +226,7 @@ export default function NotificationManagement() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Đã lên lịch</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.scheduled}</p>
+              <p className="text-2xl font-bold text-darker">{stats.scheduled}</p>
             </div>
           </div>
         </div>
@@ -238,7 +238,7 @@ export default function NotificationManagement() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Đã gửi</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.sent}</p>
+              <p className="text-2xl font-bold text-darker">{stats.sent}</p>
             </div>
           </div>
         </div>
@@ -250,7 +250,7 @@ export default function NotificationManagement() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Thất bại</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.failed}</p>
+              <p className="text-2xl font-bold text-darker">{stats.failed}</p>
             </div>
           </div>
         </div>
@@ -292,7 +292,7 @@ export default function NotificationManagement() {
                   <tr key={notification.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="max-w-xs">
-                        <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                        <p className="text-sm font-medium text-darker line-clamp-1">
                           {notification.title}
                         </p>
                         <p className="text-sm text-gray-500 line-clamp-1">
@@ -306,7 +306,7 @@ export default function NotificationManagement() {
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm text-gray-900">
+                      <p className="text-sm text-darker">
                         {targetConfig[notification.target]}
                       </p>
                     </td>
@@ -367,7 +367,7 @@ export default function NotificationManagement() {
         {notifications.length === 0 && (
           <div className="text-center py-12">
             <BellIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Chưa có thông báo nào</h3>
+            <h3 className="mt-2 text-sm font-medium text-darker">Chưa có thông báo nào</h3>
             <p className="mt-1 text-sm text-gray-500">
               Tạo thông báo đầu tiên để gửi cho người dùng.
             </p>
@@ -394,7 +394,7 @@ export default function NotificationManagement() {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark mb-2">
               Tiêu đề *
             </label>
             <input
@@ -408,7 +408,7 @@ export default function NotificationManagement() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark mb-2">
               Nội dung *
             </label>
             <textarea
@@ -423,7 +423,7 @@ export default function NotificationManagement() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-dark mb-2">
                 Loại thông báo
               </label>
               <select
@@ -439,7 +439,7 @@ export default function NotificationManagement() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-dark mb-2">
                 Đối tượng
               </label>
               <select
@@ -456,7 +456,7 @@ export default function NotificationManagement() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark mb-2">
               Lên lịch gửi (tùy chọn)
             </label>
             <input

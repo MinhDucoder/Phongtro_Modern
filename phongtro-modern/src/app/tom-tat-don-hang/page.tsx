@@ -339,6 +339,6 @@ export default function OrderSummaryPage() {
 }
 
 export const metadata = {
-  title: 'Tóm tắt đơn hàng | Phongtro123.com',
+  title: 'Tóm tắt đơn hàng | NhaTroVN',
   description: 'Xem lại thông tin đơn hàng thuê phòng trước khi thanh toán.',
 };

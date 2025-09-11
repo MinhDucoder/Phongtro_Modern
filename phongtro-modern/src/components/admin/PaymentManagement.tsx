@@ -106,7 +106,7 @@ export default function PaymentManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý thanh toán</h1>
+          <h1 className="text-2xl font-bold text-darker">Quản lý thanh toán</h1>
           <p className="text-gray-600">Theo dõi và quản lý các giao dịch thanh toán</p>
         </div>
       </div>
@@ -120,7 +120,7 @@ export default function PaymentManagement() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng giao dịch</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-2xl font-bold text-darker">{stats.total}</p>
             </div>
           </div>
         </div>
@@ -132,7 +132,7 @@ export default function PaymentManagement() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Thành công</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.completed}</p>
+              <p className="text-2xl font-bold text-darker">{stats.completed}</p>
             </div>
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function PaymentManagement() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Chờ xử lý</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
+              <p className="text-2xl font-bold text-darker">{stats.pending}</p>
             </div>
           </div>
         </div>
@@ -156,7 +156,7 @@ export default function PaymentManagement() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Thất bại</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.failed}</p>
+              <p className="text-2xl font-bold text-darker">{stats.failed}</p>
             </div>
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function PaymentManagement() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng thu</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-2xl font-bold text-darker">
                 {stats.totalAmount.toLocaleString()}đ
               </p>
             </div>
@@ -252,10 +252,10 @@ export default function PaymentManagement() {
                 return (
                   <tr key={payment.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm font-medium text-gray-900">{payment.id}</p>
+                      <p className="text-sm font-medium text-darker">{payment.id}</p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm text-gray-900">{payment.user}</p>
+                      <p className="text-sm text-darker">{payment.user}</p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Badge variant="info" size="sm">
@@ -263,12 +263,12 @@ export default function PaymentManagement() {
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-darker">
                         {payment.amount.toLocaleString()}đ
                       </p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm text-gray-900">
+                      <p className="text-sm text-darker">
                         {methodConfig[payment.method]}
                       </p>
                     </td>
@@ -318,7 +318,7 @@ export default function PaymentManagement() {
         {filteredPayments.length === 0 && (
           <div className="text-center py-12">
             <CurrencyDollarIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Không có giao dịch nào</h3>
+            <h3 className="mt-2 text-sm font-medium text-darker">Không có giao dịch nào</h3>
             <p className="mt-1 text-sm text-gray-500">
               {searchTerm || filter !== 'all' 
                 ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.'

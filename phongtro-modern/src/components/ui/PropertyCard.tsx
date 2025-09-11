@@ -199,7 +199,7 @@ export default function PropertyCard({
       <div className="p-4">
         {/* Title */}
         <Link href={`/phong-tro/${id}`} className="block">
-          <h3 className="font-semibold text-gray-900 line-clamp-2 hover:text-blue-600 transition-colors mb-2">
+          <h3 className="font-semibold text-darker line-clamp-2 hover:text-blue-600 transition-colors mb-2">
             {title}
           </h3>
         </Link>
@@ -207,7 +207,7 @@ export default function PropertyCard({
         {/* Price and area */}
         <div className="flex items-center justify-between mb-2">
           <span className="text-lg font-bold text-green-600">{price}</span>
-          <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">{area}</span>
+          <span className="text-sm text-medium bg-gray-100 px-2 py-1 rounded">{area}</span>
         </div>
 
         {/* Rating */}
@@ -223,12 +223,12 @@ export default function PropertyCard({
                 />
               ))}
             </div>
-            <span className="text-sm text-gray-600 ml-2">({rating})</span>
+            <span className="text-sm text-medium ml-2">({rating})</span>
           </div>
         )}
 
         {/* Location */}
-        <div className="flex items-center text-sm text-gray-600 mb-3">
+        <div className="flex items-center text-sm text-medium mb-3">
           <MapPinIcon className="w-4 h-4 mr-1 flex-shrink-0" />
           <span className="line-clamp-1">{location}</span>
         </div>
@@ -255,7 +255,7 @@ export default function PropertyCard({
         )}
 
         {/* Description */}
-        <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+        <p className="text-sm text-medium line-clamp-2 mb-3">
           {description}
         </p>
 
@@ -263,12 +263,12 @@ export default function PropertyCard({
         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
           <div className="flex items-center space-x-2">
             <div className="flex items-center">
-              <span className="text-sm font-medium text-gray-900">{contact.name}</span>
+              <span className="text-sm font-medium text-darker">{contact.name}</span>
               {contact.isVerified && (
                 <CheckCircleIcon className="w-4 h-4 text-blue-500 ml-1" />
               )}
             </div>
-            <div className="flex items-center text-sm text-gray-500">
+            <div className="flex items-center text-sm text-light">
               <ClockIcon className="w-4 h-4 mr-1" />
               <span>{postedTime}</span>
             </div>

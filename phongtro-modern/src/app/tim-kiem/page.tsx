@@ -64,6 +64,6 @@ export default async function SearchPage({ searchParams }: PageProps) {
 }
 
 export const metadata = {
-  title: 'Tìm kiếm nâng cao - Phòng trọ | Phongtro123.com',
+  title: 'Tìm kiếm nâng cao - Phòng trọ | NhaTroVN',
   description: 'Tìm kiếm phòng trọ với bộ lọc nâng cao, bản đồ và nhiều tiêu chí chi tiết.',
 };

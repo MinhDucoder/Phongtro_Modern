@@ -21,7 +21,7 @@ export default function NhaNguyenCanPage() {
 }
 
 export const metadata = {
-  title: 'Cho thuê nhà nguyên căn | Phongtro123.com',
+  title: 'Cho thuê nhà nguyên căn | NhaTroVN',
   description: 'Tìm kiếm nhà nguyên căn cho thuê giá rẻ, chính chủ, đầy đủ tiện nghi tại Hà Nội, TP.HCM',
   keywords: 'cho thuê nhà nguyên căn, nhà cho thuê, thuê nhà, nhà trọ nguyên căn'
 };

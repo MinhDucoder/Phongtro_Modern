@@ -21,7 +21,7 @@ export default function MatBangPage() {
 }
 
 export const metadata = {
-  title: 'Cho thuê mặt bằng kinh doanh | Phongtro123.com',
+  title: 'Cho thuê mặt bằng kinh doanh | NhaTroVN',
   description: 'Tìm kiếm mặt bằng kinh doanh cho thuê giá rẻ, vị trí đẹp tại Hà Nội, TP.HCM',
   keywords: 'cho thuê mặt bằng, mặt bằng kinh doanh, thuê mặt bằng, shop cho thuê'
 };

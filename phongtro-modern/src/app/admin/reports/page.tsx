@@ -10,6 +10,6 @@ export default function ReportsPage() {
 }
 
 export const metadata = {
-  title: 'Báo cáo vi phạm | Admin Panel | Phongtro123.com',
+  title: 'Báo cáo vi phạm | Admin Panel | NhaTroVN',
   description: 'Quản lý và xử lý các báo cáo vi phạm từ người dùng.',
 };

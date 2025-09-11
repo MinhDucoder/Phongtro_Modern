@@ -138,7 +138,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             <div className="bg-white rounded-lg overflow-hidden shadow-sm">
               <div className="relative h-96">
                 <Image
-                  src={property.images[currentImageIndex]}
+                  src={property.images[currentImageIndex] || '/placeholder-room.svg'}
                   alt={property.title}
                   fill
                   className="object-cover"
@@ -168,10 +168,10 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               {/* Image Thumbnails */}
               <div className="p-4">
                 <div className="grid grid-cols-4 gap-2">
-                  {property.images.slice(0, 4).map((image, index) => (
+                  {property.images?.slice(0, 4).map((image, index) => (
                     <div key={index} className="relative">
                       <Image
-                        src={image}
+                        src={image || '/placeholder-room.svg'}
                         alt={`Ảnh ${index + 1}`}
                         width={100}
                         height={80}
@@ -241,7 +241,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               <div className="border-t pt-6">
                 <h2 className="text-lg font-semibold mb-4">Mô tả chi tiết</h2>
                 <div className="prose max-w-none">
-                  {property.description.split('\n').map((paragraph, index) => (
+                  {property.description?.split('\n').map((paragraph, index) => (
                     <p key={index} className="mb-3 text-gray-700 whitespace-pre-line">
                       {paragraph}
                     </p>
@@ -254,7 +254,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <h2 className="text-lg font-semibold mb-4">Tiện nghi</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {property.amenities.map((amenity, index) => (
+                {property.amenities?.map((amenity, index) => (
                   <div key={index} className="flex items-center">
                     <CheckCircleIcon className="w-5 h-5 text-green-500 mr-2" />
                     <span className="text-gray-700">{amenity}</span>
@@ -267,7 +267,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <h2 className="text-lg font-semibold mb-4">Nội quy</h2>
               <div className="space-y-3">
-                {property.rules.map((rule, index) => (
+                {property.rules?.map((rule, index) => (
                   <div key={index} className="flex items-start">
                     <XCircleIcon className="w-5 h-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
                     <span className="text-gray-700">{rule}</span>
@@ -280,7 +280,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <h2 className="text-lg font-semibold mb-4">Địa điểm lân cận</h2>
               <div className="space-y-3">
-                {property.nearbyPlaces.map((place, index) => (
+                {property.nearbyPlaces?.map((place, index) => (
                   <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
                     <div className="flex items-center">
                       <div className="text-gray-400 mr-3">
@@ -301,7 +301,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             <div className="bg-white rounded-lg p-6 shadow-sm sticky top-8">
               <div className="flex items-center mb-4">
                 <Image
-                  src={property.contact.avatar}
+                  src={property.contact.avatar || '/placeholder-avatar.svg'}
                   alt={property.contact.name}
                   width={60}
                   height={60}
@@ -381,7 +381,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             
             <div className="relative h-96 mb-4">
               <Image
-                src={property.images[currentImageIndex]}
+                src={property.images[currentImageIndex] || '/placeholder-room.svg'}
                 alt={`Ảnh ${currentImageIndex + 1}`}
                 fill
                 className="object-contain"
@@ -389,10 +389,10 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             </div>
             
             <div className="grid grid-cols-6 gap-2">
-              {property.images.map((image, index) => (
+              {property.images?.map((image, index) => (
                 <Image
                   key={index}
-                  src={image}
+                  src={image || '/placeholder-room.svg'}
                   alt={`Thumbnail ${index + 1}`}
                   width={80}
                   height={60}

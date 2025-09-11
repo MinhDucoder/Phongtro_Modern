@@ -10,6 +10,6 @@ export default function AnalyticsPage() {
 }
 
 export const metadata = {
-  title: 'Phân tích tin đăng | Phongtro123.com',
+  title: 'Phân tích tin đăng | NhaTroVN',
   description: 'Theo dõi hiệu quả tin đăng với analytics chi tiết.',
 };

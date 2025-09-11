@@ -18,6 +18,6 @@ export default function DashboardPage() {
 }
 
 export const metadata = {
-  title: 'Dashboard - Quản lý tin đăng | Phongtro123.com',
+  title: 'Dashboard - Quản lý tin đăng | NhaTroVN',
   description: 'Quản lý tin đăng, theo dõi thống kê và cập nhật thông tin cá nhân.',
 };
