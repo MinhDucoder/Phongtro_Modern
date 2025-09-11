@@ -1,25 +1,28 @@
  
 import express from 'express'
 import { mapOrder } from '~/utils/sorts.js'
+import bodyparser from 'body-parser'
+import Route from './routes/v1/index.js'
 
 const app = express()
-
+Route(app)
 const hostname = 'localhost'
-const port = 8017
+const port = 3000
+
+//middlewares
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(express.static('public'))
+app.use('/api/sorts', mapOrder)
+
+//routes
+
 
 app.get('/', (req, res) => {
-  // Test Absolute import mapOrder
-  console.log(mapOrder(
-    [ { id: 'id-1', name: 'One' },
-      { id: 'id-2', name: 'Two' },
-      { id: 'id-3', name: 'Three' },
-      { id: 'id-4', name: 'Four' },
-      { id: 'id-5', name: 'Five' } ],
-    ['id-5', 'id-4', 'id-2', 'id-3', 'id-1'],
-    'id'
-  ))
   res.end('<h1>Hello World!</h1><hr>')
 })
+
+
 
 app.listen(port, hostname, () => {
   // eslint-disable-next-line no-console
