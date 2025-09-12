@@ -1,0 +1,221 @@
+{
+  "users": [
+    {
+      "_id": {
+        "$oid": "650000000000000000000001"
+      },
+      "full_name": "Nguyen Van A",
+      "email": "a@example.com",
+      "password": "hashed_password",
+      "phone": "0123456789",
+      "role": "user",
+      "balance": 0.0,
+      "is_verified": false,
+      "is_banned": false,
+      "last_login": null,
+      "created_at": {
+        "$date": "2025-01-01T10:00:00Z"
+      },
+      "updated_at": {
+        "$date": "2025-01-01T10:00:00Z"
+      }
+    }
+  ],
+  "posts": [
+    {
+      "_id": {
+        "$oid": "650000000000000000000101"
+      },
+      "user_id": {
+        "$oid": "650000000000000000000001"
+      },
+      "title": "Phòng trọ tiện nghi",
+      "description": "Phòng trọ đầy đủ nội thất, gần trung tâm",
+      "price": 1500000.0,
+      "images": [
+        "img1.jpg",
+        "img2.jpg"
+      ],
+      "category": "phongtro",
+      "location": {
+        "city": "Hanoi",
+        "district": "Cau Giay"
+      },
+      "coordinates": {
+        "lat": 21.03,
+        "lng": 105.85
+      },
+      "area": 25.5,
+      "options": {
+        "wifi": true,
+        "parking": true
+      },
+      "status": "active",
+      "is_approved": true,
+      "type_news": "normal",
+      "views": 10,
+      "favorites_count": 2,
+      "start_date": {
+        "$date": "2025-01-01T00:00:00Z"
+      },
+      "end_date": {
+        "$date": "2025-02-01T00:00:00Z"
+      },
+      "created_at": {
+        "$date": "2025-01-01T10:00:00Z"
+      },
+      "updated_at": {
+        "$date": "2025-01-02T12:00:00Z"
+      }
+    }
+  ],
+  "api_keys": [
+    {
+      "_id": {
+        "$oid": "650000000000000000000201"
+      },
+      "user_id": {
+        "$oid": "650000000000000000000001"
+      },
+      "public_key": "pub_key_123",
+      "private_key": "priv_key_123",
+      "status": "active",
+      "usage_count": 0,
+      "last_used_at": null,
+      "created_at": {
+        "$date": "2025-01-01T10:00:00Z"
+      }
+    }
+  ],
+  "keyword_searches": [
+    {
+      "_id": {
+        "$oid": "650000000000000000000301"
+      },
+      "title": "phòng trọ hà nội",
+      "count": 15,
+      "last_searched_at": {
+        "$date": "2025-01-05T15:00:00Z"
+      }
+    }
+  ],
+  "conversations": [
+    {
+      "_id": {
+        "$oid": "650000000000000000000401"
+      },
+      "participants": [
+        {
+          "$oid": "650000000000000000000001"
+        },
+        {
+          "$oid": "650000000000000000000002"
+        }
+      ],
+      "type": "private",
+      "last_message": "Xin chào",
+      "unread_count": 1,
+      "created_at": {
+        "$date": "2025-01-01T10:00:00Z"
+      },
+      "updated_at": {
+        "$date": "2025-01-01T11:00:00Z"
+      }
+    }
+  ],
+  "messages": [
+    {
+      "_id": {
+        "$oid": "650000000000000000000501"
+      },
+      "conversation_id": {
+        "$oid": "650000000000000000000401"
+      },
+      "sender_id": {
+        "$oid": "650000000000000000000001"
+      },
+      "type": "text",
+      "content": "Hello!",
+      "attachments": [],
+      "status": "sent",
+      "created_at": {
+        "$date": "2025-01-01T10:05:00Z"
+      }
+    }
+  ],
+  "wallet_transactions": [
+    {
+      "_id": {
+        "$oid": "650000000000000000000601"
+      },
+      "user_id": {
+        "$oid": "650000000000000000000001"
+      },
+      "type": "recharge",
+      "amount": 100000,
+      "balance_before": 0,
+      "balance_after": 100000,
+      "note": "Nạp tiền Momo",
+      "created_at": {
+        "$date": "2025-01-02T10:00:00Z"
+      }
+    }
+  ],
+  "recharges": [
+    {
+      "_id": {
+        "$oid": "650000000000000000000701"
+      },
+      "user_id": {
+        "$oid": "650000000000000000000001"
+      },
+      "amount": 100000,
+      "type_payment": "Momo",
+      "status": "success",
+      "transaction_id": "TX12345",
+      "gateway_response": {
+        "code": "00",
+        "message": "Thành công"
+      },
+      "created_at": {
+        "$date": "2025-01-02T10:00:00Z"
+      }
+    }
+  ],
+  "otps": [
+    {
+      "_id": {
+        "$oid": "650000000000000000000801"
+      },
+      "user_id": {
+        "$oid": "650000000000000000000001"
+      },
+      "otp": "123456",
+      "type": "verify",
+      "expire_at": {
+        "$date": "2025-01-02T10:30:00Z"
+      },
+      "attempts": 0,
+      "is_used": false,
+      "created_at": {
+        "$date": "2025-01-02T10:00:00Z"
+      }
+    }
+  ],
+  "favourites": [
+    {
+      "_id": {
+        "$oid": "650000000000000000000901"
+      },
+      "user_id": {
+        "$oid": "650000000000000000000001"
+      },
+      "post_id": {
+        "$oid": "650000000000000000000101"
+      },
+      "created_at": {
+        "$date": "2025-01-02T12:00:00Z"
+      }
+    }
+  ]
+}
