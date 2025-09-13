@@ -1,9 +1,17 @@
- import express from 'express'
-import AuthController from '../../controllers/AuthController.js'
- const authRoute = express.Router()
+import express from "express";
+import AuthController from "~/controllers/AuthController.js";
+import { authenticate } from "~/middlewares/checkToken.js";
+import catchAsync from "~/middlewares/catchAsync.js";
 
- authRoute.post('/login', AuthController.login);
- authRoute.post('/register', AuthController.register);
+const router = express.Router();
 
+// Public
+router.post("/register", catchAsync(AuthController.register));
+router.get("/verify-email/:token", catchAsync(AuthController.verifyEmail));
+router.post("/login", catchAsync(AuthController.login));
+router.post("/refresh-token", catchAsync(AuthController.refreshToken));
 
- export default authRoute
+// Protected
+router.post("/logout", authenticate, catchAsync(AuthController.logout));
+
+export default router;
