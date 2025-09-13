@@ -4,7 +4,8 @@ import bodyparser from 'body-parser'
 import Route from './routes/v1/index.js'
 import errorHandler from './middlewares/errorhandle.js'
 import { connectDB } from './config/mongodb.js'
-
+import morgan from 'morgan'
+import cookieParser from 'cookie-parser'
 const app = express()
 connectDB()
 //routes
@@ -14,8 +15,10 @@ const port = 3000
 
 //middlewares
 app.use(express.json())
+app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public'))
+app.use(morgan('dev'))
 // app.use('/api/sorts', mapOrder)
 
 //routes
