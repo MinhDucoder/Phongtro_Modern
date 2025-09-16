@@ -6,7 +6,16 @@ import errorHandler from './middlewares/errorhandle.js'
 import { connectDB } from './config/mongodb.js'
 import morgan from 'morgan'
 import cookieParser from 'cookie-parser'
+import cors from 'cors'
+
 const app = express()
+//frontend chay port` 3000 nên thêm cors
+app.use(cors({
+  origin: 'http://localhost:3000', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true, 
+}))
+
 connectDB()
 //routes
 
