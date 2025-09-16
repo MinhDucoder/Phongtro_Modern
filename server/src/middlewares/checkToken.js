@@ -3,30 +3,32 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Middleware kiểm tra token
-export const authenticate = async (req, res, next) => {
-  try {
-    const path = req.path.toLowerCase();
-    if (path === "/login" || path === "/register") {
-      console.log("here");
-      return next();
+export const authenticate = () => {
+  return async (req, res, next) => {
+    try {
+      const path = req.path.toLowerCase();
+      if (path === "/login" || path === "/register") {
+        return next();
+      }
+
+      const accessToken =
+        req.cookies?.accessToken || req.headers.authorization?.split(" ")[1];
+
+      if (!accessToken) {
+        return res.status(401).json({ message: "Vui lòng đăng nhập" });
+      }
+
+      const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
+      req.user = decoded;
+      next();
+    } catch (error) {
+      return res
+        .status(401)
+        .json({ message: "Token không hợp lệ hoặc đã hết hạn" });
     }
-
-    const accessToken =
-      req.cookies?.accessToken || req.headers.authorization?.split(" ")[1];
-
-    if (!accessToken) {
-      return res.status(401).json({ message: "Vui lòng đăng nhập" });
-    }
-
-    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
-    req.user = decoded; // gắn thông tin user vào request
-    next();
-  } catch (error) {
-    return res
-      .status(401)
-      .json({ message: "Token không hợp lệ hoặc đã hết hạn" });
-  }
+  };
 };
+
 
 
 export const authorize = (roles = []) => {
