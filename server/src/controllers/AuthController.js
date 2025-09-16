@@ -82,7 +82,6 @@ class AuthController {
     user.last_login = new Date();
     // user.refresh_token = refreshToken; // 👉 bật lại khi dùng refresh token
     await user.save();
-    req.user = user;
 
     res.cookie("accessToken", token, { 
       httpOnly: true, 
