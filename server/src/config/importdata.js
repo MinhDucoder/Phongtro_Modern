@@ -42,11 +42,11 @@ async function importData() {
       if (Array.isArray(docs)) {
         const convertedDocs = docs.map(convertExtendedJSON);
         await db.collection(collection).insertMany(convertedDocs);
-        console.log(`✅ Imported ${convertedDocs.length} docs into ${collection}`);
+        console.log(` Imported ${convertedDocs.length} docs into ${collection}`);
       }
     }
   } catch (err) {
-    console.error("❌ Error importing data:", err);
+    console.error(" Error importing data:", err);
   } finally {
     await client.close();
   }

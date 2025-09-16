@@ -11,7 +11,7 @@ connectDB()
 //routes
 
 const hostname = 'localhost'
-const port = 3000
+const port = 5000
 
 //middlewares
 app.use(express.json())
