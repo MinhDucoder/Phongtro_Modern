@@ -21,5 +21,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
+Swagger Editor.html
+Swagger Editor_files/
 .env

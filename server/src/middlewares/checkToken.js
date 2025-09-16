@@ -28,9 +28,8 @@ export const authenticate = async (req, res, next) => {
   }
 };
 
-// Middleware phân quyền
+
 export const authorize = (roles = []) => {
-  // Nếu roles là string, chuyển sang array
   if (typeof roles === "string") roles = [roles];
 
   return (req, res, next) => {
