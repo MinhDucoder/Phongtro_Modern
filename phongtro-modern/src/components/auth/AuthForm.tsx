@@ -353,7 +353,6 @@ export default function AuthForm({ type }: AuthFormProps) {
             <p className="mt-1 text-sm text-red-600">{errors.password}</p>
           )}
         </div>
-
         {type === 'register' && (
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-dark">
