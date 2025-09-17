@@ -7,11 +7,13 @@ import notificationRoute from "./notification.js";
 import reportRoute from "./report.js";
 import adminRoute from "./admin.js";
 import roleRoute from "./role.js";
+import postRoute from "./post.js";
 
 const Route = (app) => {
   app.use("/api/v1/auth", authRouter);
   app.use("/api/v1/role-request", roleRoute);
   app.use("/api/v1/rooms", roomRoute);
+  app.use("/api/v1/posts", postRoute);
   app.use("/api/v1/booking", bookingRoute);
   app.use("/api/v1/payments", paymentRoute);
   app.use("/api/v1/reviews", reviewRoute);
