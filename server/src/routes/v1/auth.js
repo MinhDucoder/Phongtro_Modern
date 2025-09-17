@@ -11,8 +11,9 @@ router.post("/register", catchAsync(AuthController.register));
 router.get("/verify-email/:token", catchAsync(AuthController.verifyEmail));
 router.post("/login", catchAsync(AuthController.login));
 router.post("/refresh-token", catchAsync(AuthController.refreshToken));
+router.post("/logout", catchAsync(AuthController.logout)); // Không cần authenticate
 
 // Protected
-router.post("/logout", authenticate, catchAsync(AuthController.logout));
+// router.post("/logout", authenticate, catchAsync(AuthController.logout));
 
 export default router;

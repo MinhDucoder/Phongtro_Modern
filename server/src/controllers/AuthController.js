@@ -110,19 +110,29 @@ class AuthController {
   //   }
   // }
 
-  // ====== LOGOUT (chưa dùng) ======
-  // async logout(req, res) {
-  //   const { refreshToken } = req.cookies;
-  //   if (refreshToken) {
-  //     const user = await User.findOne({ refresh_token: refreshToken });
-  //     if (user) {
-  //       user.refresh_token = undefined;
-  //       await user.save();
-  //     }
-  //   }
-  //   res.clearCookie("refreshToken");
-  //   res.json({ message: "Logout thành công" });
-  // }
+  // ====== LOGOUT ======
+  async logout(req, res) {
+    try {
+      // Clear access token cookie
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax"
+      });
+      
+      // Clear refresh token cookie if exists
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax"
+      });
+      
+      res.status(200).json({ message: "Logout thành công" });
+    } catch (error) {
+      console.error("Logout error:", error);
+      res.status(500).json({ message: "Có lỗi xảy ra khi đăng xuất" });
+    }
+  }
 }
 
 export default new AuthController();

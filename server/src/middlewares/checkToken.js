@@ -7,7 +7,7 @@ export const authenticate = () => {
   return async (req, res, next) => {
     try {
       const path = req.path.toLowerCase();
-      if (path === "/login" || path === "/register") {
+      if (path === "/login" || path === "/register" || path === "/logout") {
         return next();
       }
 

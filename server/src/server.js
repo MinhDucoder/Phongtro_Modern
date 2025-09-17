@@ -11,9 +11,11 @@ import cors from 'cors'
 const app = express()
 //frontend chay port` 3000 nên thêm cors
 app.use(cors({
-  origin: 'http://localhost:3000', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true, 
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'], 
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Set-Cookie']
 }))
 
 connectDB()
