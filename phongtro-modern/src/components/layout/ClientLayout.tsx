@@ -1,7 +1,6 @@
 'use client';
 
 import Header from './Header';
-import Footer from './Footer';
 import { Toaster } from 'react-hot-toast';
 
 interface ClientLayoutProps {
@@ -15,7 +14,6 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
       <main>
         {children}
       </main>
-      <Footer />
       <Toaster 
         position="top-right"
         toastOptions={{

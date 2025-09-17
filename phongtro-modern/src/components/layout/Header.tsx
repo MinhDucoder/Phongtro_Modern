@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Bars3Icon, XMarkIcon, UserIcon, PlusIcon, HomeIcon, BuildingOfficeIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '@/contexts/AuthContext';
+import toast from 'react-hot-toast';
 
 const mainNavigation = [
   { name: 'Phòng trọ', href: '/phong-tro', icon: HomeIcon },
@@ -20,6 +23,21 @@ const secondaryNavigation = [
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isAuthenticated, user, logout } = useAuth();
+  const router = useRouter();
+
+
+  const handleLogout = async () => {
+    console.log('Logout button clicked!');
+    try {
+      await logout();
+      toast.success('Đã đăng xuất thành công!');
+      router.push('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Có lỗi khi đăng xuất');
+    }
+  };
 
   return (
     <header className="bg-white shadow-sm border-b sticky top-0 z-50">
@@ -60,22 +78,42 @@ export default function Header() {
               Tin nhắn
             </Link>
 
-            {/* Profile */}
-            <Link
-              href="/profile"
-              className="hidden md:flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-            >
-              <UserIcon className="h-4 w-4 mr-1" />
-              Hồ sơ
-            </Link>
-
-            {/* Login */}
-            <Link
-              href="/dang-nhap"
-              className="hidden sm:flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-            >
-              Đăng nhập
-            </Link>
+            {/* User Info / Login */}
+            {isAuthenticated ? (
+              <>
+                {/* User Info */}
+                <div className="hidden md:flex items-center space-x-3">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm">
+                      {user?.full_name ? user.full_name[0].toUpperCase() : 'N'}
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">
+                      {user?.full_name || user?.email}
+                    </span>
+                  </div>
+                  <Link
+                    href="/profile"
+                    className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                  >
+                    <UserIcon className="h-4 w-4 mr-1" />
+                    Hồ sơ
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="px-3 py-2 rounded-md text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+                  >
+                    Đăng xuất
+                  </button>
+                </div>
+              </>
+            ) : (
+              <Link
+                href="/dang-nhap"
+                className="hidden sm:flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+              >
+                Đăng nhập
+              </Link>
+            )}
 
             {/* Post Listing Button */}
             <Link
@@ -159,21 +197,55 @@ export default function Header() {
                     <ChatBubbleLeftRightIcon className="h-5 w-5 mr-3" />
                     Tin nhắn
                   </Link>
-                  <Link
-                    href="/profile"
-                    className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <UserIcon className="h-5 w-5 mr-3" />
-                    Hồ sơ
-                  </Link>
-                  <Link
-                    href="/dang-nhap"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Đăng nhập
-                  </Link>
+                  
+                  {isAuthenticated ? (
+                    <>
+                      {/* User Info in Mobile */}
+                      <div className="px-3 py-2 border-b border-gray-200">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                            {user?.full_name ? user.full_name[0].toUpperCase() : 'N'}
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {user?.full_name || user?.email}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {user?.role === 'admin' ? 'Quản trị viên' : 
+                               user?.role === 'landlord' ? 'Chủ nhà' : 'Người thuê'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <Link
+                        href="/profile"
+                        className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <UserIcon className="h-5 w-5 mr-3" />
+                        Hồ sơ
+                      </Link>
+                      
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setMobileMenuOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        Đăng xuất
+                      </button>
+                    </>
+                  ) : (
+                    <Link
+                      href="/dang-nhap"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Đăng nhập
+                    </Link>
+                  )}
                 </div>
 
                 {/* Post Listing Button */}

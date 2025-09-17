@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AuthFormProps {
   type: 'login' | 'register';
@@ -11,9 +12,9 @@ interface AuthFormProps {
 
 export default function AuthForm({ type }: AuthFormProps) {
   const router = useRouter();
+  const { login, register, isLoading, user } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -21,7 +22,7 @@ export default function AuthForm({ type }: AuthFormProps) {
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'tenant', // 'tenant' or 'landlord'
+    role: 'tenant' as 'tenant' | 'landlord',
     agreeTerms: false,
   });
 
@@ -102,7 +103,6 @@ export default function AuthForm({ type }: AuthFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
       // Mark all fields as touched
@@ -127,25 +127,37 @@ export default function AuthForm({ type }: AuthFormProps) {
 
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
-        setIsLoading(false);
         return;
       }
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
+      // Call API
       if (type === 'login') {
-        toast.success('Đăng nhập thành công!');
-        router.push('/');
+        const result = await login(formData.email, formData.password);
+        if (result.success && result.user) {
+          // Chuyển hướng theo role của user từ response
+          if (result.user.role === 'admin') {
+            router.push('/admin');
+          } else if (result.user.role === 'landlord') {
+            router.push('/dashboard');
+          } else {
+            // tenant - vẫn ở trang chủ
+            router.push('/');
+          }
+        }
       } else {
-        const roleText = formData.role === 'tenant' ? 'người thuê' : 'chủ nhà';
-        toast.success(`Đăng ký thành công với vai trò ${roleText}! Vui lòng kiểm tra email để xác thực tài khoản.`);
-        router.push('/dang-nhap');
+        const success = await register({
+          full_name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone,
+          role: formData.role,
+        });
+        if (success) {
+          router.push('/dang-nhap');
+        }
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Có lỗi xảy ra');
-    } finally {
-      setIsLoading(false);
+      console.error('Form submission error:', error);
     }
   };
 
