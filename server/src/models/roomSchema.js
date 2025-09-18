@@ -32,14 +32,24 @@ const roomSchema = new mongoose.Schema(
     },
     images: [
       {
-        type: String, // url ảnh
+        url: String,
+        public_id: String,
       },
     ],
     amenities: [
       {
-        type: String, // ví dụ: ["wifi", "máy lạnh", "WC riêng"]
+        type: String,
+        enum: [
+          "wifi",
+          "aircon",
+          "private_wc",
+          "washing_machine",
+          "fridge",
+          "balcony",
+        ],
       },
     ],
+
     landlord: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -48,7 +58,7 @@ const roomSchema = new mongoose.Schema(
     isAvailable: {
       type: Boolean,
       default: true,
-    },  
+    },
   },
   { timestamps: true }
 );
