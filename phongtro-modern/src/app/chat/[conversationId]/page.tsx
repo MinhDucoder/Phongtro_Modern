@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import ChatLayout from '@/components/chat/ChatLayout';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 // Mock auth check
 const isAuthenticated = true;
@@ -15,7 +16,11 @@ export default async function ConversationPage({ params }: PageProps) {
 
   const { conversationId } = await params;
 
-  return <ChatLayout activeConversationId={conversationId} />;
+  return (
+    <DashboardLayout>
+      <ChatLayout activeConversationId={conversationId} />
+    </DashboardLayout>
+  );
 }
 
 export const metadata = {

@@ -20,7 +20,7 @@ interface User {
   name: string;
   email: string;
   phone: string;
-  role: 'user' | 'premium' | 'vip' | 'admin';
+  role: 'user' | 'landlord' | 'admin';
   status: 'active' | 'suspended' | 'pending';
   registrationDate: Date;
   lastLogin: Date;
@@ -36,7 +36,7 @@ const mockUsers: User[] = [
     name: 'Nguyễn Văn A',
     email: 'nguyenvana@email.com',
     phone: '0987654321',
-    role: 'premium',
+    role: 'landlord',
     status: 'active',
     registrationDate: new Date(2024, 0, 15),
     lastLogin: new Date(Date.now() - 2 * 60 * 60 * 1000),
@@ -48,7 +48,7 @@ const mockUsers: User[] = [
     name: 'Trần Thị B',
     email: 'tranthib@email.com',
     phone: '0912345678',
-    role: 'vip',
+    role: 'admin',
     status: 'active',
     registrationDate: new Date(2024, 0, 10),
     lastLogin: new Date(Date.now() - 24 * 60 * 60 * 1000),
@@ -89,16 +89,10 @@ const getRoleBadge = (role: string) => {
           Admin
         </span>
       );
-    case 'vip':
+    case 'landlord':
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-          VIP
-        </span>
-      );
-    case 'premium':
-      return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-          Premium
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          Chủ nhà
         </span>
       );
     case 'user':
@@ -143,7 +137,7 @@ const getStatusBadge = (status: string) => {
 export default function UserManagement() {
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState<'all' | 'user' | 'premium' | 'vip' | 'admin'>('all');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'user' | 'landlord' | 'admin'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended' | 'pending'>('all');
   const [mounted, setMounted] = useState(false);
 
@@ -304,13 +298,12 @@ export default function UserManagement() {
           <div>
             <select
               value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value as 'all' | 'user' | 'premium' | 'admin')}
+              onChange={(e) => setRoleFilter(e.target.value as 'all' | 'user' | 'landlord' | 'admin')}
               className="w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">Tất cả vai trò</option>
               <option value="user">User</option>
-              <option value="premium">Premium</option>
-              <option value="vip">VIP</option>
+              <option value="landlord">Chủ nhà</option>
               <option value="admin">Admin</option>
             </select>
           </div>

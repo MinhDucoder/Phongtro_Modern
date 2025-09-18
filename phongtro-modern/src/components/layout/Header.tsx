@@ -212,7 +212,7 @@ export default function Header() {
                             </div>
                             <div className="text-xs text-gray-500">
                               {user?.role === 'admin' ? 'Quản trị viên' : 
-                               user?.role === 'landlord' ? 'Chủ nhà' : 'Người thuê'}
+                               user?.role === 'landlord' ? 'Chủ nhà' : 'Người dùng'}
                             </div>
                           </div>
                         </div>

@@ -14,7 +14,7 @@ interface AuthContextType {
     email: string;
     password: string;
     phone: string;
-    role: 'tenant' | 'landlord';
+    role: 'user' | 'landlord' | 'admin';
   }) => Promise<boolean>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     email: string;
     password: string;
     phone: string;
-    role: 'tenant' | 'landlord';
+    role: 'user' | 'landlord' | 'admin';
   }): Promise<boolean> => {
     try {
       setIsLoading(true);

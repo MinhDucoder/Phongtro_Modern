@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import ClientLayout from "@/components/layout/ClientLayout";
+import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import ClientErrorBoundary from "@/components/ui/ClientErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "react-hot-toast";
@@ -86,9 +86,9 @@ export default function RootLayout({
       >
         <ClientErrorBoundary>
           <AuthProvider>
-            <ClientLayout>
+            <ConditionalLayout>
               {children}
-            </ClientLayout>
+            </ConditionalLayout>
             <Toaster 
               position="top-right"
               toastOptions={{

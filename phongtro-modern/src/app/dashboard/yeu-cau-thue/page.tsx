@@ -1,4 +1,5 @@
 import YeuCauThueClient from './YeuCauThueClient';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 export const metadata = {
   title: 'Quản lý yêu cầu thuê | NhaTroVN',
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function RentalRequestsPage() {
-  return <YeuCauThueClient />;
+  return (
+    <DashboardLayout>
+      <YeuCauThueClient />
+    </DashboardLayout>
+  );
 }

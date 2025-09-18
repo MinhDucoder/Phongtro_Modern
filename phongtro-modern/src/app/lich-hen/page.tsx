@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import SchedulingSystem from '@/components/scheduling/SchedulingSystem';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 // Mock auth check
 const isAuthenticated = true;
@@ -10,11 +11,9 @@ export default function SchedulingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <SchedulingSystem />
-      </div>
-    </div>
+    <DashboardLayout>
+      <SchedulingSystem />
+    </DashboardLayout>
   );
 }
 

@@ -14,7 +14,7 @@ export interface User {
   full_name: string;
   email: string;
   phone: string;
-  role: 'tenant' | 'landlord' | 'admin';
+  role: 'user' | 'landlord' | 'admin';
   is_verified: boolean;
   created_at: string;
   last_login?: string;
@@ -30,7 +30,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   phone: string;
-  role?: 'tenant' | 'landlord';
+  role?: 'user' | 'landlord' | 'admin';
 }
 
 // Hàm gửi request API tổng quát

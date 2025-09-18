@@ -20,7 +20,7 @@ class AuthController {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 👉 Nếu chưa dùng verify email, ta set is_verified = true
+    //  Nếu chưa dùng verify email, ta set is_verified = true
     // const verification_token = crypto.randomBytes(32).toString("hex");
 
     const newUser = new User({
@@ -90,7 +90,7 @@ class AuthController {
     });
     // res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === "production", maxAge: 7*24*60*60*1000 });
 
-    res.json({ message: "Login thành công", token, user });
+    res.json({ message: "Đăng nhập thành công", token, user });
   }
 
   // ====== REFRESH TOKEN (chưa dùng) ======
@@ -127,7 +127,7 @@ class AuthController {
         sameSite: "lax"
       });
       
-      res.status(200).json({ message: "Logout thành công" });
+      res.status(200).json({ message: "Đã đăng xuất" });
     } catch (error) {
       console.error("Logout error:", error);
       res.status(500).json({ message: "Có lỗi xảy ra khi đăng xuất" });

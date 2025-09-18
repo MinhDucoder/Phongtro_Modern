@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import ChatLayout from '@/components/chat/ChatLayout';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 // Mock auth check - trong thực tế sẽ check từ session/JWT
 const isAuthenticated = true;
@@ -9,7 +10,11 @@ export default function ChatPage() {
     redirect('/dang-nhap');
   }
 
-  return <ChatLayout />;
+  return (
+    <DashboardLayout>
+      <ChatLayout />
+    </DashboardLayout>
+  );
 }
 
 export const metadata = {

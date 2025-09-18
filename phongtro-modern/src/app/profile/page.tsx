@@ -10,7 +10,7 @@ export default function ProfilePage() {
     name: 'Nguyễn Văn A',
     email: 'nguyenvana@email.com',
     phone: '0123456789',
-    role: 'tenant' as 'tenant' | 'landlord',
+    role: 'user' as 'user' | 'landlord' | 'admin',
     joinDate: '2024-01-15',
     avatar: null
   });
@@ -143,31 +143,31 @@ export default function ProfilePage() {
                       Vai trò
                     </label>
                     {isEditing ? (
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-3 gap-4">
                         <label className={`relative flex items-center p-3 border-2 rounded-lg cursor-pointer transition-colors ${
-                          editData.role === 'tenant' 
+                          editData.role === 'user' 
                             ? 'border-blue-500 bg-blue-50' 
                             : 'border-gray-300 hover:border-gray-400'
                         }`}>
                           <input
                             type="radio"
                             name="role"
-                            value="tenant"
-                            checked={editData.role === 'tenant'}
-                            onChange={(e) => setEditData({ ...editData, role: e.target.value as 'tenant' | 'landlord' })}
+                            value="user"
+                            checked={editData.role === 'user'}
+                            onChange={(e) => setEditData({ ...editData, role: e.target.value as 'user' | 'landlord' | 'admin' })}
                             className="sr-only"
                           />
                           <div className="flex items-center space-x-2">
                             <div className={`w-4 h-4 rounded-full border-2 ${
-                              editData.role === 'tenant' 
+                              editData.role === 'user' 
                                 ? 'border-blue-500 bg-blue-500' 
                                 : 'border-gray-300'
                             }`}>
-                              {editData.role === 'tenant' && (
+                              {editData.role === 'user' && (
                                 <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5"></div>
                               )}
                             </div>
-                            <span className="text-sm font-medium">Người thuê</span>
+                            <span className="text-sm font-medium">Người dùng</span>
                           </div>
                         </label>
 
@@ -181,7 +181,7 @@ export default function ProfilePage() {
                             name="role"
                             value="landlord"
                             checked={editData.role === 'landlord'}
-                            onChange={(e) => setEditData({ ...editData, role: e.target.value as 'tenant' | 'landlord' })}
+                            onChange={(e) => setEditData({ ...editData, role: e.target.value as 'user' | 'landlord' | 'admin' })}
                             className="sr-only"
                           />
                           <div className="flex items-center space-x-2">
@@ -195,6 +195,33 @@ export default function ProfilePage() {
                               )}
                             </div>
                             <span className="text-sm font-medium">Chủ nhà</span>
+                          </div>
+                        </label>
+
+                        <label className={`relative flex items-center p-3 border-2 rounded-lg cursor-pointer transition-colors ${
+                          editData.role === 'admin' 
+                            ? 'border-blue-500 bg-blue-50' 
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="role"
+                            value="admin"
+                            checked={editData.role === 'admin'}
+                            onChange={(e) => setEditData({ ...editData, role: e.target.value as 'user' | 'landlord' | 'admin' })}
+                            className="sr-only"
+                          />
+                          <div className="flex items-center space-x-2">
+                            <div className={`w-4 h-4 rounded-full border-2 ${
+                              editData.role === 'admin' 
+                                ? 'border-blue-500 bg-blue-500' 
+                                : 'border-gray-300'
+                            }`}>
+                              {editData.role === 'admin' && (
+                                <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5"></div>
+                              )}
+                            </div>
+                            <span className="text-sm font-medium">Quản trị viên</span>
                           </div>
                         </label>
                       </div>

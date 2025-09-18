@@ -22,7 +22,7 @@ export default function AuthForm({ type }: AuthFormProps) {
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'tenant' as 'tenant' | 'landlord',
+    role: 'user' as 'user' | 'landlord',
     agreeTerms: false,
   });
 
@@ -140,7 +140,7 @@ export default function AuthForm({ type }: AuthFormProps) {
           } else if (result.user.role === 'landlord') {
             router.push('/dashboard');
           } else {
-            // tenant - vẫn ở trang chủ
+            // user - vẫn ở trang chủ
             router.push('/');
           }
         }
@@ -199,30 +199,30 @@ export default function AuthForm({ type }: AuthFormProps) {
             </label>
             <div className="grid grid-cols-2 gap-4">
               <label className={`relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
-                formData.role === 'tenant' 
+                formData.role === 'user' 
                   ? 'border-blue-500 bg-blue-50' 
                   : 'border-gray-300 hover:border-gray-400'
               }`}>
                 <input
                   type="radio"
                   name="role"
-                  value="tenant"
-                  checked={formData.role === 'tenant'}
+                  value="user"
+                  checked={formData.role === 'user'}
                   onChange={handleInputChange}
                   className="sr-only"
                 />
                 <div className="flex items-center space-x-3">
                   <div className={`w-4 h-4 rounded-full border-2 ${
-                    formData.role === 'tenant' 
+                    formData.role === 'user' 
                       ? 'border-blue-500 bg-blue-500' 
                       : 'border-gray-300'
                   }`}>
-                    {formData.role === 'tenant' && (
+                    {formData.role === 'user' && (
                       <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5"></div>
                     )}
                   </div>
                   <div>
-                    <div className="font-medium text-dark">Người thuê</div>
+                    <div className="font-medium text-dark">Người dùng</div>
                     <div className="text-sm text-gray-600">Tìm phòng trọ, nhà thuê</div>
                   </div>
                 </div>

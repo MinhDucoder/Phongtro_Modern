@@ -117,39 +117,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Main content */}
       <div className="lg:pl-64">
-        {/* Top bar */}
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+        {/* Mobile menu button */}
+        <div className="lg:hidden fixed top-4 left-4 z-50">
           <button
             type="button"
-            className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
+            className="p-2 bg-white rounded-md shadow-md text-gray-700 hover:text-gray-900"
             onClick={() => setSidebarOpen(true)}
           >
             <Bars3Icon className="h-6 w-6" />
           </button>
-
-          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-            <div className="flex flex-1"></div>
-            <div className="flex items-center gap-x-4 lg:gap-x-6">
-              {/* Notifications */}
-              <button className="relative p-2 text-gray-400 hover:text-gray-500">
-                <BellIcon className="h-6 w-6" />
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  3
-                </span>
-              </button>
-
-              {/* Admin profile */}
-              <div className="flex items-center gap-x-2">
-                <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                  <span className="text-sm font-medium text-white">A</span>
-                </div>
-                <div className="hidden lg:block">
-                  <p className="text-sm font-medium text-gray-900">Admin User</p>
-                  <p className="text-xs text-gray-500">Super Admin</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Page content */}
