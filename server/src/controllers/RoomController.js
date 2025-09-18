@@ -1,22 +1,47 @@
-import mongoose from "mongoose";
-import roomSchema from "~/models/roomSchema";
+import roomSchema from "~/models/roomSchema.js";
+import uploadService from "~/services/uploadService.js";
 
 class RoomController {
+  // Create Room
+  // POST /rooms
   async createRoom(req, res, next) {
-    const room = req.body;
     try {
-      const { userID } = req.user
-      const newRoom = {
-        ...room,
-        landlord: userID,
-      };
-      await roomSchema.create(newRoom);
+      // Vì dùng form-data, dữ liệu text cũng sẽ nằm trong req.body
+      const { title, description, price, address } = req.body;
 
-      res.json("createe room success!");
+      let imageResults = [];
+      if (req.files && req.files.length > 0) {
+        imageResults = await uploadService.uploadFiles(req.files, "Rooms");
+      }
+
+      // Chỉ lấy ra url + public_id
+      const images = imageResults.map((img) => ({
+        url: img.secure_url, // Cloudinary trả secure_url thay vì url
+        public_id: img.public_id,
+      }));
+      console.log(req.user)
+      // userID được attach từ middleware auth
+      const { id } = req.user;
+
+      const newRoom = await roomSchema.create({
+        title,
+        description,
+        price,
+        address,
+        images,
+        landlord: id,
+      });
+
+      res.status(201).json({
+        message: "Create room success!",
+        room: newRoom,
+      });
     } catch (error) {
       next(error);
     }
   }
+
+  // Get All Rooms
   async getAllRoom(req, res, next) {
     try {
       const {
@@ -25,7 +50,7 @@ class RoomController {
         price_max,
         page = 1,
         limit = 10,
-        sort = "createdAt", // mặc định sort theo ngày đăng
+        sort = "createdAt",
       } = req.query;
 
       const filter = {};
@@ -36,12 +61,11 @@ class RoomController {
         if (price_max) filter.price.$lte = Number(price_max);
       }
 
-      // tính tổng số phòng để trả về meta phân trang
       const total = await roomSchema.countDocuments(filter);
 
       const rooms = await roomSchema
         .find(filter)
-        .sort({ [sort]: -1 }) // -1: mới nhất lên đầu
+        .sort({ [sort]: -1 })
         .skip((page - 1) * limit)
         .limit(Number(limit));
 
@@ -59,42 +83,76 @@ class RoomController {
     }
   }
 
+  // Get Room by ID
   async getRoomByID(req, res, next) {
     try {
-      const roomID = req.param.roomID;
-      const room = await roomSchema.findById({ _id: roomID });
+      const { roomID } = req.params;
+      const room = await roomSchema.findById(roomID);
       if (!room) {
-        res.status(404).json({ message: "Room not found!" });
+        return res.status(404).json({ message: "Room not found!" });
       }
-      res.json("success");
-    } catch (error) {
-      next(error);
-    }
-  }
-  async updateRoom(req, res, next) {
-    try {
-      const roomID = req.params.id;
-      const updatedRoom = await roomSchema.findByIdAndUpdate(
-        roomID,
-        req.body,
-        { new: true } // trả về bản đã update
-      );
-      if (!updatedRoom)
-        return res.status(404).json({ message: "Room not found" });
-      res.json(updatedRoom);
+      res.json({ message: "Get room success", room });
     } catch (error) {
       next(error);
     }
   }
 
+  // Update Room
+  async updateRoom(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      let updateData = { ...req.body };
+
+      // Nếu có upload thêm ảnh mới
+      if (req.files && req.files.length > 0) {
+        const imageResults = await uploadService.uploadFiles(
+          req.files,
+          "Rooms"
+        );
+        const images = imageResults.map((img) => ({
+          url: img.url,
+          public_id: img.public_id,
+        }));
+        updateData.images = images;
+      }
+
+      const updatedRoom = await roomSchema.findByIdAndUpdate(id, updateData, {
+        new: true,
+      });
+
+      if (!updatedRoom) {
+        return res.status(404).json({ message: "Room not found" });
+      }
+      res.json({ message: "Update success", room: updatedRoom });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Delete Room
   async deleteRoom(req, res, next) {
     try {
-      const roomID = req.param.roomID;
-      const result = await roomSchema.deleteOne({ _id: roomID });
-      if (result.deletedCount === 0) {
-        return res.status(404).json({ message: "Room not foud" });
+      const { roomID } = req.params;
+
+      // Xóa trong DB
+      const room = await roomSchema.findById(roomID);
+      if (!room) {
+        return res.status(404).json({ message: "Room not found" });
       }
-      res.status(204).json(result);
+
+      // Nếu room có ảnh thì xóa luôn trên Cloudinary
+      if (room.images && room.images.length > 0) {
+        for (const img of room.images) {
+          if (img.public_id) {
+            await uploadService.deleteFile(img.public_id);
+          }
+        }
+      }
+
+      await roomSchema.deleteOne({ _id: roomID });
+
+      res.json({ message: "Delete room success" });
     } catch (error) {
       next(error);
     }
