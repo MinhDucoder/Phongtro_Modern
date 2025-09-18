@@ -19,7 +19,7 @@ class RoomController {
         url: img.secure_url, // Cloudinary trả secure_url thay vì url
         public_id: img.public_id,
       }));
-      console.log(req.user)
+      console.log(req.user);
       // userID được attach từ middleware auth
       const { id } = req.user;
 
@@ -31,6 +31,14 @@ class RoomController {
         images,
         landlord: id,
       });
+
+      await Promise.all(
+        newRoom.images.map((img) => uploadService.deleteFile(img.public_id))
+      );
+
+      while (newRoom.images.public_id) {
+        await uploadService.deleteFile(newRoom.images.public_id);
+      }
 
       res.status(201).json({
         message: "Create room success!",
@@ -142,13 +150,9 @@ class RoomController {
       }
 
       // Nếu room có ảnh thì xóa luôn trên Cloudinary
-      if (room.images && room.images.length > 0) {
-        for (const img of room.images) {
-          if (img.public_id) {
-            await uploadService.deleteFile(img.public_id);
-          }
-        }
-      }
+      await Promise.all(
+        room.images.map((img) => uploadService.deleteFile(img.public_id))
+      );
 
       await roomSchema.deleteOne({ _id: roomID });
 

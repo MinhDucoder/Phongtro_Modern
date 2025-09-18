@@ -67,11 +67,13 @@ class UserController {
         "UserAvatars"
       );
 
-      await User.findByIdAndUpdate(
+      const user = await User.findByIdAndUpdate(
         req.user.id,
         { avatar: { url: result.url, public_id: result.public_id } }, // lưu cả public_id nếu cần
         { new: true }
       );
+
+      await uploadService.deleteFile(user.avatar.public_id)
 
       res.json({
         message: "Cập nhật avatar thành công",
