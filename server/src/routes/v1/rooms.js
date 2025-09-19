@@ -1,11 +1,13 @@
 import express from "express";
 import RoomController from "~/controllers/RoomController";
 import { roomSchemaValidator } from "~/validations/roomValidator";
-import { validate } from "~/middlewares/validate";
+import { validate } from "~/validations/validate";
 import { authorize } from "~/middlewares/checkToken";
 import { authenticate } from "../../middlewares/checkToken";
 import uploadRoute from "./upload";
-import uploadMiddleware, { cleanupUploads } from "../../middlewares/uploadMiddleware.js";
+import uploadMiddleware, {
+  cleanupUploads,
+} from "../../middlewares/uploadMiddleware.js";
 
 const roomRoute = express.Router();
 
@@ -22,11 +24,9 @@ roomRoute.post(
 roomRoute.get("/:roomID", RoomController.getRoomByID);
 roomRoute.patch(
   "/:roomID",
-  validate(
-    roomSchemaValidator,
-    authorize("landlord", "admin"),
-    RoomController.updateRoom
-  )
+  validate(roomSchemaValidator),
+  authorize("landlord", "admin"),
+  RoomController.updateRoom
 );
 roomRoute.delete(
   "/:roomID",

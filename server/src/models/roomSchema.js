@@ -32,7 +32,7 @@ const roomSchema = new mongoose.Schema(
     },
     images: [
       {
-        url: String,
+        type: [String],
         public_id: String,
       },
     ],
