@@ -1,4 +1,7 @@
+'use client';
+
 import { Toaster } from "react-hot-toast";
+import AdminGuard from "@/components/auth/AdminGuard";
 
 export default function AdminLayout({
   children,
@@ -6,7 +9,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <AdminGuard>
       {children}
       <Toaster 
         position="top-right"
@@ -32,7 +35,7 @@ export default function AdminLayout({
           },
         }}
       />
-    </>
+    </AdminGuard>
   );
 }
 

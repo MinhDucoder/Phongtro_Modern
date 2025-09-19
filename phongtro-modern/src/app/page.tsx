@@ -1,7 +1,13 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import SearchFilter from '@/components/ui/SearchFilter';
 import PropertyCard from '@/components/ui/PropertyCard';
 import Pagination from '@/components/ui/Pagination';
 import StructuredData from '@/components/seo/StructuredData';
+import { roomApi, Room } from '@/lib/api';
+import RoomCard from '@/components/room/RoomCard';
+import toast from 'react-hot-toast';
 
 // Mock data for demonstration
 export const properties = [
@@ -81,6 +87,59 @@ export const properties = [
 ];
 
 export default function Home() {
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchFeaturedRooms();
+  }, []);
+
+  const fetchFeaturedRooms = async () => {
+    try {
+      setLoading(true);
+      console.log('Fetching featured rooms from API...');
+      
+      const response = await roomApi.getRooms({ 
+        limit: 6, 
+        sort: 'createdAt' 
+      });
+      
+      console.log('API Response:', response);
+      
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        setRooms(response.data);
+        toast.success(`Đã tải ${response.data.length} phòng từ database`);
+      } else {
+        console.log('No data from API or empty response');
+        toast('Database chưa có dữ liệu phòng. Vui lòng thêm dữ liệu vào database.', {
+          icon: '⚠️',
+          style: {
+            background: '#fbbf24',
+            color: '#92400e',
+          },
+        });
+        setRooms([]);
+      }
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+      toast.error('Không thể kết nối API. Vui lòng kiểm tra server.');
+      setRooms([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  
+
+  const handleToggleFavorite = (roomId: string) => {
+    setFavorites(prev => 
+      prev.includes(roomId) 
+        ? prev.filter(id => id !== roomId)
+        : [...prev, roomId]
+    );
+  };
+
   return (
     <>
       <StructuredData 
@@ -143,15 +202,32 @@ export default function Home() {
             <button className="px-4 py-2 text-gray-600 hover:text-blue-600 text-sm font-medium">
               Có video
             </button>
+            <a 
+              href="/phong" 
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+            >
+              Xem tất cả
+            </a>
           </div>
         </div>
 
         {/* Property Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {properties.map((property) => (
-            <PropertyCard key={property.id} {...property} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {rooms.map((room) => (
+              <RoomCard
+                key={room._id}
+                room={room}
+                onToggleFavorite={handleToggleFavorite}
+                isFavorite={favorites.includes(room._id)}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Pagination */}
         <div className="mt-12">

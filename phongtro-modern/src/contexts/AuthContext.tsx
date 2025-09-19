@@ -65,15 +65,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Store token in localStorage as fallback (cookies are handled by server)
         localStorage.setItem('accessToken', response.token);
         setUser(response.user);
-        toast.success(response.message || 'Đăng nhập thành công!');
+        toast.success(response.message || 'Đăng nhập thành công!', { duration: 200 });
         return { success: true, user: response.user };
       }
       
-      toast.error('Đăng nhập thất bại');
+      toast.error('Đăng nhập thất bại', { duration: 200 });
       return { success: false };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng nhập';
-      toast.error(errorMessage);
+      toast.error(errorMessage, { duration: 200 });
       return { success: false };
     } finally {
       setIsLoading(false);
@@ -91,11 +91,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(true);
       const response: ApiResponse = await authApi.register(userData);
       
-      toast.success(response.message || 'Đăng ký thành công!');
+      toast.success(response.message || 'Đăng ký thành công!', { duration: 200 });
       return true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng ký';
-      toast.error(errorMessage);
+      toast.error(errorMessage, { duration: 200 });
       return false;
     } finally {
       setIsLoading(false);

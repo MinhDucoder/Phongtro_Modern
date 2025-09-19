@@ -31,11 +31,11 @@ export default function Header() {
     console.log('Logout button clicked!');
     try {
       await logout();
-      toast.success('Đã đăng xuất thành công!');
+      toast.success('Đã đăng xuất thành công!', { duration: 200 });
       router.push('/');
     } catch (error) {
       console.error('Logout error:', error);
-      toast.error('Có lỗi khi đăng xuất');
+      toast.error('Có lỗi khi đăng xuất', { duration: 200 });
     }
   };
 
@@ -84,9 +84,12 @@ export default function Header() {
                 {/* User Info */}
                 <div className="hidden md:flex items-center space-x-3">
                   <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm">
+                    <Link 
+                      href={user?.role === 'landlord' ? '/dashboard' : user?.role === 'admin' ? '/admin' : '/profile'}
+                      className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm hover:bg-blue-600 transition-colors cursor-pointer"
+                    >
                       {user?.full_name ? user.full_name[0].toUpperCase() : 'N'}
-                    </div>
+                    </Link>
                     <span className="text-sm font-medium text-gray-700">
                       {user?.full_name || user?.email}
                     </span>
@@ -202,7 +205,11 @@ export default function Header() {
                     <>
                       {/* User Info in Mobile */}
                       <div className="px-3 py-2 border-b border-gray-200">
-                        <div className="flex items-center space-x-3">
+                        <Link 
+                          href={user?.role === 'landlord' ? '/dashboard' : user?.role === 'admin' ? '/admin' : '/profile'}
+                          className="flex items-center space-x-3 hover:bg-gray-50 rounded-md p-2 -m-2 transition-colors"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
                           <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
                             {user?.full_name ? user.full_name[0].toUpperCase() : 'N'}
                           </div>
@@ -215,7 +222,7 @@ export default function Header() {
                                user?.role === 'landlord' ? 'Chủ nhà' : 'Người dùng'}
                             </div>
                           </div>
-                        </div>
+                        </Link>
                       </div>
                       
                       <Link

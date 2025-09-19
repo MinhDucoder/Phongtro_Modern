@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +12,7 @@ interface AuthFormProps {
 
 export default function AuthForm({ type }: AuthFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, register, isLoading, user } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -134,14 +135,22 @@ export default function AuthForm({ type }: AuthFormProps) {
       if (type === 'login') {
         const result = await login(formData.email, formData.password);
         if (result.success && result.user) {
-          // Chuyển hướng theo role của user từ response
-          if (result.user.role === 'admin') {
-            router.push('/admin');
-          } else if (result.user.role === 'landlord') {
-            router.push('/dashboard');
+          // Kiểm tra redirect parameter
+          const redirectTo = searchParams.get('redirect');
+          
+          if (redirectTo) {
+            // Nếu có redirect parameter, chuyển đến đó
+            router.push(redirectTo);
           } else {
-            // user - vẫn ở trang chủ
-            router.push('/');
+            // Chuyển hướng theo role của user từ response
+            if (result.user.role === 'admin') {
+              router.push('/admin');
+            } else if (result.user.role === 'landlord') {
+              router.push('/dashboard');
+            } else {
+              // user - vẫn ở trang chủ
+              router.push('/');
+            }
           }
         }
       } else {

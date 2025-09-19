@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import DashboardGuard from '@/components/auth/DashboardGuard';
 import { 
   HomeIcon, 
   DocumentTextIcon, 
@@ -17,7 +19,8 @@ import {
   CalendarDaysIcon, 
   ChatBubbleLeftRightIcon, 
   CreditCardIcon,
-  HandRaisedIcon
+  HandRaisedIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 
 const navigation = [
@@ -43,18 +46,30 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarHidden, setSidebarHidden] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout, user: authUser } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   // Mock user data - trong thực tế sẽ fetch từ API
   const user = {
-    name: 'Nguyễn Văn A',
-    email: 'nguyenvana@email.com',
+    name: authUser?.full_name || 'Nguyễn Văn A',
+    email: authUser?.email || 'nguyenvana@email.com',
     avatar: '/placeholder-room.svg',
     isVerified: true,
     memberSince: '2023',
   };
 
   return (
-    <div className="h-screen bg-gray-50 flex">
+    <DashboardGuard>
+      <div className="h-screen bg-gray-50 flex">
       {/* Mobile sidebar */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
@@ -87,12 +102,27 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                           ? 'bg-blue-100 text-blue-900'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
+                      onClick={() => setSidebarOpen(false)}
                     >
                       <item.icon className="mr-4 h-6 w-6" />
                       {item.name}
                     </Link>
                   );
                 })}
+                
+                {/* Logout button for mobile */}
+                <div className="border-t border-gray-200 mt-2">
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setSidebarOpen(false);
+                    }}
+                    className="flex items-center w-full px-2 py-2 text-base font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                  >
+                    <ArrowRightOnRectangleIcon className="mr-4 h-6 w-6" />
+                    Đăng xuất
+                  </button>
+                </div>
               </nav>
             </div>
           </div>
@@ -176,6 +206,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   </Link>
                 );
               })}
+              
+              <div className="border-t border-gray-200 mt-2">
+            <button 
+              onClick={handleLogout}
+              className="flex items-center w-full px-2 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors"
+            >
+              <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5" />
+              Đăng xuất
+            </button>
+          </div>
             </nav>
 
           </div>
@@ -258,5 +298,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </main>
       </div>
     </div>
+    </DashboardGuard>
   );
 }

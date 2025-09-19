@@ -7,6 +7,12 @@ export interface ApiResponse<T = any> {
   data?: T;
   token?: string;
   user?: User;
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 export interface User {
@@ -31,6 +37,22 @@ export interface RegisterRequest {
   password: string;
   phone: string;
   role?: 'user' | 'landlord' | 'admin';
+}
+
+export interface Room {
+  _id: string;
+  title: string;
+  description: string;
+  price: number;
+  area: number;
+  address: string;
+  city: string;
+  images: string[];
+  amenities: string[];
+  landlord: string;
+  isAvailable: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Hàm gửi request API tổng quát
@@ -113,11 +135,26 @@ export const authApi = {
   },
 };
 
-// Các hàm API cho Room (sử dụng trong tương lai)
+// Các hàm API cho Room
 export const roomApi = {
   // Lấy tất cả phòng
-  async getRooms(params?: Record<string, any>): Promise<ApiResponse> {
-    const queryString = params ? `?${new URLSearchParams(params).toString()}` : '';
+  async getRooms(params?: {
+    city?: string;
+    price_min?: number;
+    price_max?: number;
+    page?: number;
+    limit?: number;
+    sort?: string;
+  }): Promise<ApiResponse> {
+    const queryString = params ? `?${new URLSearchParams(
+      Object.entries(params).reduce((acc, [key, value]) => {
+        if (value !== undefined && value !== null) {
+          acc[key] = value.toString();
+        }
+        return acc;
+      }, {} as Record<string, string>)
+    ).toString()}` : '';
+    
     return apiRequest(`/rooms${queryString}`, {
       method: 'GET',
     });
