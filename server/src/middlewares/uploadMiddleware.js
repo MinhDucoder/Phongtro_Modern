@@ -1,6 +1,7 @@
 // src/middlewares/uploadMiddleware.js
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 
 // Lưu file vào /uploads tạm
 const storage = multer.diskStorage({
@@ -27,5 +28,18 @@ const upload = multer({
     cb(null, true);
   },
 });
+
+export const cleanupUploads = (req, res, next) => {
+  res.on("finish", () => {
+    if (req.files) {
+      req.files.forEach((file) => {
+        fs.unlink(file.path, (err) => {
+          if (err) console.error("Error deleting file:", err);
+        });
+      });
+    }
+  });
+  next();
+};
 
 export default upload;

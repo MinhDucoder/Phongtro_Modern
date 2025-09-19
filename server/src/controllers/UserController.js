@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import User from "~/models/userSchema.js";
 import uploadService from "~/services/uploadService";
+import fs from "fs/promises";
 
 class UserController {
   // [GET] /user/profile
@@ -73,7 +74,6 @@ class UserController {
         { new: true }
       );
 
-      await uploadService.deleteFile(user.avatar.public_id)
 
       res.json({
         message: "Cập nhật avatar thành công",

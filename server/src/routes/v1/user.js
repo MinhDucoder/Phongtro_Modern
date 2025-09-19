@@ -3,6 +3,7 @@ import UserController from "~/controllers/UserController.js";
 import { authenticate, authorize } from "~/middlewares/checkToken.js";
 import UploadController from "~/controllers/UploadController";
 import uploadMiddleware from "../../middlewares/uploadMiddleware.js";
+import { cleanupUploads } from "../../middlewares/uploadMiddleware.js";
 
 const userRoute = express.Router();
 
@@ -18,6 +19,7 @@ userRoute.put(
   authenticate(),
   authorize(["user", "landlord"]),
   uploadMiddleware.single("avatar"),
+  cleanupUploads,
   UserController.updateAvatar
 );
 

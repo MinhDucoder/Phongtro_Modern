@@ -5,7 +5,7 @@ import { validate } from "~/middlewares/validate";
 import { authorize } from "~/middlewares/checkToken";
 import { authenticate } from "../../middlewares/checkToken";
 import uploadRoute from "./upload";
-import uploadMiddleware from "../../middlewares/uploadMiddleware.js";
+import uploadMiddleware, { cleanupUploads } from "../../middlewares/uploadMiddleware.js";
 
 const roomRoute = express.Router();
 
@@ -16,6 +16,7 @@ roomRoute.post(
   authenticate(),
   authorize("landlord"),
   validate(roomSchemaValidator),
+  cleanupUploads,
   RoomController.createRoom
 );
 roomRoute.get("/:roomID", RoomController.getRoomByID);
