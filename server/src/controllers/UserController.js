@@ -1,11 +1,15 @@
 import bcrypt from "bcrypt";
 import User from "~/models/userSchema.js";
+import uploadService from "~/services/uploadService";
+import fs from "fs/promises";
 
 class UserController {
   // [GET] /user/profile
   async getProfile(req, res) {
     try {
-      const user = await User.findById(req.user.id).select("-password -refresh_token -verification_token");
+      const user = await User.findById(req.user.id).select(
+        "-password -refresh_token -verification_token"
+      );
       if (!user) return res.status(404).json({ message: "User not found" });
       res.json(user);
     } catch (error) {
@@ -52,6 +56,33 @@ class UserController {
       res.status(500).json({ message: error.message });
     }
   }
+  // [PATCH] /user/avatar
+  async updateAvatar(req, res) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const result = await uploadService.uploadFile(
+        req.file.path,
+        "UserAvatars"
+      );
+
+      const user = await User.findByIdAndUpdate(
+        req.user.id,
+        { avatar: { url: result.url, public_id: result.public_id } }, // lưu cả public_id nếu cần
+        { new: true }
+      );
+
+
+      res.json({
+        message: "Cập nhật avatar thành công",
+        avatar: result.url,
+      });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
 
   // [GET] /user/activity
   async getActivity(req, res) {
@@ -75,7 +106,8 @@ class UserController {
       if (!user) return res.status(404).json({ message: "User not found" });
 
       const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) return res.status(403).json({ message: "Password is incorrect" });
+      if (!isMatch)
+        return res.status(403).json({ message: "Password is incorrect" });
 
       user.is_banned = true; // deactivate
       await user.save();

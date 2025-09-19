@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import User from "~/models/userSchema.js";
 import dotenv from "dotenv";
+import fs from "fs/promises";
 // import nodemailer from "nodemailer"; // 👉 Chưa dùng tới, nên comment lại
 
 dotenv.config();

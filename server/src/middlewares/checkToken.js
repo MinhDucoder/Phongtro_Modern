@@ -29,20 +29,31 @@ export const authenticate = () => {
   };
 };
 
-
-
+// middlewares/authorize.js
 export const authorize = (roles = []) => {
-  if (typeof roles === "string") roles = [roles];
+  const allowedRoles = Array.isArray(roles) ? roles : [roles]; // ép luôn thành mảng
 
   return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({ message: "Vui lòng đăng nhập" });
-    }
+    try {
+      // Chưa login
+      if (!req.user) {
+        return res.status(401).json({ message: "Vui lòng đăng nhập" });
+      }
 
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: "Bạn không có quyền truy cập" });
-    }
+      const userRole = req.user.role || null;
 
-    next();
+      // Nếu có truyền roles mà user không thuộc nhóm đó
+      if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
+        return res.status(403).json({ message: "Bạn không có quyền truy cập" });
+      }
+
+      // Hợp lệ
+      next();
+    } catch (error) {
+      return res.status(500).json({
+        message: "Lỗi xác thực quyền",
+        error: error.message,
+      });
+    }
   };
 };
