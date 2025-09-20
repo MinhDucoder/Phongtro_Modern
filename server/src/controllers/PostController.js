@@ -40,15 +40,38 @@ class PostController {
 
       const [items, total] = await Promise.all([
         Post.find()
-          .populate("roomId")
-          .populate("landlord", "name avatarUrl role")
+          .populate({
+            path: "roomId",
+            select: "title description price area images amenities city address"
+          })
+          .populate("landlord", "full_name avatar role")
           .skip(skip)
           .limit(limit)
           .sort({ createdAt: -1 }),
         Post.countDocuments(),
       ]);
 
-      res.json({ total, items });
+      // Xử lý dữ liệu để đảm bảo format nhất quán
+      const processedItems = items.map(item => {
+        // Nếu có roomId và roomId được populate thành công
+        if (item.roomId && typeof item.roomId === 'object') {
+          return {
+            _id: item._id,
+            ...item.roomId.toObject(), // Spread thông tin từ Room
+            postId: item._id,
+            landlord: item.landlord,
+            options: item.options,
+            favouriteLevel: item.favouriteLevel,
+            status: item.status,
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt
+          };
+        }
+        // Nếu roomId là null hoặc không populate được, trả về dữ liệu cũ
+        return item.toObject();
+      });
+
+      res.json({ total, items: processedItems });
     } catch (err) {
       next(err);
     }
@@ -58,11 +81,33 @@ class PostController {
   async detail(req, res, next) {
     try {
       const post = await Post.findById(req.params.id)
-        .populate("roomId")
-        .populate("landlord", "name avatarUrl role");
+        .populate({
+          path: "roomId",
+          select: "title description price area images amenities city address"
+        })
+        .populate("landlord", "full_name avatar role");
 
       if (!post) return res.status(404).json({ message: "Post not found" });
-      res.json(post);
+      
+      // Xử lý dữ liệu để đảm bảo format nhất quán
+      let processedPost;
+      if (post.roomId && typeof post.roomId === 'object') {
+        processedPost = {
+          _id: post._id,
+          ...post.roomId.toObject(),
+          postId: post._id,
+          landlord: post.landlord,
+          options: post.options,
+          favouriteLevel: post.favouriteLevel,
+          status: post.status,
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt
+        };
+      } else {
+        processedPost = post.toObject();
+      }
+      
+      res.json(processedPost);
     } catch (err) {
       next(err);
     }
