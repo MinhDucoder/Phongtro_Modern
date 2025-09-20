@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose'
-const uri = "mongodb+srv://ducyberxdev:ducyberxdev@phongtrovn.tqxpcgt.mongodb.net/?retryWrites=true&w=majority&appName=PhongTroVN";
+const uri = "mongodb+srv://ducyberxdev:ducyberxdev@phongtrovn.tqxpcgt.mongodb.net/PhongTroVN?retryWrites=true&w=majority&appName=PhongTroVN";
 
 const clientOptions = {
   serverApi: { version: '1', strict: true, deprecationErrors: true }

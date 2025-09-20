@@ -23,4 +23,5 @@ yarn-debug.log*
 yarn-error.log*
 Swagger Editor.html
 Swagger Editor_files/
+postman/
 .env
