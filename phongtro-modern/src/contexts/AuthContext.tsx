@@ -61,19 +61,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(true);
       const response: ApiResponse = await authApi.login({ email, password });
       
-      if (response.token && response.user) {
-        // Store token in localStorage as fallback (cookies are handled by server)
-        localStorage.setItem('accessToken', response.token);
+      console.log('Login response:', response); // Debug log
+      
+      if (response.success && response.user) {
         setUser(response.user);
-        toast.success(response.message || 'Đăng nhập thành công!', { duration: 200 });
+        // Note: We don't need to store token in localStorage anymore as it's handled by httpOnly cookie
+        toast.success(response.message || 'Đăng nhập thành công!');
         return { success: true, user: response.user };
       }
       
-      toast.error('Đăng nhập thất bại', { duration: 200 });
+      toast.error(response.message || 'Đăng nhập thất bại');
       return { success: false };
     } catch (error) {
+      console.error('Login error:', error); // Debug log
       const errorMessage = error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng nhập';
-      toast.error(errorMessage, { duration: 200 });
+      toast.error(errorMessage);
       return { success: false };
     } finally {
       setIsLoading(false);

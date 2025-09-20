@@ -3,6 +3,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/a
 
 // Các kiểu dữ liệu cho API responses
 export interface ApiResponse<T = any> {
+  success?: boolean;
   message: string;
   data?: T;
   token?: string;
@@ -49,8 +50,17 @@ export interface Room {
   city: string;
   images: string[];
   amenities: string[];
-  landlord: string;
+  landlord: {
+    _id: string;
+    full_name: string;
+    role: string;
+    phone: string;
+    email: string;
+  };
   isAvailable: boolean;
+  options: string[];
+  favouriteLevel: string;
+  status: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -99,7 +109,7 @@ async function apiRequest<T>(
 export const authApi = {
   // Đăng nhập user
   async login(credentials: LoginRequest): Promise<ApiResponse> {
-    return apiRequest('/auth/login', {
+    return apiRequest('/api/v1/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
@@ -107,7 +117,7 @@ export const authApi = {
 
   // Đăng ký user
   async register(userData: RegisterRequest): Promise<ApiResponse> {
-    return apiRequest('/auth/register', {
+    return apiRequest('/api/v1/auth/register', {
       method: 'POST',
       body: JSON.stringify(userData),
     });
@@ -122,14 +132,14 @@ export const authApi = {
 
   // Xác thực email
   async verifyEmail(token: string): Promise<ApiResponse> {
-    return apiRequest(`/auth/verify-email/${token}`, {
+    return apiRequest(`/api/v1/auth/verify-email/${token}`, {
       method: 'GET',
     });
   },
 
   // Làm mới token
   async refreshToken(): Promise<ApiResponse> {
-    return apiRequest('/auth/refresh-token', {
+    return apiRequest('/api/v1/auth/refresh-token', {
       method: 'POST',
     });
   },

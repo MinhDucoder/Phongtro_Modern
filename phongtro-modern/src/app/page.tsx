@@ -9,120 +9,47 @@ import { roomApi, Room } from '@/lib/api';
 import RoomCard from '@/components/room/RoomCard';
 import toast from 'react-hot-toast';
 
-// Mock data for demonstration
-export const properties = [
-  {
-    id: '1',
-    title: 'PHÒNG TRỌ GIÁ MỀM CHỈ TỪ 3TR GẦN DƯỢC, BÁCH KHOA, NEU,...',
-    price: '3.8 triệu/tháng',
-    area: '25 m²',
-    location: 'Hai Bà Trưng, Hà Nội',
-    images: ['/placeholder-room.svg', '/placeholder-room.svg'],
-    description: 'PHÒNG TRỌ GIÁ MỀM CHỈ TỪ 3TR GẦN DƯỢC, BÁCH KHOA, NEU,...- ĐỦ ĐIỀU HÒA, NÓNG LẠNH, TỦ LẠNH. KHÉP KÍN, CÓ BAN CÔNG.',
-    contact: {
-      name: 'Lê Nhật Duy',
-      phone: '0365349437',
-      isVerified: true,
-    },
-    postedTime: 'Hôm nay',
-    isFeatured: true,
-    viewCount: 1234,
-    rating: 4.5,
-    amenities: ['Điều hòa', 'Nóng lạnh', 'WiFi miễn phí'],
-  },
-  {
-    id: '2',
-    title: 'GẦN NGOẠI THƯƠNG, GTVT, HUTECH, HỒNG BÀNG, UEF, VietVision, Ga Metro',
-    price: '3.3 triệu/tháng',
-    area: '18 m²',
-    location: 'Bình Thạnh, Hồ Chí Minh',
-    images: ['/placeholder-room.svg'],
-    description: 'Clip video phòng giá 4tr9- Để đảm bảo an ninh cho Sinh Viên ở Ngõ Sen giờ hoạt động từ 6h - 24h',
-    contact: {
-      name: 'Nhà Trọ Ngõ Sen',
-      phone: '0909814679',
-      isVerified: false,
-    },
-    postedTime: 'Hôm nay',
-    viewCount: 856,
-    rating: 4.2,
-    amenities: ['WiFi miễn phí', 'Bảo vệ 24/7', 'Thang máy'],
-  },
-  {
-    id: '3',
-    title: 'Ở ghép giường tầng sát vách DH Nguyễn Tất Thành',
-    price: '1.3 triệu/tháng',
-    area: '30 m²',
-    location: 'Quận 4, Hồ Chí Minh',
-    images: ['/placeholder-room.svg'],
-    description: 'TÂN SINH VIÊN TÌM CHỖ Ở – ĐỪNG VỘI, ĐỌC NGAY NÈ! Homestay Hoàng Phúc – Chuỗi ký túc xá & căn hộ dịch vụ',
-    contact: {
-      name: 'Hoàng Phúc',
-      phone: '0931313570',
-      isVerified: true,
-    },
-    postedTime: 'Hôm nay',
-    viewCount: 2341,
-    rating: 4.8,
-    amenities: ['Giường', 'Tủ quần áo', 'Bàn học', 'WiFi miễn phí'],
-  },
-  {
-    id: '4',
-    title: 'Cho thuê phòng trọ khép kín, full đồ khu vực Nam Từ Liêm',
-    price: '3.5 triệu/tháng',
-    area: '20 m²',
-    location: 'Nam Từ Liêm, Hà Nội',
-    images: ['/placeholder-room.svg'],
-    description: 'Chính chủ cho thuê phòng trong Toà CCMN mới xây. Địa chỉ: Ngõ 133 phố Phú Đô, Nam Từ Liêm',
-    contact: {
-      name: 'Chủ nhà',
-      phone: '0987654321',
-      isVerified: true,
-    },
-    postedTime: '2 giờ trước',
-    viewCount: 567,
-    rating: 4.0,
-    amenities: ['Điều hòa', 'Nóng lạnh', 'Tủ lạnh'],
-  },
-];
-
 export default function Home() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
-    fetchFeaturedRooms();
-  }, []);
+    fetchFeaturedRooms(currentPage);
+  }, [currentPage]);
 
-  const fetchFeaturedRooms = async () => {
+  const fetchFeaturedRooms = async (page: number = 1) => {
     try {
       setLoading(true);
-      console.log('Fetching featured rooms from API...');
+      console.log('Fetching posts from API...');
       
-      const response = await roomApi.getRooms({ 
-        limit: 6, 
-        sort: 'createdAt' 
-      });
+      const response = await fetch(`http://localhost:5000/api/v1/posts?page=${page}&limit=${ITEMS_PER_PAGE}`);
+      const data = await response.json();
       
-      console.log('API Response:', response);
+      console.log('API Response:', data);
       
-      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-        setRooms(response.data);
-        toast.success(`Đã tải ${response.data.length} phòng từ database`);
-      } else {
-        console.log('No data from API or empty response');
-        toast('Database chưa có dữ liệu phòng. Vui lòng thêm dữ liệu vào database.', {
-          icon: '⚠️',
-          style: {
-            background: '#fbbf24',
-            color: '#92400e',
-          },
-        });
-        setRooms([]);
+      if (data.items && Array.isArray(data.items)) {
+        setRooms(data.items);
+        setTotalPages(Math.ceil(data.total / ITEMS_PER_PAGE));
+        
+        if (data.items.length > 0) {
+          toast.success(`Đã tải ${data.items.length} tin đăng từ database`);
+        } else {
+          console.log('No data from API or empty response');
+          toast('Chưa có tin đăng nào. Vui lòng thêm tin đăng mới.', {
+            icon: '⚠️',
+            style: {
+              background: '#fbbf24',
+              color: '#92400e',
+            },
+          });
+        }
       }
     } catch (error) {
-      console.error('Error fetching rooms:', error);
+      console.error('Error fetching posts:', error);
       toast.error('Không thể kết nối API. Vui lòng kiểm tra server.');
       setRooms([]);
     } finally {
@@ -231,11 +158,14 @@ export default function Home() {
 
         {/* Pagination */}
         <div className="mt-12">
-          <Pagination 
-            currentPage={1} 
-            totalPages={10} 
-            baseUrl="/" 
-          />
+          {!loading && totalPages > 1 && (
+            <Pagination 
+              currentPage={currentPage} 
+              totalPages={totalPages} 
+              baseUrl="/" 
+              onPageChange={(page) => setCurrentPage(page)}
+            />
+          )}
         </div>
       </section>
 
