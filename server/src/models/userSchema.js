@@ -16,7 +16,10 @@ const userSchema = new Schema(
       lowercase: true,
       trim: true,
     },
-    password: { type: String,select: false, required: true },
+    password: { type: String, select: false, required: function() {
+      // Password không required nếu user đăng nhập bằng OAuth (có google_id hoặc facebook_id)
+      return !this.google_id && !this.facebook_id;
+    }},
     phone: { type: String, trim: true },
     role: {
       type: String,
@@ -28,7 +31,10 @@ const userSchema = new Schema(
     is_banned: { type: Boolean, default: false },
     last_login: { type: Date, default: null },
     verification_token: { type: String }, // token xác thực email
+    verification_token_expires: { type: Date }, // thời hạn của token xác thực
     refresh_token: { type: String }, // refresh token
+    google_id: { type: String },
+    facebook_id: { type: String }
   },
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );

@@ -28,6 +28,7 @@ class AuthController {
       phone,
       is_verified: false,
       verification_token: verificationToken,
+      verification_token_expires: new Date(Date.now() + 1 * 60 * 60 * 1000), // thời gian 1 giờ
     });
 
     await newUser.save();
@@ -47,7 +48,7 @@ class AuthController {
       console.error('Failed to send verification email');
       // Nếu không gửi được email, vẫn tạo tài khoản nhưng thông báo cho user
       res.status(201).json({ 
-        message: "Đăng ký thành công! Tuy nhiên có lỗi khi gửi email xác thực, vui lòng thử lại sau.",
+        message: "Đăng ký thành công! Có lỗi khi gửi email xác thực, vui lòng thử lại sau.",
         needVerification: true
       });
     } else {
@@ -63,7 +64,10 @@ class AuthController {
   async verifyEmail(req, res) {
     try {
       const { token } = req.query;
-      const user = await User.findOne({ verification_token: token });
+      const user = await User.findOne({ 
+        verification_token: token,
+        verification_token_expires: { $gt: new Date() }
+      });
       
       if (!user) {
         return res.status(400).json({ 
@@ -111,6 +115,7 @@ class AuthController {
 
       const verificationToken = generateVerificationToken();
       user.verification_token = verificationToken;
+      user.verification_token_expires = new Date(Date.now() + 1 * 60 * 60 * 1000); // Token expires in 1 hour
       await user.save();
 
       const emailSent = await sendVerificationEmail(email, verificationToken);

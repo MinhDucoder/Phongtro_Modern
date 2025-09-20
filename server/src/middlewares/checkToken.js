@@ -14,6 +14,12 @@ export const authenticate = () => {
       const accessToken =
         req.cookies?.accessToken || req.headers.authorization?.split(" ")[1];
 
+      console.log('authenticate middleware:', {
+        path: req.path,
+        cookies: req.cookies,
+        accessToken: accessToken ? 'exists' : 'missing'
+      });
+
       if (!accessToken) {
         return res.status(401).json({ message: "Vui lòng đăng nhập" });
       }

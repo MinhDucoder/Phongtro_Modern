@@ -29,30 +29,79 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
   const isAuthenticated = !!user;
 
   // Check if user is logged in on app start
   useEffect(() => {
-    checkAuthStatus();
+    if (!hasCheckedAuth) {
+      setHasCheckedAuth(true);
+      checkAuthStatus();
+    }
+  }, [hasCheckedAuth]);
+
+  // Check for Google OAuth success redirect
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    console.log('URL params:', window.location.search);
+    if (urlParams.get('login') === 'success') {
+      console.log('Detected login=success, fetching user profile...');
+      // Clear the URL parameter
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // Fetch user info after successful OAuth login
+      setTimeout(() => {
+        fetchUserProfile();
+      }, 1000); // Delay 1 second to ensure cookie is set
+    }
   }, []);
+
+  // Fallback: Check if user is authenticated but no user data
+  useEffect(() => {
+    const checkCookie = () => {
+      // Check if accessToken cookie exists but no user data
+      const cookies = document.cookie.split(';');
+      const hasAccessToken = cookies.some(cookie => cookie.trim().startsWith('accessToken='));
+      
+      if (hasAccessToken && !user && !isLoading) {
+        console.log('Found accessToken cookie but no user data, fetching profile...');
+        fetchUserProfile();
+      }
+    };
+
+    // Check after 2 seconds
+    setTimeout(checkCookie, 2000);
+  }, [user, isLoading]);
+
+  const fetchUserProfile = async () => {
+    try {
+      console.log('fetchUserProfile: Starting...');
+      setIsLoading(true);
+      console.log('fetchUserProfile: Calling API /me...');
+      const response = await authApi.getMe();
+      console.log('fetchUserProfile: API response:', response);
+      // API /me trả về user trong response.user
+      if (response.success && response.user) {
+        setUser(response.user as User);
+        toast.success('Đăng nhập thành công!');
+      } else {
+        console.log('fetchUserProfile: No user in response', response);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      // Don't show error toast for profile fetch failures
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const checkAuthStatus = async () => {
     try {
-      // Try to get user info from token stored in cookies
-      // For now, we'll check if there's a token in localStorage as fallback
-      const token = localStorage.getItem('accessToken');
-      if (token) {
-        // In a real app, you might want to verify the token with the server
-        // For now, we'll just check if it exists
-        // You can implement a /me endpoint to get current user info
-        setIsLoading(false);
-      } else {
-        setIsLoading(false);
-      }
+      // Try to get user info from server using httpOnly cookie
+      await fetchUserProfile();
     } catch (error) {
       console.error('Error checking auth status:', error);
-      setIsLoading(false);
+      
     }
   };
 
@@ -65,7 +114,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       if (response.success && response.user) {
         setUser(response.user);
-        // Note: We don't need to store token in localStorage anymore as it's handled by httpOnly cookie
+        
         toast.success(response.message || 'Đăng nhập thành công!');
         return { success: true, user: response.user };
       }
@@ -111,7 +160,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.error('Error during logout API call:', error);
       // Vẫn logout local dù API có lỗi
     } finally {
-      // Clear local state regardless of API call success
+     
       localStorage.removeItem('accessToken');
       setUser(null);
     }
@@ -119,12 +168,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const refreshUser = async (): Promise<void> => {
     try {
-      // This would typically call a /me endpoint to get current user info
-      // For now, we'll just check if token exists
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        setUser(null);
-      }
+      await fetchUserProfile();
     } catch (error) {
       console.error('Error refreshing user:', error);
       setUser(null);

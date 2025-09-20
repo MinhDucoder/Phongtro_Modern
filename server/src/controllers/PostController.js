@@ -47,7 +47,7 @@ class PostController {
 
       const total = await Room.countDocuments();
 
-      // Transform room data into post format
+      
       const processedItems = rooms.map(room => ({
         _id: room._id,
         title: room.title || "",
@@ -66,9 +66,9 @@ class PostController {
           phone: room.landlord?.phone || "",
           email: room.landlord?.email || ""
         },
-        options: [], // Default empty options for room listing
-        favouriteLevel: "free", // Default free level
-        status: "active", // Default active status
+        options: [], 
+        favouriteLevel: "free", 
+        status: "active", 
         createdAt: room.createdAt,
         updatedAt: room.updatedAt
       }));

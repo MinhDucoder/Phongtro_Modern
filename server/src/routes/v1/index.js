@@ -1,4 +1,5 @@
 import authRouter from "./auth.js";
+import socialAuthRouter from "./socialAuthRoutes.js";
 import roomRoute from "./rooms.js";
 import bookingRoute from "./booking.js";
 import paymentRoute from "./payment.js";
@@ -11,7 +12,22 @@ import postRoute from "./post.js";
 import userRoute from "./user.js";
 
 const Route = (app) => {
+  // Root route
+  app.get("/", (req, res) => {
+    res.json({ 
+      message: "Phongtro Modern API Server", 
+      version: "1.0.0",
+      endpoints: {
+        auth: "/api/v1/auth",
+        posts: "/api/v1/posts",
+        rooms: "/api/v1/rooms",
+        users: "/api/v1/user"
+      }
+    });
+  });
+
   app.use("/api/v1/auth", authRouter);
+  app.use("/api/v1/auth", socialAuthRouter);
   app.use("/api/v1/user", userRoute);
   app.use("/api/v1/role-request", roleRoute);
   app.use("/api/v1/rooms", roomRoute);

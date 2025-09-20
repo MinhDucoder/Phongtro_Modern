@@ -1,5 +1,5 @@
 // API cấu hình và service layer
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+const API_BASE_URL = 'http://localhost:5000/api/v1';
 
 // Các kiểu dữ liệu cho API responses
 export interface ApiResponse<T = any> {
@@ -71,6 +71,7 @@ async function apiRequest<T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   const url = `${API_BASE_URL}${endpoint}`;
+  console.log('apiRequest: Final URL =', url);
   
   const defaultOptions: RequestInit = {
     headers: {
@@ -89,15 +90,29 @@ async function apiRequest<T>(
   };
 
   try {
-    const response = await fetch(url, config);
-    const data = await response.json();
-
+    // Add timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
+    
+    const response = await fetch(url, {
+      ...config,
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
     if (!response.ok) {
-      throw new Error(data.message || 'Có lỗi xảy ra');
+      const errorText = await response.text();
+      console.error('API Error:', response.status, errorText);
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
-
+    
+    const data = await response.json();
     return data;
   } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Request timeout - server không phản hồi');
+    }
     if (error instanceof Error) {
       throw error;
     }
@@ -109,7 +124,7 @@ async function apiRequest<T>(
 export const authApi = {
   // Đăng nhập user
   async login(credentials: LoginRequest): Promise<ApiResponse> {
-    return apiRequest('/api/v1/auth/login', {
+    return apiRequest('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
@@ -117,7 +132,7 @@ export const authApi = {
 
   // Đăng ký user
   async register(userData: RegisterRequest): Promise<ApiResponse> {
-    return apiRequest('/api/v1/auth/register', {
+    return apiRequest('/auth/register', {
       method: 'POST',
       body: JSON.stringify(userData),
     });
@@ -132,15 +147,33 @@ export const authApi = {
 
   // Xác thực email
   async verifyEmail(token: string): Promise<ApiResponse> {
-    return apiRequest(`/api/v1/auth/verify-email/${token}`, {
+    return apiRequest(`/auth/verify-email/${token}`, {
       method: 'GET',
     });
   },
 
   // Làm mới token
   async refreshToken(): Promise<ApiResponse> {
-    return apiRequest('/api/v1/auth/refresh-token', {
+    return apiRequest('/auth/refresh-token', {
       method: 'POST',
+    });
+  },
+
+  // Lấy thông tin profile của user hiện tại
+  async getProfile(): Promise<ApiResponse> {
+    console.log('getProfile: API_BASE_URL =', API_BASE_URL);
+    console.log('getProfile: Full URL =', `${API_BASE_URL}/user/profile`);
+    return apiRequest('/user/profile', {
+      method: 'GET',
+    });
+  },
+
+  // Lấy thông tin user từ JWT token (API /me)
+  async getMe(): Promise<ApiResponse> {
+    console.log('getMe: API_BASE_URL =', API_BASE_URL);
+    console.log('getMe: Full URL =', `${API_BASE_URL}/user/me`);
+    return apiRequest('/user/me', {
+      method: 'GET',
     });
   },
 };

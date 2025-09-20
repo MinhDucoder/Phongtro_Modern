@@ -7,12 +7,20 @@ class UserController {
   // [GET] /user/profile
   async getProfile(req, res) {
     try {
+      console.log('getProfile - req.user.id:', req.user.id);
       const user = await User.findById(req.user.id).select(
         "-password -refresh_token -verification_token"
       );
       if (!user) return res.status(404).json({ message: "User not found" });
+      console.log('getProfile - user found:', {
+        id: user._id,
+        full_name: user.full_name,
+        email: user.email,
+        role: user.role
+      });
       res.json(user);
     } catch (error) {
+      console.error('getProfile error:', error);
       res.status(500).json({ message: error.message });
     }
   }
