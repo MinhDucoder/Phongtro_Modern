@@ -8,7 +8,8 @@ const router = express.Router();
 
 // Public
 router.post("/register", catchAsync(AuthController.register));
-router.get("/verify-email/:token", catchAsync(AuthController.verifyEmail));
+router.get("/verify-email", catchAsync(AuthController.verifyEmail)); // Đã thay đổi từ /:token sang ?token= query param
+router.post("/resend-verification", catchAsync(AuthController.resendVerificationEmail));
 router.post("/login", catchAsync(AuthController.login));
 router.post("/refresh-token", catchAsync(AuthController.refreshToken));
 router.post("/logout", catchAsync(AuthController.logout)); // Không cần authenticate

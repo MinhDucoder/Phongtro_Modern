@@ -38,38 +38,40 @@ class PostController {
       const limit = parseInt(req.query.limit) || 20;
       const skip = (page - 1) * limit;
 
-      const [items, total] = await Promise.all([
-        Post.find()
-          .populate({
-            path: "roomId",
-            select: "title description price area images amenities city address"
-          })
-          .populate("landlord", "full_name avatar role")
-          .skip(skip)
-          .limit(limit)
-          .sort({ createdAt: -1 }),
-        Post.countDocuments(),
-      ]);
+      // Fetch rooms first
+      const rooms = await Room.find()
+        .populate("landlord", "full_name avatar role email phone")
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 });
 
-      // Xử lý dữ liệu để đảm bảo format nhất quán
-      const processedItems = items.map(item => {
-        // Nếu có roomId và roomId được populate thành công
-        if (item.roomId && typeof item.roomId === 'object') {
-          return {
-            _id: item._id,
-            ...item.roomId.toObject(), // Spread thông tin từ Room
-            postId: item._id,
-            landlord: item.landlord,
-            options: item.options,
-            favouriteLevel: item.favouriteLevel,
-            status: item.status,
-            createdAt: item.createdAt,
-            updatedAt: item.updatedAt
-          };
-        }
-        // Nếu roomId là null hoặc không populate được, trả về dữ liệu cũ
-        return item.toObject();
-      });
+      const total = await Room.countDocuments();
+
+      // Transform room data into post format
+      const processedItems = rooms.map(room => ({
+        _id: room._id,
+        title: room.title || "",
+        description: room.description || "",
+        price: room.price || 0,
+        area: room.area || 0,
+        images: room.images || [],
+        amenities: room.amenities || [],
+        city: room.city || "",
+        address: room.address || "",
+        isAvailable: room.isAvailable || true,
+        landlord: {
+          _id: room.landlord?._id || null,
+          full_name: room.landlord?.full_name || "",
+          role: room.landlord?.role || "",
+          phone: room.landlord?.phone || "",
+          email: room.landlord?.email || ""
+        },
+        options: [], // Default empty options for room listing
+        favouriteLevel: "free", // Default free level
+        status: "active", // Default active status
+        createdAt: room.createdAt,
+        updatedAt: room.updatedAt
+      }));
 
       res.json({ total, items: processedItems });
     } catch (err) {

@@ -9,14 +9,17 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 
 const app = express()
-//frontend chay port` 3000 nên thêm cors
+//frontend chay port 3000 nên thêm cors
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'], 
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001'], 
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Access-Control-Allow-Origin'],
   exposedHeaders: ['Set-Cookie']
 }))
+
+// Enable pre-flight requests
+app.options('*', cors());
 
 connectDB()
 //routes
