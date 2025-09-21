@@ -10,19 +10,21 @@ import adminRoute from "./admin.js";
 import roleRoute from "./role.js";
 import postRoute from "./post.js";
 import userRoute from "./user.js";
+import conversationRoute from "./conversationRoutes.js";
+import messageRoute from "./messageRoutes.js";
 
 const Route = (app) => {
   // Root route
   app.get("/", (req, res) => {
-    res.json({ 
-      message: "Phongtro Modern API Server", 
+    res.json({
+      message: "Phongtro Modern API Server",
       version: "1.0.0",
       endpoints: {
         auth: "/api/v1/auth",
         posts: "/api/v1/posts",
         rooms: "/api/v1/rooms",
-        users: "/api/v1/user"
-      }
+        users: "/api/v1/user",
+      },
     });
   });
 
@@ -33,6 +35,8 @@ const Route = (app) => {
   app.use("/api/v1/rooms", roomRoute);
   app.use("/api/v1/posts", postRoute);
   app.use("/api/v1/booking", bookingRoute);
+  app.use("/api/v1/conversations", conversationRoute);
+  app.use("/api/v1/messages", messageRoute);
   app.use("/api/v1/payments", paymentRoute);
   app.use("/api/v1/reviews", reviewRoute);
   app.use("/api/v1/notifications", notificationRoute);
