@@ -52,17 +52,29 @@ router.get('/facebook',
 router.get('/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/login' }),
   (req, res) => {
-    // Tạo JWT token
+    console.log('Facebook OAuth callback - User:', {
+      id: req.user._id,
+      full_name: req.user.full_name,
+      email: req.user.email,
+      role: req.user.role
+    });
+
+    // Tạo JWT token với thông tin user đầy đủ
     const token = jwt.sign(
-      { id: req.user._id, role: req.user.role },
+      { 
+        id: req.user._id, 
+        role: req.user.role,
+        full_name: req.user.full_name,
+        email: req.user.email
+      },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // Set cookie
+    // Set cookie với thông tin user
     res.cookie("accessToken", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV,
       sameSite: 'lax',
       maxAge: 7*24*60*60*1000 // 7 days
     });
