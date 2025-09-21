@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import userSchema from "~/models/userSchema";
 dotenv.config();
 
 // Middleware kiểm tra token
@@ -14,10 +15,10 @@ export const authenticate = () => {
       const accessToken =
         req.cookies?.accessToken || req.headers.authorization?.split(" ")[1];
 
-      console.log('authenticate middleware:', {
+      console.log("authenticate middleware:", {
         path: req.path,
         cookies: req.cookies,
-        accessToken: accessToken ? 'exists' : 'missing'
+        accessToken: accessToken ? "exists" : "missing",
       });
 
       if (!accessToken) {
@@ -62,4 +63,20 @@ export const authorize = (roles = []) => {
       });
     }
   };
+};
+
+export const socketAuth = async (socket, next) => {
+  try {
+    const token = socket.handshake.auth?.token;
+    if (!token) return next(new Error("Authentication error"));
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await userSchema.findById(decoded.id);
+    if (!user) return next(new Error("User not found"));
+
+    socket.user = user;
+    next();
+  } catch (err) {
+    next(new Error("Authentication error"));
+  }
 };

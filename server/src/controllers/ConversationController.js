@@ -28,7 +28,7 @@ class ConversationController {
   // Danh sách conversation của user
   async list(req, res, next) {
     try {
-      const userId = req.user._id; // lấy từ middleware auth
+      const userId = req.user.id; // lấy từ middleware auth
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 20;
       const skip = (page - 1) * limit;
