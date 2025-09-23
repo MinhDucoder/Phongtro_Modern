@@ -62,4 +62,6 @@ userRoute.put(
 userRoute.get("/activity", authenticate, UserController.getActivity);
 userRoute.delete("/delete", authenticate, UserController.deleteAccount);
 
+
+
 export default userRoute;

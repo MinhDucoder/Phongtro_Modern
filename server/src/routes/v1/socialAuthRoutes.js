@@ -12,11 +12,18 @@ router.get('/google',
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
-    console.log('Google OAuth callback - User:', {
+    console.log('=== GOOGLE OAUTH LOGIN ===');
+    console.log('Full user object from Google:', JSON.stringify(req.user, null, 2));
+    console.log('User details:', {
       id: req.user._id,
       full_name: req.user.full_name,
       email: req.user.email,
-      role: req.user.role
+      role: req.user.role,
+      google_id: req.user.google_id,
+      is_verified: req.user.is_verified,
+      is_banned: req.user.is_banned,
+      created_at: req.user.created_at,
+      last_login: req.user.last_login
     });
 
     // Tạo JWT token với thông tin user đầy đủ
@@ -52,11 +59,18 @@ router.get('/facebook',
 router.get('/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/login' }),
   (req, res) => {
-    console.log('Facebook OAuth callback - User:', {
+    console.log('=== FACEBOOK OAUTH LOGIN ===');
+    console.log('Full user object from Facebook:', JSON.stringify(req.user, null, 2));
+    console.log('User details:', {
       id: req.user._id,
       full_name: req.user.full_name,
       email: req.user.email,
-      role: req.user.role
+      role: req.user.role,
+      facebook_id: req.user.facebook_id,
+      is_verified: req.user.is_verified,
+      is_banned: req.user.is_banned,
+      created_at: req.user.created_at,
+      last_login: req.user.last_login
     });
 
     // Tạo JWT token với thông tin user đầy đủ
