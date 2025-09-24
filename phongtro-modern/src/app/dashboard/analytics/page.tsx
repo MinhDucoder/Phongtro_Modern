@@ -1,13 +1,13 @@
 'use client';
 
-import DashboardLayoutFixed from '@/components/dashboard/DashboardLayoutFixed';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import PropertyAnalytics from '@/components/analytics/PropertyAnalytics';
 
 export default function AnalyticsPage() {
   return (
-    <DashboardLayoutFixed>
+    <DashboardLayout>
       <PropertyAnalytics />
-    </DashboardLayoutFixed>
+    </DashboardLayout>
   );
 }
 

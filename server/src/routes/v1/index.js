@@ -12,6 +12,8 @@ import postRoute from "./post.js";
 import userRoute from "./user.js";
 import conversationRoute from "./conversationRoutes.js";
 import messageRoute from "./messageRoutes.js";
+import dashboardRoute from "./dashboard.js";
+import rentalRequestRoute from "./rentalRequest.js";
 
 const Route = (app) => {
   // Root route
@@ -42,6 +44,8 @@ const Route = (app) => {
   app.use("/api/v1/notifications", notificationRoute);
   app.use("/api/v1/reports", reportRoute);
   app.use("/api/v1/admin", adminRoute);
+  app.use("/api/v1/dashboard", dashboardRoute);
+  app.use("/api/v1/rental-requests", rentalRequestRoute);
 };
 
 export default Route;

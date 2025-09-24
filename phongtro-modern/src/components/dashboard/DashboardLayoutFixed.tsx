@@ -66,7 +66,7 @@ export default function DashboardLayoutFixed({ children }: DashboardLayoutProps)
   };
 
   return (
-    <div className="h-screen bg-gray-50 flex">
+    <div className="h-screen bg-gray-50 flex" suppressHydrationWarning>
       {/* Mobile sidebar */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
@@ -145,7 +145,7 @@ export default function DashboardLayoutFixed({ children }: DashboardLayoutProps)
                     <Image
                       className="h-8 w-8 rounded-full"
                       src={user.avatar}
-                      alt={user.name}
+                      alt={user.name || 'User Avatar'}
                       width={32}
                       height={32}
                     />
@@ -224,7 +224,7 @@ export default function DashboardLayoutFixed({ children }: DashboardLayoutProps)
                     <Image
                       className="h-8 w-8 rounded-full"
                       src={user.avatar}
-                      alt={user.name}
+                      alt={user.name || 'User Avatar'}
                       width={32}
                       height={32}
                     />

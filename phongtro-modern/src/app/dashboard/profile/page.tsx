@@ -1,13 +1,13 @@
 'use client';
 
-import DashboardLayoutFixed from '@/components/dashboard/DashboardLayoutFixed';
-import UserProfile from '@/components/dashboard/UserProfile';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import UserProfileWrapper from '@/components/dashboard/UserProfileWrapper';
 
 export default function ProfilePage() {
   return (
-    <DashboardLayoutFixed>
-      <UserProfile />
-    </DashboardLayoutFixed>
+    <DashboardLayout>
+      <UserProfileWrapper />
+    </DashboardLayout>
   );
 }
 

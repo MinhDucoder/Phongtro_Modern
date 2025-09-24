@@ -43,11 +43,11 @@ userRoute.get("/profile", (req, res, next) => {
   console.log('GET /profile - Headers:', req.headers);
   console.log('GET /profile - Cookies:', req.cookies);
   next();
-}, authenticate, UserController.getProfile);
-userRoute.patch("/update", authenticate, UserController.updateProfile);
+}, authenticate(), UserController.getProfile);
+userRoute.patch("/update", authenticate(), UserController.updateProfile);
 userRoute.patch(
   "/change-password",
-  authenticate,
+  authenticate(),
   UserController.changePassword
 );
 userRoute.put(
@@ -59,8 +59,8 @@ userRoute.put(
   UserController.updateAvatar
 );
 
-userRoute.get("/activity", authenticate, UserController.getActivity);
-userRoute.delete("/delete", authenticate, UserController.deleteAccount);
+userRoute.get("/activity", authenticate(), UserController.getActivity);
+userRoute.delete("/delete", authenticate(), UserController.deleteAccount);
 
 
 

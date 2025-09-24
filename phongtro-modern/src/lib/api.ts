@@ -1,5 +1,5 @@
 // API cấu hình và service layer
-const API_BASE_URL = 'http://localhost:5000/api/v1';
+export const API_BASE_URL = 'http://localhost:5000/api/v1';
 
 // Các kiểu dữ liệu cho API responses
 export interface ApiResponse<T = any> {
@@ -104,7 +104,27 @@ async function apiRequest<T>(
     if (!response.ok) {
       const errorText = await response.text();
       console.error('API Error:', response.status, errorText);
+      
+      // Handle specific error cases
+      if (response.status === 401) {
+        // Token expired or invalid - clear any stored auth data
+        if (typeof window !== 'undefined') {
+          document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        }
+      }
+      
       throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
+    
+    // Check if response is JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error('Non-JSON response received:', {
+        status: response.status,
+        contentType,
+        url: url
+      });
+      throw new Error(`Server returned non-JSON response (${response.status})`);
     }
     
     const data = await response.json();
@@ -174,6 +194,14 @@ export const authApi = {
     console.log('getMe: Full URL =', `${API_BASE_URL}/user/me`);
     return apiRequest('/user/me', {
       method: 'GET',
+    });
+  },
+  
+  // Đổi mật khẩu
+  async changePassword(payload: { oldPassword: string; newPassword: string }): Promise<ApiResponse> {
+    return apiRequest('/user/change-password', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
     });
   },
 };

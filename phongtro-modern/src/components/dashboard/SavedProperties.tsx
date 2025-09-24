@@ -281,7 +281,7 @@ export default function SavedProperties() {
                   <div className="flex-shrink-0 relative">
                     <Image
                       src={property.image}
-                      alt={property.title}
+                      alt={property.title || 'Property image'}
                       width={120}
                       height={90}
                       className="w-30 h-24 object-cover rounded-lg"

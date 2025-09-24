@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -15,6 +15,8 @@ import {
   ComputerDesktopIcon,
   GlobeAltIcon
 } from '@heroicons/react/24/outline';
+import { dashboardApi } from '@/lib/api';
+import { getFirstImage } from '@/lib/imageUtils';
 
 // Mock analytics data
 const analyticsData = {
@@ -28,7 +30,7 @@ const analyticsData = {
     callsChange: '+8%',
     messagesChange: '+25%',
   },
-  topProperties: [
+  topPerformingPosts: [
     {
       id: '1',
       title: 'Phòng trọ gần ĐH Bách Khoa, full nội thất',
@@ -133,6 +135,9 @@ const StatCard = ({ title, value, change, icon: Icon, color }: StatCardProps) =>
 export default function PropertyAnalytics() {
   const [selectedTimeRange, setSelectedTimeRange] = useState('7d');
   const [selectedProperty, setSelectedProperty] = useState('all');
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const timeRanges = [
     { value: '24h', label: '24 giờ' },
@@ -140,6 +145,135 @@ export default function PropertyAnalytics() {
     { value: '30d', label: '30 ngày' },
     { value: '90d', label: '90 ngày' },
   ];
+
+  // Fetch analytics data
+  const fetchAnalytics = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await dashboardApi.getAnalytics({
+        timeRange: selectedTimeRange,
+        postId: selectedProperty === 'all' ? undefined : selectedProperty
+      });
+
+      if (response.success && response.data) {
+        setAnalyticsData(response.data);
+      } else {
+        setError('Không thể tải dữ liệu analytics');
+      }
+    } catch (err: any) {
+      console.error('Error fetching analytics:', err);
+      setError(err.message || 'Có lỗi xảy ra khi tải dữ liệu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [selectedTimeRange, selectedProperty]);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Phân tích tin đăng</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Theo dõi hiệu quả và tối ưu hóa tin đăng của bạn
+            </p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white p-6 rounded-lg shadow-sm border animate-pulse">
+              <div className="flex items-center">
+                <div className="flex-shrink-0 p-3 rounded-lg bg-gray-300"></div>
+                <div className="ml-4 flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="text-center py-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p className="mt-2 text-gray-500">Đang tải dữ liệu analytics...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Phân tích tin đăng</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Theo dõi hiệu quả và tối ưu hóa tin đăng của bạn
+            </p>
+          </div>
+        </div>
+        
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Lỗi tải dữ liệu</h3>
+              <p className="mt-1 text-sm text-red-700">{error}</p>
+            </div>
+          </div>
+          <div className="mt-4">
+            <button
+              onClick={fetchAnalytics}
+              className="bg-red-100 hover:bg-red-200 text-red-800 px-4 py-2 rounded-md text-sm font-medium"
+            >
+              Thử lại
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Use fallback data if API data is not available
+  const data = analyticsData || {
+    overview: {
+      totalViews: 0,
+      totalLikes: 0,
+      totalCalls: 0,
+      totalMessages: 0,
+      viewsChange: '+0%',
+      likesChange: '+0%',
+      callsChange: '+0%',
+      messagesChange: '+0%',
+    },
+    topPerformingPosts: [],
+    demographics: {
+      ageGroups: [],
+      devices: [
+        { type: 'Mobile', percentage: 0, icon: DevicePhoneMobileIcon },
+        { type: 'Desktop', percentage: 0, icon: ComputerDesktopIcon },
+        { type: 'Tablet', percentage: 0, icon: GlobeAltIcon },
+      ],
+      locations: [],
+    },
+    timeAnalytics: {
+      bestHours: [],
+      bestDays: [],
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -167,9 +301,9 @@ export default function PropertyAnalytics() {
             className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="all">Tất cả tin đăng</option>
-            {analyticsData.topProperties.map(property => (
-              <option key={property.id} value={property.id}>
-                {property.title.substring(0, 30)}...
+            {data.topPerformingPosts?.map((property: any) => (
+              <option key={property.id || property._id} value={property.id || property._id}>
+                {(property.title || property.roomId?.title || 'Tin đăng').substring(0, 30)}...
               </option>
             ))}
           </select>
@@ -180,29 +314,29 @@ export default function PropertyAnalytics() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Tổng lượt xem"
-          value={analyticsData.overview.totalViews.toLocaleString()}
-          change={analyticsData.overview.viewsChange}
+          value={data.overview?.totalViews?.toLocaleString() || '0'}
+          change={data.overview?.viewsChange || '+0%'}
           icon={EyeIcon}
           color="bg-blue-500"
         />
         <StatCard
           title="Lượt yêu thích"
-          value={analyticsData.overview.totalLikes.toString()}
-          change={analyticsData.overview.likesChange}
+          value={data.overview?.totalLikes?.toString() || '0'}
+          change={data.overview?.likesChange || '+0%'}
           icon={HeartIcon}
           color="bg-red-500"
         />
         <StatCard
           title="Cuộc gọi"
-          value={analyticsData.overview.totalCalls.toString()}
-          change={analyticsData.overview.callsChange}
+          value={data.overview?.totalCalls?.toString() || '0'}
+          change={data.overview?.callsChange || '+0%'}
           icon={PhoneIcon}
           color="bg-green-500"
         />
         <StatCard
           title="Tin nhắn"
-          value={analyticsData.overview.totalMessages.toString()}
-          change={analyticsData.overview.messagesChange}
+          value={data.overview?.totalMessages?.toString() || '0'}
+          change={data.overview?.messagesChange || '+0%'}
           icon={ChatBubbleLeftIcon}
           color="bg-purple-500"
         />
@@ -214,16 +348,22 @@ export default function PropertyAnalytics() {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Lượt xem theo thời gian</h3>
           <div className="h-64 bg-gray-50 rounded-lg flex items-end justify-around p-4">
-            {analyticsData.timeAnalytics.bestDays.map((day) => (
-              <div key={day.day} className="flex flex-col items-center">
-                <div
-                  className="bg-blue-500 rounded-t w-8 mb-2"
-                  style={{ height: `${(day.views / 500) * 100}%`, minHeight: '20px' }}
-                ></div>
-                <span className="text-xs text-gray-600">{day.day}</span>
-                <span className="text-xs font-medium text-gray-900">{day.views}</span>
+            {data.timeAnalytics?.bestDays?.length > 0 ? (
+              data.timeAnalytics.bestDays.map((day: any) => (
+                <div key={day.day} className="flex flex-col items-center">
+                  <div
+                    className="bg-blue-500 rounded-t w-8 mb-2"
+                    style={{ height: `${(day.views / 500) * 100}%`, minHeight: '20px' }}
+                  ></div>
+                  <span className="text-xs text-gray-600">{day.day}</span>
+                  <span className="text-xs font-medium text-gray-900">{day.views}</span>
+                </div>
+              ))
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-500">
+                <p>Chưa có dữ liệu</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -231,12 +371,29 @@ export default function PropertyAnalytics() {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Thiết bị truy cập</h3>
           <div className="space-y-4">
-            {analyticsData.demographics.devices.map((device) => (
-              <div key={device.type} className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <device.icon className="h-5 w-5 text-gray-500 mr-3" />
-                  <span className="text-sm font-medium text-gray-900">{device.type}</span>
-                </div>
+            {data.demographics?.devices?.map((device: any) => {
+              // Map icon string to actual component
+              const getIconComponent = (iconName: string) => {
+                switch (iconName) {
+                  case 'DevicePhoneMobileIcon':
+                    return DevicePhoneMobileIcon;
+                  case 'ComputerDesktopIcon':
+                    return ComputerDesktopIcon;
+                  case 'GlobeAltIcon':
+                    return GlobeAltIcon;
+                  default:
+                    return DevicePhoneMobileIcon;
+                }
+              };
+              
+              const IconComponent = getIconComponent(device.icon);
+              
+              return (
+                <div key={device.type} className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <IconComponent className="h-5 w-5 text-gray-500 mr-3" />
+                    <span className="text-sm font-medium text-gray-900">{device.type}</span>
+                  </div>
                 <div className="flex items-center">
                   <div className="w-24 bg-gray-200 rounded-full h-2 mr-3">
                     <div
@@ -245,9 +402,10 @@ export default function PropertyAnalytics() {
                     ></div>
                   </div>
                   <span className="text-sm text-gray-600">{device.percentage}%</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -258,100 +416,106 @@ export default function PropertyAnalytics() {
           <h3 className="text-lg font-medium text-gray-900">Tin đăng hiệu quả nhất</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tin đăng
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Lượt xem
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Yêu thích
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Cuộc gọi
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  CTR
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Doanh thu
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Hành động
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {analyticsData.topProperties.map((property) => (
-                <tr key={property.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <Image
-                        src={property.image}
-                        alt={property.title}
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 rounded object-cover mr-3"
-                      />
-                      <div>
-                        <div className="text-sm font-medium text-gray-900 line-clamp-1">
-                          {property.title}
-                        </div>
-                        <div className="text-sm text-gray-500">ID: {property.id}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <EyeIcon className="h-4 w-4 text-blue-500 mr-1" />
-                      <span className="text-sm font-medium text-gray-900">
-                        {property.views.toLocaleString()}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <HeartIcon className="h-4 w-4 text-red-500 mr-1" />
-                      <span className="text-sm text-gray-900">{property.likes}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <PhoneIcon className="h-4 w-4 text-green-500 mr-1" />
-                      <span className="text-sm text-gray-900">{property.calls}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      property.ctr > 4 
-                        ? 'bg-green-100 text-green-800' 
-                        : property.ctr > 3
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {property.ctr}%
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-medium text-green-600">
-                      {property.revenue.toLocaleString()}đ
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <Link
-                      href={`/phong-tro/${property.id}`}
-                      className="text-blue-600 hover:text-blue-900"
-                    >
-                      Xem chi tiết
-                    </Link>
-                  </td>
+          {data.topPerformingPosts?.length > 0 ? (
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Tin đăng
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Lượt xem
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Yêu thích
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Cuộc gọi
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    CTR
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Doanh thu
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Hành động
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {data.topPerformingPosts.map((property: any) => (
+                  <tr key={property.id || property._id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <Image
+                          src={getFirstImage(property.roomId?.images || property.images)}
+                          alt={property.title || property.roomId?.title || 'Room image'}
+                          width={40}
+                          height={40}
+                          className="w-10 h-10 rounded object-cover mr-3"
+                        />
+                        <div>
+                          <div className="text-sm font-medium text-gray-900 line-clamp-1">
+                            {property.title || property.roomId?.title || 'Tin đăng'}
+                          </div>
+                          <div className="text-sm text-gray-500">ID: {property.id || property._id}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <EyeIcon className="h-4 w-4 text-blue-500 mr-1" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {(property.views || property.analytics?.views || 0).toLocaleString()}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <HeartIcon className="h-4 w-4 text-red-500 mr-1" />
+                        <span className="text-sm text-gray-900">{property.likes || property.analytics?.likes || 0}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <PhoneIcon className="h-4 w-4 text-green-500 mr-1" />
+                        <span className="text-sm text-gray-900">{property.calls || property.analytics?.calls || 0}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        parseFloat(property.ctr || 0) > 4 
+                          ? 'bg-green-100 text-green-800' 
+                          : parseFloat(property.ctr || 0) > 3
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {parseFloat(property.ctr || 0).toFixed(1)}%
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm font-medium text-green-600">
+                        {(property.revenue || property.roomId?.price || 0).toLocaleString()}đ
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <Link
+                        href={`/phong-tro/${property.id || property._id}`}
+                        className="text-blue-600 hover:text-blue-900"
+                      >
+                        Xem chi tiết
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">Chưa có dữ liệu tin đăng</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -361,24 +525,30 @@ export default function PropertyAnalytics() {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Độ tuổi người xem</h3>
           <div className="space-y-4">
-            {analyticsData.demographics.ageGroups.map((group) => (
-              <div key={group.range} className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <UserGroupIcon className="h-5 w-5 text-gray-400 mr-2" />
-                  <span className="text-sm font-medium text-gray-900">{group.range} tuổi</span>
-                  <span className="text-sm text-gray-500 ml-2">({group.label})</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-20 bg-gray-200 rounded-full h-2 mr-3">
-                    <div
-                      className="bg-blue-500 h-2 rounded-full"
-                      style={{ width: `${group.percentage}%` }}
-                    ></div>
+            {data.demographics?.ageGroups?.length > 0 ? (
+              data.demographics.ageGroups.map((group: any) => (
+                <div key={group.range} className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <UserGroupIcon className="h-5 w-5 text-gray-400 mr-2" />
+                    <span className="text-sm font-medium text-gray-900">{group.range} tuổi</span>
+                    <span className="text-sm text-gray-500 ml-2">({group.label})</span>
                   </div>
-                  <span className="text-sm text-gray-600 w-8">{group.percentage}%</span>
+                  <div className="flex items-center">
+                    <div className="w-20 bg-gray-200 rounded-full h-2 mr-3">
+                      <div
+                        className="bg-blue-500 h-2 rounded-full"
+                        style={{ width: `${group.percentage}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-sm text-gray-600 w-8">{group.percentage}%</span>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                <p>Chưa có dữ liệu độ tuổi</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -386,24 +556,30 @@ export default function PropertyAnalytics() {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Vị trí người xem</h3>
           <div className="space-y-4">
-            {analyticsData.demographics.locations.map((location) => (
-              <div key={location.city} className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <MapPinIcon className="h-5 w-5 text-gray-400 mr-2" />
-                  <span className="text-sm font-medium text-gray-900">{location.city}</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-20 bg-gray-200 rounded-full h-2 mr-3">
-                    <div
-                      className="bg-green-500 h-2 rounded-full"
-                      style={{ width: `${location.percentage}%` }}
-                    ></div>
+            {data.demographics?.locations?.length > 0 ? (
+              data.demographics.locations.map((location: any) => (
+                <div key={location.city} className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <MapPinIcon className="h-5 w-5 text-gray-400 mr-2" />
+                    <span className="text-sm font-medium text-gray-900">{location.city}</span>
                   </div>
-                  <span className="text-sm text-gray-600 w-8">{location.percentage}%</span>
-                  <span className="text-xs text-gray-500 ml-2">({location.views})</span>
+                  <div className="flex items-center">
+                    <div className="w-20 bg-gray-200 rounded-full h-2 mr-3">
+                      <div
+                        className="bg-green-500 h-2 rounded-full"
+                        style={{ width: `${location.percentage}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-sm text-gray-600 w-8">{location.percentage}%</span>
+                    <span className="text-xs text-gray-500 ml-2">({location.views})</span>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                <p>Chưa có dữ liệu vị trí</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
@@ -414,20 +590,26 @@ export default function PropertyAnalytics() {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Giờ vàng (nhiều lượt xem nhất)</h3>
           <div className="space-y-3">
-            {analyticsData.timeAnalytics.bestHours.map((hour, index) => (
-              <div key={hour.hour} className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium mr-3 ${
-                    index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-600' : 'bg-gray-300'
-                  }`}>
-                    {index + 1}
+            {data.timeAnalytics?.bestHours?.length > 0 ? (
+              data.timeAnalytics.bestHours.map((hour: any, index: number) => (
+                <div key={hour.hour} className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium mr-3 ${
+                      index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-600' : 'bg-gray-300'
+                    }`}>
+                      {index + 1}
+                    </div>
+                    <ClockIcon className="h-4 w-4 text-gray-400 mr-2" />
+                    <span className="text-sm font-medium text-gray-900">{hour.hour}</span>
                   </div>
-                  <ClockIcon className="h-4 w-4 text-gray-400 mr-2" />
-                  <span className="text-sm font-medium text-gray-900">{hour.hour}</span>
+                  <span className="text-sm text-gray-600">{hour.views} lượt xem</span>
                 </div>
-                <span className="text-sm text-gray-600">{hour.views} lượt xem</span>
+              ))
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                <p>Chưa có dữ liệu giờ vàng</p>
               </div>
-            ))}
+            )}
           </div>
           <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
             <p className="text-sm text-yellow-800">
@@ -472,7 +654,7 @@ export default function PropertyAnalytics() {
           
           <div className="mt-4">
             <Link
-              href="/dang-tin"
+              href="/dashboard/tin-dang"
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
               Đăng tin VIP

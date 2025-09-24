@@ -12,6 +12,8 @@ import {
   EyeSlashIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { authApi } from '@/lib/api';
 
 interface UserSettings {
   profile: {
@@ -61,6 +63,7 @@ const defaultSettings: UserSettings = {
 };
 
 export default function UserSettings() {
+  const { user: authUser } = useAuth();
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'privacy' | 'security'>('profile');
   const [isLoading, setIsLoading] = useState(false);
@@ -68,14 +71,38 @@ export default function UserSettings() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    
+    // Load user data from auth context
+    if (authUser) {
+      setSettings(prev => ({
+        ...prev,
+        profile: {
+          name: authUser.full_name || '',
+          email: authUser.email || '',
+          phone: authUser.phone || '',
+          avatar: authUser.avatar || ''
+        }
+      }));
+    }
+  }, [authUser]);
 
   const handleSaveSettings = async () => {
+    if (!authUser) {
+      toast.error('Vui lòng đăng nhập để lưu cài đặt');
+      return;
+    }
+
     setIsLoading(true);
     try {
+      // TODO: Implement actual API call for settings
       await new Promise(resolve => setTimeout(resolve, 1000));
       toast.success('Cài đặt đã được lưu thành công');
     } catch {
@@ -86,11 +113,40 @@ export default function UserSettings() {
   };
 
   const handleChangePassword = async () => {
+    if (!authUser) {
+      toast.error('Vui lòng đăng nhập để thay đổi mật khẩu');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('Mật khẩu xác nhận không khớp');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      toast.error('Mật khẩu mới phải có ít nhất 6 ký tự');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Mật khẩu đã được thay đổi thành công');
-    } catch {
+      const response = await authApi.changePassword({
+        oldPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+
+      if ((response as any).success !== false) {
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        });
+        toast.success('Mật khẩu đã được thay đổi thành công');
+      } else {
+        toast.error(response.message || 'Mật khẩu hiện tại không đúng');
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
       toast.error('Có lỗi xảy ra khi thay đổi mật khẩu');
     } finally {
       setIsLoading(false);
@@ -109,6 +165,16 @@ export default function UserSettings() {
       <div className="p-6 bg-white rounded-lg shadow animate-pulse">
         <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
         <div className="h-64 bg-gray-200 rounded"></div>
+      </div>
+    );
+  }
+
+  if (!authUser) {
+    return (
+      <div className="p-6 bg-white rounded-lg shadow">
+        <div className="text-center">
+          <p className="text-gray-500">Vui lòng đăng nhập để xem cài đặt tài khoản</p>
+        </div>
       </div>
     );
   }
@@ -351,6 +417,8 @@ export default function UserSettings() {
                       <div className="relative">
                         <input
                           type={showCurrentPassword ? 'text' : 'password'}
+                          value={passwordData.currentPassword}
+                          onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
                           className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           placeholder="Nhập mật khẩu hiện tại"
                         />
@@ -375,6 +443,8 @@ export default function UserSettings() {
                       <div className="relative">
                         <input
                           type={showNewPassword ? 'text' : 'password'}
+                          value={passwordData.newPassword}
+                          onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
                           className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           placeholder="Nhập mật khẩu mới"
                         />
@@ -399,6 +469,8 @@ export default function UserSettings() {
                       <div className="relative">
                         <input
                           type={showConfirmPassword ? 'text' : 'password'}
+                          value={passwordData.confirmPassword}
+                          onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                           className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           placeholder="Nhập lại mật khẩu mới"
                         />

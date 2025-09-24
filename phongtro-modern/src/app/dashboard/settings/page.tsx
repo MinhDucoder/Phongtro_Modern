@@ -1,12 +1,12 @@
 'use client';
 
-import DashboardLayoutFixed from '@/components/dashboard/DashboardLayoutFixed';
-import UserSettings from '@/components/dashboard/UserSettings';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import UserSettingsWrapper from '@/components/dashboard/UserSettingsWrapper';
 
 export default function SettingsPage() {
   return (
-    <DashboardLayoutFixed>
-      <UserSettings />
-    </DashboardLayoutFixed>
+    <DashboardLayout>
+      <UserSettingsWrapper />
+    </DashboardLayout>
   );
 }

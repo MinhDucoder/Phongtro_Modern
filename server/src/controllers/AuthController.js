@@ -166,7 +166,12 @@ class AuthController {
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) return res.status(401).json({ message: "Sai mật khẩu" });
 
-      const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
+      const token = jwt.sign({ 
+        id: user._id, 
+        role: user.role,
+        email: user.email,
+        full_name: user.full_name
+      }, JWT_SECRET, { expiresIn: "30d" }); // Extended to 30 days
 
       user.last_login = new Date();
       await user.save();
@@ -182,13 +187,14 @@ class AuthController {
         last_login: user.last_login
       };
 
-      // Set cookie with proper options
+      // Set cookie with proper options for better persistence
       res.cookie("accessToken", token, { 
         httpOnly: true, 
         secure: process.env.NODE_ENV === "production", 
         sameSite: 'lax',
         path: '/',
-        maxAge: 7*24*60*60*1000 // 7 days
+        maxAge: 30*24*60*60*1000, // 30 days instead of 7 days
+        domain: process.env.NODE_ENV === "production" ? '.yourdomain.com' : undefined // Only set domain in production
       });
 
       res.status(200).json({ 

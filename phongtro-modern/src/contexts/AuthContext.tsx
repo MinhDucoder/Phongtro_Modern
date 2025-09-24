@@ -39,7 +39,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setHasCheckedAuth(true);
       checkAuthStatus();
     }
-  }, [hasCheckedAuth]);
+    
+    // Auto-refresh authentication every 10 minutes if user is logged in
+    const refreshInterval = setInterval(() => {
+      if (user && hasCheckedAuth) {
+        console.log('Auto-refreshing authentication...');
+        checkAuthStatus();
+      }
+    }, 10 * 60 * 1000); // 10 minutes
+
+    return () => clearInterval(refreshInterval);
+  }, [hasCheckedAuth, user]);
 
   // Check for Google OAuth success redirect
   useEffect(() => {
@@ -83,9 +93,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // API /me trả về user trong response.user
       if (response.success && response.user) {
         setUser(response.user as User);
-        toast.success('Đăng nhập thành công!');
+        console.log('fetchUserProfile: User set successfully');
       } else {
         console.log('fetchUserProfile: No user in response', response);
+        setUser(null);
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -101,7 +112,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await fetchUserProfile();
     } catch (error) {
       console.error('Error checking auth status:', error);
-      
+      // Clear user state if authentication fails
+      setUser(null);
     }
   };
 

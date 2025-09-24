@@ -69,12 +69,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <DashboardGuard>
-      <div className="h-screen bg-gray-50 flex">
+      <div className="h-screen bg-gray-50 flex" suppressHydrationWarning>
       {/* Mobile sidebar */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-          <div className="relative flex w-full max-w-xs flex-1 flex-col bg-white">
+          <div className="relative flex w-full max-w-xs flex-1 flex-col bg-white" suppressHydrationWarning>
             <div className="absolute top-0 right-0 -mr-12 pt-2">
               <button
                 type="button"
@@ -131,7 +131,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Desktop sidebar */}
       {!sidebarHidden && (
-        <div className={`hidden lg:flex lg:flex-col transition-all duration-300 ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'}`}>
+        <div className={`hidden lg:flex lg:flex-col transition-all duration-300 ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'}`} suppressHydrationWarning>
         <div className="flex h-full flex-col bg-white shadow">
           <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
             <div className="flex flex-shrink-0 items-center justify-between px-4">
@@ -160,7 +160,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <Image
                       className="h-10 w-10 rounded-full"
                       src={user.avatar}
-                      alt={user.name}
+                      alt={user.name || 'User Avatar'}
                       width={40}
                       height={40}
                     />
@@ -179,7 +179,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Image
                     className="h-8 w-8 rounded-full"
                     src={user.avatar}
-                    alt={user.name}
+                    alt={user.name || 'User Avatar'}
                     width={32}
                     height={32}
                   />
@@ -224,7 +224,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       )}
 
       {/* Main content */}
-      <div className={`flex-1 flex flex-col transition-all duration-300`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300`} suppressHydrationWarning>
         {/* Top bar */}
         <div className="sticky top-0 z-10 bg-white shadow-sm border-b border-gray-200 lg:hidden">
           <div className="flex h-16 items-center justify-between px-4">
@@ -245,7 +245,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Image
                 className="h-8 w-8 rounded-full"
                 src={user.avatar}
-                alt={user.name}
+                alt={user.name || 'User Avatar'}
                 width={32}
                 height={32}
               />
@@ -279,7 +279,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Image
                     className="h-8 w-8 rounded-full"
                     src={user.avatar}
-                    alt={user.name}
+                    alt={user.name || 'User Avatar'}
                     width={32}
                     height={32}
                   />

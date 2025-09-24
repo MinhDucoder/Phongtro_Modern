@@ -383,7 +383,7 @@ export default function DashboardOverview() {
               <div key={posting.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
                 <Image
                   src={posting.image}
-                  alt={posting.title}
+                  alt={posting.title || 'Post image'}
                   width={64}
                   height={64}
                   className="h-16 w-16 object-cover rounded-lg"
