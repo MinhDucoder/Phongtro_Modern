@@ -14,7 +14,10 @@ import {
   FunnelIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
+import { dashboardApi } from '@/lib/api';
 import toast from 'react-hot-toast';
+import PostForm from './PostForm';
+import { getFirstImage } from '@/lib/imageUtils';
 
 // Mock data - trong thực tế sẽ fetch từ API
 const mockPostings = [
@@ -121,20 +124,69 @@ const getPackageBadge = (packageType: string) => {
 };
 
 export default function MyPostings() {
-  const [postings, setPostings] = useState(mockPostings);
+  const [postings, setPostings] = useState<any[]>([]);
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0
+  });
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingPost, setEditingPost] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    fetchPosts();
+  }, [selectedStatus, searchQuery, pagination.page]);
+
+  const fetchPosts = async () => {
+    try {
+      setIsLoading(true);
+      const response = await dashboardApi.getMyPosts({
+        page: pagination.page,
+        limit: pagination.limit,
+        status: selectedStatus === 'all' ? undefined : selectedStatus,
+        search: searchQuery || undefined
+      });
+
+      if (response && response.data && response.data.posts) {
+        setPostings(response.data.posts);
+        setPagination(prev => ({
+          ...prev,
+          ...response.data.pagination
+        }));
+        
+        if (response.data.posts.length > 0) {
+          toast.success(`Đã tải ${response.data.posts.length} tin đăng`);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      toast.error('Không thể tải danh sách tin đăng');
+      // Fallback to mock data on error
+      setPostings(mockPostings);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredPostings = postings.filter(posting => {
     const matchesStatus = selectedStatus === 'all' || posting.status === selectedStatus;
-    const matchesSearch = posting.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         posting.location.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Use correct data structure from API
+    const title = posting.roomId?.title || '';
+    const address = posting.roomId?.address || '';
+    const city = posting.roomId?.city || '';
+    const location = `${address} ${city}`.trim();
+    
+    const matchesSearch = searchQuery === '' || 
+                         title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         location.toLowerCase().includes(searchQuery.toLowerCase());
+    
     return matchesStatus && matchesSearch;
   });
 
@@ -143,12 +195,14 @@ export default function MyPostings() {
     
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setPostings(prev => prev.filter(p => p.id !== id));
-      toast.success('Xóa tin đăng thành công');
-    } catch {
-      toast.error('Có lỗi xảy ra');
+      const response = await dashboardApi.deletePost(id);
+      if (response) {
+        setPostings(prev => prev.filter(p => p._id !== id));
+        toast.success('Xóa tin đăng thành công');
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      toast.error('Có lỗi xảy ra khi xóa tin đăng');
     } finally {
       setIsLoading(false);
     }
@@ -157,37 +211,55 @@ export default function MyPostings() {
   const handleRenew = async (id: string) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setPostings(prev => prev.map(p => 
-        p.id === id 
-          ? { ...p, status: 'active', expires: '2024-03-15' }
-          : p
-      ));
-      toast.success('Gia hạn tin đăng thành công');
-    } catch {
-      toast.error('Có lỗi xảy ra');
+      const response = await dashboardApi.renewPost(id);
+      if (response) {
+        // Refresh posts list
+        fetchPosts();
+        toast.success('Gia hạn tin đăng thành công');
+      }
+    } catch (error) {
+      console.error('Error renewing post:', error);
+      toast.error('Có lỗi xảy ra khi gia hạn tin đăng');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleToggleStatus = async (id: string) => {
+    const posting = postings.find(p => p._id === id);
+    if (!posting) return;
+
+    const newStatus = posting.status === 'active' ? 'paused' : 'active';
+    
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setPostings(prev => prev.map(p => 
-        p.id === id 
-          ? { ...p, status: p.status === 'active' ? 'paused' : 'active' }
-          : p
-      ));
-      toast.success('Cập nhật trạng thái thành công');
-    } catch {
-      toast.error('Có lỗi xảy ra');
+      const response = await dashboardApi.updatePostStatus(id, newStatus);
+      if (response) {
+        // Refresh posts list
+        fetchPosts();
+        toast.success('Cập nhật trạng thái thành công');
+      }
+    } catch (error) {
+      console.error('Error updating post status:', error);
+      toast.error('Có lỗi xảy ra khi cập nhật trạng thái');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleEdit = (id: string) => {
+    setEditingPost(id);
+  };
+
+  const handleFormSuccess = () => {
+    setShowCreateForm(false);
+    setEditingPost(null);
+    fetchPosts(); // Refresh the list
+  };
+
+  const handleFormCancel = () => {
+    setShowCreateForm(false);
+    setEditingPost(null);
   };
 
   return (
@@ -197,16 +269,16 @@ export default function MyPostings() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Tin đăng của tôi</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Quản lý {postings.length} tin đăng của bạn
+            Quản lý {pagination.total || postings.length} tin đăng của bạn
           </p>
         </div>
-        <Link
-          href="/dang-tin"
+        <button
+          onClick={() => setShowCreateForm(true)}
           className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
         >
           <PlusIcon className="h-4 w-4 mr-2" />
           Đăng tin mới
-        </Link>
+        </button>
       </div>
 
       {/* Filters */}
@@ -255,7 +327,7 @@ export default function MyPostings() {
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-500">Tổng lượt xem</p>
               <p className="text-lg font-semibold text-gray-900">
-                {mounted ? postings.reduce((sum, p) => sum + p.views, 0).toLocaleString() : postings.reduce((sum, p) => sum + p.views, 0)}
+                {mounted ? postings.reduce((sum, p) => sum + (p.analytics?.views || 0), 0).toLocaleString() : postings.reduce((sum, p) => sum + (p.analytics?.views || 0), 0)}
               </p>
             </div>
           </div>
@@ -271,7 +343,7 @@ export default function MyPostings() {
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-500">Lượt yêu thích</p>
               <p className="text-lg font-semibold text-gray-900">
-                {postings.reduce((sum, p) => sum + p.likes, 0)}
+                {postings.reduce((sum, p) => sum + (p.analytics?.likes || 0), 0)}
               </p>
             </div>
           </div>
@@ -287,7 +359,7 @@ export default function MyPostings() {
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-500">Số cuộc gọi</p>
               <p className="text-lg font-semibold text-gray-900">
-                {postings.reduce((sum, p) => sum + p.calls, 0)}
+                {postings.reduce((sum, p) => sum + (p.analytics?.calls || 0), 0)}
               </p>
             </div>
           </div>
@@ -334,13 +406,13 @@ export default function MyPostings() {
         ) : (
           <div className="divide-y divide-gray-200">
             {filteredPostings.map((posting) => (
-              <div key={posting.id} className="p-6 hover:bg-gray-50">
+              <div key={posting._id} className="p-6 hover:bg-gray-50">
                 <div className="flex items-start space-x-4">
                   {/* Image */}
                   <div className="flex-shrink-0">
                     <Image
-                      src={posting.images[0]}
-                      alt={posting.title}
+                      src={getFirstImage(posting.roomId?.images)}
+                      alt={posting.roomId?.title || 'Room image'}
                       width={120}
                       height={90}
                       className="w-30 h-24 object-cover rounded-lg"
@@ -353,26 +425,26 @@ export default function MyPostings() {
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-2">
                           {getStatusBadge(posting.status)}
-                          {getPackageBadge(posting.package)}
+                          {getPackageBadge(posting.favouriteLevel)}
                         </div>
                         
                         <Link 
-                          href={`/phong-tro/${posting.id}`}
+                          href={`/phong-tro/${posting._id}`}
                           className="text-lg font-medium text-gray-900 hover:text-blue-600 line-clamp-2"
                         >
-                          {posting.title}
+                          {posting.roomId?.title || 'Không có tiêu đề'}
                         </Link>
                         
                         <p className="text-sm text-gray-600 mt-1">
-                          {posting.address}, {posting.location}
+                          {posting.roomId?.address || ''}, {posting.roomId?.city || ''}
                         </p>
                         
                         <div className="flex items-center mt-2 space-x-4">
                           <span className="text-lg font-bold text-green-600">
-                            {posting.price}
+                            {posting.roomId?.price ? `${posting.roomId.price.toLocaleString()} VNĐ` : 'N/A'}
                           </span>
                           <span className="text-sm text-gray-500">
-                            {posting.area}
+                            {posting.roomId?.area ? `${posting.roomId.area} m²` : 'N/A'}
                           </span>
                         </div>
 
@@ -380,22 +452,22 @@ export default function MyPostings() {
                         <div className="flex items-center mt-3 space-x-6 text-sm text-gray-500">
                           <div className="flex items-center">
                             <EyeIcon className="h-4 w-4 mr-1" />
-                            {posting.views} lượt xem
+                            {posting.analytics?.views || 0} lượt xem
                           </div>
                           <div className="flex items-center">
                             <HeartIcon className="h-4 w-4 mr-1" />
-                            {posting.likes} yêu thích
+                            {posting.analytics?.likes || 0} yêu thích
                           </div>
                           <div className="flex items-center">
                             <PhoneIcon className="h-4 w-4 mr-1" />
-                            {posting.calls} cuộc gọi
+                            {posting.analytics?.calls || 0} cuộc gọi
                           </div>
                         </div>
 
                         <div className="flex items-center mt-2 text-xs text-gray-400">
-                          <span>Đăng: {new Date(posting.posted).toLocaleDateString('vi-VN')}</span>
+                          <span>Đăng: {new Date(posting.createdAt).toLocaleDateString('vi-VN')}</span>
                           <span className="mx-2">•</span>
-                          <span>Hết hạn: {new Date(posting.expires).toLocaleDateString('vi-VN')}</span>
+                          <span>Cập nhật: {new Date(posting.updatedAt).toLocaleDateString('vi-VN')}</span>
                         </div>
                       </div>
 
@@ -434,7 +506,16 @@ export default function MyPostings() {
                         )}
 
                         <button
-                          onClick={() => handleDelete(posting.id)}
+                          onClick={() => handleEdit(posting._id)}
+                          disabled={isLoading}
+                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
+                          title="Chỉnh sửa"
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                        </button>
+
+                        <button
+                          onClick={() => handleDelete(posting._id)}
                           disabled={isLoading}
                           className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                           title="Xóa"
@@ -450,6 +531,86 @@ export default function MyPostings() {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between bg-white px-4 py-3 border-t border-gray-200">
+          <div className="flex-1 flex justify-between sm:hidden">
+            <button
+              onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+              disabled={pagination.page <= 1}
+              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+            >
+              Trước
+            </button>
+            <button
+              onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+              disabled={pagination.page >= pagination.totalPages}
+              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+            >
+              Sau
+            </button>
+          </div>
+          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm text-gray-700">
+                Hiển thị{' '}
+                <span className="font-medium">{(pagination.page - 1) * pagination.limit + 1}</span>
+                {' '}đến{' '}
+                <span className="font-medium">
+                  {Math.min(pagination.page * pagination.limit, pagination.total)}
+                </span>
+                {' '}trong tổng số{' '}
+                <span className="font-medium">{pagination.total}</span> kết quả
+              </p>
+            </div>
+            <div>
+              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                <button
+                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                  disabled={pagination.page <= 1}
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Trước
+                </button>
+                {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setPagination(prev => ({ ...prev, page }))}
+                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                      page === pagination.page
+                        ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                  disabled={pagination.page >= pagination.totalPages}
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Sau
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create/Edit Post Modal */}
+      {(showCreateForm || editingPost) && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <PostForm
+              postId={editingPost || undefined}
+              onSuccess={handleFormSuccess}
+              onCancel={handleFormCancel}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

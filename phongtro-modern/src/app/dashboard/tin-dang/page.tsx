@@ -1,15 +1,13 @@
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
+'use client';
+
+import DashboardLayoutFixed from '@/components/dashboard/DashboardLayoutFixed';
 import MyPostings from '@/components/dashboard/MyPostings';
 
 export default function MyPostingsPage() {
   return (
-    <DashboardLayout>
+    <DashboardLayoutFixed>
       <MyPostings />
-    </DashboardLayout>
+    </DashboardLayoutFixed>
   );
 }
 
-export const metadata = {
-  title: 'Tin đăng của tôi | NhaTroVN',
-  description: 'Quản lý tất cả tin đăng cho thuê phòng trọ của bạn.',
-};

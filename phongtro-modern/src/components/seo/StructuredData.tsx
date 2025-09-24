@@ -1,3 +1,5 @@
+'use client';
+
 interface StructuredDataProps {
   type: 'website' | 'organization' | 'breadcrumb' | 'property';
   data: Record<string, unknown> | null;

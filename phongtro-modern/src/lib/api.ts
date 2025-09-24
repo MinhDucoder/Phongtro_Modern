@@ -234,7 +234,190 @@ export const roomApi = {
   },
 };
 
+// Dashboard API cho landlord
+export const dashboardApi = {
+  // Get dashboard overview
+  async getOverview(): Promise<ApiResponse> {
+    return apiRequest('/dashboard/overview', {
+      method: 'GET',
+    });
+  },
+
+  // Get landlord's posts
+  async getMyPosts(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    search?: string;
+  }): Promise<ApiResponse> {
+    const queryString = params ? `?${new URLSearchParams(
+      Object.entries(params).reduce((acc, [key, value]) => {
+        if (value !== undefined && value !== null) {
+          acc[key] = value.toString();
+        }
+        return acc;
+      }, {} as Record<string, string>)
+    ).toString()}` : '';
+    
+    return apiRequest(`/dashboard/posts${queryString}`, {
+      method: 'GET',
+    });
+  },
+
+  // Update post status
+  async updatePostStatus(postId: string, status: string): Promise<ApiResponse> {
+    return apiRequest(`/dashboard/posts/${postId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+  },
+
+  // Renew post
+  async renewPost(postId: string): Promise<ApiResponse> {
+    return apiRequest(`/dashboard/posts/${postId}/renew`, {
+      method: 'PATCH',
+    });
+  },
+
+  // Get analytics
+  async getAnalytics(params?: {
+    timeRange?: string;
+    postId?: string;
+  }): Promise<ApiResponse> {
+    const queryString = params ? `?${new URLSearchParams(
+      Object.entries(params).reduce((acc, [key, value]) => {
+        if (value !== undefined && value !== null) {
+          acc[key] = value.toString();
+        }
+        return acc;
+      }, {} as Record<string, string>)
+    ).toString()}` : '';
+    
+    return apiRequest(`/dashboard/analytics${queryString}`, {
+      method: 'GET',
+    });
+  },
+
+  // Get recent activities
+  async getRecentActivities(limit?: number): Promise<ApiResponse> {
+    const queryString = limit ? `?limit=${limit}` : '';
+    return apiRequest(`/dashboard/activities${queryString}`, {
+      method: 'GET',
+    });
+  },
+
+  // Get single post by ID
+  async getPostById(postId: string): Promise<ApiResponse> {
+    return apiRequest(`/dashboard/posts/${postId}`, {
+      method: 'GET',
+    });
+  },
+
+  // Create new post
+  async createPost(postData: any): Promise<ApiResponse> {
+    return apiRequest('/dashboard/posts', {
+      method: 'POST',
+      body: JSON.stringify(postData),
+    });
+  },
+
+  // Update existing post
+  async updatePost(postId: string, postData: any): Promise<ApiResponse> {
+    return apiRequest(`/dashboard/posts/${postId}`, {
+      method: 'PUT',
+      body: JSON.stringify(postData),
+    });
+  },
+
+  // Delete post
+  async deletePost(postId: string): Promise<ApiResponse> {
+    return apiRequest(`/dashboard/posts/${postId}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
+// Rental Request API
+export const rentalRequestApi = {
+  // Create rental request (tenant)
+  async createRequest(requestData: {
+    postId: string;
+    message: string;
+    expectedMoveIn: string;
+    contactInfo?: any;
+    tenantInfo?: any;
+  }): Promise<ApiResponse> {
+    return apiRequest('/rental-requests', {
+      method: 'POST',
+      body: JSON.stringify(requestData),
+    });
+  },
+
+  // Get landlord's requests
+  async getLandlordRequests(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+  }): Promise<ApiResponse> {
+    const queryString = params ? `?${new URLSearchParams(
+      Object.entries(params).reduce((acc, [key, value]) => {
+        if (value !== undefined && value !== null) {
+          acc[key] = value.toString();
+        }
+        return acc;
+      }, {} as Record<string, string>)
+    ).toString()}` : '';
+    
+    return apiRequest(`/rental-requests/landlord/requests${queryString}`, {
+      method: 'GET',
+    });
+  },
+
+  // Get request statistics
+  async getRequestStats(): Promise<ApiResponse> {
+    return apiRequest('/rental-requests/landlord/stats', {
+      method: 'GET',
+    });
+  },
+
+  // Update request status
+  async updateRequestStatus(requestId: string, status: string, responseMessage?: string): Promise<ApiResponse> {
+    return apiRequest(`/rental-requests/${requestId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, responseMessage }),
+    });
+  },
+
+  // Get request detail
+  async getRequestDetail(requestId: string): Promise<ApiResponse> {
+    return apiRequest(`/rental-requests/${requestId}`, {
+      method: 'GET',
+    });
+  },
+
+  // Get tenant's requests
+  async getTenantRequests(params?: {
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse> {
+    const queryString = params ? `?${new URLSearchParams(
+      Object.entries(params).reduce((acc, [key, value]) => {
+        if (value !== undefined && value !== null) {
+          acc[key] = value.toString();
+        }
+        return acc;
+      }, {} as Record<string, string>)
+    ).toString()}` : '';
+    
+    return apiRequest(`/rental-requests/my-requests${queryString}`, {
+      method: 'GET',
+    });
+  },
+};
+
 export default {
   auth: authApi,
   rooms: roomApi,
+  dashboard: dashboardApi,
+  rentalRequests: rentalRequestApi,
 };

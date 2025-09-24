@@ -1,15 +1,13 @@
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
+'use client';
+
+import DashboardLayoutFixed from '@/components/dashboard/DashboardLayoutFixed';
 import UserProfile from '@/components/dashboard/UserProfile';
 
 export default function ProfilePage() {
   return (
-    <DashboardLayout>
+    <DashboardLayoutFixed>
       <UserProfile />
-    </DashboardLayout>
+    </DashboardLayoutFixed>
   );
 }
 
-export const metadata = {
-  title: 'Thông tin cá nhân | NhaTroVN',
-  description: 'Cập nhật thông tin cá nhân và cài đặt tài khoản.',
-};

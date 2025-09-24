@@ -1,10 +1,12 @@
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
+'use client';
+
+import DashboardLayoutFixed from '@/components/dashboard/DashboardLayoutFixed';
 import PaymentHistory from '@/components/payment/PaymentHistory';
 
 export default function PaymentHistoryPage() {
   return (
-    <DashboardLayout>
+    <DashboardLayoutFixed>
       <PaymentHistory />
-    </DashboardLayout>
+    </DashboardLayoutFixed>
   );
 }

@@ -1,5 +1,7 @@
+'use client';
+
 import { redirect } from 'next/navigation';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import DashboardLayoutFixed from '@/components/dashboard/DashboardLayoutFixed';
 import DashboardOverview from '@/components/dashboard/DashboardOverview';
 
 // Mock auth check - trong thực tế sẽ check từ session/JWT
@@ -11,13 +13,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayoutFixed>
       <DashboardOverview />
-    </DashboardLayout>
+    </DashboardLayoutFixed>
   );
 }
 
-export const metadata = {
-  title: 'Dashboard - Quản lý tin đăng | NhaTroVN',
-  description: 'Quản lý tin đăng, theo dõi thống kê và cập nhật thông tin cá nhân.',
-};

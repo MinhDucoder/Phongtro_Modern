@@ -12,7 +12,9 @@ import {
   EyeIcon,
   ChatBubbleLeftIcon
 } from '@heroicons/react/24/outline';
+import { rentalRequestApi } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { getFirstImage } from '@/lib/imageUtils';
 
 // Mock data - trong thực tế sẽ fetch từ API
 const mockRequests = [
@@ -88,14 +90,70 @@ const mockRequests = [
 ];
 
 export default function YeuCauThueClient() {
-  const [requests, setRequests] = useState(mockRequests);
+  const [requests, setRequests] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    fetchRequests();
+    fetchStats();
+  }, [selectedStatus]);
+
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      const response = await rentalRequestApi.getLandlordRequests({
+        page: 1,
+        limit: 20,
+        status: selectedStatus === 'all' ? undefined : selectedStatus
+      });
+
+      if (response && response.data && response.data.requests) {
+        setRequests(response.data.requests);
+        
+        // Calculate stats from the requests data
+        const calculatedStats = {
+          total: response.data.requests.length,
+          pending: response.data.requests.filter(r => r.status === 'pending').length,
+          accepted: response.data.requests.filter(r => r.status === 'accepted').length,
+          rejected: response.data.requests.filter(r => r.status === 'rejected').length,
+        };
+        setStats(calculatedStats);
+        
+        toast.success(`Đã tải ${response.data.requests.length} yêu cầu thuê`);
+      }
+    } catch (error) {
+      console.error('Error fetching requests:', error);
+      toast.error('Không thể tải danh sách yêu cầu thuê');
+      // Fallback to mock data
+      setRequests(mockRequests);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const response = await rentalRequestApi.getRequestStats();
+      if (response && response.data) {
+        setStats(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      // Fallback stats - calculate from current requests
+      const calculatedStats = {
+        total: requests.length,
+        pending: requests.filter(r => r.status === 'pending').length,
+        accepted: requests.filter(r => r.status === 'accepted').length,
+        rejected: requests.filter(r => r.status === 'rejected').length,
+      };
+      setStats(calculatedStats);
+    }
+  };
 
   const filteredRequests = requests.filter(request => {
     if (selectedStatus === 'all') return true;
@@ -149,18 +207,21 @@ export default function YeuCauThueClient() {
 
   const handleAcceptRequest = async (requestId: string) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await rentalRequestApi.updateRequestStatus(
+        requestId, 
+        'accepted',
+        'Yêu cầu thuê của bạn đã được chấp nhận. Chúng tôi sẽ liên hệ với bạn sớm nhất.'
+      );
       
-      setRequests(prev => prev.map(req => 
-        req.id === requestId 
-          ? { ...req, status: 'accepted' }
-          : req
-      ));
-      
-      toast.success('Đã chấp nhận yêu cầu thuê');
-    } catch {
-      toast.error('Có lỗi xảy ra');
+      if (response) {
+        // Refresh requests and stats
+        await fetchRequests();
+        await fetchStats();
+        toast.success('Đã chấp nhận yêu cầu thuê');
+      }
+    } catch (error) {
+      console.error('Error accepting request:', error);
+      toast.error('Có lỗi xảy ra khi chấp nhận yêu cầu');
     }
   };
 
@@ -168,18 +229,21 @@ export default function YeuCauThueClient() {
     if (!confirm('Bạn có chắc chắn muốn từ chối yêu cầu thuê này?')) return;
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await rentalRequestApi.updateRequestStatus(
+        requestId, 
+        'rejected',
+        'Rất tiếc, yêu cầu thuê của bạn không phù hợp với yêu cầu hiện tại. Cảm ơn bạn đã quan tâm.'
+      );
       
-      setRequests(prev => prev.map(req => 
-        req.id === requestId 
-          ? { ...req, status: 'rejected' }
-          : req
-      ));
-      
-      toast.success('Đã từ chối yêu cầu thuê');
-    } catch {
-      toast.error('Có lỗi xảy ra');
+      if (response) {
+        // Refresh requests and stats
+        await fetchRequests();
+        await fetchStats();
+        toast.success('Đã từ chối yêu cầu thuê');
+      }
+    } catch (error) {
+      console.error('Error rejecting request:', error);
+      toast.error('Có lỗi xảy ra khi từ chối yêu cầu');
     }
   };
 
@@ -306,19 +370,17 @@ export default function YeuCauThueClient() {
             const StatusIcon = statusInfo.icon;
             
             return (
-              <div key={request.id} className="bg-white rounded-lg shadow-sm border p-6">
+              <div key={request._id} className="bg-white rounded-lg shadow-sm border p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-start space-x-4">
-                    <img 
-                      src={request.seeker.avatar} 
-                      alt={request.seeker.name}
-                      className="w-12 h-12 rounded-full"
-                    />
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                      <UserIcon className="w-6 h-6 text-blue-600" />
+                    </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{request.seeker.name}</h3>
-                      <p className="text-sm text-gray-600">{request.seeker.occupation} • {request.seeker.age} tuổi</p>
+                      <h3 className="font-semibold text-gray-900">{request.tenant?.full_name || 'Không có tên'}</h3>
+                      <p className="text-sm text-gray-600">{request.tenant?.email || ''}</p>
                       <p className="text-sm text-gray-500">
-                        Gửi yêu cầu lúc {formatDate(request.submittedAt)}
+                        Gửi yêu cầu lúc {formatDate(new Date(request.createdAt))}
                       </p>
                     </div>
                   </div>
@@ -338,16 +400,20 @@ export default function YeuCauThueClient() {
                     </h4>
                     <div className="flex items-start space-x-3">
                       <img 
-                        src={request.property.image} 
-                        alt={request.property.title}
+                        src={getFirstImage(request.post?.roomId?.images)} 
+                        alt={request.post?.roomId?.title || 'Room image'}
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                       <div>
                         <p className="font-medium text-gray-900 line-clamp-2">
-                          {request.property.title}
+                          {request.post?.roomId?.title || 'Không có tiêu đề'}
                         </p>
-                        <p className="text-sm text-gray-600">{request.property.location}</p>
-                        <p className="text-sm font-medium text-green-600">{request.property.price}</p>
+                        <p className="text-sm text-gray-600">
+                          {request.post?.roomId?.address || ''}, {request.post?.roomId?.city || ''}
+                        </p>
+                        <p className="text-sm font-medium text-green-600">
+                          {request.post?.roomId?.price ? `${request.post.roomId.price.toLocaleString()} VNĐ` : 'N/A'}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -361,13 +427,13 @@ export default function YeuCauThueClient() {
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center">
                         <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
-                        <span>{request.seeker.phone}</span>
+                        <span>{request.tenant?.phone || 'N/A'}</span>
                       </div>
                       <div className="flex items-center">
                         <CalendarIcon className="w-4 h-4 mr-2 text-gray-400" />
-                        <span>Dự kiến chuyển vào: {new Date(request.seeker.expectedMoveIn).toLocaleDateString('vi-VN')}</span>
+                        <span>Dự kiến chuyển vào: {new Date(request.expectedMoveIn).toLocaleDateString('vi-VN')}</span>
                       </div>
-                      <p className="text-gray-600">Lịch sử thuê: {request.seeker.rentalHistory}</p>
+                      <p className="text-gray-600">Số người: {request.tenantInfo?.numberOfPeople || 1}</p>
                     </div>
                   </div>
                 </div>
@@ -375,21 +441,21 @@ export default function YeuCauThueClient() {
                 {/* Message */}
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                   <h4 className="font-medium text-gray-900 mb-2">Tin nhắn từ người thuê:</h4>
-                  <p className="text-gray-700">{request.seeker.message}</p>
+                  <p className="text-gray-700">{request.message || 'Không có tin nhắn'}</p>
                 </div>
 
                 {/* Actions */}
                 {request.status === 'pending' && (
                   <div className="mt-6 flex flex-col sm:flex-row gap-4">
                     <button
-                      onClick={() => handleAcceptRequest(request.id)}
+                      onClick={() => handleAcceptRequest(request._id)}
                       className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center"
                     >
                       <CheckCircleIcon className="w-5 h-5 mr-2" />
                       Chấp nhận
                     </button>
                     <button
-                      onClick={() => handleRejectRequest(request.id)}
+                      onClick={() => handleRejectRequest(request._id)}
                       className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center"
                     >
                       <XCircleIcon className="w-5 h-5 mr-2" />

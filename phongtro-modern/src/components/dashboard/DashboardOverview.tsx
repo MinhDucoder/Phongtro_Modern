@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -16,38 +17,8 @@ import {
   ClockIcon,
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
-
-// Mock data - trong thực tế sẽ fetch từ API
-const stats = [
-  {
-    name: 'Tổng tin đăng',
-    value: '12',
-    change: '+2',
-    changeType: 'increase',
-    icon: DocumentTextIcon,
-  },
-  {
-    name: 'Yêu cầu thuê',
-    value: '8',
-    change: '+3',
-    changeType: 'increase',
-    icon: HandRaisedIcon,
-  },
-  {
-    name: 'Lượt xem tháng này',
-    value: '2,847',
-    change: '+12%',
-    changeType: 'increase',
-    icon: EyeIcon,
-  },
-  {
-    name: 'Doanh thu tháng',
-    value: '2.5M',
-    change: '+18%',
-    changeType: 'increase',
-    icon: CreditCardIcon,
-  },
-];
+import { dashboardApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 const recentActivities = [
   {
@@ -115,8 +86,8 @@ const myPostings = [
     status: 'expired',
     views: 567,
     likes: 23,
-    posted: '1 tuần trước',
-  },
+    posted: '1 tuần trước'
+  }
 ];
 
 const getStatusBadge = (status: string) => {
@@ -150,13 +121,98 @@ const getActivityIcon = (type: string) => {
 };
 
 export default function DashboardOverview() {
+  const [overview, setOverview] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardOverview();
+  }, []);
+
+  const fetchDashboardOverview = async () => {
+    try {
+      setLoading(true);
+      const response = await dashboardApi.getOverview();
+      
+      if (response && response.data) {
+        setOverview(response.data);
+        toast.success('Đã tải dữ liệu dashboard');
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard overview:', error);
+      toast.error('Không thể tải dữ liệu dashboard');
+      // Fallback to mock data on error
+      setOverview({
+        stats: {
+          totalPosts: 12,
+          pendingRequests: 3,
+          todayViews: 2847,
+          todayRevenue: 250000
+        },
+        changes: {
+          postsChange: '+2',
+          requestsChange: '+3',
+          viewsChange: '+12%',
+          revenueChange: '+18%'
+        }
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="bg-gray-200 h-32 rounded-lg mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-gray-200 h-24 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const stats = overview ? [
+    {
+      name: 'Tổng tin đăng',
+      value: overview.stats.totalPosts?.toString() || '0',
+      change: overview.changes.postsChange || '+0',
+      changeType: 'increase',
+      icon: DocumentTextIcon,
+    },
+    {
+      name: 'Yêu cầu thuê',
+      value: overview.stats.pendingRequests?.toString() || '0',
+      change: overview.changes.requestsChange || '+0',
+      changeType: 'increase',
+      icon: HandRaisedIcon,
+    },
+    {
+      name: 'Lượt xem hôm nay',
+      value: overview.stats.todayViews?.toLocaleString() || '0',
+      change: overview.changes.viewsChange || '+0%',
+      changeType: 'increase',
+      icon: EyeIcon,
+    },
+    {
+      name: 'Doanh thu hôm nay',
+      value: overview.stats.todayRevenue ? `${(overview.stats.todayRevenue / 1000)}K` : '0',
+      change: overview.changes.revenueChange || '+0%',
+      changeType: 'increase',
+      icon: CreditCardIcon,
+    }
+  ] : [];
+
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
         <h2 className="text-2xl font-bold mb-2">Chào mừng trở lại!</h2>
         <p className="text-blue-100 mb-4">
-          Bạn có 3 yêu cầu thuê mới cần xử lý và 15 lượt xem mới trong hôm nay.
+          Bạn có {overview?.stats?.pendingRequests || 0} yêu cầu thuê mới cần xử lý và {overview?.stats?.todayViews || 0} lượt xem mới trong hôm nay.
         </p>
         <Link
           href="/dang-tin"

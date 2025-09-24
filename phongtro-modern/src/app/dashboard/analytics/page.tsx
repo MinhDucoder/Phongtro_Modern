@@ -1,15 +1,13 @@
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
+'use client';
+
+import DashboardLayoutFixed from '@/components/dashboard/DashboardLayoutFixed';
 import PropertyAnalytics from '@/components/analytics/PropertyAnalytics';
 
 export default function AnalyticsPage() {
   return (
-    <DashboardLayout>
+    <DashboardLayoutFixed>
       <PropertyAnalytics />
-    </DashboardLayout>
+    </DashboardLayoutFixed>
   );
 }
 
-export const metadata = {
-  title: 'Phân tích tin đăng | NhaTroVN',
-  description: 'Theo dõi hiệu quả tin đăng với analytics chi tiết.',
-};

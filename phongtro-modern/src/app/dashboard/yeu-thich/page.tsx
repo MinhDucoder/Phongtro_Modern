@@ -1,15 +1,13 @@
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
+'use client';
+
+import DashboardLayoutFixed from '@/components/dashboard/DashboardLayoutFixed';
 import SavedProperties from '@/components/dashboard/SavedProperties';
 
 export default function SavedPropertiesPage() {
   return (
-    <DashboardLayout>
+    <DashboardLayoutFixed>
       <SavedProperties />
-    </DashboardLayout>
+    </DashboardLayoutFixed>
   );
 }
 
-export const metadata = {
-  title: 'Tin đã lưu | NhaTroVN',
-  description: 'Danh sách các tin đăng phòng trọ bạn đã lưu để xem sau.',
-};
