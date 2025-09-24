@@ -2,71 +2,83 @@
 import Conversation from "../models/conversation.js";
 import Message from "../models/message.js";
 
-export default function chatHandler(io) {
-  io.on("connection", (socket) => {
-    console.log(`🔌 New client connected: ${socket.id}`);
-
-    // join conversation room
-    socket.on("joinConversation", ({ conversationId }) => {
+export default function chatHandler(io, socket) {
+  // 👉 Join conversation room
+  socket.on("joinConversation", ({ conversationId }, callback) => {
+    try {
       socket.join(conversationId);
       console.log(`✅ ${socket.id} joined conversation ${conversationId}`);
-    });
+      if (callback) callback({ success: true, conversationId });
+    } catch (err) {
+      if (callback) callback({ success: false, error: err.message });
+    }
+  });
 
-    // send message
-    socket.on("sendMessage", async ({ conversationId, receiver, text, attachments }) => {
-      try {
-        const sender = socket.user._id; // giả định bạn gán user vào socket khi auth
-        // 1. create message
-        const message = await Message.create({
-          conversationId,
-          sender,
-          receiver,
-          text,
-          attachments,
-        });
+  // 👉 Send message
+  socket.on("sendMessage", async ({ conversationId, receiver, text, attachments }, callback) => {
+    try {
+      const sender = socket.user._id;
 
-        // 2. update lastMessage in conversation
-        await Conversation.findByIdAndUpdate(conversationId, {
-          lastMessage: {
-            text: message.text,
-            sender: message.sender,
-            createdAt: message.created_at,
-          },
-        });
+      // 1. Tạo message
+      const message = await Message.create({
+        conversationId,
+        sender,
+        receiver,
+        text,
+        attachments,
+      });
 
-        // 3. emit back to conversation room
-        io.to(conversationId).emit("receiveMessage", message);
+      // 2. Update lastMessage + updatedAt
+      await Conversation.findByIdAndUpdate(conversationId, {
+        lastMessage: {
+          text: message.text,
+          sender: message.sender,
+          createdAt: message.createdAt,
+        },
+        updatedAt: new Date(),
+      });
 
-        // 4. ack cho sender
-        socket.emit("messageSent", { messageId: message._id, status: "sent" });
-      } catch (err) {
-        console.error("Socket sendMessage error:", err.message);
-        socket.emit("errorMessage", { message: err.message });
-      }
-    });
+      // 3. Emit cho room
+      io.to(conversationId).emit("receiveMessage", message);
 
-    // message seen
-    socket.on("messageSeen", async ({ messageId, conversationId }) => {
-      try {
-        const message = await Message.findByIdAndUpdate(
-          messageId,
-          { status: "seen" },
-          { new: true }
-        );
+      // 4. Callback về cho client (ack)
+      if (callback) callback({ success: true, messageId: message._id });
+    } catch (err) {
+      console.error("❌ sendMessage error:", err.message);
+      if (callback) callback({ success: false, error: err.message });
+    }
+  });
 
-        // emit cho cả room biết message đã seen
-        io.to(conversationId).emit("messageSeen", {
-          messageId: message._id,
-          status: "seen",
-        });
-      } catch (err) {
-        console.error("Socket messageSeen error:", err.message);
-        socket.emit("errorMessage", { message: err.message });
-      }
-    });
+  // 👉 Message seen
+  socket.on("messageSeen", async ({ messageId, conversationId }, callback) => {
+    try {
+      const message = await Message.findByIdAndUpdate(
+        messageId,
+        { status: "seen" },
+        { new: true }
+      );
 
-    socket.on("disconnect", () => {
-      console.log(`❌ Client disconnected: ${socket.id}`);
-    });
+      if (!message) throw new Error("Message not found");
+
+      io.to(conversationId).emit("messageSeen", {
+        messageId: message._id,
+        userId: socket.user._id,
+        status: "seen",
+      });
+
+      if (callback) callback({ success: true, messageId });
+    } catch (err) {
+      console.error("❌ messageSeen error:", err.message);
+      if (callback) callback({ success: false, error: err.message });
+    }
   });
 }
+
+// xử lí callback lỗi client khi nhận respone từ server
+// socket.emit("sendMessage", payload, (response) => {
+//   if (response.success) {
+//     console.log("✅ Message sent:", response.messageId);
+//   } else {
+//     console.error("❌ Error:", response.error);
+//   }
+// });

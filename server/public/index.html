@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Client</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="chat-client.js"></script>
+</head>
+<body>
+  <h2>Chat Client</h2>
+  <div>
+    <label>Token:</label>
+    <input id="token" type="text" placeholder="JWT token"/>
+    <button onclick="client.connect(document.getElementById('token').value)">Connect</button>
+  </div>
+  <div>
+    <label>Conversation ID:</label>
+    <input id="conversationId" type="text"/>
+    <button onclick="client.joinConversation(document.getElementById('conversationId').value)">Join</button>
+  </div>
+  <div>
+    <label>Receiver ID:</label>
+    <input id="receiverId" type="text"/>
+  </div>
+  <div>
+    <label>Message:</label>
+    <input id="message" type="text"/>
+    <button onclick="client.sendMessage({ text: document.getElementById('message').value, receiverId: document.getElementById('receiverId').value })">Send</button>
+  </div>
+  <div>
+    <label>Message ID:</label>
+    <input id="messageId" type="text" placeholder="for mark seen"/>
+    <button onclick="client.markSeen(document.getElementById('messageId').value)">Mark Seen</button>
+  </div>
+  <h3>Logs</h3>
+  <div id="logs" style="border:1px solid #ccc; height:200px; overflow:auto;"></div>
+
+  <script>
+    const client = new ChatClient({
+      serverUrl: "http://localhost:3000",
+      logElementId: "logs",
+    });
+  </script>
+</body>
+</html>
