@@ -11,6 +11,9 @@ router.post("/register", catchAsync(AuthController.register));
 router.get("/verify-email", catchAsync(AuthController.verifyEmail)); // Đã thay đổi từ /:token sang ?token= query param
 router.post("/resend-verification", catchAsync(AuthController.resendVerificationEmail));
 router.post("/login", catchAsync(AuthController.login));
+router.post("/forgot-password", catchAsync(AuthController.forgotPassword));
+router.get("/verify-reset-token", catchAsync(AuthController.verifyResetToken));
+router.post("/reset-password", catchAsync(AuthController.resetPassword));
 router.post("/refresh-token", catchAsync(AuthController.refreshToken));
 router.post("/logout", catchAsync(AuthController.logout)); // Không cần authenticate
 

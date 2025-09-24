@@ -8,8 +8,8 @@ const testEmail = async () => {
   try {
     console.log('Starting email test...');
     console.log('Environment variables:', {
-      EMAIL_USER: process.env.EMAIL_USER,
-      EMAIL_PASS: process.env.EMAIL_PASS ? '(set)' : '(not set)',
+      GMAIL_USER: process.env.GMAIL_USER,
+      GMAIL_APP_PASSWORD: process.env.GMAIL_APP_PASSWORD ? '(set)' : '(not set)',
       FRONTEND_URL: process.env.FRONTEND_URL
     });
 

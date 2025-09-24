@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { type } from 'os';
 
 interface AuthFormProps {
   type: 'login' | 'register';
@@ -417,9 +418,13 @@ export default function AuthForm({ type }: AuthFormProps) {
             </div>
 
             <div className="text-sm">
-              <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+              <button 
+                type="button" 
+                onClick={() => router.push('/quen-mat-khau')} 
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
                 Quên mật khẩu?
-              </a>
+              </button>
             </div>
           </div>
         )}

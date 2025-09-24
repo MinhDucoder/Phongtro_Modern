@@ -32,6 +32,8 @@ const userSchema = new Schema(
     last_login: { type: Date, default: null },
     verification_token: { type: String }, // token xác thực email
     verification_token_expires: { type: Date }, // thời hạn của token xác thực
+    password_reset_token: { type: String }, // token đặt lại mật khẩu
+    password_reset_expires: { type: Date }, // thời hạn token đặt lại mật khẩu
     refresh_token: { type: String }, // refresh token
     google_id: { type: String },
     facebook_id: { type: String }

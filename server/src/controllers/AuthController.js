@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import User from "~/models/userSchema.js";
 import dotenv from "dotenv";
 import fs from "fs/promises";
-import { generateVerificationToken, sendVerificationEmail } from '~/services/emailService.js';
+import { generateVerificationToken, sendVerificationEmail, generatePasswordResetToken, sendPasswordResetEmail } from '~/services/emailService.js';
 
 dotenv.config();
 
@@ -35,9 +35,9 @@ class AuthController {
 
     console.log('Starting email verification process...');
     console.log('Environment variables:', {
-      EMAIL_USER: process.env.EMAIL_USER,
+      GMAIL_USER: process.env.GMAIL_USER,
       FRONTEND_URL: process.env.FRONTEND_URL,
-      has_EMAIL_PASS: !!process.env.EMAIL_PASS
+      has_APP_PASSWORD: !!process.env.GMAIL_APP_PASSWORD
     });
 
     // Gửi email xác thực
@@ -241,6 +241,172 @@ class AuthController {
     } catch (error) {
       console.error("Logout error:", error);
       res.status(500).json({ message: "Có lỗi xảy ra khi đăng xuất" });
+    }
+  }
+
+  // ====== FORGOT PASSWORD ======
+  async forgotPassword(req, res) {
+    try {
+      const { email } = req.body;
+      console.log('Forgot password request for email:', email);
+      
+      if (!email) {
+        console.log('Email is missing in request');
+        return res.status(400).json({ 
+          success: false, 
+          message: "Vui lòng nhập địa chỉ email" 
+        });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        console.log('Invalid email format:', email);
+        return res.status(400).json({ 
+          success: false, 
+          message: "Địa chỉ email không hợp lệ" 
+        });
+      }
+
+      const user = await User.findOne({ email });
+      if (!user) {
+        console.log('User not found for email:', email);
+        // Không tiết lộ thông tin user có tồn tại hay không
+        return res.status(200).json({ 
+          success: true,
+          message: "Nếu email này tồn tại trong hệ thống, bạn sẽ nhận được email hướng dẫn đặt lại mật khẩu" 
+        });
+      }
+
+      // Tạo reset token và lưu vào database
+      console.log('Generating reset token for user:', user._id);
+      const resetToken = generatePasswordResetToken();
+      user.password_reset_token = resetToken;
+      user.password_reset_expires = new Date(Date.now() + 60 * 60 * 1000); // 1 giờ
+      await user.save();
+      console.log('Reset token saved to database for user:', user._id);
+
+      try {
+        // Gửi email reset password
+        console.log('Sending password reset email to:', email);
+        const emailSent = await sendPasswordResetEmail(email, resetToken);
+        
+        if (!emailSent) {
+          console.error('Failed to send password reset email to:', email);
+          return res.status(500).json({ 
+            success: false,
+            message: "Có lỗi khi gửi email. Vui lòng thử lại sau." 
+          });
+        }
+
+        console.log('Password reset email sent successfully to:', email);
+        res.status(200).json({ 
+          success: true,
+          message: "Email hướng dẫn đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư của bạn." 
+        });
+      } catch (emailError) {
+        console.error('Error sending password reset email:', emailError);
+        res.status(500).json({ 
+          success: false,
+          message: "Có lỗi khi gửi email. Vui lòng thử lại sau." 
+        });
+      }
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      console.error('Error stack:', error.stack);
+      res.status(500).json({ 
+        success: false,
+        message: "Có lỗi xảy ra. Vui lòng thử lại sau." 
+      });
+    }
+  }
+
+  // ====== RESET PASSWORD ======
+  async resetPassword(req, res) {
+    try {
+      const { token, newPassword } = req.body;
+      
+      if (!token || !newPassword) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Token và mật khẩu mới là bắt buộc" 
+        });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Mật khẩu phải có ít nhất 6 ký tự" 
+        });
+      }
+
+      // Tìm user với token hợp lệ và chưa hết hạn
+      const user = await User.findOne({
+        password_reset_token: token,
+        password_reset_expires: { $gt: new Date() }
+      });
+
+      if (!user) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Token không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu đặt lại mật khẩu mới." 
+        });
+      }
+
+      // Cập nhật mật khẩu mới
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      user.password = hashedPassword;
+      user.password_reset_token = undefined;
+      user.password_reset_expires = undefined;
+      await user.save();
+
+      res.status(200).json({ 
+        success: true,
+        message: "Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới." 
+      });
+    } catch (error) {
+      console.error('Reset password error:', error);
+      res.status(500).json({ 
+        success: false,
+        message: "Có lỗi xảy ra khi đặt lại mật khẩu. Vui lòng thử lại sau." 
+      });
+    }
+  }
+
+  // ====== VERIFY RESET TOKEN ======
+  async verifyResetToken(req, res) {
+    try {
+      const { token } = req.query;
+      
+      if (!token) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Token không hợp lệ" 
+        });
+      }
+
+      const user = await User.findOne({
+        password_reset_token: token,
+        password_reset_expires: { $gt: new Date() }
+      });
+
+      if (!user) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Token không hợp lệ hoặc đã hết hạn" 
+        });
+      }
+
+      res.status(200).json({ 
+        success: true,
+        message: "Token hợp lệ" 
+      });
+    } catch (error) {
+      console.error('Verify reset token error:', error);
+      res.status(500).json({ 
+        success: false,
+        message: "Có lỗi xảy ra khi xác thực token" 
+      });
     }
   }
 }
