@@ -30,6 +30,10 @@ const userSchema = new Schema(
     is_verified: { type: Boolean, default: false },
     is_banned: { type: Boolean, default: false },
     last_login: { type: Date, default: null },
+    is_deleted: { type: Boolean, default: false }, // Soft delete flag
+    deleted_at: { type: Date, default: null }, // Soft delete timestamp
+    ban_reason: { type: String }, // Reason for banning the user
+    banned_at: { type: Date }, // When the user was banned
     verification_token: { type: String }, // token xác thực email
     verification_token_expires: { type: Date }, // thời hạn của token xác thực
     password_reset_token: { type: String }, // token đặt lại mật khẩu

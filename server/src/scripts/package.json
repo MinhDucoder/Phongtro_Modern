@@ -1,0 +1,13 @@
+{
+  "name": "user-delete-test",
+  "version": "1.0.0",
+  "description": "Test script for user deletion",
+  "main": "test-user-delete.js",
+  "type": "module",
+  "scripts": {
+    "test": "node test-user-delete.js"
+  },
+  "dependencies": {
+    "mongodb": "^6.20.0"
+  }
+}
