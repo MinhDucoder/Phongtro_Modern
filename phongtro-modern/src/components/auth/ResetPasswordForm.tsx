@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { customToast } from '@/components/ui/CustomToast';
 
 export default function ResetPasswordForm() {
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function ResetPasswordForm() {
   useEffect(() => {
     const verifyToken = async () => {
       if (!token) {
-        toast.error('Không tìm thấy token. Vui lòng thử lại.');
+        customToast.error('Không tìm thấy token. Vui lòng thử lại.');
         router.push('/quen-mat-khau');
         return;
       }
@@ -40,12 +40,12 @@ export default function ResetPasswordForm() {
           setTokenValid(true);
           setUserEmail(data.email);
         } else {
-          toast.error(data.message || 'Token không hợp lệ hoặc đã hết hạn');
+          customToast.error(data.message || 'Token không hợp lệ hoặc đã hết hạn');
           router.push('/quen-mat-khau');
         }
       } catch (error) {
         console.error('Token verification error:', error);
-        toast.error('Có lỗi xảy ra khi xác minh token');
+        customToast.error('Có lỗi xảy ra khi xác minh token');
         router.push('/quen-mat-khau');
       } finally {
         setIsVerifying(false);
@@ -161,16 +161,16 @@ export default function ResetPasswordForm() {
       const data = await response.json();
 
       if (data.success) {
-        toast.success('Đặt lại mật khẩu thành công!');
+        customToast.success('Đặt lại mật khẩu thành công!');
         setTimeout(() => {
           router.push('/dang-nhap?reset=success');
         }, 1500);
       } else {
-        toast.error(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+        customToast.error(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
       }
     } catch (error) {
       console.error('Reset password error:', error);
-      toast.error('Có lỗi xảy ra. Vui lòng thử lại sau.');
+      customToast.error('Có lỗi xảy ra. Vui lòng thử lại sau.');
     } finally {
       setIsLoading(false);
     }

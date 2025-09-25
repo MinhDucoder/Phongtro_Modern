@@ -16,7 +16,11 @@ class AuthController {
     const { full_name, email, password, phone } = req.body;
 
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: "Email đã tồn tại" });
+    if (existingUser) return res.status(400).json({ 
+      success: false,
+      message: "Email này đã có tài khoản. Bạn có thể đăng nhập hoặc thử với email khác.",
+      action: "login"  // Gợi ý frontend có thể hiển thị link đăng nhập
+    });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const verificationToken = generateVerificationToken();
@@ -146,25 +150,37 @@ class AuthController {
       const { email, password } = req.body;
 
       const user = await User.findOne({ email }).select('+password');
-      if (!user) return res.status(401).json({ message: "Email không tồn tại" });
+      if (!user) return res.status(401).json({ 
+        success: false, 
+        message: "Email hoặc mật khẩu không chính xác", 
+        errorType: "invalid_credentials" 
+      });
 
       if (!user.password) {
         console.error('No password found for user:', email);
-        return res.status(500).json({ success: false, message: "Lỗi xác thực" });
+        return res.status(500).json({ 
+          success: false, 
+          message: "Tài khoản của bạn có vấn đề. Vui lòng liên hệ hỗ trợ.", 
+          errorType: "account_issue" 
+        });
       }
 
       // Kiểm tra xác thực email
       if (!user.is_verified) {
         return res.status(403).json({ 
           success: false, 
-          message: "Vui lòng xác thực email trước khi đăng nhập",
+          message: "Tài khoản chưa được xác thực. Vui lòng kiểm tra email để xác thực trước khi đăng nhập.",
           needVerification: true,
           email: user.email
         });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) return res.status(401).json({ message: "Sai mật khẩu" });
+      if (!isMatch) return res.status(401).json({ 
+        success: false, 
+        message: "Email hoặc mật khẩu không chính xác", 
+        errorType: "invalid_credentials" 
+      });
 
       const token = jwt.sign({ 
         id: user._id, 
@@ -205,7 +221,7 @@ class AuthController {
       });
     } catch (error) {
       console.error('Login error:', error);
-      res.status(500).json({ success: false, message: "Có lỗi xảy ra khi đăng nhập" });
+      res.status(500).json({ success: false, message: "Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau." });
     }
   }
 
@@ -243,10 +259,10 @@ class AuthController {
         sameSite: "lax"
       });
       
-      res.status(200).json({ message: "Đã đăng xuất" });
+      res.status(200).json({ message: "Đã đăng xuất thành công" });
     } catch (error) {
       console.error("Logout error:", error);
-      res.status(500).json({ message: "Có lỗi xảy ra khi đăng xuất" });
+      res.status(500).json({ message: "Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại." });
     }
   }
 
@@ -260,7 +276,7 @@ class AuthController {
         console.log('Email is missing in request');
         return res.status(400).json({ 
           success: false, 
-          message: "Vui lòng nhập địa chỉ email" 
+          message: "Vui lòng nhập địa chỉ email của bạn" 
         });
       }
 
@@ -270,7 +286,7 @@ class AuthController {
         console.log('Invalid email format:', email);
         return res.status(400).json({ 
           success: false, 
-          message: "Địa chỉ email không hợp lệ" 
+          message: "Địa chỉ email không đúng định dạng" 
         });
       }
 
@@ -322,7 +338,7 @@ class AuthController {
       console.error('Error stack:', error.stack);
       res.status(500).json({ 
         success: false,
-        message: "Có lỗi xảy ra. Vui lòng thử lại sau." 
+        message: "Có lỗi xảy ra trong quá trình xử lý yêu cầu. Vui lòng thử lại sau." 
       });
     }
   }
@@ -335,14 +351,14 @@ class AuthController {
       if (!token || !newPassword) {
         return res.status(400).json({ 
           success: false, 
-          message: "Token và mật khẩu mới là bắt buộc" 
+          message: "Thiếu thông tin cần thiết. Vui lòng nhập đầy đủ mật khẩu mới." 
         });
       }
 
       if (newPassword.length < 6) {
         return res.status(400).json({ 
           success: false, 
-          message: "Mật khẩu phải có ít nhất 6 ký tự" 
+          message: "Mật khẩu phải có ít nhất 6 ký tự để đảm bảo an toàn" 
         });
       }
 
@@ -374,7 +390,7 @@ class AuthController {
       console.error('Reset password error:', error);
       res.status(500).json({ 
         success: false,
-        message: "Có lỗi xảy ra khi đặt lại mật khẩu. Vui lòng thử lại sau." 
+        message: "Có lỗi xảy ra khi đặt lại mật khẩu. Vui lòng thử lại hoặc yêu cầu mã mới." 
       });
     }
   }

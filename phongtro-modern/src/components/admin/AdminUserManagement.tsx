@@ -13,7 +13,7 @@ import {
   ShieldCheckIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { customToast } from '@/components/ui/CustomToast';
 
 interface User {
   _id: string;
@@ -90,11 +90,11 @@ export default function AdminUserManagement() {
         setStats(data.data.statistics);
         setTotalPages(data.data.pagination.totalPages);
       } else {
-        toast.error(data.message || 'Lỗi khi tải danh sách user');
+        customToast.error(data.message || 'Lỗi khi tải danh sách user');
       }
     } catch (error) {
       console.error('Error fetching users:', error);
-      toast.error('Lỗi kết nối server');
+      customToast.error('Lỗi kết nối server');
     } finally {
       setLoading(false);
     }
@@ -128,16 +128,16 @@ export default function AdminUserManagement() {
       const data = await response.json();
 
       if (data.success) {
-        toast.success(data.message);
+        customToast.success(data.message);
         fetchUsers();
         setShowBanModal(false);
         setBanReason('');
       } else {
-        toast.error(data.message);
+        customToast.error(data.message);
       }
     } catch (error) {
       console.error('Error banning user:', error);
-      toast.error('Lỗi khi cập nhật trạng thái user');
+      customToast.error('Lỗi khi cập nhật trạng thái user');
     }
   };
 
@@ -153,14 +153,14 @@ export default function AdminUserManagement() {
       const data = await response.json();
 
       if (data.success) {
-        toast.success('Cập nhật thành công');
+        customToast.success('Cập nhật thành công');
         fetchUsers();
       } else {
-        toast.error(data.message);
+        customToast.error(data.message);
       }
     } catch (error) {
       console.error('Error updating user:', error);
-      toast.error('Lỗi khi cập nhật user');
+      customToast.error('Lỗi khi cập nhật user');
     }
   };
 

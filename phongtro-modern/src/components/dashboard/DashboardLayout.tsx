@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardGuard from '@/components/auth/DashboardGuard';
+import { showLogoutSuccessToast } from '@/components/ui/LogoutSuccessToast';
 import { 
   HomeIcon, 
   DocumentTextIcon, 
@@ -52,9 +53,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const handleLogout = async () => {
     try {
       await logout();
+      showLogoutSuccessToast(); // Hiển thị toast đăng xuất với thời gian 2s
       router.push('/');
     } catch (error) {
       console.error('Logout error:', error);
+      // Xử lý lỗi im lặng
     }
   };
 

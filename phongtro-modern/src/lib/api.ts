@@ -8,6 +8,7 @@ export interface ApiResponse<T = any> {
   data?: T;
   token?: string;
   user?: User;
+  error?: string;
   pagination?: {
     total: number;
     page: number;
@@ -102,18 +103,97 @@ async function apiRequest<T>(
     clearTimeout(timeoutId);
     
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('API Error:', response.status, errorText);
+      let errorData;
+      const contentType = response.headers.get('content-type');
+      
+      try {
+        // Thử parse JSON nếu response là json
+        if (contentType && contentType.includes('application/json')) {
+          errorData = await response.json();
+        } else {
+          const errorText = await response.text();
+          errorData = { message: errorText };
+        }
+      } catch (e) {
+        const errorText = await response.text();
+        errorData = { message: errorText };
+      }
+      
+      // Chỉ hiển thị các lỗi không phải 401 trên console để tránh ồn ào log
+      if (response.status !== 401) {
+        console.warn(`API Response (${response.status}):`, errorData);
+      }
       
       // Handle specific error cases
       if (response.status === 401) {
         // Token expired or invalid - clear any stored auth data
         if (typeof window !== 'undefined') {
           document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          
+          // Kiểm tra xem đây có phải là lỗi phiên đăng nhập hết hạn hay không
+          const isSessionTimeout = endpoint !== '/auth/login' && !endpoint.includes('/auth/register');
+          
+          if (isSessionTimeout) {
+            // Nếu đây không phải là yêu cầu login/register, có khả năng phiên làm việc đã hết hạn
+            // Thêm mã tại đây nếu muốn chuyển hướng người dùng đến trang đăng nhập
+            console.log('Phiên làm việc đã hết hạn, sẽ cần đăng nhập lại');
+          }
         }
+        
+        // Tạo thông báo lỗi thân thiện hơn cho 401
+        let friendlyMessage;
+        if (errorData?.message && errorData.message.includes('Email hoặc mật khẩu không chính xác')) {
+          friendlyMessage = "Email hoặc mật khẩu không chính xác";
+        } else if (endpoint === '/auth/login') {
+          friendlyMessage = "Thông tin đăng nhập không chính xác";
+        } else {
+          friendlyMessage = "Phiên làm việc đã hết hạn, vui lòng đăng nhập lại";
+        }
+        
+        throw new Error(friendlyMessage);
       }
       
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
+      // Tạo thông báo thân thiện cho các lỗi khác
+      let friendlyMessage = errorData?.message || "Có lỗi xảy ra, vui lòng thử lại sau";
+      
+      // Thông báo thân thiện dựa trên status code
+      switch (response.status) {
+        case 400:
+          // Cố gắng trích xuất thông báo lỗi cụ thể
+          if (errorData?.message) {
+            if (errorData.message.includes('email')) {
+              friendlyMessage = "Email không hợp lệ hoặc đã tồn tại trong hệ thống";
+            } else if (errorData.message.includes('password')) {
+              friendlyMessage = "Mật khẩu không đáp ứng yêu cầu bảo mật";
+            } else {
+              friendlyMessage = errorData.message;
+            }
+          } else {
+            friendlyMessage = "Thông tin không hợp lệ, vui lòng kiểm tra lại";
+          }
+          break;
+        case 403:
+          // Xác định rõ nguyên nhân của lỗi 403 (quyền truy cập)
+          if (endpoint.includes('/dashboard')) {
+            friendlyMessage = "Bạn không có quyền truy cập vào tính năng của chủ nhà. Vui lòng nâng cấp tài khoản lên landlord";
+          } else if (endpoint.includes('/admin')) {
+            friendlyMessage = "Tính năng này chỉ dành cho quản trị viên hệ thống";
+          } else {
+            friendlyMessage = errorData?.message || "Bạn không có quyền truy cập vào tính năng này";
+          }
+          break;
+        case 404:
+          friendlyMessage = errorData?.message || "Không tìm thấy thông tin yêu cầu";
+          break;
+        case 500:
+          friendlyMessage = "Hệ thống đang gặp sự cố. Vui lòng thử lại sau";
+          break;
+        case 503:
+          friendlyMessage = "Dịch vụ hiện đang bảo trì, vui lòng thử lại sau";
+          break;
+      }
+      
+      throw new Error(friendlyMessage);
     }
     
     // Check if response is JSON
@@ -130,12 +210,25 @@ async function apiRequest<T>(
     const data = await response.json();
     return data;
   } catch (error) {
+    // Xử lý lỗi timeout
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Request timeout - server không phản hồi');
+      console.warn('API request timeout:', url);
+      throw new Error('Kết nối đến máy chủ bị gián đoạn, vui lòng thử lại');
     }
+    
+    // Xử lý lỗi mạng
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      console.warn('Network error:', url);
+      throw new Error('Không thể kết nối đến máy chủ, vui lòng kiểm tra kết nối mạng');
+    }
+    
+    // Các lỗi đã được xử lý trước đó
     if (error instanceof Error) {
       throw error;
     }
+    
+    // Lỗi không xác định
+    console.error('Unhandled API error:', error);
     throw new Error('Có lỗi xảy ra khi kết nối với server');
   }
 }
@@ -190,11 +283,23 @@ export const authApi = {
 
   // Lấy thông tin user từ JWT token (API /me)
   async getMe(): Promise<ApiResponse> {
-    console.log('getMe: API_BASE_URL =', API_BASE_URL);
-    console.log('getMe: Full URL =', `${API_BASE_URL}/user/me`);
-    return apiRequest('/user/me', {
-      method: 'GET',
-    });
+    try {
+      return await apiRequest('/user/me', {
+        method: 'GET',
+      });
+    } catch (error) {
+      // Xử lý lỗi 401 một cách im lặng khi kiểm tra session
+      if (error instanceof Error && 
+          (error.message.includes('Phiên làm việc đã hết hạn') || 
+           error.message.includes('đăng nhập lại'))) {
+        // Trả về response thất bại mà không ném lỗi
+        return {
+          success: false,
+          message: 'Phiên làm việc đã hết hạn',
+        };
+      }
+      throw error;
+    }
   },
   
   // Đổi mật khẩu
@@ -266,9 +371,21 @@ export const roomApi = {
 export const dashboardApi = {
   // Get dashboard overview
   async getOverview(): Promise<ApiResponse> {
-    return apiRequest('/dashboard/overview', {
-      method: 'GET',
-    });
+    try {
+      return await apiRequest('/dashboard/overview', {
+        method: 'GET',
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("không có quyền truy cập")) {
+        // Trả về response thất bại với thông báo lỗi cụ thể về quyền truy cập
+        return {
+          success: false,
+          message: "Bạn cần có tài khoản chủ nhà (landlord) để truy cập tính năng này",
+          error: "PERMISSION_DENIED"
+        };
+      }
+      throw error; // Re-throw lỗi nếu không phải lỗi quyền truy cập
+    }
   },
 
   // Get landlord's posts

@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { customToast } from '@/components/ui/CustomToast';
 import { type } from 'os';
 
 interface AuthFormProps {

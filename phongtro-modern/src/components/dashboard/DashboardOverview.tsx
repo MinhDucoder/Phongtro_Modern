@@ -18,7 +18,7 @@ import {
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { dashboardApi } from '@/lib/api';
-import toast from 'react-hot-toast';
+import { customToast } from '@/components/ui/CustomToast';
 
 const recentActivities = [
   {
@@ -133,26 +133,64 @@ export default function DashboardOverview() {
       setLoading(true);
       const response = await dashboardApi.getOverview();
       
-      if (response && response.data) {
+      if (response.success && response.data) {
         setOverview(response.data);
-        toast.success('Đã tải dữ liệu dashboard');
+        customToast.success('Đã tải dữ liệu dashboard');
+      } else if (!response.success) {
+        // Xử lý trường hợp response thành công nhưng dữ liệu thất bại
+        if (response.error === "PERMISSION_DENIED") {
+          // Xử lý lỗi quyền truy cập
+          customToast.error(response.message || 'Bạn không có quyền truy cập vào tính năng này');
+          window.location.href = '/'; // Chuyển hướng về trang chủ nếu không có quyền
+          return;
+        } else {
+          customToast.error(response.message || 'Không thể tải dữ liệu dashboard');
+        }
+        
+        // Fallback to mock data on error
+        setOverview({
+          stats: {
+            totalPosts: 0,
+            pendingRequests: 0,
+            todayViews: 0,
+            todayRevenue: 0
+          },
+          changes: {
+            postsChange: '+0',
+            requestsChange: '+0',
+            viewsChange: '+0%',
+            revenueChange: '+0%'
+          }
+        });
       }
     } catch (error) {
       console.error('Error fetching dashboard overview:', error);
-      toast.error('Không thể tải dữ liệu dashboard');
-      // Fallback to mock data on error
+      
+      // Kiểm tra nếu là lỗi quyền truy cập
+      let errorMessage = 'Không thể tải dữ liệu dashboard';
+      if (error instanceof Error && error.message.includes('quyền truy cập')) {
+        errorMessage = error.message;
+        // Chuyển hướng nếu không có quyền truy cập
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 3000); // Chuyển hướng sau 3 giây
+      }
+      
+      customToast.error(errorMessage);
+      
+      // Fallback to empty data on error
       setOverview({
         stats: {
-          totalPosts: 12,
-          pendingRequests: 3,
-          todayViews: 2847,
-          todayRevenue: 250000
+          totalPosts: 0,
+          pendingRequests: 0,
+          todayViews: 0,
+          todayRevenue: 0
         },
         changes: {
-          postsChange: '+2',
-          requestsChange: '+3',
-          viewsChange: '+12%',
-          revenueChange: '+18%'
+          postsChange: '+0',
+          requestsChange: '+0',
+          viewsChange: '+0%',
+          revenueChange: '+0%'
         }
       });
     } finally {

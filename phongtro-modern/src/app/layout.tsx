@@ -4,7 +4,7 @@ import "./globals.css";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import ClientErrorBoundary from "@/components/ui/ClientErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { Toaster } from "react-hot-toast";
+import { CustomToaster } from "@/components/ui/CustomToast";
 import ConnectionStatus from "@/components/ui/ConnectionStatus";
 
 const geistSans = Geist({
@@ -89,30 +89,7 @@ export default function RootLayout({
             <ConditionalLayout>
               {children}
             </ConditionalLayout>
-            <Toaster 
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  background: '#363636',
-                  color: '#fff',
-                },
-                success: {
-                  duration: 3000,
-                  iconTheme: {
-                    primary: '#4ade80',
-                    secondary: '#fff',
-                  },
-                },
-                error: {
-                  duration: 5000,
-                  iconTheme: {
-                    primary: '#ef4444',
-                    secondary: '#fff',
-                  },
-                },
-              }}
-            />
+            <CustomToaster />
             {/* <ConnectionStatus /> */}
           </AuthProvider>
         </ClientErrorBoundary>

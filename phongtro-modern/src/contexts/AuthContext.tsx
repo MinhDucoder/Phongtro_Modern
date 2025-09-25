@@ -2,7 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authApi, User, ApiResponse } from '@/lib/api';
-import toast from 'react-hot-toast';
+import { customToast } from '@/components/ui/CustomToast';
+import { showLoginSuccessToast } from '@/components/ui/LoginSuccessToast';
 
 interface AuthContextType {
   user: User | null;
@@ -54,14 +55,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Check for Google OAuth success redirect
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    console.log('URL params:', window.location.search);
     if (urlParams.get('login') === 'success') {
-      console.log('Detected login=success, fetching user profile...');
       // Clear the URL parameter
       window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Hiển thị thông báo đăng nhập thành công từ OAuth
+      showLoginSuccessToast();
+      
       // Fetch user info after successful OAuth login
       setTimeout(() => {
-        fetchUserProfile();
+        // Gọi phiên bản đặc biệt không hiển thị thông báo
+        fetchUserProfileSilent();
       }, 1000); // Delay 1 second to ensure cookie is set
     }
   }, []);
@@ -74,8 +78,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const hasAccessToken = cookies.some(cookie => cookie.trim().startsWith('accessToken='));
       
       if (hasAccessToken && !user && !isLoading) {
-        console.log('Found accessToken cookie but no user data, fetching profile...');
-        fetchUserProfile();
+        // Luôn sử dụng phiên bản im lặng khi tự động kiểm tra đăng nhập
+        fetchUserProfileSilent();
       }
     };
 
@@ -83,24 +87,50 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setTimeout(checkCookie, 2000);
   }, [user, isLoading]);
 
+  // Phiên bản chuẩn của fetchUserProfile - sẽ không được sử dụng trực tiếp từ OAuth callbacks
   const fetchUserProfile = async () => {
     try {
-      console.log('fetchUserProfile: Starting...');
       setIsLoading(true);
-      console.log('fetchUserProfile: Calling API /me...');
       const response = await authApi.getMe();
-      console.log('fetchUserProfile: API response:', response);
+      
       // API /me trả về user trong response.user
       if (response.success && response.user) {
         setUser(response.user as User);
-        console.log('fetchUserProfile: User set successfully');
       } else {
-        console.log('fetchUserProfile: No user in response', response);
+        // Không hiển thị lỗi, chỉ xóa trạng thái user
         setUser(null);
+        
+        // Xóa cookie nếu phát hiện lỗi xác thực
+        if (response.message?.includes('Phiên làm việc đã hết hạn')) {
+          document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        }
       }
     } catch (error) {
-      console.error('Error fetching user profile:', error);
-      // Don't show error toast for profile fetch failures
+      // Xử lý lỗi im lặng, không hiển thị toast
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Phiên bản im lặng - không hiển thị thông báo đăng nhập thành công
+  // Được sử dụng cho OAuth callbacks để tránh hiển thị thông báo thành công hai lần
+  const fetchUserProfileSilent = async () => {
+    try {
+      setIsLoading(true);
+      const response = await authApi.getMe();
+      
+      if (response.success && response.user) {
+        setUser(response.user as User);
+      } else {
+        setUser(null);
+        
+        if (response.message?.includes('Phiên làm việc đã hết hạn')) {
+          document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        }
+      }
+    } catch (error) {
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -109,9 +139,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const checkAuthStatus = async () => {
     try {
       // Try to get user info from server using httpOnly cookie
-      await fetchUserProfile();
+      // Sử dụng phiên bản silent để không hiển thị thông báo
+      await fetchUserProfileSilent();
     } catch (error) {
-      console.error('Error checking auth status:', error);
       // Clear user state if authentication fails
       setUser(null);
     }
@@ -122,21 +152,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(true);
       const response: ApiResponse = await authApi.login({ email, password });
       
-      console.log('Login response:', response); // Debug log
-      
       if (response.success && response.user) {
         setUser(response.user);
         
-        toast.success(response.message || 'Đăng nhập thành công!');
+        // Hiển thị thông báo thành công sau khi đăng nhập với email/password
+        showLoginSuccessToast();
         return { success: true, user: response.user };
       }
       
-      toast.error(response.message || 'Đăng nhập thất bại');
+      // Server trả về thất bại nhưng không có thông báo lỗi
+      customToast.loginError(response.message || 'Đăng nhập không thành công');
       return { success: false };
     } catch (error) {
-      console.error('Login error:', error); // Debug log
-      const errorMessage = error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng nhập';
-      toast.error(errorMessage);
+      // Xử lý các lỗi từ API
+      let errorMessage = 'Không thể đăng nhập vào hệ thống, vui lòng thử lại';
+      
+      if (error instanceof Error) {
+        // Xử lý thông báo lỗi thân thiện
+        if (error.message.includes('Email hoặc mật khẩu không chính xác') ||
+            error.message.includes('Thông tin đăng nhập không chính xác')) {
+          errorMessage = 'Email hoặc mật khẩu không chính xác';
+        } else if (error.message.includes('kết nối') || error.message.includes('mạng')) {
+          errorMessage = 'Không thể kết nối đến máy chủ, vui lòng kiểm tra kết nối mạng';
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+      }
+      
+      customToast.loginError(errorMessage);
       return { success: false };
     } finally {
       setIsLoading(false);
@@ -154,11 +197,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(true);
       const response: ApiResponse = await authApi.register(userData);
       
-      toast.success(response.message || 'Đăng ký thành công!', { duration: 200 });
+      customToast.success(response.message || 'Đăng ký thành công!');
       return true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng ký';
-      toast.error(errorMessage, { duration: 200 });
+      customToast.error(errorMessage);
       return false;
     } finally {
       setIsLoading(false);
