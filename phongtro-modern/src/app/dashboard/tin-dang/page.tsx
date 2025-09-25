@@ -1,13 +1,13 @@
 'use client';
 
-import DashboardLayoutFixed from '@/components/dashboard/DashboardLayoutFixed';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import MyPostings from '@/components/dashboard/MyPostings';
 
 export default function MyPostingsPage() {
   return (
-    <DashboardLayoutFixed>
+    <DashboardLayout>
       <MyPostings />
-    </DashboardLayoutFixed>
+    </DashboardLayout>
   );
 }
 

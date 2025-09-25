@@ -10,8 +10,8 @@ interface ConditionalLayoutProps {
 export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
   const pathname = usePathname();
   
-  // Nếu là trang dashboard, admin, lịch hẹn, chat - không sử dụng ClientLayout
-  if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/lich-hen') || pathname.startsWith('/chat')) {
+  // Nếu là trang dashboard, admin, lịch hẹn, chat, thông báo - không sử dụng ClientLayout (ẩn header top)
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/lich-hen') || pathname.startsWith('/chat') || pathname.startsWith('/thong-bao')) {
     return <>{children}</>;
   }
   

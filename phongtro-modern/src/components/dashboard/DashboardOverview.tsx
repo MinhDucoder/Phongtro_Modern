@@ -1,461 +1,166 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import {
-  DocumentTextIcon,
-  EyeIcon,
-  PhoneIcon,
-  HeartIcon,
-  ChartBarIcon,
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-  PlusIcon,
-  CreditCardIcon,
-  HandRaisedIcon,
-  ClockIcon,
-  CheckCircleIcon
-} from '@heroicons/react/24/outline';
 import { dashboardApi } from '@/lib/api';
-import { customToast } from '@/components/ui/CustomToast';
 
-const recentActivities = [
-  {
-    id: 1,
-    type: 'request',
-    message: 'Có yêu cầu thuê mới từ Nguyễn Văn A',
-    time: '5 phút trước',
-    property: 'Phòng trọ gần ĐH Bách Khoa',
-  },
-  {
-    id: 2,
-    type: 'view',
-    message: 'Có người xem tin "Phòng trọ gần ĐH Bách Khoa"',
-    time: '2 phút trước',
-    property: 'Phòng trọ gần ĐH Bách Khoa',
-  },
-  {
-    id: 3,
-    type: 'call',
-    message: 'Có cuộc gọi từ 098****567',
-    time: '15 phút trước',
-    property: 'Căn hộ mini Hai Bà Trưng',
-  },
-  {
-    id: 4,
-    type: 'like',
-    message: 'Tin đăng được thêm vào yêu thích',
-    time: '1 giờ trước',
-    property: 'Phòng trọ full nội thất',
-  },
-];
-
-const myPostings = [
-  {
-    id: '1',
-    title: 'Phòng trọ gần ĐH Bách Khoa, full nội thất',
-    price: '3.5 triệu/tháng',
-    area: '25 m²',
-    location: 'Hai Bà Trưng, Hà Nội',
-    image: '/placeholder-room.svg',
-    status: 'active',
-    views: 234,
-    likes: 12,
-    posted: '2 ngày trước',
-  },
-  {
-    id: '2',
-    title: 'Căn hộ mini 1PN, có ban công, gần chợ',
-    price: '4.2 triệu/tháng',
-    area: '35 m²',
-    location: 'Thanh Xuân, Hà Nội',
-    image: '/placeholder-room.svg',
-    status: 'pending',
-    views: 89,
-    likes: 5,
-    posted: '1 ngày trước',
-  },
-  {
-    id: '3',
-    title: 'Phòng trọ giá rẻ, gần trường ĐH Kinh tế',
-    price: '2.8 triệu/tháng',
-    area: '20 m²',
-    location: 'Đống Đa, Hà Nội',
-    image: '/placeholder-room.svg',
-    status: 'expired',
-    views: 567,
-    likes: 23,
-    posted: '1 tuần trước'
-  }
-];
-
-const getStatusBadge = (status: string) => {
-  switch (status) {
-    case 'active':
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Đang hiển thị</span>;
-    case 'pending':
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Chờ duyệt</span>;
-    case 'expired':
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Hết hạn</span>;
-    default:
-      return null;
-  }
-};
-
-const getActivityIcon = (type: string) => {
-  switch (type) {
-    case 'request':
-      return <HandRaisedIcon className="h-5 w-5 text-orange-500" />;
-    case 'view':
-      return <EyeIcon className="h-5 w-5 text-blue-500" />;
-    case 'call':
-      return <PhoneIcon className="h-5 w-5 text-green-500" />;
-    case 'like':
-      return <HeartIcon className="h-5 w-5 text-red-500" />;
-    case 'approved':
-      return <DocumentTextIcon className="h-5 w-5 text-purple-500" />;
-    default:
-      return <ChartBarIcon className="h-5 w-5 text-gray-500" />;
-  }
-};
+interface OverviewData {
+  stats?: {
+    totalPosts?: number;
+    activePosts?: number;
+    pendingRequests?: number;
+    totalViews?: number;
+  };
+  changes?: any;
+}
 
 export default function DashboardOverview() {
-  const [overview, setOverview] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<OverviewData | null>(null);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [topPosts, setTopPosts] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchDashboardOverview();
-  }, []);
-
-  const fetchDashboardOverview = async () => {
-    try {
-      setLoading(true);
-      const response = await dashboardApi.getOverview();
-      
-      if (response.success && response.data) {
-        setOverview(response.data);
-        customToast.success('Đã tải dữ liệu dashboard');
-      } else if (!response.success) {
-        // Xử lý trường hợp response thành công nhưng dữ liệu thất bại
-        if (response.error === "PERMISSION_DENIED") {
-          // Xử lý lỗi quyền truy cập
-          customToast.error(response.message || 'Bạn không có quyền truy cập vào tính năng này');
-          window.location.href = '/'; // Chuyển hướng về trang chủ nếu không có quyền
-          return;
+    const fetchOverview = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await dashboardApi.getOverview();
+        if (res && (res.success === undefined || res.success === true)) {
+          setData((res as any).data || null);
         } else {
-          customToast.error(response.message || 'Không thể tải dữ liệu dashboard');
+          setError(res?.message || 'Không thể tải dữ liệu tổng quan');
         }
-        
-        // Fallback to mock data on error
-        setOverview({
-          stats: {
-            totalPosts: 0,
-            pendingRequests: 0,
-            todayViews: 0,
-            todayRevenue: 0
-          },
-          changes: {
-            postsChange: '+0',
-            requestsChange: '+0',
-            viewsChange: '+0%',
-            revenueChange: '+0%'
+        // Fetch recent activities song song
+        try {
+          const actRes = await dashboardApi.getRecentActivities(6);
+          if (actRes && (actRes.success === undefined || actRes.success === true)) {
+            setActivities((actRes as any).data || []);
           }
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching dashboard overview:', error);
-      
-      // Kiểm tra nếu là lỗi quyền truy cập
-      let errorMessage = 'Không thể tải dữ liệu dashboard';
-      if (error instanceof Error && error.message.includes('quyền truy cập')) {
-        errorMessage = error.message;
-        // Chuyển hướng nếu không có quyền truy cập
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 3000); // Chuyển hướng sau 3 giây
-      }
-      
-      customToast.error(errorMessage);
-      
-      // Fallback to empty data on error
-      setOverview({
-        stats: {
-          totalPosts: 0,
-          pendingRequests: 0,
-          todayViews: 0,
-          todayRevenue: 0
-        },
-        changes: {
-          postsChange: '+0',
-          requestsChange: '+0',
-          viewsChange: '+0%',
-          revenueChange: '+0%'
+        } catch (e) {
+          // im lặng nếu lỗi phần phụ này
         }
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+
+        // Fetch top posts 7d
+        try {
+          const analyticsRes = await dashboardApi.getAnalytics({ timeRange: '7d' });
+          if (analyticsRes && (analyticsRes.success === undefined || analyticsRes.success === true)) {
+            const payload: any = (analyticsRes as any).data || {};
+            setTopPosts(payload.topPerformingPosts || []);
+          }
+        } catch (e) {
+          // im lặng
+        }
+      } catch (e: any) {
+        setError(e?.message || 'Có lỗi xảy ra');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOverview();
+  }, []);
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="animate-pulse">
-          <div className="bg-gray-200 h-32 rounded-lg mb-6"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-gray-200 h-24 rounded-lg"></div>
-            ))}
-          </div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="h-24 rounded-lg bg-gray-100 animate-pulse" />
+        ))}
       </div>
     );
   }
 
-  const stats = overview ? [
-    {
-      name: 'Tổng tin đăng',
-      value: overview.stats.totalPosts?.toString() || '0',
-      change: overview.changes.postsChange || '+0',
-      changeType: 'increase',
-      icon: DocumentTextIcon,
-    },
-    {
-      name: 'Yêu cầu thuê',
-      value: overview.stats.pendingRequests?.toString() || '0',
-      change: overview.changes.requestsChange || '+0',
-      changeType: 'increase',
-      icon: HandRaisedIcon,
-    },
-    {
-      name: 'Lượt xem hôm nay',
-      value: overview.stats.todayViews?.toLocaleString() || '0',
-      change: overview.changes.viewsChange || '+0%',
-      changeType: 'increase',
-      icon: EyeIcon,
-    },
-    {
-      name: 'Doanh thu hôm nay',
-      value: overview.stats.todayRevenue ? `${(overview.stats.todayRevenue / 1000)}K` : '0',
-      change: overview.changes.revenueChange || '+0%',
-      changeType: 'increase',
-      icon: CreditCardIcon,
-    }
-  ] : [];
+  if (error) {
+    return (
+      <div className="p-4 rounded-md bg-red-50 text-red-700">
+        {error}
+      </div>
+    );
+  }
+
+  const stats = data?.stats || {};
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
-        <h2 className="text-2xl font-bold mb-2">Chào mừng trở lại!</h2>
-        <p className="text-blue-100 mb-4">
-          Bạn có {overview?.stats?.pendingRequests || 0} yêu cầu thuê mới cần xử lý và {overview?.stats?.todayViews || 0} lượt xem mới trong hôm nay.
-        </p>
-        <Link
-          href="/dang-tin"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50"
-        >
-          <PlusIcon className="h-4 w-4 mr-2" />
-          Đăng tin mới
-        </Link>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Tổng số tin" value={stats.totalPosts ?? 0} />
+        <StatCard label="Tin đang hoạt động" value={stats.activePosts ?? 0} />
+        <StatCard label="Yêu cầu chờ xử lý" value={stats.pendingRequests ?? 0} />
+        <StatCard label="Lượt xem" value={stats.totalViews ?? 0} />
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => (
-          <div key={stat.name} className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <stat.icon className="h-6 w-6 text-gray-400" />
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">{stat.name}</dt>
-                    <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">{stat.value}</div>
-                      <div className={`ml-2 flex items-baseline text-sm font-semibold ${
-                        stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {stat.changeType === 'increase' ? (
-                          <ArrowTrendingUpIcon className="self-center flex-shrink-0 h-4 w-4" />
-                        ) : (
-                          <ArrowTrendingDownIcon className="self-center flex-shrink-0 h-4 w-4" />
-                        )}
-                        <span className="sr-only">
-                          {stat.changeType === 'increase' ? 'Increased' : 'Decreased'} by
-                        </span>
-                        {stat.change}
-                      </div>
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
+      {/* Empty state CTA cho trường hợp chưa có tin */}
+      {(stats.totalPosts ?? 0) === 0 && (
+        <div className="rounded-md border border-blue-200 bg-blue-50 p-4 text-blue-800">
+          Bạn chưa có tin nào. <Link href="/dang-tin" className="underline font-medium">Tạo tin đầu tiên</Link> để bắt đầu.
+        </div>
+      )}
+
+      {/* Quick actions */}
+      <div className="flex flex-wrap gap-3">
+        <Link href="/dang-tin" className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700">Đăng tin mới</Link>
+        <Link href="/dashboard/tin-dang" className="inline-flex items-center rounded-md border px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Quản lý tin</Link>
+        <Link href="/dashboard/yeu-cau-thue" className="inline-flex items-center rounded-md border px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Xem yêu cầu thuê</Link>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activities */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Hoạt động gần đây</h3>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {recentActivities.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
-                    {getActivityIcon(activity.type)}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm text-gray-900">{activity.message}</p>
-                    <p className="text-sm text-gray-500">{activity.property}</p>
-                    <p className="text-xs text-gray-400">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-6">
-              <Link
-                href="/dashboard/hoat-dong"
-                className="text-sm font-medium text-blue-600 hover:text-blue-500"
-              >
-                Xem tất cả hoạt động →
-              </Link>
-            </div>
-          </div>
+      {/* Recent activities */}
+      <div className="rounded-lg border bg-white">
+        <div className="px-4 py-3 border-b">
+          <h3 className="text-base font-semibold text-gray-900">Hoạt động gần đây</h3>
         </div>
-
-        {/* Recent Rental Requests */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-gray-900">Yêu cầu thuê gần đây</h3>
-              <Link
-                href="/dashboard/yeu-cau-thue"
-                className="text-sm font-medium text-blue-600 hover:text-blue-500"
-              >
-                Xem tất cả →
-              </Link>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
-                <HandRaisedIcon className="h-5 w-5 text-orange-500 flex-shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-900">Nguyễn Văn A</p>
-                  <p className="text-sm text-gray-500">Phòng trọ gần ĐH Bách Khoa</p>
-                  <p className="text-xs text-orange-600">5 phút trước</p>
+        <div className="divide-y">
+          {activities.length === 0 ? (
+            <div className="p-4 text-sm text-gray-500">Chưa có hoạt động nào.</div>
+          ) : (
+            activities.map((act, idx) => (
+              <div key={idx} className="px-4 py-3 flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-gray-900">{act.message || 'Hoạt động'}</div>
+                  <div className="text-xs text-gray-500">{new Date(act.time).toLocaleString('vi-VN')}</div>
                 </div>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                  Chờ xử lý
-                </span>
+                {act.type === 'request' ? (
+                  <Link href="/dashboard/yeu-cau-thue" className="text-sm text-blue-600 hover:underline">Xem</Link>
+                ) : (
+                  <Link href="/dashboard/tin-dang" className="text-sm text-blue-600 hover:underline">Chi tiết</Link>
+                )}
               </div>
-              
-              <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-                <CheckCircleIcon className="h-5 w-5 text-green-500 flex-shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-900">Trần Thị B</p>
-                  <p className="text-sm text-gray-500">Căn hộ mini Hai Bà Trưng</p>
-                  <p className="text-xs text-green-600">2 giờ trước</p>
-                </div>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  Đã chấp nhận
-                </span>
-              </div>
-              
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <ClockIcon className="h-5 w-5 text-gray-500 flex-shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-900">Lê Văn C</p>
-                  <p className="text-sm text-gray-500">Phòng trọ full nội thất</p>
-                  <p className="text-xs text-gray-600">1 ngày trước</p>
-                </div>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                  Chờ xử lý
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Stats Chart Placeholder */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Thống kê lượt xem</h3>
-          </div>
-          <div className="p-6">
-            <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-              <div className="text-center">
-                <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">Biểu đồ thống kê</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Tính năng sẽ được cập nhật trong phiên bản tiếp theo
-                </p>
-              </div>
-            </div>
-          </div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* My Recent Postings */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900">Tin đăng gần đây</h3>
-            <Link
-              href="/dashboard/tin-dang"
-              className="text-sm font-medium text-blue-600 hover:text-blue-500"
-            >
-              Xem tất cả →
-            </Link>
-          </div>
+      {/* Top posts 7 ngày */}
+      <div className="rounded-lg border bg-white">
+        <div className="px-4 py-3 border-b">
+          <h3 className="text-base font-semibold text-gray-900">Top tin trong 7 ngày</h3>
         </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            {myPostings.map((posting) => (
-              <div key={posting.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                <Image
-                  src={posting.image}
-                  alt={posting.title || 'Post image'}
-                  width={64}
-                  height={64}
-                  className="h-16 w-16 object-cover rounded-lg"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <h4 className="text-sm font-medium text-gray-900 truncate">
-                      {posting.title}
-                    </h4>
-                    {getStatusBadge(posting.status)}
-                  </div>
-                  <p className="text-sm text-gray-500 mb-1">
-                    {posting.location} • {posting.area}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-green-600">{posting.price}</span>
-                    <div className="flex items-center space-x-4 text-xs text-gray-500">
-                      <span className="flex items-center">
-                        <EyeIcon className="h-4 w-4 mr-1" />
-                        {posting.views}
-                      </span>
-                      <span className="flex items-center">
-                        <HeartIcon className="h-4 w-4 mr-1" />
-                        {posting.likes}
-                      </span>
-                      <span>{posting.posted}</span>
-                    </div>
-                  </div>
+        {topPosts.length === 0 ? (
+          <div className="p-4 text-sm text-gray-500">Chưa có dữ liệu. Hãy đăng tin và chia sẻ để tăng lượt xem.</div>
+        ) : (
+          <ul className="divide-y">
+            {topPosts.slice(0, 5).map((p: any) => (
+              <li key={p.id || p._id} className="px-4 py-3 flex items-center justify-between">
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-gray-900 truncate">{p.roomId?.title || p.title || 'Tin đăng'}</div>
+                  <div className="text-xs text-gray-500">Lượt xem: {p.views ?? p.analytics?.views ?? 0}</div>
                 </div>
-              </div>
+                <Link href="/dashboard/tin-dang" className="text-sm text-blue-600 hover:underline">Quản lý</Link>
+              </li>
             ))}
-          </div>
-        </div>
+          </ul>
+        )}
       </div>
     </div>
   );
 }
+
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg border bg-white p-4">
+      <div className="text-sm text-gray-700">{label}</div>
+      <div className="mt-2 text-2xl font-semibold text-gray-900">{value}</div>
+    </div>
+  );
+}
+

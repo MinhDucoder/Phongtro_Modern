@@ -1143,6 +1143,33 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@redis/bloom@5.8.2":
+  version "5.8.2"
+  resolved "https://registry.npmjs.org/@redis/bloom/-/bloom-5.8.2.tgz"
+  integrity sha512-855DR0ChetZLarblio5eM0yLwxA9Dqq50t8StXKp5bAtLT0G+rZ+eRzzqxl37sPqQKjUudSYypz55o6nNhbz0A==
+
+"@redis/client@^5.8.2", "@redis/client@5.8.2":
+  version "5.8.2"
+  resolved "https://registry.npmjs.org/@redis/client/-/client-5.8.2.tgz"
+  integrity sha512-WtMScno3+eBpTac1Uav2zugXEoXqaU23YznwvFgkPwBQVwEHTDgOG7uEAObtZ/Nyn8SmAMbqkEubJaMOvnqdsQ==
+  dependencies:
+    cluster-key-slot "1.1.2"
+
+"@redis/json@5.8.2":
+  version "5.8.2"
+  resolved "https://registry.npmjs.org/@redis/json/-/json-5.8.2.tgz"
+  integrity sha512-uxpVfas3I0LccBX9rIfDgJ0dBrUa3+0Gc8sEwmQQH0vHi7C1Rx1Qn8Nv1QWz5bohoeIXMICFZRcyDONvum2l/w==
+
+"@redis/search@5.8.2":
+  version "5.8.2"
+  resolved "https://registry.npmjs.org/@redis/search/-/search-5.8.2.tgz"
+  integrity sha512-cNv7HlgayavCBXqPXgaS97DRPVWFznuzsAmmuemi2TMCx5scwLiP50TeZvUS06h/MG96YNPe6A0Zt57yayfxwA==
+
+"@redis/time-series@5.8.2":
+  version "5.8.2"
+  resolved "https://registry.npmjs.org/@redis/time-series/-/time-series-5.8.2.tgz"
+  integrity sha512-g2NlHM07fK8H4k+613NBsk3y70R2JIM2dPMSkhIjl2Z17SYvaYKdusz85d7VYOrZBWtDrHV/WD2E3vGu+zni8A==
+
 "@sendgrid/client@^8.1.5":
   version "8.1.6"
   resolved "https://registry.npmjs.org/@sendgrid/client/-/client-8.1.6.tgz"
@@ -1545,6 +1572,11 @@ cloudinary@^2.7.0:
   dependencies:
     lodash "^4.17.21"
     q "^1.5.1"
+
+cluster-key-slot@1.1.2:
+  version "1.1.2"
+  resolved "https://registry.npmjs.org/cluster-key-slot/-/cluster-key-slot-1.1.2.tgz"
+  integrity sha512-RMr0FhtfXemyinomL4hrWcYJxmX6deFdCxpJzhDttxgO1+bcCnkk+9drydLVDmAMG7NE6aN/fl4F7ucU/90gAA==
 
 color-convert@^2.0.1:
   version "2.0.1"
@@ -2024,6 +2056,13 @@ etag@~1.8.1:
   resolved "https://registry.npmjs.org/etag/-/etag-1.8.1.tgz"
   integrity sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==
 
+express-rate-limit@^8.1.0:
+  version "8.1.0"
+  resolved "https://registry.npmjs.org/express-rate-limit/-/express-rate-limit-8.1.0.tgz"
+  integrity sha512-4nLnATuKupnmwqiJc27b4dCFmB/T60ExgmtDD7waf4LdrbJ8CPZzZRHYErDYNhoz+ql8fUdYwM/opf90PoPAQA==
+  dependencies:
+    ip-address "10.0.1"
+
 express-session@^1.18.2:
   version "1.18.2"
   resolved "https://registry.npmjs.org/express-session/-/express-session-1.18.2.tgz"
@@ -2038,7 +2077,7 @@ express-session@^1.18.2:
     safe-buffer "5.2.1"
     uid-safe "~2.1.5"
 
-express@^4.18.2:
+express@^4.18.2, "express@>= 4.11":
   version "4.21.2"
   resolved "https://registry.npmjs.org/express/-/express-4.21.2.tgz"
   integrity sha512-28HqgMZAmih1Czt9ny7qr6ek2qddF4FclbMzwhCREB6OFfH+rXAnuNCwo1/wFvrtbgsQDb4kSbX9de9lFbrXnA==
@@ -2462,6 +2501,11 @@ internal-slot@^1.0.5:
     get-intrinsic "^1.2.0"
     has "^1.0.3"
     side-channel "^1.0.4"
+
+ip-address@10.0.1:
+  version "10.0.1"
+  resolved "https://registry.npmjs.org/ip-address/-/ip-address-10.0.1.tgz"
+  integrity sha512-NWv9YLW4PoW2B7xtzaS3NCot75m6nK7Icdv0o3lfMceJVRfSoQwqD4wEH5rLwoKJwUiZ/rfpiVBhnaF0FK4HoA==
 
 ipaddr.js@1.9.1:
   version "1.9.1"
@@ -3342,6 +3386,17 @@ readdirp@~3.6.0:
   integrity sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==
   dependencies:
     picomatch "^2.2.1"
+
+redis@^5.8.2:
+  version "5.8.2"
+  resolved "https://registry.npmjs.org/redis/-/redis-5.8.2.tgz"
+  integrity sha512-31vunZj07++Y1vcFGcnNWEf5jPoTkGARgfWI4+Tk55vdwHxhAvug8VEtW7Cx+/h47NuJTEg/JL77zAwC6E0OeA==
+  dependencies:
+    "@redis/bloom" "5.8.2"
+    "@redis/client" "5.8.2"
+    "@redis/json" "5.8.2"
+    "@redis/search" "5.8.2"
+    "@redis/time-series" "5.8.2"
 
 regenerate-unicode-properties@^10.1.0:
   version "10.1.0"

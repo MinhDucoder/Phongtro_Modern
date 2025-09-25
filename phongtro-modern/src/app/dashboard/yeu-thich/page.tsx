@@ -1,13 +1,13 @@
 'use client';
 
-import DashboardLayoutFixed from '@/components/dashboard/DashboardLayoutFixed';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import SavedProperties from '@/components/dashboard/SavedProperties';
 
 export default function SavedPropertiesPage() {
   return (
-    <DashboardLayoutFixed>
+    <DashboardLayout>
       <SavedProperties />
-    </DashboardLayoutFixed>
+    </DashboardLayout>
   );
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { Toaster } from "react-hot-toast";
+import DashboardGuard from "@/components/auth/DashboardGuard";
 
 export default function DashboardLayout({
   children,
@@ -9,7 +10,9 @@ export default function DashboardLayout({
 }) {
   return (
     <>
-      {children}
+      <DashboardGuard>
+        {children}
+      </DashboardGuard>
       <Toaster 
         position="top-right"
         toastOptions={{

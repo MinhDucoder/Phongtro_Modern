@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   CheckCircleIcon,
   XCircleIcon,
@@ -97,13 +97,20 @@ export default function YeuCauThueClient() {
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const lastFetchRef = useRef<{ key: string; ts: number } | null>(null);
   useEffect(() => {
     setMounted(true);
-    fetchRequests();
+    const key = `req-${selectedStatus}`;
+    const now = Date.now();
+    if (lastFetchRef.current && lastFetchRef.current.key === key && (now - lastFetchRef.current.ts) < 500) {
+      return;
+    }
+    lastFetchRef.current = { key, ts: now };
+    fetchRequests({ showToast: true });
     fetchStats();
   }, [selectedStatus]);
 
-  const fetchRequests = async () => {
+  const fetchRequests = async (options?: { showToast?: boolean }) => {
     try {
       setLoading(true);
       const response = await rentalRequestApi.getLandlordRequests({
@@ -124,7 +131,9 @@ export default function YeuCauThueClient() {
         };
         setStats(calculatedStats);
         
-        toast.success(`Đã tải ${response.data.requests.length} yêu cầu thuê`);
+        if (options?.showToast) {
+          toast.success(`Đã tải ${response.data.requests.length} yêu cầu thuê`);
+        }
       }
     } catch (error) {
       console.error('Error fetching requests:', error);
@@ -426,12 +435,12 @@ export default function YeuCauThueClient() {
                     </h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center">
-                        <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
-                        <span>{request.tenant?.phone || 'N/A'}</span>
+                        <PhoneIcon className="w-4 h-4 mr-2 text-gray-500" />
+                        <span className="text-gray-700">{request.tenant?.phone || 'N/A'}</span>
                       </div>
                       <div className="flex items-center">
-                        <CalendarIcon className="w-4 h-4 mr-2 text-gray-400" />
-                        <span>Dự kiến chuyển vào: {new Date(request.expectedMoveIn).toLocaleDateString('vi-VN')}</span>
+                        <CalendarIcon className="w-4 h-4 mr-2 text-gray-500" />
+                        <span className="text-gray-700">Dự kiến chuyển vào: {new Date(request.expectedMoveIn).toLocaleDateString('vi-VN')}</span>
                       </div>
                       <p className="text-gray-600">Số người: {request.tenantInfo?.numberOfPeople || 1}</p>
                     </div>
@@ -499,7 +508,7 @@ export default function YeuCauThueClient() {
 
         {filteredRequests.length === 0 && (
           <div className="text-center py-12">
-            <UserIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <UserIcon className="w-16 h-16 text-gray-500 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có yêu cầu thuê</h3>
             <p className="text-gray-600">
               {selectedStatus === 'all' 

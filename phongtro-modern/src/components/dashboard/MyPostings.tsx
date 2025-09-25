@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -18,6 +18,7 @@ import { dashboardApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import PostForm from './PostForm';
 import { getFirstImage } from '@/lib/imageUtils';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 // Mock data - trong thực tế sẽ fetch từ API
 const mockPostings = [
@@ -128,6 +129,7 @@ export default function MyPostings() {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -137,15 +139,36 @@ export default function MyPostings() {
   });
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingPost, setEditingPost] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
+  // Chặn duplicated fetch/toast do StrictMode (effect chạy 2 lần ở dev)
+  const lastFetchRef = useRef<{ key: string; ts: number } | null>(null);
   useEffect(() => {
     setMounted(true);
-    fetchPosts();
-  }, [selectedStatus, searchQuery, pagination.page]);
+    const key = `${selectedStatus}-${pagination.page}`;
+    const now = Date.now();
+    if (lastFetchRef.current && lastFetchRef.current.key === key && (now - lastFetchRef.current.ts) < 500) {
+      return; // bỏ qua lần gọi trùng trong ~500ms
+    }
+    lastFetchRef.current = { key, ts: now };
+    fetchPosts({ showToast: true });
+  }, [selectedStatus, pagination.page]);
 
-  const fetchPosts = async () => {
+  // Debounce searchQuery 300ms
+  useEffect(() => {
+    const id = setTimeout(() => {
+      // Khi search thay đổi, luôn quay về page 1
+      setPagination(prev => ({ ...prev, page: 1 }));
+      fetchPosts({ showToast: false });
+    }, 300);
+    return () => clearTimeout(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]);
+
+  const fetchPosts = async (options?: { showToast?: boolean }) => {
     try {
       setIsLoading(true);
+      setLoadError(null);
       const response = await dashboardApi.getMyPosts({
         page: pagination.page,
         limit: pagination.limit,
@@ -160,15 +183,16 @@ export default function MyPostings() {
           ...response.data.pagination
         }));
         
-        if (response.data.posts.length > 0) {
+        if (options?.showToast && response.data.posts.length > 0) {
           toast.success(`Đã tải ${response.data.posts.length} tin đăng`);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching posts:', error);
+      setLoadError(error?.message || 'Không thể tải danh sách tin đăng');
       toast.error('Không thể tải danh sách tin đăng');
-      // Fallback to mock data on error
-      setPostings(mockPostings);
+      // Không dùng mock khi chuẩn hoá state; để empty/error rõ ràng
+      setPostings([]);
     } finally {
       setIsLoading(false);
     }
@@ -191,8 +215,6 @@ export default function MyPostings() {
   });
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa tin đăng này?')) return;
-    
     setIsLoading(true);
     try {
       const response = await dashboardApi.deletePost(id);
@@ -382,11 +404,30 @@ export default function MyPostings() {
         </div>
       </div>
 
-      {/* Postings List */}
+      {/* Loading/Error/List */}
       <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-        {filteredPostings.length === 0 ? (
+        {isLoading ? (
+          <div className="p-6 grid grid-cols-1 gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="animate-pulse flex space-x-4">
+                <div className="rounded bg-gray-200 h-24 w-32" />
+                <div className="flex-1 space-y-3 py-1">
+                  <div className="h-4 bg-gray-200 rounded w-3/5" />
+                  <div className="h-4 bg-gray-200 rounded w-2/5" />
+                  <div className="h-4 bg-gray-200 rounded w-1/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : loadError ? (
+          <div className="p-6">
+            <div className="rounded-md border border-red-200 bg-red-50 p-4 text-red-800">
+              {loadError}
+            </div>
+          </div>
+        ) : filteredPostings.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
+            <div className="text-gray-500 mb-4">
               <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
@@ -462,6 +503,14 @@ export default function MyPostings() {
                             <PhoneIcon className="h-4 w-4 mr-1" />
                             {posting.analytics?.calls || 0} cuộc gọi
                           </div>
+                          {posting.status === 'active' && posting.expiresAt && (() => {
+                            const days = Math.ceil((new Date(posting.expiresAt).getTime() - Date.now()) / (1000*60*60*24));
+                            return days <= 3 ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                Sắp hết hạn: {Math.max(days,0)} ngày
+                              </span>
+                            ) : null;
+                          })()}
                         </div>
 
                         <div className="flex items-center mt-2 text-xs text-gray-400">
@@ -474,7 +523,7 @@ export default function MyPostings() {
                       {/* Actions */}
                       <div className="flex items-center space-x-2 ml-4">
                         <Link
-                          href={`/dashboard/tin-dang/edit/${posting.id}`}
+                          href={`/dashboard/tin-dang/edit/${posting._id}`}
                           className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           title="Chỉnh sửa"
                         >
@@ -483,7 +532,7 @@ export default function MyPostings() {
 
                         {posting.status === 'expired' ? (
                           <button
-                            onClick={() => handleRenew(posting.id)}
+                            onClick={() => handleRenew(posting._id)}
                             disabled={isLoading}
                             className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
                             title="Gia hạn"
@@ -492,7 +541,7 @@ export default function MyPostings() {
                           </button>
                         ) : (
                           <button
-                            onClick={() => handleToggleStatus(posting.id)}
+                            onClick={() => handleToggleStatus(posting._id)}
                             disabled={isLoading}
                             className={`p-2 rounded-lg transition-colors disabled:opacity-50 ${
                               posting.status === 'active'
@@ -515,7 +564,7 @@ export default function MyPostings() {
                         </button>
 
                         <button
-                          onClick={() => handleDelete(posting._id)}
+                          onClick={() => setConfirmDeleteId(posting._id)}
                           disabled={isLoading}
                           className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                           title="Xóa"
@@ -610,6 +659,21 @@ export default function MyPostings() {
             />
           </div>
         </div>
+      )}
+
+      {confirmDeleteId && (
+        <ConfirmDialog
+          title="Xóa tin đăng"
+          message="Bạn có chắc chắn muốn xóa tin này? Hành động không thể hoàn tác."
+          confirmText="Xóa"
+          cancelText="Hủy"
+          onCancel={() => setConfirmDeleteId(null)}
+          onConfirm={async () => {
+            const id = confirmDeleteId;
+            setConfirmDeleteId(null);
+            await handleDelete(id);
+          }}
+        />
       )}
     </div>
   );

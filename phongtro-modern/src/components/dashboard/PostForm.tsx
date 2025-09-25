@@ -203,13 +203,13 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
   return (
     <div className="bg-white rounded-lg shadow-lg">
       <div className="flex items-center justify-between p-6 border-b">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className="text-xl font-semibold text-black">
           {isEditing ? 'Chỉnh sửa tin đăng' : 'Tạo tin đăng mới'}
         </h2>
         {onCancel && (
           <button
             onClick={onCancel}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-500 hover:text-gray-700"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
@@ -220,55 +220,55 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
         {/* Basic Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-black mb-2">
               Tiêu đề tin đăng *
             </label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500 text-gray-900"
               placeholder="Nhập tiêu đề tin đăng"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-black mb-2">
               Giá thuê (VNĐ/tháng) *
             </label>
             <input
               type="number"
               value={formData.price}
               onChange={(e) => handleInputChange('price', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500 text-gray-900"
               placeholder="3500000"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-black mb-2">
               Diện tích (m²)
             </label>
             <input
               type="number"
               value={formData.area}
               onChange={(e) => handleInputChange('area', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500 text-gray-900"
               placeholder="25"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-black mb-2">
               Tiền cọc (VNĐ)
             </label>
             <input
               type="number"
               value={formData.deposit}
               onChange={(e) => handleInputChange('deposit', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500 text-gray-900"
               placeholder="1000000"
             />
           </div>
@@ -276,14 +276,14 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
 
         {/* Address */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-black mb-2">
             Địa chỉ chi tiết *
           </label>
           <input
             type="text"
             value={formData.address}
             onChange={(e) => handleInputChange('address', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500 text-gray-900"
             placeholder="Số 123, Ngõ 45, Đường Trần Khát Chân"
             required
           />
@@ -291,7 +291,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-black mb-2">
               Thành phố
             </label>
             <input
@@ -304,7 +304,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-black mb-2">
               Quận/Huyện
             </label>
             <input
@@ -317,7 +317,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-black mb-2">
               Phường/Xã
             </label>
             <input
@@ -332,21 +332,21 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
 
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-black mb-2">
             Mô tả chi tiết
           </label>
           <textarea
             value={formData.description}
             onChange={(e) => handleInputChange('description', e.target.value)}
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500 text-gray-900"
             placeholder="Mô tả chi tiết về phòng trọ, tiện ích, khu vực xung quanh..."
           />
         </div>
 
         {/* Amenities */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-black mb-2">
             Tiện ích có sẵn
           </label>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -358,7 +358,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
                   onChange={() => handleArrayToggle('amenities', amenity.value)}
                   className="mr-2"
                 />
-                <span className="text-sm">{amenity.label}</span>
+                <span className="text-sm text-black">{amenity.label}</span>
               </label>
             ))}
           </div>
@@ -366,7 +366,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
 
         {/* Post Options */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-black mb-2">
             Tùy chọn tin đăng
           </label>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -378,7 +378,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
                   onChange={() => handleArrayToggle('options', option.value)}
                   className="mr-2"
                 />
-                <span className="text-sm">{option.label}</span>
+                <span className="text-sm text-black">{option.label}</span>
               </label>
             ))}
           </div>
@@ -391,42 +391,42 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
           </label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Điện/kWh</label>
+              <label className="block text-xs text-gray-700 mb-1">Điện/kWh</label>
               <input
                 type="number"
                 value={formData.utilities.electricity}
                 onChange={(e) => handleInputChange('utilities.electricity', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500 text-gray-900"
                 placeholder="4000"
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Nước/tháng</label>
+              <label className="block text-xs text-gray-700 mb-1">Nước/tháng</label>
               <input
                 type="number"
                 value={formData.utilities.water}
                 onChange={(e) => handleInputChange('utilities.water', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500 text-gray-900"
                 placeholder="25000"
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Internet/tháng</label>
+              <label className="block text-xs text-gray-700 mb-1">Internet/tháng</label>
               <input
                 type="number"
                 value={formData.utilities.internet}
                 onChange={(e) => handleInputChange('utilities.internet', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500 text-gray-900"
                 placeholder="0"
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Gửi xe/tháng</label>
+              <label className="block text-xs text-gray-700 mb-1">Gửi xe/tháng</label>
               <input
                 type="number"
                 value={formData.utilities.parking}
                 onChange={(e) => handleInputChange('utilities.parking', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500 text-gray-900"
                 placeholder="0"
               />
             </div>
@@ -474,7 +474,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
             Hình ảnh
           </label>
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <PhotoIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <PhotoIcon className="mx-auto h-12 w-12 text-gray-500" />
             <p className="mt-2 text-sm text-gray-500">
               Tính năng upload hình ảnh sẽ được thêm sau
             </p>

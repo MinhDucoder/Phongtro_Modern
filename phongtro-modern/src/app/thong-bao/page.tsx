@@ -1,20 +1,13 @@
-import { redirect } from 'next/navigation';
 import NotificationCenter from '@/components/notifications/NotificationCenter';
-
-// Mock auth check
-const isAuthenticated = true;
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 export default function NotificationsPage() {
-  if (!isAuthenticated) {
-    redirect('/dang-nhap');
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <DashboardLayout>
       <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <NotificationCenter />
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
 

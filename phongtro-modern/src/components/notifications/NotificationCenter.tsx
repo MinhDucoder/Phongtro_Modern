@@ -390,7 +390,7 @@ export default function NotificationCenter() {
           <div className="flex items-center space-x-2">
             <button
               onClick={handleSelectAll}
-              className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
+              className="text-sm text-blue-700 hover:text-blue-800 transition-colors"
             >
               {selectedNotifications.length === filteredNotifications.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
             </button>
@@ -457,7 +457,7 @@ export default function NotificationCenter() {
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
                           <h4 className={`text-sm font-medium ${
-                            !notification.isRead ? 'text-gray-900' : 'text-gray-700'
+                            !notification.isRead ? 'text-gray-900' : 'text-gray-800'
                           }`}>
                             {notification.title}
                           </h4>
