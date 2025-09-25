@@ -15,6 +15,17 @@ import { socketAuth } from "./middlewares/checkToken.js";
 import chatHandler from "./sockets/chatHandler.js";
 
 const app = express();
+
+// Reduce noisy logs in production while preserving warnings/errors
+if (process.env.NODE_ENV === 'production') {
+  // Keep error and warn for visibility, silence log/debug/info
+  // eslint-disable-next-line no-console
+  console.log = () => {};
+  // eslint-disable-next-line no-console
+  console.debug = () => {};
+  // eslint-disable-next-line no-console
+  console.info = () => {};
+}
 const hostname = "localhost";
 const port = 5000;
 
