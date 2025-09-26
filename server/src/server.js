@@ -1,63 +1,42 @@
 import express from "express";
-import { mapOrder } from "~/utils/sorts.js";
-import bodyparser from "body-parser";
+import { createServer } from "http";
+import { Server } from "socket.io";
+
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
+import session from "express-session";
+import passport from "./config/passportConfig.js";
+
+import { connectDB } from "./config/mongodbConfig.js";
 import Route from "./routes/v1/index.js";
 import errorHandler from "./middlewares/errorhandle.js";
-import { connectDB } from "./config/mongodbConfig.js";
-import morgan from "morgan";
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import passport from "./config/passportConfig.js";
-import session from "express-session";
-import http from "http";
-import { Server } from "socket.io";
 import { socketAuth } from "./middlewares/checkToken.js";
 import chatHandler from "./sockets/chatHandler.js";
 
 const app = express();
 const hostname = "localhost";
-const port = 5000;
+const apiPort = 5000;
 
-// ✅ Tạo HTTP server thay vì dùng app.listen
-const server = http.createServer(app);
+// ===== Kết nối DB =====
+connectDB();
 
-// ✅ Khởi tạo socket.io
-const io = new Server(server, {
-  cors: {
-    origin: ["http://localhost:3000"],
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
-
-// Middleware CORS
+// ===== Middleware API =====
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: [`http://${hostname}:3000`], // cho frontend dev
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     credentials: true,
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "X-Requested-With",
-      "Access-Control-Allow-Origin",
-    ],
-    exposedHeaders: ["Set-Cookie"],
   })
 );
 app.options("*", cors());
 
-// Kết nối DB
-connectDB();
-
-//middlewares
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(morgan("dev"));
 
-//session
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -68,26 +47,39 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-//routes
+// routes
 Route(app);
 
-//error handling middleware
+// error handling
 app.use(errorHandler);
 
-// ✅ Socket.IO middleware auth
+// ===== Tạo HTTP server chung =====
+const httpServer = createServer(app);
+
+// ===== Socket.IO gắn chung vào httpServer =====
+const io = new Server(httpServer, {
+  cors: {
+    origin: [`http://${hostname}:3000`], // cho frontend dev
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+  serveClient: true, // cho phép /socket.io/socket.io.js
+});
+
+// middleware auth
 io.use(socketAuth);
 
-// ✅ Socket.IO handler
+// handler
 io.on("connection", (socket) => {
-  console.log("⚡ Client connected:", socket.id);
-  chatHandler(io, socket); // xử lý event chat
+  console.log("⚡ Socket connected:", socket.id);
+  chatHandler(io, socket);
 
   socket.on("disconnect", () => {
-    console.log("❌ Client disconnected:", socket.id);
+    console.log("❌ Socket disconnected:", socket.id);
   });
 });
 
-// ✅ Lắng nghe server HTTP (có cả Express + Socket.IO)
-server.listen(port, hostname, () => {
-  console.log(`Hello , I am running at http://${hostname}:${port}/`);
+// ===== Start server (API + Socket.IO) =====
+httpServer.listen(apiPort, hostname, () => {
+  console.log(`🚀 Server (API + Socket.IO) running at http://${hostname}:${apiPort}/`);
 });

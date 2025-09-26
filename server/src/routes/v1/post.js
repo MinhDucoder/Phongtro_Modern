@@ -1,6 +1,6 @@
 import express from "express";
 import PostController from "../../controllers/PostController.js";
-import { authenticate } from "../../middlewares/checkToken.js";
+import { authenticate, authorize } from "../../middlewares/checkToken.js";
 import catchAsync from "../../middlewares/catchAsync.js";
 
 const postRoute = express.Router();
@@ -11,7 +11,7 @@ postRoute.post("/", authenticate(), catchAsync(PostController.create));
 postRoute.get("/", catchAsync(PostController.list));
 
 postRoute.get("/:id", authenticate(), catchAsync(PostController.detail));
-postRoute.put("/:id", authenticate(), catchAsync(PostController.update));
-postRoute.delete("/:id", authenticate(), catchAsync(PostController.remove));
+postRoute.put("/:id", authenticate(), authorize("admin"), catchAsync(PostController.update));
+postRoute.delete("/:id", authenticate(), authorize("admin"), catchAsync(PostController.remove));
 
 export default postRoute;
