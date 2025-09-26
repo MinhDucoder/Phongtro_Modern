@@ -25,9 +25,65 @@ const postSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "active", "expired"],
+      enum: ["pending", "active", "expired", "rejected"],
       default: "pending",
     },
+    // Moderation fields
+    moderatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    moderatedAt: {
+      type: Date,
+    },
+    rejectionReason: {
+      type: String,
+    },
+    moderationNotes: {
+      type: String,
+    },
+    moderationPriority: {
+      type: String,
+      enum: ["low", "normal", "high"],
+      default: "normal"
+    },
+    moderation: {
+      contentIssues: {
+        type: Boolean,
+        default: false
+      },
+      pricingIssues: {
+        type: Boolean,
+        default: false
+      },
+      imageIssues: {
+        type: Boolean,
+        default: false
+      },
+      addressIssues: {
+        type: Boolean,
+        default: false
+      },
+      violationDetails: {
+        type: String
+      },
+      reviewCount: {
+        type: Number,
+        default: 0
+      },
+      lastReviewedAt: {
+        type: Date
+      }
+    },
+    // When rejected, expiry date for resubmission
+    resubmissionEligibleDate: {
+      type: Date
+    },
+    // For auto-approval rules
+    autoApprovalEligible: {
+      type: Boolean,
+      default: false
+    }
   },
   { timestamps: true }
 );

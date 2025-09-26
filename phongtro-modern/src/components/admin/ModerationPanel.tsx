@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   EyeIcon, 
   CheckCircleIcon, 
@@ -14,53 +14,23 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import PostDetailModal from './EnhancedPostDetailModal';
+import { toast } from 'react-hot-toast';
 
-interface Post {
+export interface Post {
   id: string;
   title: string;
   author: string;
+  authorId: string;
   status: 'pending' | 'approved' | 'rejected';
   submittedAt: string;
   category: string;
   location: string;
   price: string;
   reason?: string;
+  description: string;
+  images: string[];
 }
-
-// Mock data
-const mockPosts: Post[] = [
-  {
-    id: '1',
-    title: 'PHÒNG TRỌ GIÁ MỀM CHỈ TỪ 3TR GẦN DƯỢC, BÁCH KHOA, NEU,...',
-    author: 'Lê Nhật Duy',
-    status: 'pending',
-    submittedAt: '2024-01-15T10:30:00Z',
-    category: 'Phòng trọ',
-    location: 'Hai Bà Trưng, Hà Nội',
-    price: '3.8 triệu/tháng'
-  },
-  {
-    id: '2',
-    title: 'GẦN NGOẠI THƯƠNG, GTVT, HUTECH, HỒNG BÀNG, UEF, VietVision, Ga Metro',
-    author: 'Nhà Trọ Ngõ Sen',
-    status: 'approved',
-    submittedAt: '2024-01-14T15:20:00Z',
-    category: 'Phòng trọ',
-    location: 'Bình Thạnh, Hồ Chí Minh',
-    price: '3.3 triệu/tháng'
-  },
-  {
-    id: '3',
-    title: 'Ở ghép giường tầng sát vách DH Nguyễn Tất Thành',
-    author: 'Hoàng Phúc',
-    status: 'rejected',
-    submittedAt: '2024-01-13T09:15:00Z',
-    category: 'Ở ghép',
-    location: 'Quận 4, Hồ Chí Minh',
-    price: '1.3 triệu/tháng',
-    reason: 'Thông tin không chính xác'
-  }
-];
 
 const statusConfig = {
   pending: { label: 'Chờ duyệt', variant: 'warning' as const, icon: ClockIcon },
@@ -69,61 +39,168 @@ const statusConfig = {
 };
 
 export default function ModerationPanel() {
-  const [posts, setPosts] = useState<Post[]>(mockPosts);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showActionModal, setShowActionModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [action, setAction] = useState<'approve' | 'reject' | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredPosts = posts.filter(post => {
-    const matchesFilter = filter === 'all' || post.status === filter;
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.author.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesFilter && matchesSearch;
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0
   });
+
+  // Hàm fetch dữ liệu từ API
+  const fetchPosts = async () => {
+    setIsLoading(true);
+    try {
+      // Tạo query params
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('limit', '10');
+      
+      if (filter !== 'all') {
+        params.append('status', filter);
+      }
+      
+      if (searchTerm) {
+        params.append('search', searchTerm);
+      }
+
+      const response = await fetch(`/api/admin/moderation?${params.toString()}`);
+      
+      if (!response.ok) {
+        throw new Error('Không thể tải dữ liệu từ server');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setPosts(data.data.posts);
+        setStats(data.data.statistics);
+        setTotalPages(data.data.pagination.totalPages);
+      } else {
+        toast.error(data.message || 'Có lỗi xảy ra khi tải dữ liệu');
+      }
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      toast.error('Không thể tải dữ liệu bài đăng');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Gọi API khi component mount và khi các tham số thay đổi
+  useEffect(() => {
+    fetchPosts();
+  }, [page, filter]);
+
+  // Xử lý tìm kiếm
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1); // Reset về trang đầu tiên khi tìm kiếm
+    fetchPosts();
+  };
 
   const handleAction = async (postId: string, action: 'approve' | 'reject') => {
     setIsLoading(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setPosts(prev => prev.map(post => 
-      post.id === postId 
-        ? { 
-            ...post, 
-            status: action === 'approve' ? 'approved' : 'rejected',
-            reason: action === 'reject' ? rejectionReason : undefined
-          }
-        : post
-    ));
-    
-    setIsLoading(false);
-    setShowModal(false);
-    setSelectedPost(null);
-    setAction(null);
-    setRejectionReason('');
+    try {
+      const response = await fetch(`/api/admin/moderation/${postId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: action === 'approve' ? 'approved' : 'rejected',
+          reason: action === 'reject' ? rejectionReason : undefined,
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Không thể cập nhật trạng thái bài đăng');
+      }
+      
+      // Hiển thị thông báo thành công
+      toast.success(action === 'approve' ? 'Đã duyệt bài đăng' : 'Đã từ chối bài đăng');
+      
+      // Tải lại dữ liệu
+      fetchPosts();
+    } catch (error) {
+      console.error('Error updating post status:', error);
+      toast.error(error instanceof Error ? error.message : 'Có lỗi xảy ra');
+    } finally {
+      setIsLoading(false);
+      setShowActionModal(false);
+      setShowDetailModal(false);
+      setSelectedPost(null);
+      setAction(null);
+      setRejectionReason('');
+    }
   };
 
-  const openModal = (post: Post, action: 'approve' | 'reject') => {
+  const openActionModal = (post: Post, actionType: 'approve' | 'reject') => {
     setSelectedPost(post);
-    setAction(action);
-    setShowModal(true);
+    setAction(actionType);
+    setShowActionModal(true);
   };
 
-  const getStatusCounts = () => {
-    return {
-      pending: posts.filter(p => p.status === 'pending').length,
-      approved: posts.filter(p => p.status === 'approved').length,
-      rejected: posts.filter(p => p.status === 'rejected').length,
-      total: posts.length
-    };
+  const openDetailModal = (post: Post) => {
+    setSelectedPost(post);
+    setShowDetailModal(true);
   };
 
-  const counts = getStatusCounts();
+  const handleDetailModalStatusChange = async (postId: string, status: 'approved' | 'rejected', reason?: string, options?: any) => {
+    try {
+      const response = await fetch(`/api/admin/moderation/${postId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status,
+          reason,
+          notes: options?.notes,
+          contentIssues: options?.contentIssues,
+          pricingIssues: options?.pricingIssues,
+          imageIssues: options?.imageIssues,
+          addressIssues: options?.addressIssues,
+          violationDetails: options?.violationDetails
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Không thể cập nhật trạng thái bài đăng');
+      }
+      
+      // Hiển thị thông báo thành công
+      toast.success(status === 'approved' ? 'Đã duyệt bài đăng' : 'Đã từ chối bài đăng');
+      
+      // Tải lại dữ liệu
+      fetchPosts();
+      return;
+    } catch (error) {
+      console.error('Error updating post status:', error);
+      toast.error(error instanceof Error ? error.message : 'Có lỗi xảy ra');
+      throw error;
+    }
+  };
+
+  // Xử lý phân trang
+  const handlePageChange = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setPage(newPage);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -144,7 +221,7 @@ export default function ModerationPanel() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Chờ duyệt</p>
-              <p className="text-2xl font-bold text-darker">{counts.pending}</p>
+              <p className="text-2xl font-bold text-darker">{stats.pending}</p>
             </div>
           </div>
         </div>
@@ -156,7 +233,7 @@ export default function ModerationPanel() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Đã duyệt</p>
-              <p className="text-2xl font-bold text-darker">{counts.approved}</p>
+              <p className="text-2xl font-bold text-darker">{stats.approved}</p>
             </div>
           </div>
         </div>
@@ -168,7 +245,7 @@ export default function ModerationPanel() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Từ chối</p>
-              <p className="text-2xl font-bold text-darker">{counts.rejected}</p>
+              <p className="text-2xl font-bold text-darker">{stats.rejected}</p>
             </div>
           </div>
         </div>
@@ -180,7 +257,7 @@ export default function ModerationPanel() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng cộng</p>
-              <p className="text-2xl font-bold text-darker">{counts.total}</p>
+              <p className="text-2xl font-bold text-darker">{stats.total}</p>
             </div>
           </div>
         </div>
@@ -244,90 +321,129 @@ export default function ModerationPanel() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredPosts.map((post) => {
-                const statusInfo = statusConfig[post.status];
-                const StatusIcon = statusInfo.icon;
-                
-                return (
-                  <tr key={post.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="max-w-xs">
-                        <p className="text-sm font-medium text-darker line-clamp-2">
-                          {post.title}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {post.category} • {post.location} • {post.price}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm text-darker">{post.author}</p>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge variant={statusInfo.variant} size="sm">
-                        <StatusIcon className="w-3 h-3 mr-1" />
-                        {statusInfo.label}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(post.submittedAt).toLocaleDateString('vi-VN')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          leftIcon={<EyeIcon className="w-4 h-4" />}
-                        >
-                          Xem
-                        </Button>
-                        {post.status === 'pending' && (
-                          <>
-                            <Button
-                              variant="primary"
-                              size="sm"
-                              leftIcon={<CheckCircleIcon className="w-4 h-4" />}
-                              onClick={() => openModal(post, 'approve')}
-                            >
-                              Duyệt
-                            </Button>
-                            <Button
-                              variant="danger"
-                              size="sm"
-                              leftIcon={<XCircleIcon className="w-4 h-4" />}
-                              onClick={() => openModal(post, 'reject')}
-                            >
-                              Từ chối
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-10 text-center">
+                    <LoadingSpinner size="md" />
+                    <p className="mt-2 text-gray-500">Đang tải dữ liệu...</p>
+                  </td>
+                </tr>
+              ) : posts.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-10 text-center">
+                    <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-sm font-medium text-darker">Không có tin đăng nào</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {searchTerm || filter !== 'all' 
+                        ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.'
+                        : 'Chưa có tin đăng nào cần kiểm duyệt.'
+                      }
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                posts.map((post) => {
+                  const statusInfo = statusConfig[post.status];
+                  const StatusIcon = statusInfo.icon;
+                  
+                  return (
+                    <tr key={post.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <div className="max-w-xs">
+                          <p className="text-sm font-medium text-darker line-clamp-2">
+                            {post.title}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {post.category} • {post.location} • {post.price}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <p className="text-sm text-darker">{post.author}</p>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Badge variant={statusInfo.variant} size="sm">
+                          <StatusIcon className="w-3 h-3 mr-1" />
+                          {statusInfo.label}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(post.submittedAt).toLocaleDateString('vi-VN')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            leftIcon={<EyeIcon className="w-4 h-4" />}
+                            onClick={() => openDetailModal(post)}
+                          >
+                            Xem
+                          </Button>
+                          {post.status === 'pending' && (
+                            <>
+                              <Button
+                                variant="primary"
+                                size="sm"
+                                leftIcon={<CheckCircleIcon className="w-4 h-4" />}
+                                onClick={() => openActionModal(post, 'approve')}
+                              >
+                                Duyệt
+                              </Button>
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                leftIcon={<XCircleIcon className="w-4 h-4" />}
+                                onClick={() => openActionModal(post, 'reject')}
+                              >
+                                Từ chối
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
-
-        {filteredPosts.length === 0 && (
-          <div className="text-center py-12">
-            <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-darker">Không có tin đăng nào</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {searchTerm || filter !== 'all' 
-                ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.'
-                : 'Chưa có tin đăng nào cần kiểm duyệt.'
-              }
-            </p>
-          </div>
-        )}
       </div>
+      
+      {/* Pagination */}
+      {totalPages > 1 && !isLoading && (
+        <div className="flex justify-center mt-6">
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page === 1}
+            >
+              Trước
+            </Button>
+            
+            <span className="text-sm text-gray-600">
+              Trang {page} / {totalPages}
+            </span>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => handlePageChange(page + 1)}
+              disabled={page === totalPages}
+            >
+              Sau
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Action Modal */}
       <Modal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        isOpen={showActionModal}
+        onClose={() => setShowActionModal(false)}
         title={action === 'approve' ? 'Duyệt tin đăng' : 'Từ chối tin đăng'}
         size="md"
       >
@@ -356,7 +472,7 @@ export default function ModerationPanel() {
             <div className="flex justify-end space-x-3 pt-4">
               <Button
                 variant="outline"
-                onClick={() => setShowModal(false)}
+                onClick={() => setShowActionModal(false)}
               >
                 Hủy
               </Button>
@@ -372,6 +488,14 @@ export default function ModerationPanel() {
           </div>
         )}
       </Modal>
+      
+      {/* Chi tiết bài đăng Modal */}
+      <PostDetailModal
+        post={selectedPost}
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        onStatusChange={handleDetailModalStatusChange}
+      />
     </div>
   );
 }
