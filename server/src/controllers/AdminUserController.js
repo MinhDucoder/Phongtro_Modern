@@ -40,11 +40,7 @@ class AdminUserController {
     if (status && status !== 'all') {
       console.log(`Applying status filter: ${status}`);
       
-      if (status === 'active') {
-        filter.is_banned = false;
-      } else if (status === 'banned') {
-        filter.is_banned = true;
-      } else if (status === 'verified') {
+      if (status === 'verified') {
         filter.is_verified = true;
       } else if (status === 'unverified') {
         filter.is_verified = false;
@@ -83,8 +79,6 @@ class AdminUserController {
         $group: {
           _id: null,
           totalUsers: { $sum: 1 },
-          activeUsers: { $sum: { $cond: [{ $eq: ["$is_banned", false] }, 1, 0] } },
-          bannedUsers: { $sum: { $cond: [{ $eq: ["$is_banned", true] }, 1, 0] } },
           verifiedUsers: { $sum: { $cond: [{ $eq: ["$is_verified", true] }, 1, 0] } },
           landlords: { $sum: { $cond: [{ $eq: ["$role", "landlord"] }, 1, 0] } },
           regularUsers: { $sum: { $cond: [{ $eq: ["$role", "user"] }, 1, 0] } }
@@ -104,8 +98,6 @@ class AdminUserController {
         },
         statistics: stats[0] || {
           totalUsers: 0,
-          activeUsers: 0,
-          bannedUsers: 0,
           verifiedUsers: 0,
           landlords: 0,
           regularUsers: 0
@@ -128,19 +120,109 @@ class AdminUserController {
       });
     }
 
-    // Lấy thống kê bài đăng của user (nếu có)
-    // TODO: Thêm logic lấy số bài đăng khi có Post model
+    // Initialize stats and activities arrays
+    let userStats = {
+      totalPosts: 0,
+      totalBookings: 0,
+      totalTransactions: 0,
+      totalReviews: 0,
+      averageRating: 0,
+      totalSpent: 0
+    };
+
+    let userActivities = [];
+
+    try {
+      // Try to get post statistics if Post model exists
+      const Post = await import('~/models/postSchema.js').then(m => m.default).catch(() => null);
+      if (Post) {
+        userStats.totalPosts = await Post.countDocuments({ 
+          user: id, 
+          is_deleted: { $ne: true } 
+        });
+      }
+
+      // Try to get booking statistics if Booking model exists  
+      const Booking = await import('~/models/bookingSchema.js').then(m => m.default).catch(() => null);
+      if (Booking) {
+        userStats.totalBookings = await Booking.countDocuments({ user: id });
+      }
+
+      // Try to get transaction statistics if Transaction model exists
+      const Transaction = await import('~/models/transactionSchema.js').then(m => m.default).catch(() => null);
+      if (Transaction) {
+        const transactions = await Transaction.find({ user: id });
+        userStats.totalTransactions = transactions.length;
+        userStats.totalSpent = transactions.reduce((total, t) => total + (t.amount || 0), 0);
+      }
+
+      // Try to get review statistics if Review model exists
+      const Review = await import('~/models/reviewSchema.js').then(m => m.default).catch(() => null);
+      if (Review) {
+        const reviews = await Review.find({ user: id });
+        userStats.totalReviews = reviews.length;
+        if (reviews.length > 0) {
+          userStats.averageRating = reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length;
+        }
+      }
+
+      // Create some sample activities based on user data
+      userActivities = [
+        {
+          date: user.created_at,
+          action: 'account_created',
+          description: 'Tài khoản được tạo',
+          ip_address: 'N/A'
+        }
+      ];
+
+      if (user.last_login) {
+        userActivities.unshift({
+          date: user.last_login,
+          action: 'login',
+          description: 'Đăng nhập lần cuối',
+          ip_address: 'N/A'
+        });
+      }
+
+      if (user.is_verified) {
+        userActivities.push({
+          date: user.created_at, // Use creation date as proxy
+          action: 'email_verified',
+          description: 'Email được xác thực',
+          ip_address: 'N/A'
+        });
+      }
+
+      // Sort activities by date (newest first)
+      userActivities.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+    } catch (error) {
+      console.log('Error getting user statistics:', error.message);
+      // Continue with default empty stats
+    }
 
     res.status(200).json({
       success: true,
-      data: user
+      data: {
+        user,
+        stats: userStats,
+        activities: userActivities.slice(0, 10) // Limit to 10 most recent activities
+      }
     });
   });
 
   // Cập nhật thông tin user
   updateUser = catchAsync(async (req, res) => {
     const { id } = req.params;
-    const { full_name, email, phone, role, is_verified } = req.body;
+    const { 
+      full_name, 
+      email, 
+      phone, 
+      address,
+      role, 
+      is_verified
+    } = req.body;
 
     const user = await User.findById(id);
     if (!user) {
@@ -161,53 +243,25 @@ class AdminUserController {
       }
     }
 
+    // Prepare update data
+    const updateData = {
+      full_name,
+      email,
+      phone,
+      address,
+      role,
+      is_verified
+    };
+
     const updatedUser = await User.findByIdAndUpdate(
       id,
-      {
-        full_name,
-        email,
-        phone,
-        role,
-        is_verified
-      },
+      updateData,
       { new: true, runValidators: true }
     ).select('-password -refresh_token -verification_token -password_reset_token');
 
     res.status(200).json({
       success: true,
       message: 'Cập nhật user thành công',
-      data: updatedUser
-    });
-  });
-
-  // Ban/Unban user
-  toggleBanUser = catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const { reason } = req.body;
-
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'Không tìm thấy user'
-      });
-    }
-
-    const newBanStatus = !user.is_banned;
-    
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      {
-        is_banned: newBanStatus,
-        ban_reason: newBanStatus ? reason : undefined,
-        banned_at: newBanStatus ? new Date() : undefined
-      },
-      { new: true }
-    ).select('-password -refresh_token -verification_token -password_reset_token');
-
-    res.status(200).json({
-      success: true,
-      message: newBanStatus ? 'Đã cấm user' : 'Đã bỏ cấm user',
       data: updatedUser
     });
   });
