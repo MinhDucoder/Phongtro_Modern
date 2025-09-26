@@ -560,9 +560,118 @@ export const rentalRequestApi = {
   },
 };
 
+// Payment API
+export const paymentApi = {
+  // Get payment history
+  async getPaymentHistory(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    packageType?: string;
+  }): Promise<ApiResponse> {
+    const queryString = params ? `?${new URLSearchParams(
+      Object.entries(params).reduce((acc, [key, value]) => {
+        if (value !== undefined && value !== null) {
+          acc[key] = value.toString();
+        }
+        return acc;
+      }, {} as Record<string, string>)
+    ).toString()}` : '';
+    
+    return apiRequest(`/payments/dashboard/history${queryString}`, {
+      method: 'GET',
+    });
+  },
+
+  // Get payment statistics
+  async getPaymentStats(): Promise<ApiResponse> {
+    return apiRequest('/payments/dashboard/stats', {
+      method: 'GET',
+    });
+  },
+
+  // Get payment detail
+  async getPaymentDetail(paymentId: string): Promise<ApiResponse> {
+    return apiRequest(`/payments/dashboard/${paymentId}`, {
+      method: 'GET',
+    });
+  },
+
+  // Download invoice
+  async downloadInvoice(paymentId: string): Promise<ApiResponse> {
+    return apiRequest(`/payments/dashboard/${paymentId}/invoice`, {
+      method: 'GET',
+    });
+  },
+};
+
+// Saved Properties API
+export const savedPropertiesApi = {
+  // Get saved properties
+  async getSavedProperties(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    filter?: string;
+    sortBy?: string;
+  }): Promise<ApiResponse> {
+    const queryString = params ? `?${new URLSearchParams(
+      Object.entries(params).reduce((acc, [key, value]) => {
+        if (value !== undefined && value !== null) {
+          acc[key] = value.toString();
+        }
+        return acc;
+      }, {} as Record<string, string>)
+    ).toString()}` : '';
+    
+    return apiRequest(`/saved-properties/dashboard/saved${queryString}`, {
+      method: 'GET',
+    });
+  },
+
+  // Get saved properties statistics
+  async getSavedPropertiesStats(): Promise<ApiResponse> {
+    return apiRequest('/saved-properties/dashboard/saved/stats', {
+      method: 'GET',
+    });
+  },
+
+  // Save a property
+  async saveProperty(postId: string, notes?: string, tags?: string[]): Promise<ApiResponse> {
+    return apiRequest('/saved-properties', {
+      method: 'POST',
+      body: JSON.stringify({ postId, notes, tags }),
+    });
+  },
+
+  // Remove a saved property
+  async removeProperty(favoriteId: string): Promise<ApiResponse> {
+    return apiRequest(`/saved-properties/${favoriteId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Update favorite notes and tags
+  async updateFavorite(favoriteId: string, notes?: string, tags?: string[]): Promise<ApiResponse> {
+    return apiRequest(`/saved-properties/${favoriteId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ notes, tags }),
+    });
+  },
+
+  // Check if a property is saved
+  async checkSavedStatus(postId: string): Promise<ApiResponse> {
+    return apiRequest(`/saved-properties/dashboard/saved/${postId}`, {
+      method: 'GET',
+    });
+  },
+};
+
 export default {
   auth: authApi,
   rooms: roomApi,
   dashboard: dashboardApi,
   rentalRequests: rentalRequestApi,
+  payment: paymentApi,
+  savedProperties: savedPropertiesApi,
 };

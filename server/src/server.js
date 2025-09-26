@@ -71,7 +71,7 @@ app.use(morgan("dev"));
 //session
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'your-fallback-session-secret-key',
     resave: false,
     saveUninitialized: false,
   })

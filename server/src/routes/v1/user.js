@@ -20,7 +20,7 @@ userRoute.get("/me", (req, res) => {
       return res.status(401).json({ message: "Vui lòng đăng nhập" });
     }
     
-    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
+    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET || 'asdfsadfsadf');
     console.log('GET /me - Decoded token:', decoded);
     
     // Trả về thông tin user từ JWT token

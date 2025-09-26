@@ -2,8 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authApi, User, ApiResponse } from '@/lib/api';
-import { customToast } from '@/components/ui/CustomToast';
-import { showLoginSuccessToast } from '@/components/ui/LoginSuccessToast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface AuthContextType {
   user: User | null;
@@ -155,13 +154,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (response.success && response.user) {
         setUser(response.user);
         
-        // Hiển thị thông báo thành công sau khi đăng nhập với email/password
-        showLoginSuccessToast(response.user);
+        // Không hiển thị toast khi đăng nhập theo yêu cầu
         return { success: true, user: response.user };
       }
       
       // Server trả về thất bại nhưng không có thông báo lỗi
-      customToast.loginError(response.message || 'Đăng nhập không thành công');
+      toastManager.showLoginError(response.message || 'Đăng nhập không thành công');
       return { success: false };
     } catch (error) {
       // Xử lý các lỗi từ API
@@ -179,7 +177,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       }
       
-      customToast.loginError(errorMessage);
+      toastManager.showLoginError(errorMessage);
       return { success: false };
     } finally {
       setIsLoading(false);
@@ -197,11 +195,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(true);
       const response: ApiResponse = await authApi.register(userData);
       
-      customToast.success(response.message || 'Đăng ký thành công!');
+      toastManager.showSuccess(response.message || 'Đăng ký thành công!');
       return true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng ký';
-      customToast.error(errorMessage);
+      toastManager.showError(errorMessage);
       return false;
     } finally {
       setIsLoading(false);
@@ -210,12 +208,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = async (): Promise<void> => {
     try {
+      // Không hiển thị toast khi đăng xuất theo yêu cầu
+      
+      // Gọi API logout
       await authApi.logout();
     } catch (error) {
       console.error('Error during logout API call:', error);
       // Vẫn logout local dù API có lỗi
     } finally {
-     
+      // Clear local state
       localStorage.removeItem('accessToken');
       setUser(null);
     }

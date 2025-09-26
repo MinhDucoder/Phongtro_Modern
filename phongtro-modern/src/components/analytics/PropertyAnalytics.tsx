@@ -160,11 +160,13 @@ export default function PropertyAnalytics() {
       if (response.success && response.data) {
         setAnalyticsData(response.data);
       } else {
-        setError('Không thể tải dữ liệu analytics');
+        setError(response.message || 'Không thể tải dữ liệu analytics');
+        setAnalyticsData(null);
       }
     } catch (err: any) {
       console.error('Error fetching analytics:', err);
-      setError(err.message || 'Có lỗi xảy ra khi tải dữ liệu');
+      setError(err.message || 'Có lỗi xảy ra khi tải dữ liệu analytics');
+      setAnalyticsData(null);
     } finally {
       setLoading(false);
     }
@@ -247,33 +249,28 @@ export default function PropertyAnalytics() {
     );
   }
 
-  // Use fallback data if API data is not available
-  const data = analyticsData || {
-    overview: {
-      totalViews: 0,
-      totalLikes: 0,
-      totalCalls: 0,
-      totalMessages: 0,
-      viewsChange: '+0%',
-      likesChange: '+0%',
-      callsChange: '+0%',
-      messagesChange: '+0%',
-    },
-    topPerformingPosts: [],
-    demographics: {
-      ageGroups: [],
-      devices: [
-        { type: 'Mobile', percentage: 0, icon: DevicePhoneMobileIcon },
-        { type: 'Desktop', percentage: 0, icon: ComputerDesktopIcon },
-        { type: 'Tablet', percentage: 0, icon: GlobeAltIcon },
-      ],
-      locations: [],
-    },
-    timeAnalytics: {
-      bestHours: [],
-      bestDays: [],
-    }
-  };
+  // Only show data if API call was successful
+  if (!analyticsData) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <svg className="mx-auto h-12 w-12 text-red-400 mb-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          </svg>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Không thể tải dữ liệu</h3>
+          <p className="text-gray-500 mb-4">{error || 'Có lỗi xảy ra khi tải dữ liệu analytics'}</p>
+          <button 
+            onClick={() => fetchAnalytics()}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const data = analyticsData;
 
   return (
     <div className="space-y-6">

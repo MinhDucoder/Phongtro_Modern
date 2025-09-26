@@ -25,7 +25,7 @@ export const authenticate = () => {
         return res.status(401).json({ message: "Vui lòng đăng nhập" });
       }
 
-      const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
+      const decoded = jwt.verify(accessToken, process.env.JWT_SECRET || 'asdfsadfsadf');
       req.user = decoded;
       next();
     } catch (error) {
@@ -70,7 +70,7 @@ export const socketAuth = async (socket, next) => {
     const token = socket.handshake.auth?.token;
     if (!token) return next(new Error("Authentication error"));
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'asdfsadfsadf');
     const user = await userSchema.findById(decoded.id);
     if (!user) return next(new Error("User not found"));
 

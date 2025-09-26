@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const favoriteSchema = new mongoose.Schema({
   user: {
@@ -32,7 +32,7 @@ const favoriteSchema = new mongoose.Schema({
     maxlength: 50
   }]
 }, {
-  timestamps: true
+  timestamps: { createdAt: "created_at", updatedAt: "updated_at" }
 });
 
 // Indexes for performance
@@ -40,22 +40,8 @@ favoriteSchema.index({ user: 1, post: 1 }, { unique: true }); // Prevent duplica
 favoriteSchema.index({ user: 1, savedAt: -1 }); // For sorting user's favorites by date
 favoriteSchema.index({ post: 1 }); // For finding who saved a post
 
-// Virtual for populated data
-favoriteSchema.virtual('populatedPost', {
-  ref: 'Post',
-  localField: 'post',
-  foreignField: '_id',
-  justOne: true
-});
+export default mongoose.model('Favorite', favoriteSchema);
 
-favoriteSchema.virtual('populatedRoom', {
-  ref: 'Room',
-  localField: 'room',
-  foreignField: '_id',
-  justOne: true
-});
-
-module.exports = mongoose.model('Favorite', favoriteSchema);
 
 
 

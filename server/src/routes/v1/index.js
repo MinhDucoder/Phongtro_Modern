@@ -14,6 +14,7 @@ import conversationRoute from "./conversationRoutes.js";
 import messageRoute from "./messageRoutes.js";
 import dashboardRoute from "./dashboard.js";
 import rentalRequestRoute from "./rentalRequest.js";
+import savedPropertiesRoute from "./savedProperties.js";
 import systemRoute from "./system.js";
 
 const Route = (app) => {
@@ -47,6 +48,7 @@ const Route = (app) => {
   app.use("/api/v1/admin", adminRoute);
   app.use("/api/v1/dashboard", dashboardRoute);
   app.use("/api/v1/rental-requests", rentalRequestRoute);
+  app.use("/api/v1/saved-properties", savedPropertiesRoute);
   app.use("/api/v1/system", systemRoute);
 };
 

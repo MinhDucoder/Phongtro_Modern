@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -13,95 +13,9 @@ import {
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
+import { savedPropertiesApi } from '@/lib/api';
 
-// Mock data - trong thực tế sẽ fetch từ API
-const mockSavedProperties = [
-  {
-    id: '1',
-    title: 'Phòng trọ cao cấp gần ĐH Bách Khoa, full nội thất',
-    price: '4.2 triệu/tháng',
-    area: '28 m²',
-    location: 'Hai Bà Trưng, Hà Nội',
-    address: 'Số 123, Ngõ 45, Đường Trần Khát Chân',
-    image: '/placeholder-room.svg',
-    contact: {
-      name: 'Chị Hoa',
-      phone: '0987654321',
-    },
-    views: 234,
-    savedDate: '2024-01-18',
-    isAvailable: true,
-    isFeatured: true,
-  },
-  {
-    id: '2',
-    title: 'Căn hộ mini 1PN, có ban công, view đẹp',
-    price: '5.5 triệu/tháng',
-    area: '35 m²',
-    location: 'Thanh Xuân, Hà Nội',
-    address: 'Số 456, Phố Nguyễn Trãi',
-    image: '/placeholder-room.svg',
-    contact: {
-      name: 'Anh Nam',
-      phone: '0912345678',
-    },
-    views: 189,
-    savedDate: '2024-01-17',
-    isAvailable: true,
-    isFeatured: false,
-  },
-  {
-    id: '3',
-    title: 'Phòng trọ giá rẻ, gần trường ĐH Kinh tế',
-    price: '3.0 triệu/tháng',
-    area: '22 m²',
-    location: 'Đống Đa, Hà Nội',
-    address: 'Số 789, Đường Giải Phóng',
-    image: '/placeholder-room.svg',
-    contact: {
-      name: 'Chú Minh',
-      phone: '0934567890',
-    },
-    views: 456,
-    savedDate: '2024-01-15',
-    isAvailable: false,
-    isFeatured: false,
-  },
-  {
-    id: '4',
-    title: 'Nhà nguyên căn 2PN, có sân vườn nhỏ',
-    price: '9.0 triệu/tháng',
-    area: '65 m²',
-    location: 'Long Biên, Hà Nội',
-    address: 'Số 321, Phố Ngọc Thụy',
-    image: '/placeholder-room.svg',
-    contact: {
-      name: 'Bà Lan',
-      phone: '0945678901',
-    },
-    views: 298,
-    savedDate: '2024-01-14',
-    isAvailable: true,
-    isFeatured: true,
-  },
-  {
-    id: '5',
-    title: 'Căn hộ dịch vụ cao cấp, đầy đủ tiện nghi',
-    price: '7.8 triệu/tháng',
-    area: '40 m²',
-    location: 'Cầu Giấy, Hà Nội',
-    address: 'Số 654, Phố Duy Tân',
-    image: '/placeholder-room.svg',
-    contact: {
-      name: 'Anh Đức',
-      phone: '0967890123',
-    },
-    views: 167,
-    savedDate: '2024-01-12',
-    isAvailable: true,
-    isFeatured: false,
-  },
-];
+// Mock data removed - using real API data only
 
 const filterOptions = [
   { value: 'all', label: 'Tất cả' },
@@ -119,11 +33,55 @@ const sortOptions = [
 ];
 
 export default function SavedProperties() {
-  const [savedProperties, setSavedProperties] = useState(mockSavedProperties);
+  const [savedProperties, setSavedProperties] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0
+  });
+
+  useEffect(() => {
+    fetchSavedProperties();
+  }, [searchQuery, selectedFilter, sortBy, pagination.page]);
+
+  const fetchSavedProperties = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await savedPropertiesApi.getSavedProperties({
+        page: pagination.page,
+        limit: pagination.limit,
+        search: searchQuery || undefined,
+        filter: selectedFilter === 'all' ? undefined : selectedFilter,
+        sortBy
+      });
+
+      if (response.success && response.data) {
+        setSavedProperties(response.data.properties);
+        setPagination(prev => ({
+          ...prev,
+          ...response.data.pagination
+        }));
+      } else {
+        setError(response.message || 'Không thể tải danh sách tin đã lưu');
+        setSavedProperties([]);
+      }
+    } catch (error: any) {
+      console.error('Error fetching saved properties:', error);
+      setError(error.message || 'Có lỗi xảy ra khi tải dữ liệu');
+      setSavedProperties([]);
+      toast.error('Không thể tải danh sách tin đã lưu');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Filter and sort properties
   const filteredAndSortedProperties = savedProperties
@@ -168,11 +126,16 @@ export default function SavedProperties() {
     
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setSavedProperties(prev => prev.filter(p => p.id !== id));
-      toast.success('Đã xóa khỏi danh sách yêu thích');
-    } catch {
+      const response = await savedPropertiesApi.removeProperty(id);
+      
+      if (response.success) {
+        setSavedProperties(prev => prev.filter(p => p.id !== id));
+        toast.success('Đã xóa khỏi danh sách yêu thích');
+      } else {
+        toast.error(response.message || 'Không thể xóa khỏi danh sách yêu thích');
+      }
+    } catch (error: any) {
+      console.error('Error removing property:', error);
       toast.error('Có lỗi xảy ra');
     } finally {
       setIsLoading(false);
@@ -182,6 +145,24 @@ export default function SavedProperties() {
   const handleContactCall = (phone: string) => {
     window.open(`tel:${phone}`, '_self');
   };
+
+  if (error && savedProperties.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <HeartIcon className="mx-auto h-12 w-12 text-red-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Không thể tải dữ liệu</h3>
+          <p className="text-gray-500 mb-4">{error}</p>
+          <button 
+            onClick={() => fetchSavedProperties()}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -279,13 +260,21 @@ export default function SavedProperties() {
                 <div className="flex items-start space-x-4">
                   {/* Image */}
                   <div className="flex-shrink-0 relative">
-                    <Image
-                      src={property.image}
-                      alt={property.title || 'Property image'}
-                      width={120}
-                      height={90}
-                      className="w-30 h-24 object-cover rounded-lg"
-                    />
+                    {property.image && property.image.trim() !== '' ? (
+                      <Image
+                        src={property.image}
+                        alt={property.title || 'Property image'}
+                        width={120}
+                        height={90}
+                        className="w-30 h-24 object-cover rounded-lg"
+                      />
+                    ) : (
+                      <div className="w-30 h-24 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
                     {property.isFeatured && (
                       <div className="absolute top-1 left-1 bg-yellow-400 text-black text-xs px-2 py-1 rounded">
                         Nổi bật
@@ -332,7 +321,7 @@ export default function SavedProperties() {
                               <EyeIcon className="h-4 w-4 mr-1" />
                               {property.views} lượt xem
                             </div>
-                            <span>Lưu: {new Date(property.savedDate).toLocaleDateString('vi-VN')}</span>
+                            <span>Lưu: {new Date(property.savedDate || property.savedAt || '').toLocaleDateString('vi-VN')}</span>
                           </div>
 
                           <div className="flex items-center space-x-2">

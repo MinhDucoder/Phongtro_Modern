@@ -34,7 +34,7 @@ router.get('/google/callback',
         full_name: req.user.full_name,
         email: req.user.email
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'asdfsadfsadf',
       { expiresIn: "7d" }
     );
 
@@ -81,7 +81,7 @@ router.get('/facebook/callback',
         full_name: req.user.full_name,
         email: req.user.email
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'asdfsadfsadf',
       { expiresIn: "7d" }
     );
 

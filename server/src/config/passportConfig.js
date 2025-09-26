@@ -7,12 +7,13 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Google 
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/api/v1/auth/google/callback",
-    passReqToCallback: true
-  },
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(new GoogleStrategy({
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "/api/v1/auth/google/callback",
+      passReqToCallback: true
+    },
   async (req, accessToken, refreshToken, profile, done) => {
     try {
       console.log('Google OAuth profile:', {
@@ -48,16 +49,20 @@ passport.use(new GoogleStrategy({
       return done(error, null);
     }
   }
-));
+  ));
+} else {
+  console.log('⚠️ Google OAuth credentials not found, skipping Google strategy');
+}
 
 // Facebook 
-passport.use(new FacebookStrategy({
-    clientID: process.env.FACEBOOK_APP_ID,
-    clientSecret: process.env.FACEBOOK_APP_SECRET,
-    callbackURL: "/api/v1/auth/facebook/callback",
-    profileFields: ['id', 'emails', 'name', 'displayName'],
-    passReqToCallback: true
-  },
+if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
+  passport.use(new FacebookStrategy({
+      clientID: process.env.FACEBOOK_APP_ID,
+      clientSecret: process.env.FACEBOOK_APP_SECRET,
+      callbackURL: "/api/v1/auth/facebook/callback",
+      profileFields: ['id', 'emails', 'name', 'displayName'],
+      passReqToCallback: true
+    },
   async (req, accessToken, refreshToken, profile, done) => {
     try {
       console.log('Facebook OAuth profile:', {
@@ -107,7 +112,10 @@ passport.use(new FacebookStrategy({
       return done(error, null);
     }
   }
-));
+  ));
+} else {
+  console.log('⚠️ Facebook OAuth credentials not found, skipping Facebook strategy');
+}
 
 // Serialize 
 passport.serializeUser((user, done) => {

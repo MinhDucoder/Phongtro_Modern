@@ -14,63 +14,29 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import { paymentApi } from '@/lib/api';
 
 interface PaymentRecord {
   id: string;
   packageName: string;
+  packageType: string;
   amount: number;
-  status: 'completed' | 'pending' | 'failed' | 'refunded';
+  currency: string;
+  status: 'completed' | 'pending' | 'failed' | 'refunded' | 'cancelled';
   paymentMethod: string;
   transactionId: string;
-  createdAt: Date;
-  expiresAt: Date;
+  packageStartDate: Date | string;
+  packageEndDate: Date | string;
+  packageDuration: number;
   invoiceUrl?: string;
+  notes?: string;
+  createdAt: Date | string;
+  completedAt?: Date | string;
+  failedAt?: Date | string;
+  failureReason?: string;
 }
 
-// Mock payment history data
-const mockPayments: PaymentRecord[] = [
-  {
-    id: '1',
-    packageName: 'Gói Premium - 30 ngày',
-    amount: 150000,
-    status: 'completed',
-    paymentMethod: 'VNPay',
-    transactionId: 'VNPAY_20240120_123456',
-    createdAt: new Date(2024, 0, 20, 14, 30),
-    expiresAt: new Date(2024, 1, 19, 14, 30),
-    invoiceUrl: '/invoices/invoice_1.pdf'
-  },
-  {
-    id: '2',
-    packageName: 'Gói Cơ Bản - 7 ngày',
-    amount: 50000,
-    status: 'completed',
-    paymentMethod: 'MoMo',
-    transactionId: 'MOMO_20240115_789012',
-    createdAt: new Date(2024, 0, 15, 10, 15),
-    expiresAt: new Date(2024, 0, 22, 10, 15)
-  },
-  {
-    id: '3',
-    packageName: 'Gói VIP - 60 ngày',
-    amount: 300000,
-    status: 'pending',
-    paymentMethod: 'ZaloPay',
-    transactionId: 'ZALOPAY_20240118_345678',
-    createdAt: new Date(2024, 0, 18, 16, 45),
-    expiresAt: new Date(2024, 2, 18, 16, 45)
-  },
-  {
-    id: '4',
-    packageName: 'Gói Premium - 30 ngày',
-    amount: 150000,
-    status: 'failed',
-    paymentMethod: 'Chuyển khoản',
-    transactionId: 'BANK_20240110_901234',
-    createdAt: new Date(2024, 0, 10, 9, 20),
-    expiresAt: new Date(2024, 1, 9, 9, 20)
-  }
-];
+// Mock data removed - using real API data only
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -123,13 +89,53 @@ const getPaymentMethodIcon = (method: string) => {
 };
 
 export default function PaymentHistory() {
-  const [payments] = useState<PaymentRecord[]>(mockPayments);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [filter, setFilter] = useState<'all' | 'completed' | 'pending' | 'failed'>('all');
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0
+  });
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    fetchPayments();
+  }, [filter, pagination.page]);
+
+  const fetchPayments = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await paymentApi.getPaymentHistory({
+        page: pagination.page,
+        limit: pagination.limit,
+        status: filter === 'all' ? undefined : filter
+      });
+
+      if (response.success && response.data) {
+        setPayments(response.data.payments);
+        setPagination(prev => ({
+          ...prev,
+          ...response.data.pagination
+        }));
+      } else {
+        setError(response.message || 'Không thể tải lịch sử thanh toán');
+        setPayments([]);
+      }
+    } catch (error: any) {
+      console.error('Error fetching payments:', error);
+      setError(error.message || 'Có lỗi xảy ra khi tải dữ liệu');
+      setPayments([]);
+      toast.error('Không thể tải lịch sử thanh toán');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredPayments = payments.filter(payment => {
     if (filter === 'all') return true;
@@ -143,8 +149,9 @@ export default function PaymentHistory() {
     }).format(price);
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('vi-VN', {
+  const formatDate = (date: Date | string) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -153,12 +160,25 @@ export default function PaymentHistory() {
     });
   };
 
-  const handleDownloadInvoice = (payment: PaymentRecord) => {
-    if (payment.invoiceUrl) {
-      toast.success('Đang tải hóa đơn...');
-      // In a real app, this would download the actual invoice
-    } else {
-      toast.error('Hóa đơn chưa có sẵn');
+  const handleDownloadInvoice = async (payment: PaymentRecord) => {
+    try {
+      if (payment.invoiceUrl) {
+        toast.success('Đang tải hóa đơn...');
+        // Try to download from API
+        const response = await paymentApi.downloadInvoice(payment.id);
+        if (response.success && response.data?.invoiceUrl) {
+          // Open invoice URL in new tab
+          window.open(response.data.invoiceUrl, '_blank');
+        } else {
+          // Fallback to direct URL
+          window.open(payment.invoiceUrl, '_blank');
+        }
+      } else {
+        toast.error('Hóa đơn chưa có sẵn');
+      }
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      toast.error('Không thể tải hóa đơn');
     }
   };
 
@@ -177,6 +197,37 @@ export default function PaymentHistory() {
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-20 bg-gray-200 rounded"></div>
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (loading && payments.length === 0) {
+    return (
+      <div className="p-6 bg-white rounded-lg shadow animate-pulse">
+        <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-20 bg-gray-200 rounded"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error && payments.length === 0) {
+    return (
+      <div className="p-6 bg-white rounded-lg shadow">
+        <div className="text-center py-12">
+          <BanknotesIcon className="mx-auto h-12 w-12 text-red-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Không thể tải dữ liệu</h3>
+          <p className="text-gray-500 mb-4">{error}</p>
+          <button 
+            onClick={() => fetchPayments()}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          >
+            Thử lại
+          </button>
         </div>
       </div>
     );
@@ -317,6 +368,9 @@ export default function PaymentHistory() {
                       <p className="text-sm text-gray-600">
                         Mã giao dịch: {payment.transactionId}
                       </p>
+                      <p className="text-xs text-gray-500">
+                        Gói {payment.packageType} - {payment.packageDuration} ngày
+                      </p>
                     </div>
                   </div>
                   
@@ -327,7 +381,7 @@ export default function PaymentHistory() {
                     </div>
                     <div>
                       <span className="text-gray-500">Hết hạn:</span>
-                      <p className="font-medium text-gray-900">{formatDate(payment.expiresAt)}</p>
+                      <p className="font-medium text-gray-900">{formatDate(payment.packageEndDate)}</p>
                     </div>
                     <div>
                       <span className="text-gray-500">Số tiền:</span>
@@ -372,6 +426,48 @@ export default function PaymentHistory() {
           ))
         )}
       </div>
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between mt-6">
+          <div className="text-sm text-gray-700">
+            Hiển thị {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} trong tổng số {pagination.total} giao dịch
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+              disabled={pagination.page === 1 || loading}
+              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Trước
+            </button>
+            {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+              const pageNum = i + 1;
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setPagination(prev => ({ ...prev, page: pageNum }))}
+                  disabled={loading}
+                  className={`px-3 py-2 text-sm font-medium rounded-md ${
+                    pagination.page === pageNum
+                      ? 'text-white bg-blue-600'
+                      : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+            <button
+              onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+              disabled={pagination.page === pagination.totalPages || loading}
+              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Sau
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

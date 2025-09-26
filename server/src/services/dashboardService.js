@@ -28,6 +28,11 @@ class DashboardService {
         date: today
       }).lean();
 
+      // Get all analytics for total views calculation
+      const allAnalytics = await PostAnalytics.find({
+        landlord: userId
+      }).lean();
+
       // Calculate statistics
       const stats = {
         totalPosts: userPosts.length,
@@ -39,6 +44,9 @@ class DashboardService {
         pendingRequests: rentalRequests.filter(req => req.status === 'pending').length,
         acceptedRequests: rentalRequests.filter(req => req.status === 'accepted').length,
         rejectedRequests: rentalRequests.filter(req => req.status === 'rejected').length,
+        
+        // Total views across all time
+        totalViews: allAnalytics.reduce((sum, analytics) => sum + analytics.metrics.views, 0),
         
         // Today's metrics
         todayViews: todayAnalytics.reduce((sum, analytics) => sum + analytics.metrics.views, 0),

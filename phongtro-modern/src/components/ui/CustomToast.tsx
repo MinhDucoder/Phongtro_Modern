@@ -56,38 +56,59 @@ export function CustomToaster() {
 
 // Hàm tiện ích để hiển thị các toast tùy chỉnh
 export const customToast = {
-  success: (message: string, icon: string = '👋') => {
+  success: (message: string, icon: string = '✓') => {
+    // Dismiss any existing toasts first
+    toast.dismiss();
+    const id = 'success-toast';
+    const duration = 3000;
+    
     toast.success(message, {
       icon,
+      duration,
       style: {
         background: '#10b981',
         color: 'white',
-        borderRadius: '4px',
-        padding: '10px 16px',
-        fontWeight: 'bold',
+        borderRadius: '8px',
+        padding: '12px 16px',
+        fontSize: '14px',
+        fontWeight: '500',
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        border: '1px solid #059669',
       },
       position: 'top-right',
-      duration: 3000,
+      id,
     });
+    setTimeout(() => toast.dismiss(id), duration + 100);
   },
   
   error: (message: string, icon: string = '✕') => {
+    // Dismiss any existing toasts first
+    toast.dismiss();
+    const id = 'error-toast';
+    const duration = 4000;
+    
     toast.error(message, {
       icon,
+      duration,
       style: {
         background: '#ef4444',
         color: 'white',
-        borderRadius: '4px',
-        padding: '10px 16px',
+        borderRadius: '8px',
+        padding: '12px 16px',
+        fontSize: '14px',
+        fontWeight: '500',
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        border: '1px solid #dc2626',
       },
       position: 'top-right',
-      duration: 3000,
+      id,
       // Tắt icon mặc định của react-hot-toast
       iconTheme: {
         primary: 'white',
         secondary: '#ef4444'
       }
     });
+    setTimeout(() => toast.dismiss(id), duration + 100);
   },
 
   warning: (message: string) => {
@@ -127,23 +148,33 @@ export const customToast = {
   
   // Toast cho lỗi đăng nhập
   loginError: (message: string) => {
+    // Dismiss any existing toasts first
+    toast.dismiss();
+    const id = 'login-error';
+    const duration = 4000;
+    
     toast.error(message, {
       icon: '🔐',
-      duration: 3000,
+      duration,
       style: {
         background: '#ef4444',
         color: 'white',
-        borderRadius: '4px',
-        padding: '10px 16px',
+        borderRadius: '8px',
+        padding: '12px 16px',
         fontSize: '14px',
+        fontWeight: '500',
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        border: '1px solid #dc2626',
       },
       position: 'top-right',
+      id, // Prevent duplicate toasts
       // Tắt icon mặc định của react-hot-toast
       iconTheme: {
         primary: 'white',
         secondary: '#ef4444'
       }
     });
+    setTimeout(() => toast.dismiss(id), duration + 100);
   },
   
   // Toast cho việc xác thực email
