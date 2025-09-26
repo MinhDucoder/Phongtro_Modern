@@ -16,6 +16,7 @@ import dashboardRoute from "./dashboard.js";
 import rentalRequestRoute from "./rentalRequest.js";
 import savedPropertiesRoute from "./savedProperties.js";
 import systemRoute from "./system.js";
+import moderationRoutes from "./moderation.js";
 
 const Route = (app) => {
   // Root route
@@ -46,6 +47,7 @@ const Route = (app) => {
   app.use("/api/v1/notifications", notificationRoute);
   app.use("/api/v1/reports", reportRoute);
   app.use("/api/v1/admin", adminRoute);
+  app.use("/api/v1/admin/moderation", moderationRoutes);
   app.use("/api/v1/dashboard", dashboardRoute);
   app.use("/api/v1/rental-requests", rentalRequestRoute);
   app.use("/api/v1/saved-properties", savedPropertiesRoute);

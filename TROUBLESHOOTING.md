@@ -1,5 +1,37 @@
 # Troubleshooting Guide - API Connection Issues
 
+## Lỗi kết nối MongoDB ETIMEDOUT
+
+### Vấn đề
+Lỗi kết nối MongoDB với thông báo:
+`MongoNetworkError: connect ETIMEDOUT 159.143.58.32:27017`
+
+### Nguyên nhân
+- Cấu hình kết nối MongoDB đang cố kết nối với địa chỉ IP `159.143.58.32` thay vì MongoDB Atlas URI
+- Có thể có cấu hình cũ trong biến môi trường hoặc tệp cấu hình
+
+### Các bước khắc phục
+
+1. **Cập nhật file cấu hình MongoDB**
+   - Sử dụng file `mongodbConfig.js.new` đã cung cấp
+   - Đảm bảo URI kết nối MongoDB đúng
+
+2. **Thay thế file cấu hình hiện tại**
+   ```
+   cd D:\Phongtro_Modern\server
+   ren src\config\mongodbConfig.js mongodbConfig.js.bak
+   ren src\config\mongodbConfig.js.new mongodbConfig.js
+   ```
+
+3. **Kiểm tra kết nối**
+   ```
+   node test-mongodb-connection.js
+   ```
+
+4. **Sử dụng MongoDB cục bộ nếu cần**
+   - Cài đặt MongoDB Community Edition
+   - Sử dụng `mongodb://localhost:27017/phongtro`
+
 ## Lỗi "Failed to fetch" khi kết nối API
 
 ### Nguyên nhân thường gặp:

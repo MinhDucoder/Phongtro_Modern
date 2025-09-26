@@ -17,7 +17,7 @@ const userSchema = new Schema(
       trim: true,
     },
     password: { type: String, select: false, required: function() {
-      // Password không required nếu user đăng nhập bằng OAuth (có google_id hoặc facebook_id)
+      // Mật khẩu không bắt buộc nếu user đăng nhập bằng OAuth (có google_id hoặc facebook_id)
       return !this.google_id && !this.facebook_id;
     }},
     phone: { type: String, trim: true },
@@ -28,17 +28,14 @@ const userSchema = new Schema(
     },
     balance: { type: Number, default: 0 },
     is_verified: { type: Boolean, default: false },
-    is_banned: { type: Boolean, default: false },
     last_login: { type: Date, default: null },
-    is_deleted: { type: Boolean, default: false }, // Soft delete flag
-    deleted_at: { type: Date, default: null }, // Soft delete timestamp
-    ban_reason: { type: String }, // Reason for banning the user
-    banned_at: { type: Date }, // When the user was banned
-    verification_token: { type: String }, // token xác thực email
-    verification_token_expires: { type: Date }, // thời hạn của token xác thực
-    password_reset_token: { type: String }, // token đặt lại mật khẩu
-    password_reset_expires: { type: Date }, // thời hạn token đặt lại mật khẩu
-    refresh_token: { type: String }, // refresh token
+    is_deleted: { type: Boolean, default: false }, // Cờ xóa mềm
+    deleted_at: { type: Date, default: null }, // Thời gian xóa mềm
+    verification_token: { type: String }, // Mã xác thực email
+    verification_token_expires: { type: Date }, // Thời hạn của mã xác thực
+    password_reset_token: { type: String }, // Mã đặt lại mật khẩu
+    password_reset_expires: { type: Date }, // Thời hạn mã đặt lại mật khẩu
+    refresh_token: { type: String }, // Mã làm mới phiên đăng nhập
     google_id: { type: String },
     facebook_id: { type: String }
   },

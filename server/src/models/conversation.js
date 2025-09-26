@@ -16,6 +16,16 @@ const conversationSchema = new Schema(
       sender: { type: Schema.Types.ObjectId, ref: "User" },
       createdAt: { type: Date },
     },
+    type: {
+      type: String,
+      enum: ["private", "group"],
+      default: "private",
+    },
+    unread: {
+      type: Map,
+      of: Number,
+      default: {},
+    },
   },
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );
