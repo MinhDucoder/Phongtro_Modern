@@ -1,7 +1,9 @@
 // src/services/postService.js
+import { success } from "~/utils/responeHandler.js";
 import Post from "../models/postSchema.js";
 import Room from "../models/roomSchema.js";
 import { LANDLORD_PROJECTION, ROOM_PROJECTION } from "../utils/constants.js";
+import notificationService from "./notificationService.js";
 
 class PostService {
   async createPost(userId, { roomId, options, favouriteLevel }) {
@@ -24,7 +26,12 @@ class PostService {
     ]);
   }
 
-  async listPosts({ page = 1, limit = 20, filters = {}, sort = { createdAt: -1 } }) {
+  async listPosts({
+    page = 1,
+    limit = 20,
+    filters = {},
+    sort = { createdAt: -1 },
+  }) {
     const skip = (page - 1) * limit;
 
     const posts = await Post.find(filters)
@@ -46,6 +53,24 @@ class PostService {
 
     if (!post) throw new Error("Post not found");
     return post;
+  }
+
+  async updateStatusPost(postId, status) {
+    try {
+      const post = await Post.findById(postId);
+      post.status = status;
+      await post.save();
+      notificationService.createNotification({
+        user: post.landlord,
+        title: "Cập nhật trạng thái bài đăng",
+        message: `Bài đăng của bạn đã được cập nhật trạng thái thành ${status}.`,
+        type: "post_status_update",
+        relatedId: post._id,
+      });
+      return success(true, "Cập nhật trạng thái bài đăng thành công", post);
+    } catch (error) {
+      throw new Error("Lỗi khi cập nhật trạng thái bài đăng");
+    }
   }
 
   async updatePost(postId, userId, { options, favouriteLevel, status }) {
