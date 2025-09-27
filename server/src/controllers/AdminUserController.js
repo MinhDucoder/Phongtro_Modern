@@ -1,5 +1,5 @@
-import User from "~/models/userSchema.js";
-import catchAsync from "~/middlewares/catchAsync.js";
+import User from "../models/userSchema.js";
+import catchAsync from "../middlewares/catchAsync.js";
 
 class AdminUserController {
   // Lấy danh sách tất cả users với phân trang và filter

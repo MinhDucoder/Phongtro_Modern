@@ -2,9 +2,8 @@ import express from "express";
 import RoomController from "~/controllers/RoomController";
 import { roomSchemaValidator } from "~/validations/roomValidator";
 import { validate } from "~/validations/validate";
-import { authorize } from "~/middlewares/checkToken";
-import { authenticate } from "../../middlewares/checkToken";
-import uploadRoute from "./upload";
+import { authenticate, authorize } from "~/middlewares/checkToken";
+import uploadRoute from "./upload.js";
 import uploadMiddleware, {
   cleanupUploads,
 } from "../../middlewares/uploadMiddleware.js";

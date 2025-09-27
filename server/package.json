@@ -1,58 +1,27 @@
 {
-  "name": "nodejs-expressjs-mongodb-base-project",
-  "private": true,
+  "name": "phongtro-modern-server",
   "version": "1.0.0",
-  "author": "NguyenMinhDuc",
-  "engines": {
-    "node": ">=18.x"
-  },
+  "description": "Backend server for Phongtro Modern application",
+  "type": "module",
+  "main": "src/server.js",
   "scripts": {
-    "lint": "eslint src --ext js --report-unused-disable-directives --max-warnings 0",
-    "clean": "rm -rf build && mkdir build",
-    "build-babel": "babel ./src -d ./build/src",
-    "build": "npm run clean && npm run build-babel",
-    "production": "npm run build && node ./build/src/server.js",
-    "dev": "nodemon --exec babel-node ./src/server.js",
-    "seed": "babel-node ./src/scripts/seedRooms.js"
+    "start": "node --loader ./src/config/loader.js src/server.js",
+    "dev": "nodemon --loader ./src/config/loader.js src/server.js",
+    "update-property-types": "node src/scripts/updatePropertyTypes.js"
   },
   "dependencies": {
-    "@babel/runtime": "^7.22.10",
-    "@sendgrid/mail": "^8.1.6",
-    "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.2",
-    "cloudinary": "^2.7.0",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "crypto": "^1.0.1",
-    "dotenv": "^17.2.2",
     "express": "^4.18.2",
-    "express-rate-limit": "^8.1.0",
-    "express-session": "^1.18.2",
-    "http": "^0.0.1-security",
-    "joi": "^18.0.1",
+    "mongoose": "^7.5.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.18.1",
-    "morgan": "^1.10.1",
-    "multer": "^2.0.2",
-    "nodemailer": "^7.0.6",
-    "passport": "^0.7.0",
-    "passport-facebook": "^3.0.0",
-    "passport-google-oauth20": "^2.0.0",
-    "redis": "^5.8.2",
-    "resend": "^6.1.0",
-    "router": "^2.2.0",
-    "socket": "^1.1.21",
-    "socket.io": "^4.5.3"
+    "multer": "^1.4.5-lts.1",
+    "cloudinary": "^1.40.0",
+    "nodemailer": "^6.9.4",
+    "socket.io": "^4.7.2"
   },
   "devDependencies": {
-    "@babel/cli": "^7.22.10",
-    "@babel/core": "^7.22.10",
-    "@babel/eslint-parser": "^7.22.10",
-    "@babel/node": "^7.22.10",
-    "@babel/plugin-transform-runtime": "^7.22.10",
-    "@babel/preset-env": "^7.22.10",
-    "babel-plugin-module-resolver": "^5.0.0",
-    "eslint": "^8.47.0",
     "nodemon": "^3.0.1"
   }
 }

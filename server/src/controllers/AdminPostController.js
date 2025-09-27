@@ -1,7 +1,7 @@
-import Post from "~/models/postSchema.js";
-import Room from "~/models/roomSchema.js";
-import User from "~/models/userSchema.js";
-import catchAsync from "~/middlewares/catchAsync.js";
+import Post from "../models/postSchema.js";
+import Room from "../models/roomSchema.js";
+import User from "../models/userSchema.js";
+import catchAsync from "../middlewares/catchAsync.js";
 
 class AdminPostController {
   // Lấy danh sách tất cả posts với phân trang và filter

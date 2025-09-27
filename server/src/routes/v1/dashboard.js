@@ -6,6 +6,9 @@ import catchAsync from "../../middlewares/catchAsync.js";
 
 const dashboardRoute = express.Router();
 
+// Admin dashboard routes
+dashboardRoute.get("/admin/overview", authenticate(), authorize(['admin']), catchAsync(DashboardController.getAdminOverview));
+
 // All dashboard routes require authentication and landlord/admin role
 dashboardRoute.use(authenticate());
 dashboardRoute.use(authorize(['landlord', 'admin']));

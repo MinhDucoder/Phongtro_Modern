@@ -1,7 +1,7 @@
-import Post from "~/models/postSchema.js";
-import User from "~/models/userSchema.js";
-import Room from "~/models/roomSchema.js";
-import catchAsync from "~/middlewares/catchAsync.js";
+import Post from "../models/postSchema.js";
+import User from "../models/userSchema.js";
+import Room from "../models/roomSchema.js";
+import catchAsync from "../middlewares/catchAsync.js";
 import mongoose from "mongoose";
 
 class ModerationController {

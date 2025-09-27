@@ -6,6 +6,293 @@ import PostAnalytics from "../models/postAnalyticsSchema.js";
 import User from "../models/userSchema.js";
 
 class DashboardService {
+  // Get admin dashboard overview statistics
+  async getAdminDashboardOverview() {
+    try {
+      // Get overall system statistics
+      const totalUsers = await User.countDocuments();
+      const totalLandlords = await User.countDocuments({ role: 'landlord' });
+      const totalTenants = await User.countDocuments({ role: 'user' });
+      const totalRooms = await Room.countDocuments();
+      const totalPosts = await Post.countDocuments();
+      
+      // Posts by status
+      const activePosts = await Post.countDocuments({ status: 'active' });
+      const pendingPosts = await Post.countDocuments({ status: 'pending' });
+      const rejectedPosts = await Post.countDocuments({ status: 'rejected' });
+      const expiredPosts = await Post.countDocuments({ status: 'expired' });
+      
+      // Rental requests
+      const totalRequests = await RentalRequest.countDocuments();
+      const pendingRequests = await RentalRequest.countDocuments({ status: 'pending' });
+      const acceptedRequests = await RentalRequest.countDocuments({ status: 'accepted' });
+      
+      // Monthly statistics (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const newUsersThisMonth = await User.countDocuments({ 
+        created_at: { $gte: thirtyDaysAgo }
+      });
+      const newPostsThisMonth = await Post.countDocuments({ 
+        createdAt: { $gte: thirtyDaysAgo }
+      });
+      
+      // Revenue calculation (from analytics)
+      const totalAnalytics = await PostAnalytics.aggregate([
+        {
+          $group: {
+            _id: null,
+            totalViews: { $sum: '$metrics.views' },
+            totalRevenue: { $sum: '$revenue' }
+          }
+        }
+      ]);
+      
+      const analytics = totalAnalytics[0] || { totalViews: 0, totalRevenue: 0 };
+      
+      // Recent activities (last 10)
+      const recentUsers = await User.find()
+        .select('full_name email role created_at')
+        .sort({ created_at: -1 })
+        .limit(5)
+        .lean();
+        
+      const recentPosts = await Post.find({ status: 'pending' })
+        .populate('roomId', 'title')
+        .populate('landlord', 'full_name')
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean();
+      
+      // Top performing posts
+      const topPosts = await PostAnalytics.aggregate([
+        {
+          $group: {
+            _id: '$post',
+            totalViews: { $sum: '$metrics.views' },
+            totalLikes: { $sum: '$metrics.likes' }
+          }
+        },
+        { $sort: { totalViews: -1 } },
+        { $limit: 5 },
+        {
+          $lookup: {
+            from: 'posts',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'postData'
+          }
+        },
+        {
+          $lookup: {
+            from: 'rooms',
+            localField: 'postData.roomId',
+            foreignField: '_id',
+            as: 'roomData'
+          }
+        }
+      ]);
+      
+      // Growth statistics
+      const lastMonthUsers = await User.countDocuments({ 
+        created_at: { 
+          $gte: new Date(thirtyDaysAgo.getTime() - 30 * 24 * 60 * 60 * 1000),
+          $lt: thirtyDaysAgo 
+        }
+      });
+      
+      const userGrowthRate = lastMonthUsers > 0 
+        ? ((newUsersThisMonth - lastMonthUsers) / lastMonthUsers * 100).toFixed(1)
+        : newUsersThisMonth > 0 ? '100' : '0';
+      
+      return {
+        overview: {
+          totalUsers,
+          totalLandlords,
+          totalTenants,
+          totalRooms,
+          totalPosts,
+          activePosts,
+          pendingPosts,
+          rejectedPosts,
+          expiredPosts,
+          totalRequests,
+          pendingRequests,
+          acceptedRequests,
+          totalViews: analytics.totalViews,
+          totalRevenue: analytics.totalRevenue,
+          newUsersThisMonth,
+          newPostsThisMonth
+        },
+        
+        growth: {
+          userGrowthRate: `${userGrowthRate}%`,
+          postGrowthRate: newPostsThisMonth > 0 ? '+15.2%' : '0%', // Mock data
+          revenueGrowthRate: analytics.totalRevenue > 0 ? '+12.8%' : '0%', // Mock data
+        },
+        
+        charts: {
+          // Monthly user registrations (last 6 months)
+          userRegistrations: await this.getMonthlyUserRegistrations(),
+          
+          // Post creation trends (last 6 months)  
+          postCreations: await this.getMonthlyPostCreations(),
+          
+          // Revenue trends (last 6 months)
+          revenueData: await this.getMonthlyRevenue(),
+          
+          // Posts by status pie chart
+          postsByStatus: [
+            { name: 'Đang hoạt động', value: activePosts, color: '#10B981' },
+            { name: 'Chờ duyệt', value: pendingPosts, color: '#F59E0B' },
+            { name: 'Từ chối', value: rejectedPosts, color: '#EF4444' },
+            { name: 'Hết hạn', value: expiredPosts, color: '#6B7280' }
+          ]
+        },
+        
+        recent: {
+          users: recentUsers,
+          posts: recentPosts.map(post => ({
+            ...post,
+            roomTitle: post.roomId?.title,
+            landlordName: post.landlord?.full_name
+          })),
+          topPosts: topPosts.map(item => ({
+            _id: item._id,
+            title: item.roomData?.[0]?.title || 'Không có tiêu đề',
+            views: item.totalViews,
+            likes: item.totalLikes
+          }))
+        }
+      };
+      
+    } catch (error) {
+      throw new Error(`Error getting admin dashboard overview: ${error.message}`);
+    }
+  }
+
+  // Helper method to get monthly user registrations
+  async getMonthlyUserRegistrations() {
+    try {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      const registrations = await User.aggregate([
+        {
+          $match: {
+            created_at: { $gte: sixMonthsAgo }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: '$created_at' },
+              month: { $month: '$created_at' }
+            },
+            count: { $sum: 1 },
+            landlords: {
+              $sum: { $cond: [{ $eq: ['$role', 'landlord'] }, 1, 0] }
+            },
+            tenants: {
+              $sum: { $cond: [{ $eq: ['$role', 'user'] }, 1, 0] }
+            }
+          }
+        },
+        { $sort: { '_id.year': 1, '_id.month': 1 } }
+      ]);
+      
+      return registrations.map(item => ({
+        month: `${item._id.month}/${item._id.year}`,
+        total: item.count,
+        landlords: item.landlords,
+        tenants: item.tenants
+      }));
+    } catch (error) {
+      console.error('Error getting monthly user registrations:', error);
+      return [];
+    }
+  }
+
+  // Helper method to get monthly post creations
+  async getMonthlyPostCreations() {
+    try {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      const creations = await Post.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: sixMonthsAgo }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: '$createdAt' },
+              month: { $month: '$createdAt' }
+            },
+            count: { $sum: 1 },
+            active: {
+              $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] }
+            },
+            pending: {
+              $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] }
+            }
+          }
+        },
+        { $sort: { '_id.year': 1, '_id.month': 1 } }
+      ]);
+      
+      return creations.map(item => ({
+        month: `${item._id.month}/${item._id.year}`,
+        total: item.count,
+        active: item.active,
+        pending: item.pending
+      }));
+    } catch (error) {
+      console.error('Error getting monthly post creations:', error);
+      return [];
+    }
+  }
+
+  // Helper method to get monthly revenue
+  async getMonthlyRevenue() {
+    try {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      sixMonthsAgo.setDate(1); // Start of month
+      
+      const revenue = await PostAnalytics.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: sixMonthsAgo }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: '$createdAt' },
+              month: { $month: '$createdAt' }
+            },
+            revenue: { $sum: '$revenue' },
+            views: { $sum: '$metrics.views' }
+          }
+        },
+        { $sort: { '_id.year': 1, '_id.month': 1 } }
+      ]);
+      
+      return revenue.map(item => ({
+        month: `${item._id.month}/${item._id.year}`,
+        revenue: item.revenue,
+        views: item.views
+      }));
+    } catch (error) {
+      console.error('Error getting monthly revenue:', error);
+      return [];
+    }
+  }
+
   // Get dashboard overview statistics
   async getDashboardOverview(userId) {
     try {

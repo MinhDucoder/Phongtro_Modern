@@ -49,6 +49,37 @@ const roomSchema = new mongoose.Schema(
         ],
       },
     ],
+    propertyType: {
+      type: String,
+      enum: [
+        "phong_tro",
+        "nha_nguyen_can",
+        "can_ho_chung_cu",
+        "can_ho_mini",
+        "o_ghep",
+        "mat_bang"
+      ],
+      required: true,
+      default: "phong_tro",
+      index: true
+    },
+    roomType: {
+      type: String,
+      enum: [
+        "phong_don",
+        "phong_doi", 
+        "phong_ba",
+        "phong_tu",
+        "phong_nam",
+        "phong_sau",
+        "phong_bay",
+        "phong_tam",
+        "phong_chin",
+        "phong_muoi"
+      ],
+      required: false,
+      index: true
+    },
 
     landlord: {
       type: mongoose.Schema.Types.ObjectId,

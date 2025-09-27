@@ -1,6 +1,6 @@
 import express from "express";
 import bookingController from "../../controllers/BookingController.js";
-import { authenticate, authorize } from "~/middlewares/checkToken.js";
+import { authenticate, authorize } from "~/middlewares/checkToken";
 import {
   createBookingSchema,
   updateBookingSchema,

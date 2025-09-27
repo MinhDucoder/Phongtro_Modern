@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import userSchema from "~/models/userSchema";
+import userSchema from "../models/userSchema.js";
 dotenv.config();
 
 // Middleware kiểm tra token

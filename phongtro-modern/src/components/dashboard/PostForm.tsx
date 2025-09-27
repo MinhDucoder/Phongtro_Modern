@@ -31,6 +31,9 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
       internet: '',
       parking: ''
     },
+    // Property type
+    propertyType: 'phong_tro',
+    roomType: '',
     // Post data
     options: [] as string[],
     favouriteLevel: 'free',
@@ -39,6 +42,28 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
 
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(!!postId);
+
+  const propertyTypeOptions = [
+    { value: 'phong_tro', label: 'Phòng trọ', icon: '🏠' },
+    { value: 'nha_nguyen_can', label: 'Nhà nguyên căn', icon: '🏘️' },
+    { value: 'can_ho_chung_cu', label: 'Căn hộ chung cư', icon: '🏢' },
+    { value: 'can_ho_mini', label: 'Căn hộ mini', icon: '🏬' },
+    { value: 'o_ghep', label: 'Ở ghép', icon: '👥' },
+    { value: 'mat_bang', label: 'Mặt bằng', icon: '🏪' }
+  ];
+
+  const roomTypeOptions = [
+    { value: 'phong_don', label: 'Phòng đơn' },
+    { value: 'phong_doi', label: 'Phòng đôi' },
+    { value: 'phong_ba', label: 'Phòng ba' },
+    { value: 'phong_tu', label: 'Phòng tư' },
+    { value: 'phong_nam', label: 'Phòng năm' },
+    { value: 'phong_sau', label: 'Phòng sáu' },
+    { value: 'phong_bay', label: 'Phòng bảy' },
+    { value: 'phong_tam', label: 'Phòng tám' },
+    { value: 'phong_chin', label: 'Phòng chín' },
+    { value: 'phong_muoi', label: 'Phòng mười' }
+  ];
 
   const amenitiesOptions = [
     { value: 'wifi', label: 'WiFi' },
@@ -97,6 +122,8 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
             internet: room.utilities?.internet?.toString() || '',
             parking: room.utilities?.parking?.toString() || ''
           },
+          propertyType: room.propertyType || post.propertyType || 'phong_tro',
+          roomType: room.roomType || post.roomType || '',
           options: post.options || [],
           favouriteLevel: post.favouriteLevel || 'free',
           status: post.status || 'pending'
@@ -116,7 +143,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
       setFormData(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof typeof prev],
+          ...(prev[parent as keyof typeof prev] as object || {}),
           [child]: value
         }
       }));
@@ -165,8 +192,12 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
             water: parseInt(formData.utilities.water) || 0,
             internet: parseInt(formData.utilities.internet) || 0,
             parking: parseInt(formData.utilities.parking) || 0
-          }
+          },
+          propertyType: formData.propertyType,
+          roomType: formData.roomType || undefined
         },
+        propertyType: formData.propertyType,
+        roomType: formData.roomType || undefined,
         options: formData.options,
         favouriteLevel: formData.favouriteLevel,
         status: formData.status
@@ -273,6 +304,59 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
             />
           </div>
         </div>
+
+        {/* Property Type Selection */}
+        <div>
+          <label className="block text-sm font-medium text-black mb-3">
+            Loại phòng trọ *
+          </label>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {propertyTypeOptions.map((option) => (
+              <label
+                key={option.value}
+                className={`relative flex items-center justify-center p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                  formData.propertyType === option.value
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="propertyType"
+                  value={option.value}
+                  checked={formData.propertyType === option.value}
+                  onChange={(e) => handleInputChange('propertyType', e.target.value)}
+                  className="sr-only"
+                />
+                <div className="text-center">
+                  <div className="text-2xl mb-1">{option.icon}</div>
+                  <div className="text-sm font-medium">{option.label}</div>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Room Type Selection */}
+        {formData.propertyType === 'phong_tro' && (
+          <div>
+            <label className="block text-sm font-medium text-black mb-2">
+              Loại phòng
+            </label>
+            <select
+              value={formData.roomType}
+              onChange={(e) => handleInputChange('roomType', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Chọn loại phòng</option>
+              {roomTypeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Address */}
         <div>

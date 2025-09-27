@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
-import User from "~/models/userSchema.js";
-import uploadService from "~/services/uploadService";
+import User from "../models/userSchema.js";
+import uploadService from "../services/uploadService.js";
 import fs from "fs/promises";
 
 class UserController {

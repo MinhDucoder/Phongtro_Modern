@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import User from "~/models/userSchema.js";
+import User from "../models/userSchema.js";
 import dotenv from "dotenv";
 import fs from "fs/promises";
-import { generateVerificationToken, sendVerificationEmail, generatePasswordResetToken, sendPasswordResetEmail } from '~/services/emailService.js';
+import { generateVerificationToken, sendVerificationEmail, generatePasswordResetToken, sendPasswordResetEmail } from '../services/emailService.js';
 
 dotenv.config();
 

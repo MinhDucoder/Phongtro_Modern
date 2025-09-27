@@ -3,6 +3,16 @@ import dashboardService from "../services/dashboardService.js";
 import { success, error } from "../utils/responeHandler.js";
 
 class DashboardController {
+  // Get admin dashboard overview statistics
+  async getAdminOverview(req, res, next) {
+    try {
+      const adminOverview = await dashboardService.getAdminDashboardOverview();
+      return success(res, adminOverview);
+    } catch (err) {
+      return error(res, err.message, 400);
+    }
+  }
+
   // Get dashboard overview statistics
   async getOverview(req, res, next) {
     try {

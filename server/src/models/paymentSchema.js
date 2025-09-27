@@ -55,6 +55,7 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      index: true,
     },
     
     // Mã tham chiếu nội bộ

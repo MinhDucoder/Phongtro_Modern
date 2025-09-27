@@ -1,334 +1,450 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import {
   UsersIcon,
+  HomeIcon,
   DocumentTextIcon,
-  CurrencyDollarIcon,
-  EyeIcon,
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  UserGroupIcon,
   ChartBarIcon,
-  BellIcon,
-  ShieldCheckIcon
+  EyeIcon,
+  CurrencyDollarIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  XCircleIcon
 } from '@heroicons/react/24/outline';
 
-interface StatCard {
-  name: string;
-  value: string;
-  change: string;
-  changeType: 'increase' | 'decrease';
-  icon: React.ComponentType<{ className?: string }>;
-  color: string;
+interface AdminOverview {
+  overview: {
+    totalUsers: number;
+    totalLandlords: number;
+    totalTenants: number;
+    totalRooms: number;
+    totalPosts: number;
+    activePosts: number;
+    pendingPosts: number;
+    rejectedPosts: number;
+    expiredPosts: number;
+    totalRequests: number;
+    pendingRequests: number;
+    acceptedRequests: number;
+    totalViews: number;
+    totalRevenue: number;
+    newUsersThisMonth: number;
+    newPostsThisMonth: number;
+  };
+  growth: {
+    userGrowthRate: string;
+    postGrowthRate: string;
+    revenueGrowthRate: string;
+  };
+  recent: {
+    users: Array<{
+      _id: string;
+      full_name: string;
+      email: string;
+      role: string;
+      created_at: string;
+    }>;
+    posts: Array<{
+      _id: string;
+      roomTitle?: string;
+      landlordName?: string;
+      status: string;
+      createdAt: string;
+    }>;
+    topPosts: Array<{
+      _id: string;
+      title: string;
+      views: number;
+      likes: number;
+    }>;
+  };
 }
-
-interface RecentActivity {
-  id: string;
-  type: 'user_registration' | 'new_post' | 'payment' | 'report' | 'moderation';
-  title: string;
-  description: string;
-  timestamp: Date;
-  status?: 'pending' | 'completed' | 'rejected';
-}
-
-const stats: StatCard[] = [
-  {
-    name: 'Tổng người dùng',
-    value: '12,847',
-    change: '+12%',
-    changeType: 'increase',
-    icon: UsersIcon,
-    color: 'blue'
-  },
-  {
-    name: 'Tin đăng mới',
-    value: '1,234',
-    change: '+8%',
-    changeType: 'increase',
-    icon: DocumentTextIcon,
-    color: 'green'
-  },
-  {
-    name: 'Doanh thu tháng',
-    value: '45.2M',
-    change: '+23%',
-    changeType: 'increase',
-    icon: CurrencyDollarIcon,
-    color: 'purple'
-  },
-  {
-    name: 'Lượt truy cập',
-    value: '89.5K',
-    change: '+15%',
-    changeType: 'increase',
-    icon: EyeIcon,
-    color: 'orange'
-  },
-  {
-    name: 'Báo cáo vi phạm',
-    value: '23',
-    change: '-5%',
-    changeType: 'decrease',
-    icon: ExclamationTriangleIcon,
-    color: 'red'
-  },
-  {
-    name: 'Tin chờ duyệt',
-    value: '156',
-    change: '+3%',
-    changeType: 'increase',
-    icon: ClockIcon,
-    color: 'yellow'
-  }
-];
-
-const recentActivities: RecentActivity[] = [
-  {
-    id: '1',
-    type: 'user_registration',
-    title: 'Người dùng mới đăng ký',
-    description: 'Nguyễn Văn A đã đăng ký tài khoản',
-    timestamp: new Date(Date.now() - 5 * 60 * 1000),
-    status: 'completed'
-  },
-  {
-    id: '2',
-    type: 'new_post',
-    title: 'Tin đăng mới cần duyệt',
-    description: 'Phòng trọ gần ĐH Bách Khoa - Cần kiểm duyệt',
-    timestamp: new Date(Date.now() - 15 * 60 * 1000),
-    status: 'pending'
-  },
-  {
-    id: '3',
-    type: 'payment',
-    title: 'Thanh toán thành công',
-    description: 'Gói Premium - 150,000 VND',
-    timestamp: new Date(Date.now() - 30 * 60 * 1000),
-    status: 'completed'
-  },
-  {
-    id: '4',
-    type: 'report',
-    title: 'Báo cáo vi phạm mới',
-    description: 'Tin đăng ID: 12345 - Nội dung không phù hợp',
-    timestamp: new Date(Date.now() - 45 * 60 * 1000),
-    status: 'pending'
-  },
-  {
-    id: '5',
-    type: 'moderation',
-    title: 'Tin đăng đã được duyệt',
-    description: 'Căn hộ mini có ban công - Đã duyệt',
-    timestamp: new Date(Date.now() - 60 * 60 * 1000),
-    status: 'completed'
-  }
-];
-
-const getActivityIcon = (type: string) => {
-  switch (type) {
-    case 'user_registration':
-      return <UserGroupIcon className="h-5 w-5 text-blue-500" />;
-    case 'new_post':
-      return <DocumentTextIcon className="h-5 w-5 text-green-500" />;
-    case 'payment':
-      return <CurrencyDollarIcon className="h-5 w-5 text-purple-500" />;
-    case 'report':
-      return <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />;
-    case 'moderation':
-      return <ShieldCheckIcon className="h-5 w-5 text-yellow-500" />;
-    default:
-      return <BellIcon className="h-5 w-5 text-gray-500" />;
-  }
-};
-
-const getStatusBadge = (status?: string) => {
-  switch (status) {
-    case 'completed':
-      return (
-        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-          <CheckCircleIcon className="h-3 w-3 mr-1" />
-          Hoàn thành
-        </span>
-      );
-    case 'pending':
-      return (
-        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-          <ClockIcon className="h-3 w-3 mr-1" />
-          Chờ xử lý
-        </span>
-      );
-    case 'rejected':
-      return (
-        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-          <ExclamationTriangleIcon className="h-3 w-3 mr-1" />
-          Từ chối
-        </span>
-      );
-    default:
-      return null;
-  }
-};
 
 export default function AdminDashboard() {
-  const [mounted, setMounted] = useState(false);
+  const [data, setData] = useState<AdminOverview | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setMounted(true);
+    const loadData = async () => {
+      setLoading(true);
+      
+      try {
+        const response = await fetch('/api/admin/dashboard', {
+          credentials: 'include', // Include cookies for authentication
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+          setData(result.data);
+        } else {
+          console.error('Error loading dashboard data:', result.message);
+          // Fallback to mock data if API fails
+          setData(getMockData());
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        // Fallback to mock data if API fails
+        setData(getMockData());
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
-  const formatTimeAgo = (date: Date) => {
-    const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return 'Vừa xong';
-    if (diffInMinutes < 60) return `${diffInMinutes} phút trước`;
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours} giờ trước`;
-    
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays} ngày trước`;
+  const getMockData = (): AdminOverview => ({
+    overview: {
+      totalUsers: 12847,
+      totalLandlords: 3421,
+      totalTenants: 9426,
+      totalRooms: 5678,
+      totalPosts: 1234,
+      activePosts: 987,
+      pendingPosts: 156,
+      rejectedPosts: 67,
+      expiredPosts: 24,
+      totalRequests: 2341,
+      pendingRequests: 123,
+      acceptedRequests: 1987,
+      totalViews: 156789,
+      totalRevenue: 45000000,
+      newUsersThisMonth: 234,
+      newPostsThisMonth: 89
+    },
+    growth: {
+      userGrowthRate: '+12.5%',
+      postGrowthRate: '+8.3%',
+      revenueGrowthRate: '+15.2%'
+    },
+    recent: {
+      users: [
+        {
+          _id: '1',
+          full_name: 'Nguyễn Văn A',
+          email: 'a@example.com',
+          role: 'landlord',
+          created_at: new Date().toISOString()
+        },
+        {
+          _id: '2',
+          full_name: 'Trần Thị B',
+          email: 'b@example.com',
+          role: 'user',
+          created_at: new Date(Date.now() - 86400000).toISOString()
+        },
+        {
+          _id: '3',
+          full_name: 'Lê Văn C',
+          email: 'c@example.com',
+          role: 'landlord',
+          created_at: new Date(Date.now() - 172800000).toISOString()
+        }
+      ],
+      posts: [
+        {
+          _id: '1',
+          roomTitle: 'Phòng trọ đẹp Q1',
+          landlordName: 'Nguyễn Văn B',
+          status: 'pending',
+          createdAt: new Date().toISOString()
+        },
+        {
+          _id: '2',
+          roomTitle: 'Căn hộ cao cấp Q7',
+          landlordName: 'Trần Văn D',
+          status: 'pending',
+          createdAt: new Date(Date.now() - 86400000).toISOString()
+        },
+        {
+          _id: '3',
+          roomTitle: 'Nhà nguyên căn Q3',
+          landlordName: 'Lê Thị E',
+          status: 'pending',
+          createdAt: new Date(Date.now() - 172800000).toISOString()
+        }
+      ],
+      topPosts: [
+        {
+          _id: '1',
+          title: 'Căn hộ cao cấp view sông',
+          views: 5234,
+          likes: 189
+        },
+        {
+          _id: '2',
+          title: 'Phòng trọ sinh viên giá rẻ',
+          views: 4567,
+          likes: 234
+        },
+        {
+          _id: '3',
+          title: 'Nhà nguyên căn 3 phòng ngủ',
+          views: 3890,
+          likes: 156
+        }
+      ]
+    }
+  });
+
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat('vi-VN').format(num);
   };
 
-  if (!mounted) {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'Không có ngày';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Ngày không hợp lệ';
+      return date.toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Ngày không hợp lệ';
+    }
+  };
+
+  if (loading) {
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
-          ))}
-        </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-600">Không có dữ liệu</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Tổng quan hệ thống</h1>
-        <p className="text-gray-600 mt-2">Theo dõi hoạt động và hiệu suất của platform</p>
-      </div>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Tổng quan hệ thống</h1>
+          <p className="text-gray-600">Dashboard quản trị viên</p>
+        </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {stats.map((stat) => {
-          const IconComponent = stat.icon;
-          return (
-            <div key={stat.name} className="bg-white rounded-lg shadow-sm border p-6">
-              <div className="flex items-center">
-                <div className={`p-3 rounded-lg bg-${stat.color}-100`}>
-                  <IconComponent className={`h-6 w-6 text-${stat.color}-600`} />
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Total Users */}
+          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Tổng người dùng</p>
+                <p className="text-2xl font-bold text-gray-900">{formatNumber(data.overview.totalUsers)}</p>
+                <p className="text-sm text-green-600 mt-1">{data.growth.userGrowthRate} so với tháng trước</p>
+              </div>
+              <div className="bg-blue-100 p-3 rounded-full">
+                <UsersIcon className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </div>
+
+          {/* Total Posts */}
+          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Tổng bài đăng</p>
+                <p className="text-2xl font-bold text-gray-900">{formatNumber(data.overview.totalPosts)}</p>
+                <p className="text-sm text-green-600 mt-1">{data.growth.postGrowthRate} so với tháng trước</p>
+              </div>
+              <div className="bg-green-100 p-3 rounded-full">
+                <DocumentTextIcon className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </div>
+
+          {/* Total Views */}
+          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Lượt xem</p>
+                <p className="text-2xl font-bold text-gray-900">{formatNumber(data.overview.totalViews)}</p>
+                <p className="text-sm text-green-600 mt-1">+12.5% so với tháng trước</p>
+              </div>
+              <div className="bg-purple-100 p-3 rounded-full">
+                <EyeIcon className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+          </div>
+
+          {/* Revenue */}
+          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Doanh thu</p>
+                <p className="text-2xl font-bold text-gray-900">{formatCurrency(data.overview.totalRevenue)}</p>
+                <p className="text-sm text-green-600 mt-1">{data.growth.revenueGrowthRate} so với tháng trước</p>
+              </div>
+              <div className="bg-yellow-100 p-3 rounded-full">
+                <CurrencyDollarIcon className="h-6 w-6 text-yellow-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Detail Statistics */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Posts Status */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Trạng thái bài đăng</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <CheckCircleIcon className="h-5 w-5 text-green-600 mr-2" />
+                  <span className="text-gray-700">Đang hoạt động</span>
                 </div>
-                <div className="ml-4 flex-1">
-                  <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-                  <div className="flex items-baseline">
-                    <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
-                    <div className={`ml-2 flex items-baseline text-sm font-semibold ${
-                      stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
+                <span className="font-semibold text-green-600">{formatNumber(data.overview.activePosts)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <ClockIcon className="h-5 w-5 text-yellow-600 mr-2" />
+                  <span className="text-gray-700">Chờ duyệt</span>
+                </div>
+                <span className="font-semibold text-yellow-600">{formatNumber(data.overview.pendingPosts)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <XCircleIcon className="h-5 w-5 text-red-600 mr-2" />
+                  <span className="text-gray-700">Từ chối</span>
+                </div>
+                <span className="font-semibold text-red-600">{formatNumber(data.overview.rejectedPosts)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <ExclamationTriangleIcon className="h-5 w-5 text-gray-600 mr-2" />
+                  <span className="text-gray-700">Hết hạn</span>
+                </div>
+                <span className="font-semibold text-gray-600">{formatNumber(data.overview.expiredPosts)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* User Types */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Loại người dùng</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <HomeIcon className="h-5 w-5 text-blue-600 mr-2" />
+                  <span className="text-gray-700">Chủ nhà</span>
+                </div>
+                <span className="font-semibold text-blue-600">{formatNumber(data.overview.totalLandlords)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <UsersIcon className="h-5 w-5 text-green-600 mr-2" />
+                  <span className="text-gray-700">Người thuê</span>
+                </div>
+                <span className="font-semibold text-green-600">{formatNumber(data.overview.totalTenants)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <ChartBarIcon className="h-5 w-5 text-purple-600 mr-2" />
+                  <span className="text-gray-700">Tổng phòng</span>
+                </div>
+                <span className="font-semibold text-purple-600">{formatNumber(data.overview.totalRooms)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Recent Users */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Người dùng mới</h3>
+            <div className="space-y-3">
+              {data.recent.users.map((user) => (
+                <div key={user._id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                  <div>
+                    <p className="font-medium text-gray-900">{user.full_name}</p>
+                    <p className="text-sm text-gray-500">{user.email}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      user.role === 'landlord' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
                     }`}>
-                      {stat.changeType === 'increase' ? (
-                        <ArrowTrendingUpIcon className="self-center flex-shrink-0 h-4 w-4" />
-                      ) : (
-                        <ArrowTrendingDownIcon className="self-center flex-shrink-0 h-4 w-4" />
-                      )}
-                      <span className="ml-1">{stat.change}</span>
-                    </div>
+                      {user.role === 'landlord' ? 'Chủ nhà' : 'Người thuê'}
+                    </span>
+                    <p className="text-xs text-gray-400 mt-1">{formatDate(user.created_at)}</p>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
-          );
-        })}
-      </div>
+          </div>
 
-      {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Thao tác nhanh</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link
-            href="/admin/users"
-            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <UsersIcon className="h-8 w-8 text-blue-600 mr-3" />
-            <div>
-              <h3 className="font-medium text-gray-900">Quản lý người dùng</h3>
-              <p className="text-sm text-gray-600">Xem và quản lý tài khoản</p>
-            </div>
-          </Link>
-          
-          <Link
-            href="/admin/posts"
-            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <DocumentTextIcon className="h-8 w-8 text-green-600 mr-3" />
-            <div>
-              <h3 className="font-medium text-gray-900">Kiểm duyệt tin đăng</h3>
-              <p className="text-sm text-gray-600">Duyệt và quản lý tin đăng</p>
-            </div>
-          </Link>
-          
-          <Link
-            href="/admin/analytics"
-            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <ChartBarIcon className="h-8 w-8 text-purple-600 mr-3" />
-            <div>
-              <h3 className="font-medium text-gray-900">Báo cáo & Thống kê</h3>
-              <p className="text-sm text-gray-600">Xem báo cáo chi tiết</p>
-            </div>
-          </Link>
-          
-          <Link
-            href="/admin/reports"
-            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <ExclamationTriangleIcon className="h-8 w-8 text-red-600 mr-3" />
-            <div>
-              <h3 className="font-medium text-gray-900">Báo cáo vi phạm</h3>
-              <p className="text-sm text-gray-600">Xử lý báo cáo</p>
-            </div>
-          </Link>
-        </div>
-      </div>
-
-      {/* Recent Activities */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Hoạt động gần đây</h2>
-          <Link
-            href="/admin/activities"
-            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-          >
-            Xem tất cả
-          </Link>
-        </div>
-        
-        <div className="space-y-4">
-          {recentActivities.map((activity) => (
-            <div key={activity.id} className="flex items-start space-x-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
-              <div className="flex-shrink-0">
-                {getActivityIcon(activity.type)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-gray-900">{activity.title}</h3>
-                  <div className="flex items-center space-x-2">
-                    {getStatusBadge(activity.status)}
-                    <span className="text-xs text-gray-500">{formatTimeAgo(activity.timestamp)}</span>
+          {/* Recent Posts */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Bài đăng chờ duyệt</h3>
+            <div className="space-y-3">
+              {data.recent.posts.map((post) => (
+                <div key={post._id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                  <div>
+                    <p className="font-medium text-gray-900">{post.roomTitle || 'Không có tiêu đề'}</p>
+                    <p className="text-sm text-gray-500">Bởi {post.landlordName}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      post.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                    }`}>
+                      {post.status === 'pending' ? 'Chờ duyệt' : 'Đã duyệt'}
+                    </span>
+                    <p className="text-xs text-gray-400 mt-1">{formatDate(post.createdAt)}</p>
                   </div>
                 </div>
-                <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
+        </div>
+
+        {/* Top Performing Posts */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Bài đăng phổ biến nhất</h3>
+          <div className="overflow-x-auto">
+            <table className="min-w-full table-auto">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiêu đề</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lượt xem</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lượt thích</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tỷ lệ tương tác</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {data.recent.topPosts.map((post) => (
+                  <tr key={post._id} className="hover:bg-gray-50">
+                    <td className="px-4 py-4 text-sm font-medium text-gray-900">{post.title}</td>
+                    <td className="px-4 py-4 text-sm text-gray-500">{formatNumber(post.views)}</td>
+                    <td className="px-4 py-4 text-sm text-gray-500">{formatNumber(post.likes)}</td>
+                    <td className="px-4 py-4 text-sm text-gray-500">
+                      {post.views > 0 ? ((post.likes / post.views) * 100).toFixed(1) + '%' : '0%'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

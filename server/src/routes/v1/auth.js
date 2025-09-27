@@ -1,7 +1,7 @@
 import express from "express";
-import AuthController from "~/controllers/AuthController.js";
-import { authenticate } from "~/middlewares/checkToken.js";
-import catchAsync from "~/middlewares/catchAsync.js";
+import AuthController from "../../controllers/AuthController.js";
+import { authenticate } from "../../middlewares/checkToken.js";
+import catchAsync from "../../middlewares/catchAsync.js";
 
 
 const router = express.Router();

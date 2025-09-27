@@ -1,8 +1,8 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import UserController from "~/controllers/UserController.js";
-import { authenticate, authorize } from "~/middlewares/checkToken.js";
-import UploadController from "~/controllers/UploadController";
+import UserController from "../../controllers/UserController.js";
+import { authenticate, authorize } from "../../middlewares/checkToken.js";
+import UploadController from "../../controllers/UploadController.js";
 import uploadMiddleware from "../../middlewares/uploadMiddleware.js";
 import { cleanupUploads } from "../../middlewares/uploadMiddleware.js";
 

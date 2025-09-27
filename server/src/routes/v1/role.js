@@ -1,6 +1,6 @@
 import express from "express";
 import RoleController from "~/controllers/RoleController.js";
-import { authenticate, authorize } from "~/middlewares/checkToken.js";
+import { authenticate, authorize } from "~/middlewares/checkToken";
 
 const roleRoute = express.Router();
 
