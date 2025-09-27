@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import {
   EyeIcon,
   HeartIcon,
@@ -15,78 +16,11 @@ import {
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import { dashboardApi } from '@/lib/api';
-import toast from 'react-hot-toast';
 import PostForm from './PostForm';
 import { getFirstImage } from '@/lib/imageUtils';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import { toastManager } from '@/components/ui/ToastManager';
 
-// Mock data - trong thực tế sẽ fetch từ API
-const mockPostings = [
-  {
-    id: '1',
-    title: 'Phòng trọ gần ĐH Bách Khoa, full nội thất, giá tốt',
-    price: '3.5 triệu/tháng',
-    area: '25 m²',
-    location: 'Hai Bà Trưng, Hà Nội',
-    address: 'Số 123, Ngõ 45, Đường Trần Khát Chân',
-    images: ['/placeholder-room.svg'],
-    status: 'active',
-    views: 234,
-    likes: 12,
-    calls: 8,
-    posted: '2024-01-15',
-    expires: '2024-02-15',
-    package: 'VIP 1',
-  },
-  {
-    id: '2',
-    title: 'Căn hộ mini 1PN, có ban công, gần chợ, siêu thị',
-    price: '4.2 triệu/tháng',
-    area: '35 m²',
-    location: 'Thanh Xuân, Hà Nội',
-    address: 'Số 456, Phố Nguyễn Trãi',
-    images: ['/placeholder-room.svg'],
-    status: 'pending',
-    views: 89,
-    likes: 5,
-    calls: 2,
-    posted: '2024-01-18',
-    expires: '2024-02-18',
-    package: 'Thường',
-  },
-  {
-    id: '3',
-    title: 'Phòng trọ giá rẻ, gần trường ĐH Kinh tế Quốc dân',
-    price: '2.8 triệu/tháng',
-    area: '20 m²',
-    location: 'Đống Đa, Hà Nội',
-    address: 'Số 789, Đường Giải Phóng',
-    images: ['/placeholder-room.svg'],
-    status: 'expired',
-    views: 567,
-    likes: 23,
-    calls: 15,
-    posted: '2024-01-01',
-    expires: '2024-01-31',
-    package: 'VIP 2',
-  },
-  {
-    id: '4',
-    title: 'Nhà nguyên căn 2PN, có sân để xe, gần trường học',
-    price: '8.5 triệu/tháng',
-    area: '60 m²',
-    location: 'Long Biên, Hà Nội',
-    address: 'Số 321, Phố Ngọc Thụy',
-    images: ['/placeholder-room.svg'],
-    status: 'paused',
-    views: 156,
-    likes: 9,
-    calls: 6,
-    posted: '2024-01-12',
-    expires: '2024-02-12',
-    package: 'VIP 1',
-  },
-];
 
 const statusOptions = [
   { value: 'all', label: 'Tất cả trạng thái' },
@@ -141,6 +75,8 @@ export default function MyPostings() {
   const [editingPost, setEditingPost] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
+  const router = useRouter();
+
   // Chặn duplicated fetch/toast do StrictMode (effect chạy 2 lần ở dev)
   const lastFetchRef = useRef<{ key: string; ts: number } | null>(null);
   useEffect(() => {
@@ -156,22 +92,28 @@ export default function MyPostings() {
 
   // Debounce searchQuery 300ms
   useEffect(() => {
+    if (!mounted) return; // Không fetch khi chưa mount
+    
     const id = setTimeout(() => {
-      // Khi search thay đổi, luôn quay về page 1
-      setPagination(prev => ({ ...prev, page: 1 }));
-      fetchPosts({ showToast: false });
+      // Khi search thay đổi, luôn quay về page 1 và fetch
+      setPagination(prev => {
+        const newPagination = { ...prev, page: 1 };
+        // Fetch với pagination mới
+        fetchPostsWithPagination(newPagination);
+        return newPagination;
+      });
     }, 300);
     return () => clearTimeout(id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]);
+  }, [searchQuery, mounted]);
 
-  const fetchPosts = async (options?: { showToast?: boolean }) => {
+  const fetchPostsWithPagination = async (paginationToUse = pagination, options?: { showToast?: boolean }) => {
     try {
       setIsLoading(true);
       setLoadError(null);
       const response = await dashboardApi.getMyPosts({
-        page: pagination.page,
-        limit: pagination.limit,
+        page: paginationToUse.page,
+        limit: paginationToUse.limit,
         status: selectedStatus === 'all' ? undefined : selectedStatus,
         search: searchQuery || undefined
       });
@@ -184,35 +126,25 @@ export default function MyPostings() {
         }));
         
         if (options?.showToast && response.data.posts.length > 0) {
-          toast.success(`Đã tải ${response.data.posts.length} tin đăng`);
+          toastManager.showSuccess(`Đã tải ${response.data.posts.length} tin đăng`);
         }
       }
     } catch (error: any) {
       console.error('Error fetching posts:', error);
       setLoadError(error?.message || 'Không thể tải danh sách tin đăng');
-      toast.error('Không thể tải danh sách tin đăng');
-      // Không dùng mock khi chuẩn hoá state; để empty/error rõ ràng
+      toastManager.showError('Không thể tải danh sách tin đăng');
       setPostings([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const filteredPostings = postings.filter(posting => {
-    const matchesStatus = selectedStatus === 'all' || posting.status === selectedStatus;
-    
-    // Use correct data structure from API
-    const title = posting.roomId?.title || '';
-    const address = posting.roomId?.address || '';
-    const city = posting.roomId?.city || '';
-    const location = `${address} ${city}`.trim();
-    
-    const matchesSearch = searchQuery === '' || 
-                         title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         location.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return matchesStatus && matchesSearch;
-  });
+  const fetchPosts = (options?: { showToast?: boolean }) => {
+    return fetchPostsWithPagination(pagination, options);
+  };
+
+  // Backend đã filter rồi, không cần filter lại ở client
+  const filteredPostings = postings;
 
   const handleDelete = async (id: string) => {
     setIsLoading(true);
@@ -220,11 +152,11 @@ export default function MyPostings() {
       const response = await dashboardApi.deletePost(id);
       if (response) {
         setPostings(prev => prev.filter(p => p._id !== id));
-        toast.success('Xóa tin đăng thành công');
+        toastManager.showSuccess('Xóa tin đăng thành công');
       }
     } catch (error) {
       console.error('Error deleting post:', error);
-      toast.error('Có lỗi xảy ra khi xóa tin đăng');
+      toastManager.showError('Có lỗi xảy ra khi xóa tin đăng');
     } finally {
       setIsLoading(false);
     }
@@ -237,11 +169,11 @@ export default function MyPostings() {
       if (response) {
         // Refresh posts list
         fetchPosts();
-        toast.success('Gia hạn tin đăng thành công');
+        toastManager.showSuccess('Gia hạn tin đăng thành công');
       }
     } catch (error) {
       console.error('Error renewing post:', error);
-      toast.error('Có lỗi xảy ra khi gia hạn tin đăng');
+      toastManager.showError('Có lỗi xảy ra khi gia hạn tin đăng');
     } finally {
       setIsLoading(false);
     }
@@ -259,11 +191,11 @@ export default function MyPostings() {
       if (response) {
         // Refresh posts list
         fetchPosts();
-        toast.success('Cập nhật trạng thái thành công');
+        toastManager.showSuccess('Cập nhật trạng thái thành công');
       }
     } catch (error) {
       console.error('Error updating post status:', error);
-      toast.error('Có lỗi xảy ra khi cập nhật trạng thái');
+      toastManager.showError('Có lỗi xảy ra khi cập nhật trạng thái');
     } finally {
       setIsLoading(false);
     }
@@ -290,7 +222,7 @@ export default function MyPostings() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Tin đăng của tôi</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-700">
             Quản lý {pagination.total || postings.length} tin đăng của bạn
           </p>
         </div>
@@ -304,18 +236,18 @@ export default function MyPostings() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border">
+      <div className="bg-white p-4 rounded-lg shadow-sm border text-gray-900">
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
           <div className="flex-1">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
               <input
                 type="text"
                 placeholder="Tìm kiếm tin đăng..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
               />
             </div>
           </div>
@@ -325,7 +257,7 @@ export default function MyPostings() {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
             >
               {statusOptions.map(option => (
                 <option key={option.value} value={option.value}>
@@ -347,7 +279,7 @@ export default function MyPostings() {
               </div>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-500">Tổng lượt xem</p>
+              <p className="text-sm font-medium text-gray-700">Tổng lượt xem</p>
               <p className="text-lg font-semibold text-gray-900">
                 {mounted ? postings.reduce((sum, p) => sum + (p.analytics?.views || 0), 0).toLocaleString() : postings.reduce((sum, p) => sum + (p.analytics?.views || 0), 0)}
               </p>
@@ -363,7 +295,7 @@ export default function MyPostings() {
               </div>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-500">Lượt yêu thích</p>
+              <p className="text-sm font-medium text-gray-700">Lượt yêu thích</p>
               <p className="text-lg font-semibold text-gray-900">
                 {postings.reduce((sum, p) => sum + (p.analytics?.likes || 0), 0)}
               </p>
@@ -379,7 +311,7 @@ export default function MyPostings() {
               </div>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-500">Số cuộc gọi</p>
+              <p className="text-sm font-medium text-gray-700">Số cuộc gọi</p>
               <p className="text-lg font-semibold text-gray-900">
                 {postings.reduce((sum, p) => sum + (p.analytics?.calls || 0), 0)}
               </p>
@@ -395,7 +327,7 @@ export default function MyPostings() {
               </div>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-500">Đang hiển thị</p>
+              <p className="text-sm font-medium text-gray-700">Đang hiển thị</p>
               <p className="text-lg font-semibold text-gray-900">
                 {postings.filter(p => p.status === 'active').length}
               </p>
@@ -421,19 +353,33 @@ export default function MyPostings() {
           </div>
         ) : loadError ? (
           <div className="p-6">
-            <div className="rounded-md border border-red-200 bg-red-50 p-4 text-red-800">
-              {loadError}
+            <div className="rounded-md border border-red-200 bg-red-50 p-4">
+              <div className="flex items-center">
+                <svg className="h-5 w-5 text-red-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <div>
+                  <h3 className="text-sm font-medium text-red-800">Không thể tải tin đăng</h3>
+                  <p className="mt-1 text-sm text-red-700">{loadError}</p>
+                  <button 
+                    onClick={() => fetchPosts()} 
+                    className="mt-2 text-sm bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded-md transition-colors"
+                  >
+                    Thử lại
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         ) : filteredPostings.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-gray-500 mb-4">
+            <div className="text-gray-600 mb-4">
               <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
             <h3 className="text-sm font-medium text-gray-900">Không có tin đăng nào</h3>
-            <p className="mt-1 text-sm text-gray-500">Bắt đầu bằng cách tạo tin đăng đầu tiên của bạn.</p>
+            <p className="mt-1 text-sm text-gray-700">Bắt đầu bằng cách tạo tin đăng đầu tiên của bạn.</p>
             <div className="mt-6">
               <Link
                 href="/dang-tin"
@@ -447,7 +393,11 @@ export default function MyPostings() {
         ) : (
           <div className="divide-y divide-gray-200">
             {filteredPostings.map((posting) => (
-              <div key={posting._id} className="p-6 hover:bg-gray-50">
+              <div
+                key={posting._id}
+                className="p-6 hover:bg-gray-50 cursor-pointer"
+                onClick={() => router.push(`/phong-tro/${posting._id}`)}
+              >
                 <div className="flex items-start space-x-4">
                   {/* Image */}
                   <div className="flex-shrink-0">
@@ -472,6 +422,9 @@ export default function MyPostings() {
                         <Link 
                           href={`/phong-tro/${posting._id}`}
                           className="text-lg font-medium text-gray-900 hover:text-blue-600 line-clamp-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
                         >
                           {posting.roomId?.title || 'Không có tiêu đề'}
                         </Link>
@@ -490,7 +443,7 @@ export default function MyPostings() {
                         </div>
 
                         {/* Stats */}
-                        <div className="flex items-center mt-3 space-x-6 text-sm text-gray-500">
+                        <div className="flex items-center mt-3 space-x-6 text-sm text-gray-700">
                           <div className="flex items-center">
                             <EyeIcon className="h-4 w-4 mr-1" />
                             {posting.analytics?.views || 0} lượt xem
@@ -526,13 +479,17 @@ export default function MyPostings() {
                           href={`/dashboard/tin-dang/edit/${posting._id}`}
                           className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           title="Chỉnh sửa"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <PencilIcon className="h-4 w-4" />
                         </Link>
 
                         {posting.status === 'expired' ? (
                           <button
-                            onClick={() => handleRenew(posting._id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRenew(posting._id);
+                            }}
                             disabled={isLoading}
                             className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
                             title="Gia hạn"
@@ -541,7 +498,10 @@ export default function MyPostings() {
                           </button>
                         ) : (
                           <button
-                            onClick={() => handleToggleStatus(posting._id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleStatus(posting._id);
+                            }}
                             disabled={isLoading}
                             className={`p-2 rounded-lg transition-colors disabled:opacity-50 ${
                               posting.status === 'active'
@@ -555,16 +515,10 @@ export default function MyPostings() {
                         )}
 
                         <button
-                          onClick={() => handleEdit(posting._id)}
-                          disabled={isLoading}
-                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
-                          title="Chỉnh sửa"
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                        </button>
-
-                        <button
-                          onClick={() => setConfirmDeleteId(posting._id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(posting._id);
+                          }}
                           disabled={isLoading}
                           className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                           title="Xóa"
@@ -586,14 +540,22 @@ export default function MyPostings() {
         <div className="flex items-center justify-between bg-white px-4 py-3 border-t border-gray-200">
           <div className="flex-1 flex justify-between sm:hidden">
             <button
-              onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+              onClick={() => {
+                const newPagination = { ...pagination, page: pagination.page - 1 };
+                setPagination(newPagination);
+                fetchPostsWithPagination(newPagination);
+              }}
               disabled={pagination.page <= 1}
               className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
             >
               Trước
             </button>
             <button
-              onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+              onClick={() => {
+                const newPagination = { ...pagination, page: pagination.page + 1 };
+                setPagination(newPagination);
+                fetchPostsWithPagination(newPagination);
+              }}
               disabled={pagination.page >= pagination.totalPages}
               className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
             >
@@ -616,29 +578,41 @@ export default function MyPostings() {
             <div>
               <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
                 <button
-                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                  onClick={() => {
+                    const newPagination = { ...pagination, page: pagination.page - 1 };
+                    setPagination(newPagination);
+                    fetchPostsWithPagination(newPagination);
+                  }}
                   disabled={pagination.page <= 1}
-                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Trước
                 </button>
                 {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
                   <button
                     key={page}
-                    onClick={() => setPagination(prev => ({ ...prev, page }))}
+                    onClick={() => {
+                      const newPagination = { ...pagination, page };
+                      setPagination(newPagination);
+                      fetchPostsWithPagination(newPagination);
+                    }}
                     className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                       page === pagination.page
                         ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                     }`}
                   >
                     {page}
                   </button>
                 ))}
                 <button
-                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                  onClick={() => {
+                    const newPagination = { ...pagination, page: pagination.page + 1 };
+                    setPagination(newPagination);
+                    fetchPostsWithPagination(newPagination);
+                  }}
                   disabled={pagination.page >= pagination.totalPages}
-                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Sau
                 </button>

@@ -16,7 +16,7 @@ import {
   UserIcon,
   BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
-import { customToast } from '@/components/ui/CustomToast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface User {
   _id: string;
@@ -169,11 +169,11 @@ export default function UserManagement() {
         setStats(data.data.statistics);
         setTotalPages(data.data.pagination.totalPages);
       } else {
-        customToast.error(data.message || 'Lỗi khi tải danh sách user');
+        toastManager.showError(data.message || 'Lỗi khi tải danh sách user');
       }
     } catch (error) {
       console.error('Error fetching users:', error);
-      customToast.error('Lỗi kết nối server');
+      toastManager.showError('Lỗi kết nối server');
     } finally {
       setLoading(false);
     }
@@ -191,16 +191,16 @@ export default function UserManagement() {
       const data = await response.json();
 
       if (data.success) {
-        customToast.success(user.is_banned ? 'Đã bỏ khóa tài khoản' : 'Đã khóa tài khoản');
+        toastManager.showSuccess(user.is_banned ? 'Đã bỏ khóa tài khoản' : 'Đã khóa tài khoản');
         fetchUsers();
         setShowBanModal(false);
         setBanReason('');
       } else {
-        customToast.error(data.message || 'Lỗi khi cập nhật trạng thái');
+        toastManager.showError(data.message || 'Lỗi khi cập nhật trạng thái');
       }
     } catch (error) {
       console.error('Error banning user:', error);
-      customToast.error('Lỗi khi cập nhật trạng thái user');
+      toastManager.showError('Lỗi khi cập nhật trạng thái user');
     }
   };
 
@@ -219,14 +219,14 @@ export default function UserManagement() {
       const data = await response.json();
 
       if (data.success) {
-        customToast.success(`Đã ${user.is_verified ? 'hủy xác thực' : 'xác thực'} tài khoản`);
+        toastManager.showSuccess(`Đã ${user.is_verified ? 'hủy xác thực' : 'xác thực'} tài khoản`);
         fetchUsers();
       } else {
-        customToast.error(data.message);
+        toastManager.showError(data.message);
       }
     } catch (error) {
       console.error('Error verifying user:', error);
-      customToast.error('Lỗi khi cập nhật trạng thái xác thực');
+      toastManager.showError('Lỗi khi cập nhật trạng thái xác thực');
     }
   };
 
@@ -241,14 +241,14 @@ export default function UserManagement() {
         const data = await response.json();
 
         if (data.success) {
-          customToast.success('Đã xóa người dùng thành công');
+          toastManager.showSuccess('Đã xóa người dùng thành công');
           fetchUsers();
         } else {
-          customToast.error(data.message || 'Không thể xóa người dùng');
+          toastManager.showError(data.message || 'Không thể xóa người dùng');
         }
       } catch (error) {
         console.error('Error deleting user:', error);
-        customToast.error('Lỗi kết nối server');
+        toastManager.showError('Lỗi kết nối server');
       }
     }
   };

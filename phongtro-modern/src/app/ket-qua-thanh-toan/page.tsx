@@ -15,7 +15,7 @@ import {
   ArrowRightIcon,
   ArrowLeftIcon
 } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 // Mock data - trong thực tế sẽ fetch từ API
 const mockOrder = {

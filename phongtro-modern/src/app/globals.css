@@ -4,8 +4,8 @@
   --background: #ffffff;
   --foreground: #111827;
   --text-primary: #111827;
-  --text-secondary: #374151;
-  --text-muted: #6b7280;
+  --text-secondary: #2d3748;
+  --text-muted: #4a5568;
 }
 
 /* Custom CSS variables for Tailwind */
@@ -21,8 +21,8 @@
     --background: #0a0a0a;
     --foreground: #f9fafb;
     --text-primary: #f9fafb;
-    --text-secondary: #d1d5db;
-    --text-muted: #9ca3af;
+    --text-secondary: #e5e7eb;
+    --text-muted: #cbd5f5;
   }
 }
 

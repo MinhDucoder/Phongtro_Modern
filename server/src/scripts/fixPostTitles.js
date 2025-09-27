@@ -56,3 +56,5 @@ const fixPostTitles = async () => {
 // Run the fix
 connectDB().then(() => fixPostTitles());
 
+
+

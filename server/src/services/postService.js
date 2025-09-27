@@ -1,6 +1,8 @@
 // src/services/postService.js
+import mongoose from "mongoose";
 import Post from "../models/postSchema.js";
 import Room from "../models/roomSchema.js";
+import PostAnalytics from "../models/postAnalyticsSchema.js";
 import { LANDLORD_PROJECTION, ROOM_PROJECTION } from "../utils/constants.js";
 
 class PostService {
@@ -45,7 +47,76 @@ class PostService {
       .populate("landlord", LANDLORD_PROJECTION);
 
     if (!post) throw new Error("Post not found");
-    return post;
+
+    const room = post.roomId;
+    const landlord = post.landlord;
+
+    // Aggregate analytics data for the post
+    const analyticsAggregate = await PostAnalytics.aggregate([
+      {
+        $match: {
+          post: new mongoose.Types.ObjectId(postId),
+        },
+      },
+      {
+        $group: {
+          _id: "$post",
+          views: { $sum: "$metrics.views" },
+          likes: { $sum: "$metrics.likes" },
+          calls: { $sum: "$metrics.calls" },
+          messages: { $sum: "$metrics.messages" },
+        },
+      },
+    ]);
+
+    const analyticsSummary = analyticsAggregate[0] || {
+      views: 0,
+      likes: 0,
+      calls: 0,
+      messages: 0,
+    };
+
+    return {
+      id: post._id,
+      _id: post._id,
+      status: post.status,
+      favouriteLevel: post.favouriteLevel,
+      options: post.options,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      analytics: analyticsSummary,
+      room: {
+        id: room?._id,
+        _id: room?._id,
+        title: room?.title,
+        description: room?.description,
+        price: room?.price,
+        area: room?.area,
+        address: room?.address,
+        city: room?.city,
+        images: room?.images || [],
+        amenities: room?.amenities || [],
+      },
+      landlord: landlord
+        ? {
+            id: landlord._id,
+            _id: landlord._id,
+            full_name: landlord.full_name,
+            phone: landlord.phone,
+            email: landlord.email,
+            role: landlord.role,
+          }
+        : null,
+      contact: landlord
+        ? {
+            name: landlord.full_name,
+            phone: landlord.phone,
+            email: landlord.email,
+            isVerified: landlord.role === 'landlord',
+          }
+        : null,
+      viewCount: analyticsSummary.views,
+    };
   }
 
   async updatePost(postId, userId, { options, favouriteLevel, status }) {

@@ -143,3 +143,5 @@ const seedPaymentData = async () => {
 // Run the seeding
 connectDB().then(() => seedPaymentData());
 
+
+

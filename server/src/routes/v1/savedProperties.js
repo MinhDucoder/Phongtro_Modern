@@ -20,3 +20,5 @@ savedPropertiesRoute.put('/:id', catchAsync(SavedPropertiesController.updateFavo
 
 export default savedPropertiesRoute;
 
+
+

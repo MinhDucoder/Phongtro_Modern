@@ -17,7 +17,7 @@ import {
   StarIcon,
   BanknotesIcon
 } from '@heroicons/react/24/outline';
-import { customToast } from '@/components/ui/CustomToast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface User {
   _id: string;
@@ -103,14 +103,14 @@ export default function UserDetailModal({
           // Update user activities from API response
           setUserActivity(data.data.activities || []);
         } else {
-          customToast.error(data.message || 'Lỗi khi tải thông tin chi tiết');
+          toastManager.showError(data.message || 'Lỗi khi tải thông tin chi tiết');
         }
       } else {
-        customToast.error('Lỗi khi tải thông tin chi tiết');
+        toastManager.showError('Lỗi khi tải thông tin chi tiết');
       }
     } catch (error) {
       console.error('Error fetching user details:', error);
-      customToast.error('Lỗi kết nối server');
+      toastManager.showError('Lỗi kết nối server');
     } finally {
       setLoading(false);
     }

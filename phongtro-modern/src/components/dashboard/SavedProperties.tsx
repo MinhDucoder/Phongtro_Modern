@@ -12,7 +12,7 @@ import {
   FunnelIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 import { savedPropertiesApi } from '@/lib/api';
 
 // Mock data removed - using real API data only
@@ -77,7 +77,7 @@ export default function SavedProperties() {
       console.error('Error fetching saved properties:', error);
       setError(error.message || 'Có lỗi xảy ra khi tải dữ liệu');
       setSavedProperties([]);
-      toast.error('Không thể tải danh sách tin đã lưu');
+      toastManager.showError('Không thể tải danh sách tin đã lưu');
     } finally {
       setIsLoading(false);
     }
@@ -130,13 +130,13 @@ export default function SavedProperties() {
       
       if (response.success) {
         setSavedProperties(prev => prev.filter(p => p.id !== id));
-        toast.success('Đã xóa khỏi danh sách yêu thích');
+        toastManager.showSuccess('Đã xóa khỏi danh sách yêu thích');
       } else {
-        toast.error(response.message || 'Không thể xóa khỏi danh sách yêu thích');
+        toastManager.showError(response.message || 'Không thể xóa khỏi danh sách yêu thích');
       }
     } catch (error: any) {
       console.error('Error removing property:', error);
-      toast.error('Có lỗi xảy ra');
+      toastManager.showError('Có lỗi xảy ra');
     } finally {
       setIsLoading(false);
     }

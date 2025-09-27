@@ -75,3 +75,5 @@ const seedLandlordSavedProperties = async () => {
 // Run the seeding
 connectDB().then(() => seedLandlordSavedProperties());
 
+
+

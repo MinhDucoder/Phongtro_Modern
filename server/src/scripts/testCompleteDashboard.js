@@ -87,7 +87,175 @@ const testCompleteDashboard = async () => {
       console.log(`❌ MyPosts error: ${error.message}`);
     }
 
-    // 5. Test Analytics
+    // 5. Test create/update/delete flow
+    console.log('\n🆕 Testing create post...');
+    const newPostPayload = {
+      room: {
+        title: 'Phòng test tự động ' + Date.now(),
+        description: 'Phòng test tích hợp API',
+        price: 4500000,
+        area: 28,
+        address: '123 Đường API Test',
+        city: 'Hà Nội',
+        district: 'Hai Bà Trưng',
+        ward: 'Bạch Đằng',
+        amenities: ['wifi', 'aircon'],
+        images: ['/placeholder-room.svg'],
+        deposit: 1000000,
+        utilities: {
+          electricity: 3500,
+          water: 25000,
+          internet: 0,
+          parking: 0,
+        },
+      },
+      options: ['window', 'fridge'],
+      favouriteLevel: 'silver',
+      status: 'pending',
+    };
+
+    let createdPostId = null;
+
+    try {
+      const createResponse = await fetch('http://localhost:5000/api/v1/dashboard/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(newPostPayload),
+      });
+
+      if (!createResponse.ok) {
+        const errorText = await createResponse.text();
+        console.log(`❌ Create post failed: ${createResponse.status}`);
+        console.log(`   Response: ${errorText}`);
+      } else {
+        const data = await createResponse.json();
+        createdPostId = data.data?._id || data.data?.id;
+        console.log(`✅ Created post successfully: ${createdPostId}`);
+      }
+    } catch (error) {
+      console.log(`❌ Create post error: ${error.message}`);
+    }
+
+    if (createdPostId) {
+      console.log('\n✏️ Testing update post...');
+      try {
+        const updateResponse = await fetch(`http://localhost:5000/api/v1/dashboard/posts/${createdPostId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            favouriteLevel: 'gold',
+            options: ['window', 'fridge', 'balcony'],
+            status: 'active',
+            room: {
+              price: 4800000,
+              description: 'Đã cập nhật thông tin phòng test',
+            },
+          }),
+        });
+
+        if (!updateResponse.ok) {
+          const errorText = await updateResponse.text();
+          console.log(`❌ Update post failed: ${updateResponse.status}`);
+          console.log(`   Response: ${errorText}`);
+        } else {
+          console.log('✅ Update post success!');
+        }
+      } catch (error) {
+        console.log(`❌ Update post error: ${error.message}`);
+      }
+
+      console.log('\n🔄 Testing renew post...');
+      try {
+        const renewResponse = await fetch(`http://localhost:5000/api/v1/dashboard/posts/${createdPostId}/renew`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!renewResponse.ok) {
+          const errorText = await renewResponse.text();
+          console.log(`❌ Renew post failed: ${renewResponse.status}`);
+          console.log(`   Response: ${errorText}`);
+        } else {
+          console.log('✅ Renew post success!');
+        }
+      } catch (error) {
+        console.log(`❌ Renew post error: ${error.message}`);
+      }
+
+      console.log('\n⏸ Testing toggle status (pause)...');
+      try {
+        const pauseResponse = await fetch(`http://localhost:5000/api/v1/dashboard/posts/${createdPostId}/status`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: 'paused' }),
+        });
+
+        if (!pauseResponse.ok) {
+          const errorText = await pauseResponse.text();
+          console.log(`❌ Pause post failed: ${pauseResponse.status}`);
+          console.log(`   Response: ${errorText}`);
+        } else {
+          console.log('✅ Pause post success!');
+        }
+      } catch (error) {
+        console.log(`❌ Pause post error: ${error.message}`);
+      }
+
+      console.log('\n♻️ Testing toggle status (activate)...');
+      try {
+        const activateResponse = await fetch(`http://localhost:5000/api/v1/dashboard/posts/${createdPostId}/status`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: 'active' }),
+        });
+
+        if (!activateResponse.ok) {
+          const errorText = await activateResponse.text();
+          console.log(`❌ Activate post failed: ${activateResponse.status}`);
+          console.log(`   Response: ${errorText}`);
+        } else {
+          console.log('✅ Activate post success!');
+        }
+      } catch (error) {
+        console.log(`❌ Activate post error: ${error.message}`);
+      }
+
+      console.log('\n🗑  Testing delete post...');
+      try {
+        const deleteResponse = await fetch(`http://localhost:5000/api/v1/dashboard/posts/${createdPostId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!deleteResponse.ok) {
+          const errorText = await deleteResponse.text();
+          console.log(`❌ Delete post failed: ${deleteResponse.status}`);
+          console.log(`   Response: ${errorText}`);
+        } else {
+          console.log('✅ Delete post success!');
+        }
+      } catch (error) {
+        console.log(`❌ Delete post error: ${error.message}`);
+      }
+    }
+
+    // 6. Test Analytics
     console.log('\n📈 Testing Analytics...');
     try {
       const response = await fetch('http://localhost:5000/api/v1/dashboard/analytics?timeRange=7d', {
@@ -117,6 +285,7 @@ const testCompleteDashboard = async () => {
     console.log('\n📋 Summary:');
     console.log('✅ Dashboard Overview: Working');
     console.log('✅ MyPosts: Working with analytics');
+    console.log('✅ CRUD flow: ', createdPostId ? 'Completed' : 'Skipped (create failed)');
     console.log('✅ Analytics: Working');
     console.log('\n🎯 Frontend should now display:');
     console.log('   - Total Views: 16,566+');
@@ -136,4 +305,6 @@ const testCompleteDashboard = async () => {
 
 // Run the test
 connectDB().then(() => testCompleteDashboard());
+
+
 

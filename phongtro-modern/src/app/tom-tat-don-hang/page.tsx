@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { 
-  CheckCircleIcon, 
+import {
+  CheckCircleIcon,
   HomeIcon,
   UserIcon,
   CalendarIcon,
@@ -14,7 +14,7 @@ import {
   ExclamationTriangleIcon,
   ShieldCheckIcon
 } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 // Mock data - trong thực tế sẽ fetch từ API
 const mockOrder = {
@@ -103,10 +103,10 @@ export default function OrderSummaryPage() {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Đã hủy đơn hàng');
+      toastManager.showSuccess('Đã hủy đơn hàng');
       router.push('/dashboard');
     } catch {
-      toast.error('Có lỗi xảy ra');
+      toastManager.showError('Có lỗi xảy ra');
     }
   };
 

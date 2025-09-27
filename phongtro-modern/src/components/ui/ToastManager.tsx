@@ -21,259 +21,139 @@ export class ToastManager {
   }
 
   // Show login success toast
-  showLoginSuccess(userName: string, isAdmin: boolean = false): void {
-    this.clearAll();
-    
-    const toastId = 'login-success';
-    this.activeToasts.add(toastId);
-    
-    const durationMs = 3000;
-    toast.custom(
-      (t) => (
-        <div
-          className={`${
-            t.visible ? 'animate-enter' : 'animate-leave'
-          } max-w-sm w-full ${isAdmin ? 'bg-purple-600' : 'bg-green-500'} shadow-lg rounded-lg pointer-events-auto flex items-center border-l-4 ${isAdmin ? 'border-purple-400' : 'border-green-400'} toast-hover`}
-          style={{ zIndex: 9999 }}
-        >
-          <div className="flex items-center p-4 w-full">
-            <div className="flex-shrink-0">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isAdmin ? 'bg-purple-500' : 'bg-green-400'} toast-icon-success`}>
-                <span role="img" aria-label="success" className="text-sm">✓</span>
-              </div>
-            </div>
-            <div className="ml-3 flex-1">
-              <p className="text-sm font-medium text-white">
-                {isAdmin ? 'Chào mừng Admin!' : `Chào mừng ${userName}!`}
-              </p>
-              <p className="text-xs text-white/80 mt-1">
-                {isAdmin ? 'Đăng nhập admin thành công' : 'Đăng nhập thành công'}
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                toast.dismiss(t.id);
-                this.activeToasts.delete(toastId);
-              }}
-              className="ml-2 flex items-center justify-center text-white/70 hover:text-white focus:outline-none transition-colors"
-            >
-              <span className="sr-only">Đóng</span>
-              <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      ),
-      { 
-        duration: durationMs, 
-        position: 'top-right',
-        id: toastId,
-        onDismiss: () => this.activeToasts.delete(toastId)
-      }
-    );
-
-    // Force dismiss to avoid being stuck when hovered
-    setTimeout(() => {
-      toast.dismiss(toastId);
-    }, durationMs + 100);
+  showLoginSuccess(userName: string): void {
+    const message = `Chào mừng ${userName}!`;
+    this.showSuccess(message, { description: 'Đăng nhập thành công' });
   }
 
-  // Show logout success toast
   showLogoutSuccess(): void {
-    this.clearAll();
-    
-    const toastId = 'logout-success';
-    this.activeToasts.add(toastId);
-    
-    const durationMs = 2500;
-    toast.custom(
-      (t) => (
-        <div
-          className={`${
-            t.visible ? 'animate-enter' : 'animate-leave'
-          } max-w-sm w-full bg-blue-600 shadow-lg rounded-lg pointer-events-auto flex items-center border-l-4 border-blue-400 toast-hover`}
-          style={{ zIndex: 9999 }}
-        >
-          <div className="flex items-center p-4 w-full">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 toast-icon">
-                <span role="img" aria-label="logout" className="text-sm">👋</span>
-              </div>
-            </div>
-            <div className="ml-3 flex-1">
-              <p className="text-sm font-medium text-white">
-                Đã đăng xuất thành công!
-              </p>
-              <p className="text-xs text-white/80 mt-1">
-                Hẹn gặp lại bạn!
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                toast.dismiss(t.id);
-                this.activeToasts.delete(toastId);
-              }}
-              className="ml-2 flex items-center justify-center text-white/70 hover:text-white focus:outline-none transition-colors"
-            >
-              <span className="sr-only">Đóng</span>
-              <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      ),
-      { 
-        duration: durationMs, 
-        position: 'top-right',
-        id: toastId,
-        onDismiss: () => this.activeToasts.delete(toastId)
-      }
-    );
-
-    // Force dismiss to avoid being stuck when hovered
-    setTimeout(() => {
-      toast.dismiss(toastId);
-    }, durationMs + 100);
+    const message = 'Đã đăng xuất thành công!';
+    this.showInfo(message, { description: 'Hẹn gặp lại bạn!' });
   }
 
-  // Show login error toast
   showLoginError(message: string): void {
-    this.clearAll();
-    
-    const toastId = 'login-error';
-    this.activeToasts.add(toastId);
-    
-    toast.error(message, {
-      icon: '🔐',
-      duration: 4000,
-      style: {
-        background: '#ef4444',
-        color: 'white',
-        borderRadius: '8px',
-        padding: '12px 16px',
-        fontSize: '14px',
-        fontWeight: '500',
-        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        border: '1px solid #dc2626',
-      },
-      position: 'top-right',
-      id: toastId,
-      onDismiss: () => this.activeToasts.delete(toastId),
-      iconTheme: {
-        primary: 'white',
-        secondary: '#ef4444'
-      }
-    });
+    this.showError(message);
   }
 
-  // Show success toast
-  showSuccess(message: string, icon: string = '✓'): void {
+  showSuccess(message: string, options?: { icon?: string; description?: string; duration?: number }): void {
     this.clearAll();
-    
     const toastId = 'success-toast';
     this.activeToasts.add(toastId);
-    
-    toast.success(message, {
-      icon,
-      duration: 3000,
-      style: {
-        background: '#10b981',
-        color: 'white',
-        borderRadius: '8px',
-        padding: '12px 16px',
-        fontSize: '14px',
-        fontWeight: '500',
-        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        border: '1px solid #059669',
-      },
-      position: 'top-right',
-      id: toastId,
-      onDismiss: () => this.activeToasts.delete(toastId),
-    });
+
+    toast.custom(
+      (t) => (
+        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} toast-container bg-emerald-500 border-l-4 border-emerald-400`}> 
+          <div className="toast-body">
+            <div className="toast-icon bg-emerald-400">
+              {options?.icon ?? '✓'}
+            </div>
+            <div className="toast-content">
+              <p className="toast-title">{message}</p>
+              {options?.description && <p className="toast-description">{options.description}</p>}
+            </div>
+            <button onClick={() => this.dismiss(t.id, toastId)} className="toast-close">×</button>
+          </div>
+        </div>
+      ),
+      {
+        duration: options?.duration ?? 3000,
+        position: 'top-right',
+        id: toastId,
+        onDismiss: () => this.activeToasts.delete(toastId)
+      }
+    );
   }
 
-  // Show error toast
-  showError(message: string, icon: string = '✕'): void {
+  showError(message: string, options?: { icon?: string; description?: string; duration?: number }): void {
     this.clearAll();
-    
     const toastId = 'error-toast';
     this.activeToasts.add(toastId);
-    
-    toast.error(message, {
-      icon,
-      duration: 4000,
-      style: {
-        background: '#ef4444',
-        color: 'white',
-        borderRadius: '8px',
-        padding: '12px 16px',
-        fontSize: '14px',
-        fontWeight: '500',
-        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        border: '1px solid #dc2626',
-      },
-      position: 'top-right',
-      id: toastId,
-      onDismiss: () => this.activeToasts.delete(toastId),
-      iconTheme: {
-        primary: 'white',
-        secondary: '#ef4444'
+
+    toast.custom(
+      (t) => (
+        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} toast-container bg-rose-500 border-l-4 border-rose-400`}>
+          <div className="toast-body">
+            <div className="toast-icon bg-rose-400">
+              {options?.icon ?? '✕'}
+            </div>
+            <div className="toast-content">
+              <p className="toast-title">{message}</p>
+              {options?.description && <p className="toast-description">{options.description}</p>}
+            </div>
+            <button onClick={() => this.dismiss(t.id, toastId)} className="toast-close">×</button>
+          </div>
+        </div>
+      ),
+      {
+        duration: options?.duration ?? 4000,
+        position: 'top-right',
+        id: toastId,
+        onDismiss: () => this.activeToasts.delete(toastId)
       }
-    });
+    );
   }
 
-  // Show warning toast
-  showWarning(message: string): void {
+  showWarning(message: string, options?: { icon?: string; description?: string; duration?: number }): void {
     this.clearAll();
-    
     const toastId = 'warning-toast';
     this.activeToasts.add(toastId);
-    
-    toast(message, {
-      icon: '⚠️',
-      duration: 3500,
-      style: {
-        background: '#f59e0b',
-        color: 'white',
-        borderRadius: '8px',
-        padding: '12px 16px',
-        fontSize: '14px',
-        fontWeight: '500',
-        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        border: '1px solid #d97706',
-      },
-      position: 'top-right',
-      id: toastId,
-      onDismiss: () => this.activeToasts.delete(toastId),
-    });
+
+    toast.custom(
+      (t) => (
+        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} toast-container bg-amber-500 border-l-4 border-amber-400`}>
+          <div className="toast-body">
+            <div className="toast-icon bg-amber-400">
+              {options?.icon ?? '⚠️'}
+            </div>
+            <div className="toast-content">
+              <p className="toast-title">{message}</p>
+              {options?.description && <p className="toast-description">{options.description}</p>}
+            </div>
+            <button onClick={() => this.dismiss(t.id, toastId)} className="toast-close">×</button>
+          </div>
+        </div>
+      ),
+      {
+        duration: options?.duration ?? 3500,
+        position: 'top-right',
+        id: toastId,
+        onDismiss: () => this.activeToasts.delete(toastId)
+      }
+    );
   }
 
-  // Show info toast
-  showInfo(message: string): void {
+  showInfo(message: string, options?: { icon?: string; description?: string; duration?: number }): void {
     this.clearAll();
-    
     const toastId = 'info-toast';
     this.activeToasts.add(toastId);
-    
-    toast(message, {
-      icon: 'ℹ️',
-      duration: 3000,
-      style: {
-        background: '#3b82f6',
-        color: 'white',
-        borderRadius: '8px',
-        padding: '12px 16px',
-        fontSize: '14px',
-        fontWeight: '500',
-        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        border: '1px solid #2563eb',
-      },
-      position: 'top-right',
-      id: toastId,
-      onDismiss: () => this.activeToasts.delete(toastId),
-    });
+
+    toast.custom(
+      (t) => (
+        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} toast-container bg-sky-500 border-l-4 border-sky-400`}>
+          <div className="toast-body">
+            <div className="toast-icon bg-sky-400">
+              {options?.icon ?? 'ℹ️'}
+            </div>
+            <div className="toast-content">
+              <p className="toast-title">{message}</p>
+              {options?.description && <p className="toast-description">{options.description}</p>}
+            </div>
+            <button onClick={() => this.dismiss(t.id, toastId)} className="toast-close">×</button>
+          </div>
+        </div>
+      ),
+      {
+        duration: options?.duration ?? 3000,
+        position: 'top-right',
+        id: toastId,
+        onDismiss: () => this.activeToasts.delete(toastId)
+      }
+    );
+  }
+
+  private dismiss(toastInstanceId: string, toastId: string) {
+    toast.dismiss(toastInstanceId);
+    this.activeToasts.delete(toastId);
   }
 }
 

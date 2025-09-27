@@ -28,4 +28,7 @@ dashboardRoute.get("/analytics", catchAsync(DashboardController.getPostAnalytics
 // Activities
 dashboardRoute.get("/activities", catchAsync(DashboardController.getRecentActivities));
 
+// Quick stats for widgets
+dashboardRoute.get("/quick-stats", catchAsync(DashboardController.getQuickStats));
+
 export default dashboardRoute;

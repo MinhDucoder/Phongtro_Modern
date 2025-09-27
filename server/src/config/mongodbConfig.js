@@ -8,11 +8,21 @@ const clientOptions = {
 
 export const connectDB = async () => {
   try {
-  await mongoose.connect(uri, { ...clientOptions, ssl: true, tls: true })
-    await mongoose.connection.db.admin().command({ ping: 1 })
-    console.log('Pinged your deployment. You successfully connected to MongoDB!')
+    console.log('🔄 Connecting to MongoDB Atlas...');
+    await mongoose.connect(uri, {
+      ...clientOptions,
+      ssl: true,
+      tls: true,
+      connectTimeoutMS: 30000,
+      socketTimeoutMS: 45000
+    });
+    await mongoose.connection.db.admin().command({ ping: 1 });
+    console.log('✅ Successfully connected to MongoDB Atlas!');
+    return true;
   } catch (error) {
-    console.error('MongoDB connection error:', error)
-    process.exit(1)
+    console.error('❌ MongoDB connection error:', error.message);
+    console.error('Stack:', error.stack);
+    console.log('⚠️  Server will continue running but database operations will fail.');
+    return false;
   }
-}
+};

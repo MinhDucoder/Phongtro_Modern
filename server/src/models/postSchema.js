@@ -25,7 +25,7 @@ const postSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "active", "expired", "rejected"],
+      enum: ["pending", "active", "expired", "rejected", "paused"],
       default: "pending",
     },
     // Moderation fields

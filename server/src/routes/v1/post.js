@@ -10,7 +10,7 @@ postRoute.post("/", authenticate(), catchAsync(PostController.create));
 // postRoute.get("/", authenticate(), catchAsync(PostController.list));
 postRoute.get("/", catchAsync(PostController.list));
 
-postRoute.get("/:id", authenticate(), catchAsync(PostController.detail));
+postRoute.get('/:id', catchAsync(PostController.detail));
 postRoute.put("/:id", authenticate(), authorize("admin"), catchAsync(PostController.update));
 postRoute.delete("/:id", authenticate(), authorize("admin"), catchAsync(PostController.remove));
 

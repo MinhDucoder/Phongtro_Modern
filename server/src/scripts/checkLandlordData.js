@@ -69,3 +69,5 @@ const checkLandlordData = async () => {
 // Run the check
 connectDB().then(() => checkLandlordData());
 
+
+

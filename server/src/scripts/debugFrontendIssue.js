@@ -134,3 +134,5 @@ const debugFrontendIssue = async () => {
 // Run the debug
 connectDB().then(() => debugFrontendIssue());
 
+
+

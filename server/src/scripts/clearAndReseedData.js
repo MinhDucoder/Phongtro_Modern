@@ -44,3 +44,5 @@ const clearAndReseedData = async () => {
 // Run the clear and reseed
 connectDB().then(() => clearAndReseedData());
 
+
+

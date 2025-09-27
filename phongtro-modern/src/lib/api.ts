@@ -674,6 +674,14 @@ export const savedPropertiesApi = {
   },
 };
 
+export const postPublicApi = {
+  async getPostDetail(postId: string): Promise<ApiResponse> {
+    return apiRequest(`/posts/${postId}`, {
+      method: 'GET',
+    });
+  },
+};
+
 export default {
   auth: authApi,
   rooms: roomApi,

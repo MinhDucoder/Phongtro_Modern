@@ -148,6 +148,17 @@ class DashboardController {
       return error(res, err.message, 400);
     }
   }
+
+  // Get quick stats for dashboard widgets
+  async getQuickStats(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const stats = await dashboardService.getQuickStats(userId);
+      return success(res, stats);
+    } catch (err) {
+      return error(res, err.message, 400);
+    }
+  }
 }
 
 export default new DashboardController();

@@ -13,7 +13,7 @@ import {
   ExclamationTriangleIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
-import { customToast } from '@/components/ui/CustomToast';
+import { toastManager } from '@/components/ui/ToastManager';
 import UserDetailModal from './UserDetailModal';
 
 interface User {
@@ -136,11 +136,11 @@ export default function AdminUserManagement() {
         
       } else {
         console.error('Error fetching users:', data);
-        customToast.error(data.message || 'Lỗi khi tải danh sách user');
+        toastManager.showError(data.message || 'Lỗi khi tải danh sách user');
       }
     } catch (error) {
       console.error('Error fetching users:', error);
-      customToast.error('Lỗi kết nối server');
+      toastManager.showError('Lỗi kết nối server');
     } finally {
       setLoading(false);
     }
@@ -158,14 +158,14 @@ export default function AdminUserManagement() {
       const data = await response.json();
 
       if (data.success) {
-        customToast.success('Cập nhật thành công');
+        toastManager.showSuccess('Cập nhật thành công');
         fetchUsers();
       } else {
-        customToast.error(data.message);
+        toastManager.showError(data.message);
       }
     } catch (error) {
       console.error('Error updating user:', error);
-      customToast.error('Lỗi khi cập nhật user');
+      toastManager.showError('Lỗi khi cập nhật user');
     }
   };
   
@@ -203,7 +203,7 @@ export default function AdminUserManagement() {
 
       // Consider both 200 OK and other success status codes (like 202 Accepted)
       if (response.ok) {
-        customToast.success('Xóa người dùng thành công');
+        toastManager.showSuccess('Xóa người dùng thành công');
         setShowDeleteConfirm(false);
         setSelectedUser(null);
         
@@ -216,7 +216,7 @@ export default function AdminUserManagement() {
           fetchUsers();
         }, 1000); // Increased timeout to give more time for backend processing
       } else {
-        customToast.error(data.message || 'Lỗi khi xóa người dùng');
+        toastManager.showError(data.message || 'Lỗi khi xóa người dùng');
       }
       
       // Always refresh the data regardless of success/failure response
@@ -224,7 +224,7 @@ export default function AdminUserManagement() {
       setTimeout(() => fetchUsers(), 2000);
     } catch (error) {
       console.error('Error deleting user:', error);
-      customToast.error('Lỗi khi xóa người dùng');
+      toastManager.showError('Lỗi khi xóa người dùng');
     } finally {
       setIsDeleting(false);
     }
@@ -235,14 +235,14 @@ export default function AdminUserManagement() {
     
     // Validate required fields
     if (!editForm.full_name.trim() || !editForm.email.trim()) {
-      customToast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
+      toastManager.showError('Vui lòng điền đầy đủ thông tin bắt buộc');
       return;
     }
     
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(editForm.email)) {
-      customToast.error('Vui lòng nhập email hợp lệ');
+      toastManager.showError('Vui lòng nhập email hợp lệ');
       return;
     }
     
@@ -272,15 +272,15 @@ export default function AdminUserManagement() {
       const data = await response.json();
 
       if (data.success) {
-        customToast.success('Cập nhật thông tin người dùng thành công');
+        toastManager.showSuccess('Cập nhật thông tin người dùng thành công');
         setShowEditModal(false);
         fetchUsers();
       } else {
-        customToast.error(data.message || 'Lỗi khi cập nhật thông tin');
+        toastManager.showError(data.message || 'Lỗi khi cập nhật thông tin');
       }
     } catch (error) {
       console.error('Error updating user:', error);
-      customToast.error('Lỗi khi cập nhật thông tin người dùng');
+      toastManager.showError('Lỗi khi cập nhật thông tin người dùng');
     }
   };
 
@@ -868,7 +868,7 @@ export default function AdminUserManagement() {
                       className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100 rounded-md border border-blue-200 hover:bg-blue-200"
                       onClick={() => {
                         /* Implement password reset functionality */
-                        customToast.info('Chức năng đặt lại mật khẩu đang được phát triển');
+                        toastManager.showInfo('Chức năng đặt lại mật khẩu đang được phát triển');
                       }}
                     >
                       Gửi link reset mật khẩu
