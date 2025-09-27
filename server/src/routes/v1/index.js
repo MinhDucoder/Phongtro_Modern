@@ -17,6 +17,7 @@ import rentalRequestRoute from "./rentalRequest.js";
 import savedPropertiesRoute from "./savedProperties.js";
 import systemRoute from "./system.js";
 import moderationRoutes from "./moderation.js";
+import debugRoute from "../debug.js";
 
 const Route = (app) => {
   // Root route
@@ -52,6 +53,7 @@ const Route = (app) => {
   app.use("/api/v1/rental-requests", rentalRequestRoute);
   app.use("/api/v1/saved-properties", savedPropertiesRoute);
   app.use("/api/v1/system", systemRoute);
+  app.use("/api/debug", debugRoute);
 };
 
 export default Route;

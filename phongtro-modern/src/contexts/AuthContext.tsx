@@ -59,7 +59,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       window.history.replaceState({}, document.title, window.location.pathname);
       
       // Hiển thị thông báo đăng nhập thành công từ OAuth
-      showLoginSuccessToast(null); // Không có thông tin user ngay lập tức cho OAuth
+      // showLoginSuccessToast(null); // Không có thông tin user ngay lập tức cho OAuth
       
       // Fetch user info after successful OAuth login
       setTimeout(() => {

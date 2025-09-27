@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback } from 'react';
+import axios, { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Button from '@/components/ui/Button';
@@ -13,14 +13,51 @@ import {
   EyeIcon
 } from '@heroicons/react/24/outline';
 
+interface Statistics {
+  totalPosts: number;
+  activePosts: number;
+  rejectedPosts: number;
+}
+
+interface LandlordInfo {
+  name: string;
+  email?: string;
+  phone?: string;
+  isVerified: boolean;
+  avatar?: string;
+  accountAge: number;
+  statistics?: Statistics;
+}
+
+interface RoomInfo {
+  title: string;
+  price: number;
+  area: number;
+  address: string;
+  description?: string;
+  images?: string[];
+}
+
+interface Post {
+  id: string;
+  title: string;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: string;
+  rejectionReason?: string;
+  landlordInfo?: LandlordInfo;
+  roomInfo?: RoomInfo;
+}
+
+type PostStatus = 'pending' | 'approved' | 'rejected' | 'all';
+
 export default function PostModerationQueue() {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [filter, setFilter] = useState('pending');
-  const [selectedPost, setSelectedPost] = useState(null);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [filter, setFilter] = useState<PostStatus>('pending');
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   // Fetch posts for moderation
@@ -41,7 +78,8 @@ export default function PostModerationQueue() {
       }
     } catch (err) {
       console.error('Error fetching posts:', err);
-      setError(err.response?.data?.message || 'Lỗi khi tải danh sách bài đăng');
+      const axiosError = err as AxiosError<any>;
+      setError(axiosError.response?.data?.message || 'Lỗi khi tải danh sách bài đăng');
     } finally {
       setLoading(false);
     }
@@ -52,14 +90,14 @@ export default function PostModerationQueue() {
   }, [fetchPosts]);
 
   // Handle pagination
-  const handlePageChange = (newPage) => {
+  const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
       setPage(newPage);
     }
   };
 
   // Handle viewing post details
-  const handleViewDetails = async (post) => {
+  const handleViewDetails = async (post: Post) => {
     try {
       setLoading(true);
       const response = await axios.get(`/api/admin/moderation/post/${post.id}`);
@@ -72,18 +110,19 @@ export default function PostModerationQueue() {
       }
     } catch (err) {
       console.error('Error fetching post details:', err);
-      toast.error(err.response?.data?.message || 'Lỗi khi tải chi tiết bài đăng');
+      const axiosError = err as AxiosError<any>;
+      toast.error(axiosError.response?.data?.message || 'Lỗi khi tải chi tiết bài đăng');
     } finally {
       setLoading(false);
     }
   };
 
   // Handle approve/reject post
-  const handleModerationAction = async (postId, status, reason = '') => {
+  const handleModerationAction = async (postId: string, status: 'approved' | 'rejected', reason: string = '') => {
     try {
       setLoading(true);
       
-      const response = await axios.put(`/api/admin/moderation/post/${postId}`, {
+      const response = await axios.patch(`/api/admin/moderation/${postId}`, {
         status,
         reason: status === 'rejected' ? reason : undefined
       });
@@ -103,7 +142,8 @@ export default function PostModerationQueue() {
       }
     } catch (err) {
       console.error('Error updating post status:', err);
-      toast.error(err.response?.data?.message || 'Lỗi khi cập nhật trạng thái bài đăng');
+      const axiosError = err as AxiosError<any>;
+      toast.error(axiosError.response?.data?.message || 'Lỗi khi cập nhật trạng thái bài đăng');
     } finally {
       setLoading(false);
     }
@@ -128,7 +168,7 @@ export default function PostModerationQueue() {
             className="border border-gray-300 rounded px-3 py-1 text-sm"
             value={filter}
             onChange={(e) => {
-              setFilter(e.target.value);
+              setFilter(e.target.value as PostStatus);
               setPage(1);
             }}
           >
@@ -382,7 +422,7 @@ export default function PostModerationQueue() {
                   <div>
                     <p className="text-sm text-gray-500 mb-2">Hình ảnh ({selectedPost.roomInfo.images.length}):</p>
                     <div className="grid grid-cols-3 gap-2">
-                      {selectedPost.roomInfo.images.map((image, index) => (
+                      {selectedPost.roomInfo.images.map((image: string, index: number) => (
                         <div key={index} className="relative h-20 rounded overflow-hidden">
                           <img 
                             src={image} 

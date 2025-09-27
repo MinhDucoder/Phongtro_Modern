@@ -51,19 +51,67 @@ export interface Room {
   city: string;
   images: string[];
   amenities: string[];
-  landlord: {
-    _id: string;
-    full_name: string;
-    role: string;
-    phone: string;
-    email: string;
-  };
   isAvailable: boolean;
-  options: string[];
-  favouriteLevel: string;
-  status: string;
   createdAt: string;
   updatedAt: string;
+  // Optional fields that might come from post
+  postId?: string;
+  status?: string;
+  favouriteLevel?: string;
+  options?: string[];
+  contact?: {
+    name: string;
+    phone: string;
+    email: string;
+    isVerified: boolean;
+  };
+}
+
+export interface Post {
+  _id: string;
+  id: string;
+  status: 'pending' | 'active' | 'expired' | 'rejected' | 'paused';
+  favouriteLevel: 'free' | 'silver' | 'gold' | 'platinum';
+  options: string[];
+  createdAt: string;
+  updatedAt: string;
+  roomId: {
+    _id: string;
+    id: string;
+    title: string;
+    description: string;
+    price: number;
+    area: number;
+    address: string;
+    city: string;
+    images: string[];
+    amenities: string[];
+    isAvailable: boolean;
+    createdAt: string;
+    updatedAt: string;
+  } | null;
+  landlord: {
+    _id: string;
+    id: string;
+    full_name: string;
+    phone: string;
+    email: string;
+    role: string;
+    avatar?: string;
+  } | null;
+  contact: {
+    name: string;
+    phone: string;
+    email: string;
+    isVerified: boolean;
+  } | null;
+  analytics?: {
+    views: number;
+    likes: number;
+    calls: number;
+    messages: number;
+  };
+  viewCount?: number;
 }
 
 // Hàm gửi request API tổng quát
@@ -283,6 +331,14 @@ export const authApi = {
 
   // Lấy thông tin user từ JWT token (API /me)
   async getMe(): Promise<ApiResponse> {
+    // Tạm thời disable API call để tránh lỗi 401
+    console.log('getMe() disabled to avoid 401 errors');
+    return {
+      success: false,
+      message: 'API disabled',
+    };
+    
+    /* 
     try {
       return await apiRequest('/user/me', {
         method: 'GET',
@@ -300,6 +356,7 @@ export const authApi = {
       }
       throw error;
     }
+    */
   },
   
   // Đổi mật khẩu

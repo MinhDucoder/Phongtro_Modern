@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   DocumentCheckIcon,
-  DocumentXMarkIcon,
+  XMarkIcon,
   UserCircleIcon,
   HomeIcon,
   PhotoIcon,
@@ -813,7 +813,7 @@ export default function EnhancedPostModerationDetail({
               onClick={() => handleModeratePost('rejected')}
               disabled={submitting}
             >
-              <DocumentXMarkIcon className="h-5 w-5 mr-2" />
+              <XMarkIcon className="h-5 w-5 mr-2" />
               Từ chối
             </button>
             <button

@@ -19,9 +19,45 @@ class PostController {
       const filters = {};
       const sort = {};
 
-      // Ví dụ filter
+      // Mặc định chỉ lấy posts đã được duyệt (active) cho trang chủ
+      filters.status = "active";
+
+      // Ví dụ filter khác
       if (req.query.city) filters["roomId.city"] = req.query.city;
+
+      if (req.query.sortBy) {
+        sort[req.query.sortBy] = req.query.order === "asc" ? 1 : -1;
+      } else {
+        sort.createdAt = -1;
+      }
+
+      const result = await postService.listPosts({ page, limit, filters, sort });
+      
+      // Thêm headers chống cache
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
+      return success(res, result);
+    } catch (err) {
+      return error(res, err.message, 400);
+    }
+  }
+
+  async listAll(req, res, next) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 20;
+      const filters = {};
+      const sort = {};
+
+      // Admin có thể filter theo status hoặc xem tất cả
       if (req.query.status) filters.status = req.query.status;
+
+      // Ví dụ filter khác
+      if (req.query.city) filters["roomId.city"] = req.query.city;
 
       if (req.query.sortBy) {
         sort[req.query.sortBy] = req.query.order === "asc" ? 1 : -1;

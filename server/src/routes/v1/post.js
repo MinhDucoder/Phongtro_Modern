@@ -7,8 +7,12 @@ const postRoute = express.Router();
 
 //comment authenicate() de test
 postRoute.post("/", authenticate(), catchAsync(PostController.create));
-// postRoute.get("/", authenticate(), catchAsync(PostController.list));
+
+// Public route - chỉ trả về posts active
 postRoute.get("/", catchAsync(PostController.list));
+
+// Admin route - xem tất cả posts với query params
+postRoute.get("/admin/all", authenticate(), authorize("admin"), catchAsync(PostController.listAll));
 
 postRoute.get('/:id', catchAsync(PostController.detail));
 postRoute.put("/:id", authenticate(), authorize("admin"), catchAsync(PostController.update));

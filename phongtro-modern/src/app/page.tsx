@@ -5,12 +5,12 @@ import SearchFilter from '@/components/ui/SearchFilter';
 import PropertyCard from '@/components/ui/PropertyCard';
 import Pagination from '@/components/ui/Pagination';
 import StructuredData from '@/components/seo/StructuredData';
-import { roomApi, Room } from '@/lib/api';
+import { roomApi, Room, Post } from '@/lib/api';
 import RoomCard from '@/components/room/RoomCard';
 import toast from 'react-hot-toast';
 
 export default function Home() {
-  const [rooms, setRooms] = useState<Room[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,28 +18,47 @@ export default function Home() {
   const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
-    fetchFeaturedRooms(currentPage);
+    fetchFeaturedPosts(currentPage);
   }, [currentPage]);
 
-  const fetchFeaturedRooms = async (page: number = 1) => {
+  const fetchFeaturedPosts = async (page: number = 1) => {
     try {
       setLoading(true);
-      console.log('Fetching posts from API...');
+      console.log('Fetching approved posts from API...');
       
-      const response = await fetch(`http://localhost:5000/api/v1/posts?page=${page}&limit=${ITEMS_PER_PAGE}`);
+      // Chỉ lấy các post đã được duyệt (status = active)
+      // Thêm timestamp để tránh cache
+      const timestamp = Date.now();
+      const url = `http://localhost:5000/api/v1/posts?page=${page}&limit=${ITEMS_PER_PAGE}&_t=${timestamp}`;
+      console.log('Calling API URL:', url);
+      
+      const response = await fetch(url, {
+        cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
       const data = await response.json();
+      console.log('API Response data:', data);
       
-      console.log('API Response:', data);
-      
-      if (data.items && Array.isArray(data.items)) {
-        setRooms(data.items);
-        setTotalPages(Math.ceil(data.total / ITEMS_PER_PAGE));
+      if (data.success && data.data && data.data.items && Array.isArray(data.data.items)) {
+        const posts = data.data.items;
+        console.log('Posts received:', posts.length);
+        console.log('Sample post data:', posts[0]);
+        console.log('Setting posts state...');
+        setPosts(posts);
+        setTotalPages(Math.ceil(data.data.total / ITEMS_PER_PAGE));
+        console.log('Posts state updated. Current posts array length:', posts.length);
         
-        if (data.items.length > 0) {
-          toast.success(`Đã tải ${data.items.length} tin đăng từ database`);
+        if (posts.length > 0) {
+          toast.success(`Đã tải ${posts.length} tin đăng đã duyệt từ database`);
         } else {
-          console.log('No data from API or empty response');
-          toast('Chưa có tin đăng nào. Vui lòng thêm tin đăng mới.', {
+          console.log('No approved posts available');
+          toast('Chưa có tin đăng nào được duyệt. Vui lòng chờ admin duyệt tin.', {
             icon: '⚠️',
             style: {
               background: '#fbbf24',
@@ -47,11 +66,19 @@ export default function Home() {
             },
           });
         }
+      } else {
+        console.error('Invalid response structure:', data);
+        console.error('Expected: data.success && data.data && data.data.items');
+        console.error('Got - success:', data.success);
+        console.error('Got - data:', data.data);
+        console.error('Got - items:', data.data?.items);
+        toast.error('Dữ liệu không hợp lệ từ server');
+        setPosts([]);
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
       toast.error('Không thể kết nối API. Vui lòng kiểm tra server.');
-      setRooms([]);
+      setPosts([]);
     } finally {
       setLoading(false);
     }
@@ -117,7 +144,7 @@ export default function Home() {
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-darker">
-            Tin đăng cho thuê
+            Tin đăng cho thuê đã được duyệt
           </h2>
           <div className="flex items-center space-x-4">
             <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">
@@ -145,14 +172,42 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {rooms.map((room) => (
-              <RoomCard
-                key={room._id}
-                room={room}
-                onToggleFavorite={handleToggleFavorite}
-                isFavorite={favorites.includes(room._id)}
-              />
-            ))}
+            {(() => {
+              console.log('Rendering posts. Total posts:', posts.length);
+              return null;
+            })()}
+            {posts.length === 0 && (
+              <div className="col-span-full text-center py-8">
+                <p className="text-gray-500">Chưa có bài đăng nào được duyệt</p>
+              </div>
+            )}
+            {posts.map((post, index) => {
+              console.log(`Rendering post ${index}:`, {
+                postId: post._id,
+                hasRoomId: !!post.roomId,
+                roomTitle: post.roomId?.title
+              });
+              return post.roomId ? (
+                <RoomCard
+                  key={post._id}
+                  room={{
+                    ...post.roomId,
+                    // Thêm thông tin từ post nếu cần
+                    postId: post._id,
+                    status: post.status,
+                    favouriteLevel: post.favouriteLevel,
+                    options: post.options || [],
+                    contact: post.contact || undefined
+                  }}
+                  onToggleFavorite={handleToggleFavorite}
+                  isFavorite={favorites.includes(post._id)}
+                />
+              ) : (
+                <div key={post._id} className="bg-red-100 p-4 rounded">
+                  <p className="text-red-600">Post thiếu room data: {post._id}</p>
+                </div>
+              )
+            })}
           </div>
         )}
 

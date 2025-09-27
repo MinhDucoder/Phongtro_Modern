@@ -41,21 +41,54 @@ export default function RoomCard({ room, onToggleFavorite, isFavorite = false }:
     return isAvailable ? 'Còn trống' : 'Đã thuê';
   };
 
+  const isValidImageUrl = (url: string | undefined | null): boolean => {
+    if (!url || typeof url !== 'string') return false;
+    const trimmed = url.trim();
+    if (trimmed === "") return false;
+    
+    // Check for valid URL patterns
+    try {
+      const urlObj = new URL(trimmed);
+      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    } catch {
+      // If not absolute URL, check if it's a relative path
+      return trimmed.startsWith('/');
+    }
+  };
+
+  const getFirstValidImage = (): string | null => {
+    if (!room.images || !Array.isArray(room.images)) return null;
+    
+    for (const img of room.images) {
+      // Handle nested array case [[url]] 
+      const imageUrl = Array.isArray(img) ? img[0] : img;
+      if (isValidImageUrl(imageUrl)) {
+        return imageUrl;
+      }
+    }
+    return null;
+  };
+
+  const validImageUrl = getFirstValidImage();
+
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
       {/* Image */}
       <div className="relative h-48 w-full">
-        {room.images && room.images.length > 0 && !imageError ? (
+        {validImageUrl && !imageError ? (
           <Image
-            src={room.images[0]}
-            alt={room.title}
+            src={validImageUrl}
+            alt={room.title || 'Hình ảnh phòng'}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover"
             onError={() => setImageError(true)}
+            unoptimized={validImageUrl.includes('unsplash.com')}
           />
         ) : (
           <div className="h-full w-full bg-gray-200 flex items-center justify-center">
             <HomeIcon className="h-12 w-12 text-gray-400" />
+            <span className="ml-2 text-gray-500 text-sm">Không có ảnh</span>
           </div>
         )}
         

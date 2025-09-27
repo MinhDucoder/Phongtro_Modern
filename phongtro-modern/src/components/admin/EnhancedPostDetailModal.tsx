@@ -66,19 +66,19 @@ interface PostDetailModalProps {
 }
 
 export default function PostDetailModal({ post, isOpen, onClose, onStatusChange }: PostDetailModalProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState('');
-  const [moderationNotes, setModerationNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [rejectionReason, setRejectionReason] = useState<string>('');
+  const [moderationNotes, setModerationNotes] = useState<string>('');
   const [postData, setPostData] = useState<PostDetail | null>(null);
-  const [activeTab, setActiveTab] = useState('details'); // 'details', 'landlord', 'moderation'
+  const [activeTab, setActiveTab] = useState<'details' | 'landlord' | 'moderation'>('details');
   const [moderationIssues, setModerationIssues] = useState({
     contentIssues: false,
     pricingIssues: false,
     imageIssues: false,
     addressIssues: false
   });
-  const [violationDetails, setViolationDetails] = useState('');
+  const [violationDetails, setViolationDetails] = useState<string>('');
   
   const reasonRef = useRef<HTMLTextAreaElement>(null);
   
@@ -259,6 +259,14 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
     return labels[amenity] || amenity;
   };
 
+  // Handle close with proper validation
+  const handleClose = () => {
+    if (isSubmitting || isLoading) {
+      return; // Don't close if submitting or loading
+    }
+    onClose();
+  };
+
   // Render placeholder khi không có bài đăng
   if (!post) {
     return null;
@@ -270,7 +278,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={(isSubmitting || isLoading) ? undefined : onClose}
+      onClose={handleClose}
       title="Chi tiết bài đăng"
       size="xl"
     >
@@ -571,6 +579,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
                         placeholder="Nhập ghi chú nội bộ về bài đăng này"
                         rows={2}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        disabled={isSubmitting}
                       />
                     </div>
                     
@@ -587,6 +596,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
                             checked={moderationIssues.contentIssues}
                             onChange={(e) => setModerationIssues({...moderationIssues, contentIssues: e.target.checked})}
                             className="rounded text-blue-600 focus:ring-blue-500"
+                            disabled={isSubmitting}
                           />
                           <span>Nội dung không phù hợp</span>
                         </label>
@@ -597,6 +607,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
                             checked={moderationIssues.pricingIssues}
                             onChange={(e) => setModerationIssues({...moderationIssues, pricingIssues: e.target.checked})}
                             className="rounded text-blue-600 focus:ring-blue-500"
+                            disabled={isSubmitting}
                           />
                           <span>Vấn đề về giá</span>
                         </label>
@@ -607,6 +618,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
                             checked={moderationIssues.imageIssues}
                             onChange={(e) => setModerationIssues({...moderationIssues, imageIssues: e.target.checked})}
                             className="rounded text-blue-600 focus:ring-blue-500"
+                            disabled={isSubmitting}
                           />
                           <span>Hình ảnh không phù hợp</span>
                         </label>
@@ -617,6 +629,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
                             checked={moderationIssues.addressIssues}
                             onChange={(e) => setModerationIssues({...moderationIssues, addressIssues: e.target.checked})}
                             className="rounded text-blue-600 focus:ring-blue-500"
+                            disabled={isSubmitting}
                           />
                           <span>Địa chỉ không chính xác</span>
                         </label>
@@ -631,6 +644,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
                         placeholder="Mô tả chi tiết về các vi phạm cụ thể (nếu có)"
                         rows={2}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        disabled={isSubmitting}
                       />
                     </div>
                     
@@ -643,6 +657,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
                         placeholder="Nhập lý do từ chối bài đăng này (bắt buộc nếu từ chối)"
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        disabled={isSubmitting}
                       />
                     </div>
                   </div>
@@ -652,7 +667,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
           </div>
 
           <div className="flex justify-between mt-6 pt-4 border-t border-gray-200">
-            <Button onClick={onClose} variant="secondary" disabled={isSubmitting}>
+            <Button onClick={handleClose} variant="secondary" disabled={isSubmitting}>
               Đóng
             </Button>
             
@@ -662,7 +677,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
                   onClick={() => handleStatusChange('rejected')}
                   variant="danger"
                   disabled={isSubmitting}
-                  loading={isSubmitting && rejectionReason !== ''}
+                  loading={isSubmitting}
                   leftIcon={<XMarkIcon className="w-5 h-5" />}
                 >
                   Từ chối
@@ -672,7 +687,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
                   onClick={() => handleStatusChange('approved')}
                   variant="primary"
                   disabled={isSubmitting}
-                  loading={isSubmitting && rejectionReason === ''}
+                  loading={isSubmitting}
                   leftIcon={<CheckIcon className="w-5 h-5" />}
                 >
                   Duyệt

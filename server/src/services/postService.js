@@ -38,7 +38,53 @@ class PostService {
 
     const total = await Post.countDocuments(filters);
 
-    return { total, items: posts };
+    // Transform data để có cấu trúc rõ ràng hơn
+    const transformedPosts = posts.map(post => {
+      const room = post.roomId;
+      const landlord = post.landlord;
+      
+      return {
+        id: post._id,
+        _id: post._id,
+        status: post.status,
+        favouriteLevel: post.favouriteLevel,
+        options: post.options || [],
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+        roomId: room ? {
+          id: room._id,
+          _id: room._id,
+          title: room.title,
+          description: room.description,
+          price: room.price,
+          area: room.area,
+          address: room.address,
+          city: room.city,
+          images: room.images || [],
+          amenities: room.amenities || [],
+          isAvailable: room.isAvailable,
+          createdAt: room.createdAt,
+          updatedAt: room.updatedAt
+        } : null,
+        landlord: landlord ? {
+          id: landlord._id,
+          _id: landlord._id,
+          full_name: landlord.full_name,
+          phone: landlord.phone,
+          email: landlord.email,
+          role: landlord.role,
+          avatar: landlord.avatar
+        } : null,
+        contact: landlord ? {
+          name: landlord.full_name,
+          phone: landlord.phone,
+          email: landlord.email,
+          isVerified: landlord.role === 'landlord'
+        } : null
+      };
+    });
+
+    return { total, items: transformedPosts };
   }
 
   async getPostById(postId) {
@@ -85,18 +131,21 @@ class PostService {
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       analytics: analyticsSummary,
-      room: {
-        id: room?._id,
-        _id: room?._id,
-        title: room?.title,
-        description: room?.description,
-        price: room?.price,
-        area: room?.area,
-        address: room?.address,
-        city: room?.city,
-        images: room?.images || [],
-        amenities: room?.amenities || [],
-      },
+      roomId: room ? {
+        id: room._id,
+        _id: room._id,
+        title: room.title,
+        description: room.description,
+        price: room.price,
+        area: room.area,
+        address: room.address,
+        city: room.city,
+        images: room.images || [],
+        amenities: room.amenities || [],
+        isAvailable: room.isAvailable,
+        createdAt: room.createdAt,
+        updatedAt: room.updatedAt
+      } : null,
       landlord: landlord
         ? {
             id: landlord._id,

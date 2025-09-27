@@ -29,8 +29,8 @@ interface PostDetailModalProps {
 }
 
 export default function PostDetailModal({ post, isOpen, onClose, onStatusChange }: PostDetailModalProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [rejectionReason, setRejectionReason] = useState<string>('');
   const reasonRef = useRef<HTMLTextAreaElement>(null);
 
   const formatDate = (dateString: string) => {
@@ -93,6 +93,13 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
     }
   };
 
+  const handleClose = () => {
+    if (isSubmitting) {
+      return; // Don't close if submitting
+    }
+    onClose();
+  };
+
   // Render placeholder khi không có bài đăng
   if (!post) {
     return null;
@@ -101,7 +108,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={isSubmitting ? undefined : onClose}
+      onClose={handleClose}
       title="Chi tiết bài đăng"
       size="xl"
     >
@@ -176,13 +183,14 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
                 placeholder="Nhập lý do từ chối bài đăng này (bắt buộc nếu từ chối)"
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                disabled={isSubmitting}
               />
             </div>
           )}
         </div>
 
         <div className="flex justify-between mt-6 pt-4 border-t border-gray-200">
-          <Button onClick={onClose} variant="secondary">
+          <Button onClick={handleClose} variant="secondary" disabled={isSubmitting}>
             Đóng
           </Button>
           
