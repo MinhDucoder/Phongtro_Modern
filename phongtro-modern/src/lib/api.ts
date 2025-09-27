@@ -480,6 +480,13 @@ export const dashboardApi = {
       method: 'DELETE',
     });
   },
+
+  // Get quick stats for widgets
+  async getQuickStats(): Promise<ApiResponse> {
+    return apiRequest('/dashboard/quick-stats', {
+      method: 'GET',
+    });
+  },
 };
 
 // Rental Request API

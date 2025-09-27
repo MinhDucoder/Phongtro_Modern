@@ -86,8 +86,24 @@ export default function DashboardOverview() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Tổng số tin" value={stats.totalPosts ?? 0} />
         <StatCard label="Tin đang hoạt động" value={stats.activePosts ?? 0} />
+        <StatCard label="Tin tạm dừng" value={stats.pausedPosts ?? 0} />
         <StatCard label="Yêu cầu chờ xử lý" value={stats.pendingRequests ?? 0} />
-        <StatCard label="Lượt xem" value={stats.totalViews ?? 0} />
+      </div>
+      
+      {/* Secondary stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white rounded-lg border p-4">
+          <div className="text-sm text-gray-700">Lượt xem tổng</div>
+          <div className="mt-2 text-2xl font-semibold text-gray-900">{stats.totalViews ?? 0}</div>
+        </div>
+        <div className="bg-white rounded-lg border p-4">
+          <div className="text-sm text-gray-700">Tin chờ duyệt</div>
+          <div className="mt-2 text-2xl font-semibold text-gray-900">{stats.pendingPosts ?? 0}</div>
+        </div>
+        <div className="bg-white rounded-lg border p-4">
+          <div className="text-sm text-gray-700">Tin hết hạn</div>
+          <div className="mt-2 text-2xl font-semibold text-gray-900">{stats.expiredPosts ?? 0}</div>
+        </div>
       </div>
 
       {/* Empty state CTA cho trường hợp chưa có tin */}
