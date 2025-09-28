@@ -23,6 +23,7 @@ import {
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 import { toastManager } from '@/components/ui/ToastManager';
+import { rentalRequestApi } from '@/lib/api';
 
 interface PropertyDetailProps {
   property: {
@@ -33,8 +34,10 @@ interface PropertyDetailProps {
     area?: number;
     location?: string;
     address?: string;
-    images?: string[];
+    images?: string[] | any[];
     description?: string;
+    propertyType?: string;
+    roomType?: string;
     contact?: {
       name?: string;
       phone?: string;
@@ -59,8 +62,23 @@ interface PropertyDetailProps {
       area?: number;
       address?: string;
       city?: string;
-      images?: string[];
+      images?: string[] | any[];
       amenities?: string[];
+      propertyType?: string;
+      roomType?: string;
+      description?: string;
+    };
+    roomId?: {
+      title?: string;
+      price?: number;
+      area?: number;
+      address?: string;
+      city?: string;
+      images?: string[] | any[];
+      amenities?: string[];
+      propertyType?: string;
+      roomType?: string;
+      description?: string;
     };
     landlord?: {
       full_name?: string;
@@ -96,11 +114,31 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   const [showAllImages, setShowAllImages] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Mock auth state
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [requestData, setRequestData] = useState({
+    message: '',
+    expectedMoveIn: '',
+    contactInfo: {
+      phone: '',
+      email: ''
+    }
+  });
 
-  const room = property.room || property;
-  const images = Array.isArray(room?.images) ? room.images.flatMap((img: any) => (Array.isArray(img) ? img : [img])) : [];
+  const room = property.roomId || property.room || property;
+  
+  // Process images - handle both string URLs and objects with url property
+  const processedImages = Array.isArray(room?.images) 
+    ? room.images.map((img: any) => {
+        if (typeof img === 'string') return img;
+        if (typeof img === 'object' && img.url) return img.url;
+        return '/placeholder-room.svg';
+      })
+    : [];
+  
+  const images = processedImages.length > 0 ? processedImages : ['/placeholder-room.svg'];
   const primaryImage = images[currentImageIndex] || '/placeholder-room.svg';
-  const galleryImages = images.length > 0 ? images : ['/placeholder-room.svg'];
+  const galleryImages = images;
+  
   const contact = property.contact || {
     name: property.landlord?.full_name || 'Chủ nhà',
     phone: property.landlord?.phone,
@@ -111,6 +149,12 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   const price = room?.price ? `${room.price.toLocaleString()} VNĐ/tháng` : 'Giá liên hệ';
   const area = room?.area ? `${room.area} m²` : '—';
   const location = room?.city || property.location || '';
+  const propertyType = room?.propertyType || property.propertyType || '';
+  const roomType = room?.roomType || property.roomType || '';
+  const amenities = room?.amenities || property.amenities || [];
+  const description = room?.description || property.description || '';
+  const address = room?.address || property.address || '';
+  const viewCount = property.analytics?.views || property.viewCount || 0;
 
   useEffect(() => {
     setMounted(true);
@@ -122,12 +166,42 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
     if (!isAuthenticated) {
       // Show login modal or redirect to login
       toastManager.showError('Vui lòng đăng nhập để gửi yêu cầu thuê');
-      router.push('/dang-nhap?redirect=' + encodeURIComponent(`/phong-tro/${property.id}`));
+      router.push('/dang-nhap?redirect=' + encodeURIComponent(`/phong-tro/${property.id || property._id}`));
       return;
     }
 
-    // Navigate to request sent page
-    router.push(`/yeu-cau-da-gui?propertyId=${property.id}`);
+    setShowRequestModal(true);
+  };
+
+  const handleSubmitRequest = async () => {
+    if (!requestData.message.trim() || !requestData.expectedMoveIn) {
+      toastManager.showError('Vui lòng điền đầy đủ thông tin');
+      return;
+    }
+
+    try {
+      const response = await rentalRequestApi.createRequest({
+        postId: property.id || property._id || '',
+        message: requestData.message,
+        expectedMoveIn: requestData.expectedMoveIn,
+        contactInfo: requestData.contactInfo
+      });
+
+      if (response) {
+        toastManager.showSuccess('Đã gửi yêu cầu thuê thành công!');
+        setShowRequestModal(false);
+        setRequestData({
+          message: '',
+          expectedMoveIn: '',
+          contactInfo: { phone: '', email: '' }
+        });
+        // Navigate to request sent page
+        router.push(`/yeu-cau-da-gui?propertyId=${property.id || property._id}`);
+      }
+    } catch (error) {
+      console.error('Error creating rental request:', error);
+      toastManager.showError('Có lỗi xảy ra khi gửi yêu cầu');
+    }
   };
 
 
@@ -449,6 +523,92 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   onClick={() => setCurrentImageIndex(index)}
                 />
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Request Modal */}
+      {showRequestModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Gửi yêu cầu thuê phòng
+            </h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tin nhắn cho chủ nhà *
+                </label>
+                <textarea
+                  value={requestData.message}
+                  onChange={(e) => setRequestData(prev => ({ ...prev, message: e.target.value }))}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Xin chào, tôi quan tâm đến phòng trọ này..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ngày dự kiến chuyển vào *
+                </label>
+                <input
+                  type="date"
+                  value={requestData.expectedMoveIn}
+                  onChange={(e) => setRequestData(prev => ({ ...prev, expectedMoveIn: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Số điện thoại
+                  </label>
+                  <input
+                    type="tel"
+                    value={requestData.contactInfo.phone}
+                    onChange={(e) => setRequestData(prev => ({ 
+                      ...prev, 
+                      contactInfo: { ...prev.contactInfo, phone: e.target.value }
+                    }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="0123456789"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={requestData.contactInfo.email}
+                    onChange={(e) => setRequestData(prev => ({ 
+                      ...prev, 
+                      contactInfo: { ...prev.contactInfo, email: e.target.value }
+                    }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="email@example.com"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowRequestModal(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleSubmitRequest}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Gửi yêu cầu
+              </button>
             </div>
           </div>
         </div>

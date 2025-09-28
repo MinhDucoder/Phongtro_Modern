@@ -235,13 +235,14 @@ export default function YeuCauThueClient() {
   };
 
   const handleRejectRequest = async (requestId: string) => {
-    if (!confirm('Bạn có chắc chắn muốn từ chối yêu cầu thuê này?')) return;
+    const reason = prompt('Lý do từ chối (tùy chọn):');
+    if (reason === null) return; // User clicked cancel
     
     try {
       const response = await rentalRequestApi.updateRequestStatus(
         requestId, 
         'rejected',
-        'Rất tiếc, yêu cầu thuê của bạn không phù hợp với yêu cầu hiện tại. Cảm ơn bạn đã quan tâm.'
+        reason || 'Rất tiếc, yêu cầu thuê của bạn không phù hợp với yêu cầu hiện tại. Cảm ơn bạn đã quan tâm.'
       );
       
       if (response) {

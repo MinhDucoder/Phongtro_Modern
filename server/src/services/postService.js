@@ -62,6 +62,8 @@ class PostService {
           city: room.city,
           images: room.images || [],
           amenities: room.amenities || [],
+          propertyType: room.propertyType,
+          roomType: room.roomType,
           isAvailable: room.isAvailable,
           createdAt: room.createdAt,
           updatedAt: room.updatedAt
@@ -142,6 +144,8 @@ class PostService {
         city: room.city,
         images: room.images || [],
         amenities: room.amenities || [],
+        propertyType: room.propertyType,
+        roomType: room.roomType,
         isAvailable: room.isAvailable,
         createdAt: room.createdAt,
         updatedAt: room.updatedAt

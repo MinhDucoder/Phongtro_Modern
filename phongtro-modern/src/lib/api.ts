@@ -466,11 +466,25 @@ export const dashboardApi = {
     });
   },
 
-  // Update post status
-  async updatePostStatus(postId: string, status: string): Promise<ApiResponse> {
-    return apiRequest(`/dashboard/posts/${postId}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
+  // Get post by ID for editing
+  async getPostById(postId: string): Promise<ApiResponse> {
+    return apiRequest(`/dashboard/posts/${postId}`, {
+      method: 'GET',
+    });
+  },
+
+  // Update post
+  async updatePost(postId: string, postData: any): Promise<ApiResponse> {
+    return apiRequest(`/dashboard/posts/${postId}`, {
+      method: 'PUT',
+      body: JSON.stringify(postData),
+    });
+  },
+
+  // Delete post
+  async deletePost(postId: string): Promise<ApiResponse> {
+    return apiRequest(`/dashboard/posts/${postId}`, {
+      method: 'DELETE',
     });
   },
 

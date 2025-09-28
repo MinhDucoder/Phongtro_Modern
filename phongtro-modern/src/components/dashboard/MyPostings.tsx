@@ -55,6 +55,7 @@ export default function MyPostings() {
   const [postings, setPostings] = useState<any[]>([]);
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -74,14 +75,14 @@ export default function MyPostings() {
   const lastFetchRef = useRef<{ key: string; ts: number } | null>(null);
   useEffect(() => {
     setMounted(true);
-    const key = `${selectedStatus}-${pagination.page}`;
+    const key = `${selectedStatus}-${sortBy}-${pagination.page}`;
     const now = Date.now();
     if (lastFetchRef.current && lastFetchRef.current.key === key && (now - lastFetchRef.current.ts) < 500) {
       return; // bỏ qua lần gọi trùng trong ~500ms
     }
     lastFetchRef.current = { key, ts: now };
     fetchPosts({ showToast: true });
-  }, [selectedStatus, pagination.page]);
+  }, [selectedStatus, sortBy, pagination.page]);
 
   // Debounce searchQuery 300ms
   useEffect(() => {
@@ -108,7 +109,8 @@ export default function MyPostings() {
         page: paginationToUse.page,
         limit: paginationToUse.limit,
         status: selectedStatus === 'all' ? undefined : selectedStatus,
-        search: searchQuery || undefined
+        search: searchQuery || undefined,
+        sort: sortBy
       });
 
       if (response && response.data && response.data.posts) {
@@ -172,27 +174,6 @@ export default function MyPostings() {
     }
   };
 
-  const handleToggleStatus = async (id: string) => {
-    const posting = postings.find(p => p._id === id);
-    if (!posting) return;
-
-    const newStatus = posting.status === 'active' ? 'paused' : 'active';
-    
-    setIsLoading(true);
-    try {
-      const response = await dashboardApi.updatePostStatus(id, newStatus);
-      if (response) {
-        // Refresh posts list
-        fetchPosts();
-        toastManager.showSuccess('Cập nhật trạng thái thành công');
-      }
-    } catch (error) {
-      console.error('Error updating post status:', error);
-      toastManager.showError('Có lỗi xảy ra khi cập nhật trạng thái');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleEdit = (id: string) => {
     setEditingPost(id);
@@ -237,7 +218,7 @@ export default function MyPostings() {
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
               <input
                 type="text"
-                placeholder="Tìm kiếm tin đăng..."
+                placeholder="Tìm kiếm theo tiêu đề, địa chỉ..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
@@ -247,12 +228,48 @@ export default function MyPostings() {
 
           {/* Status Filter */}
           <div className="sm:w-48">
+            <div className="relative">
+              <FunnelIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 appearance-none"
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="active">Đang hiển thị</option>
+                <option value="pending">Chờ duyệt</option>
+                <option value="expired">Hết hạn</option>
+                <option value="paused">Tạm dừng</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Sort */}
+          <div className="sm:w-48">
             <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
             >
+              <option value="newest">Mới nhất</option>
+              <option value="oldest">Cũ nhất</option>
+              <option value="price_high">Giá cao đến thấp</option>
+              <option value="price_low">Giá thấp đến cao</option>
+              <option value="views">Lượt xem nhiều nhất</option>
+              <option value="expires_soon">Sắp hết hạn</option>
             </select>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => fetchPosts()}
+              disabled={isLoading}
+              className="px-3 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              title="Làm mới"
+            >
+              <ArrowPathIcon className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
           </div>
         </div>
       </div>
@@ -360,22 +377,44 @@ export default function MyPostings() {
             </div>
           </div>
         ) : filteredPostings.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-600 mb-4">
-              <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <div className="text-center py-16">
+            <div className="text-gray-400 mb-6">
+              <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h3 className="text-sm font-medium text-gray-900">Không có tin đăng nào</h3>
-            <p className="mt-1 text-sm text-gray-700">Bắt đầu bằng cách tạo tin đăng đầu tiên của bạn.</p>
-            <div className="mt-6">
-              <Link
-                href="/dang-tin"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {searchQuery || selectedStatus !== 'all' 
+                ? 'Không tìm thấy tin đăng nào'
+                : 'Chưa có tin đăng nào'
+              }
+            </h3>
+            <p className="text-sm text-gray-600 mb-8 max-w-md mx-auto">
+              {searchQuery || selectedStatus !== 'all'
+                ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm để xem kết quả khác.'
+                : 'Bắt đầu bằng cách tạo tin đăng đầu tiên của bạn để thu hút khách thuê tiềm năng.'
+              }
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              {(searchQuery || selectedStatus !== 'all') && (
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedStatus('all');
+                    setSortBy('newest');
+                  }}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  Xóa bộ lọc
+                </button>
+              )}
+              <button
+                onClick={() => setShowCreateForm(true)}
+                className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
               >
                 <PlusIcon className="h-4 w-4 mr-2" />
                 Đăng tin mới
-              </Link>
+              </button>
             </div>
           </div>
         ) : (
@@ -383,28 +422,39 @@ export default function MyPostings() {
             {filteredPostings.map((posting) => (
               <div
                 key={posting._id}
-                className="p-6 hover:bg-gray-50 cursor-pointer"
-                onClick={() => router.push(`/phong-tro/${posting._id}`)}
+                className="p-4 sm:p-6 hover:bg-gray-50 transition-colors duration-200 border-l-4 border-transparent hover:border-blue-500"
               >
-                <div className="flex items-start space-x-4">
+                <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4">
                   {/* Image */}
-                  <div className="flex-shrink-0">
-                    <Image
-                      src={getFirstImage(posting.roomId?.images)}
-                      alt={posting.roomId?.title || 'Room image'}
-                      width={120}
-                      height={90}
-                      className="w-30 h-24 object-cover rounded-lg"
-                    />
+                  <div className="flex-shrink-0 w-full sm:w-auto">
+                    <div className="relative">
+                      <Image
+                        src={getFirstImage(posting.roomId?.images)}
+                        alt={posting.roomId?.title || 'Room image'}
+                        width={120}
+                        height={90}
+                        className="w-full sm:w-30 h-48 sm:h-24 object-cover rounded-lg cursor-pointer"
+                        onClick={() => router.push(`/phong-tro/${posting._id}`)}
+                      />
+                      {posting.favouriteLevel && posting.favouriteLevel !== 'free' && (
+                        <div className="absolute top-2 left-2">
+                          {getPackageBadge(posting.favouriteLevel)}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
+                        <div className="flex flex-wrap items-center gap-2 mb-3">
                           {getStatusBadge(posting.status)}
-                          {getPackageBadge(posting.favouriteLevel)}
+                          {posting.favouriteLevel && posting.favouriteLevel !== 'free' && (
+                            <span className="sm:hidden">
+                              {getPackageBadge(posting.favouriteLevel)}
+                            </span>
+                          )}
                         </div>
                         
                         <Link 
@@ -462,45 +512,16 @@ export default function MyPostings() {
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center space-x-2 ml-4">
-                        <Link
-                          href={`/dashboard/tin-dang/edit/${posting._id}`}
-                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Chỉnh sửa"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                        </Link>
-
-                        {posting.status === 'expired' ? (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRenew(posting._id);
-                            }}
-                            disabled={isLoading}
-                            className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
-                            title="Gia hạn"
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:space-x-1 sm:ml-4 mt-4 sm:mt-0">
+                        <div className="flex justify-center sm:justify-start space-x-1">
+                          <Link
+                            href={`/phong-tro/${posting._id}`}
+                            className="flex-1 sm:flex-none p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-center"
+                            title="Xem tin"
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            <ArrowPathIcon className="h-4 w-4" />
-                          </button>
-                        ) : (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleToggleStatus(posting._id);
-                            }}
-                            disabled={isLoading}
-                            className={`p-2 rounded-lg transition-colors disabled:opacity-50 ${
-                              posting.status === 'active'
-                                ? 'text-gray-400 hover:text-yellow-600 hover:bg-yellow-50'
-                                : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
-                            }`}
-                            title={posting.status === 'active' ? 'Tạm dừng' : 'Kích hoạt'}
-                          >
-                            <ArrowPathIcon className="h-4 w-4" />
-                          </button>
-                        )}
+                            <EyeIcon className="h-4 w-4 mx-auto" />
+                          </Link>
 
                         <button
                           onClick={(e) => {
@@ -508,11 +529,38 @@ export default function MyPostings() {
                             handleEdit(posting._id);
                           }}
                           disabled={isLoading}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                          title="Xóa"
+                          className="flex-1 sm:flex-none p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50 text-center"
+                          title="Chỉnh sửa"
                         >
-                          <TrashIcon className="h-4 w-4" />
+                          <PencilIcon className="h-4 w-4 mx-auto" />
                         </button>
+
+                        {posting.status === 'expired' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRenew(posting._id);
+                            }}
+                            disabled={isLoading}
+                            className="flex-1 sm:flex-none p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
+                            title="Gia hạn"
+                          >
+                            <ArrowPathIcon className="h-4 w-4 mx-auto" />
+                          </button>
+                        )}
+
+                        <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setConfirmDeleteId(posting._id);
+                            }}
+                            disabled={isLoading}
+                            className="flex-1 sm:flex-none p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                            title="Xóa"
+                          >
+                            <TrashIcon className="h-4 w-4 mx-auto" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

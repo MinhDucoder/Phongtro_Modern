@@ -22,7 +22,6 @@ dashboardRoute.get("/posts/:id", catchAsync(DashboardController.getPostById));
 dashboardRoute.post("/posts", catchAsync(DashboardController.createPost));
 dashboardRoute.put("/posts/:id", catchAsync(DashboardController.updatePost));
 dashboardRoute.delete("/posts/:id", catchAsync(DashboardController.deletePost));
-dashboardRoute.patch("/posts/:id/status", catchAsync(DashboardController.updatePostStatus));
 dashboardRoute.patch("/posts/:id/renew", catchAsync(DashboardController.renewPost));
 
 // Analytics

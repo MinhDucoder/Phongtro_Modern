@@ -40,17 +40,25 @@ export async function uploadImages(files: File[]): Promise<string[]> {
   });
 
   try {
+    console.log('📤 Uploading images to:', `${API_BASE_URL}/api/v1/rooms/uploads/multiImage`);
+    console.log('📤 Files to upload:', files.map(f => ({ name: f.name, size: f.size, type: f.type })));
+    
     const response = await fetch(`${API_BASE_URL}/api/v1/rooms/uploads/multiImage`, {
       method: 'POST',
       credentials: 'include',
       body: formData,
     });
 
+    console.log('📤 Upload response status:', response.status);
+    
     if (!response.ok) {
-      throw new Error(`Upload failed: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('❌ Upload failed:', errorText);
+      throw new Error(`Upload failed: ${response.statusText} - ${errorText}`);
     }
 
     const result = await response.json();
+    console.log('✅ Upload successful:', result);
     
     if (result.files && Array.isArray(result.files)) {
       return result.files.map((file: any) => file.url);
@@ -58,7 +66,7 @@ export async function uploadImages(files: File[]): Promise<string[]> {
       throw new Error('Invalid response format');
     }
   } catch (error) {
-    console.error('Error uploading images:', error);
+    console.error('❌ Error uploading images:', error);
     throw error;
   }
 }

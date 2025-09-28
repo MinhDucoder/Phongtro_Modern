@@ -52,15 +52,15 @@ class DashboardController {
     }
   }
 
-  // Update post status (active, paused, etc.)
-  async updatePostStatus(req, res, next) {
+
+  // Get post by ID for editing
+  async getPostById(req, res, next) {
     try {
       const userId = req.user.id;
       const postId = req.params.id;
-      const { status } = req.body;
 
-      const updatedPost = await dashboardService.updatePostStatus(postId, userId, status);
-      return success(res, updatedPost);
+      const post = await dashboardService.getPostById(postId, userId);
+      return success(res, post);
     } catch (err) {
       return error(res, err.message, 400);
     }

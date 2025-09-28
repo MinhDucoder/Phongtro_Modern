@@ -21,10 +21,18 @@ const upload = multer({
     fileSize: 5 * 1024 * 1024, // giới hạn 5MB
   },
   fileFilter: (req, file, cb) => {
+    console.log('📁 File validation:', { 
+      originalname: file.originalname, 
+      mimetype: file.mimetype,
+      size: file.size 
+    });
+    
     const allowed = ["image/jpeg", "image/png", "image/jpg"];
     if (!allowed.includes(file.mimetype)) {
+      console.log('❌ Invalid file type:', file.mimetype);
       return cb(new Error("Only .jpg, .jpeg, .png allowed!"));
     }
+    console.log('✅ File validation passed');
     cb(null, true);
   },
 });
