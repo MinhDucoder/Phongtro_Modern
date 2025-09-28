@@ -1,6 +1,6 @@
 import RoleRequest from "~/models/roleRequestSchema.js";
 import User from "~/models/userSchema.js";
-
+import notificationService from "~/services/notificationService";
 class RoleController {
   // User gửi yêu cầu
   async requestRole(req, res) {
@@ -44,7 +44,10 @@ class RoleController {
     request.reviewed_by = adminId;
     request.reviewed_at = new Date();
     await request.save();
-
+    await notificationService.createNotification(
+      request.user._id,
+      `Yêu cầu nâng cấp lên ${request.role_requested} đã được ${action === "approve" ? "chấp nhận" : "từ chối"}.`
+    );
     res.json({ message: `Yêu cầu đã được ${action}`, request });
   }
 
