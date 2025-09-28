@@ -384,14 +384,14 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
                 </div>
 
                 {/* Ảnh bài đăng */}
-                {displayData.images && displayData.images.length > 0 ? (
+                {displayData.images && displayData.images.filter(image => image && image.trim() !== '').length > 0 ? (
                   <div className="space-y-2">
                     <h3 className="font-medium flex items-center">
                       <PhotoIcon className="h-5 w-5 mr-1 text-gray-600" /> 
-                      Hình ảnh ({displayData.images.length})
+                      Hình ảnh ({displayData.images.filter(image => image && image.trim() !== '').length})
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {displayData.images.map((image, index) => (
+                      {displayData.images.filter(image => image && image.trim() !== '').map((image, index) => (
                         <div key={index} className="relative h-48 rounded-md overflow-hidden border">
                           <Image 
                             src={image} 

@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect, useRef } from 'react';
+import { XMarkIcon, PhotoIcon, TrashIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 import { dashboardApi } from '@/lib/api';
+import { uploadImages, validateImageFile, deleteImage } from '@/lib/imageUtils';
 import toast from 'react-hot-toast';
 
 interface PostFormProps {
@@ -42,6 +44,8 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
 
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(!!postId);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const propertyTypeOptions = [
     { value: 'phong_tro', label: 'Phòng trọ', icon: '🏠' },
@@ -52,18 +56,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
     { value: 'mat_bang', label: 'Mặt bằng', icon: '🏪' }
   ];
 
-  const roomTypeOptions = [
-    { value: 'phong_don', label: 'Phòng đơn' },
-    { value: 'phong_doi', label: 'Phòng đôi' },
-    { value: 'phong_ba', label: 'Phòng ba' },
-    { value: 'phong_tu', label: 'Phòng tư' },
-    { value: 'phong_nam', label: 'Phòng năm' },
-    { value: 'phong_sau', label: 'Phòng sáu' },
-    { value: 'phong_bay', label: 'Phòng bảy' },
-    { value: 'phong_tam', label: 'Phòng tám' },
-    { value: 'phong_chin', label: 'Phòng chín' },
-    { value: 'phong_muoi', label: 'Phòng mười' }
-  ];
+ 
 
   const amenitiesOptions = [
     { value: 'wifi', label: 'WiFi' },
@@ -74,14 +67,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
     { value: 'balcony', label: 'Ban công' }
   ];
 
-  const postOptions = [
-    { value: 'aircon', label: 'Điều hòa' },
-    { value: 'washing_machine', label: 'Máy giặt' },
-    { value: 'balcony', label: 'Ban công' },
-    { value: 'window', label: 'Cửa sổ' },
-    { value: 'fridge', label: 'Tủ lạnh' },
-    { value: 'kitchen', label: 'Bếp' }
-  ];
+ 
 
   const favouriteLevels = [
     { value: 'free', label: 'Miễn phí' },
@@ -114,7 +100,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
           district: room.district || '',
           ward: room.ward || '',
           amenities: room.amenities || [],
-          images: room.images || [],
+          images: room.images?.map((img: any) => img.url || img) || [],
           deposit: room.deposit?.toString() || '',
           utilities: {
             electricity: room.utilities?.electricity?.toString() || '',
@@ -161,6 +147,81 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
       [field]: prev[field].includes(value)
         ? prev[field].filter(item => item !== value)
         : [...prev[field], value]
+    }));
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const maxImages = 10;
+    if (formData.images.length + files.length > maxImages) {
+      toast.error(`Chỉ được tải lên tối đa ${maxImages} ảnh`);
+      return;
+    }
+
+    // Validate files
+    const invalidFiles: string[] = [];
+    const validFiles = files.filter(file => {
+      const validation = validateImageFile(file);
+      if (!validation.isValid) {
+        invalidFiles.push(`${file.name}: ${validation.error}`);
+        return false;
+      }
+      return true;
+    });
+
+    if (invalidFiles.length > 0) {
+      toast.error(`Một số file không hợp lệ:\n${invalidFiles.join('\n')}`);
+    }
+
+    if (validFiles.length === 0) return;
+
+    setUploadingImages(true);
+    try {
+      const uploadedUrls = await uploadImages(validFiles);
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, ...uploadedUrls]
+      }));
+      toast.success(`Đã tải lên ${uploadedUrls.length} ảnh thành công`);
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      toast.error('Có lỗi xảy ra khi tải ảnh lên. Vui lòng thử lại.');
+    } finally {
+      setUploadingImages(false);
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveImage = async (index: number) => {
+    const imageUrl = formData.images[index];
+    
+    // Extract public_id from Cloudinary URL if it's a Cloudinary image
+    if (imageUrl.includes('cloudinary.com')) {
+      try {
+        const urlParts = imageUrl.split('/');
+        const lastPart = urlParts[urlParts.length - 1];
+        const publicId = lastPart.split('.')[0];
+        
+        // Try to delete from Cloudinary (optional, don't block UI if it fails)
+        try {
+          await deleteImage(publicId);
+        } catch (error) {
+          console.warn('Could not delete image from Cloudinary:', error);
+        }
+      } catch (error) {
+        console.warn('Could not parse Cloudinary public_id:', error);
+      }
+    }
+
+    // Remove from form data
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
     }));
   };
 
@@ -349,11 +410,9 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Chọn loại phòng</option>
-              {roomTypeOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
+              <option value="phong_don">Phòng đơn</option>
+              <option value="phong_doi">Phòng đôi</option>
+              <option value="phong_tap_the">Phòng tập thể</option>
             </select>
           </div>
         )}
@@ -454,17 +513,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
             Tùy chọn tin đăng
           </label>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {postOptions.map((option) => (
-              <label key={option.value} className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={formData.options.includes(option.value)}
-                  onChange={() => handleArrayToggle('options', option.value)}
-                  className="mr-2"
-                />
-                <span className="text-sm text-black">{option.label}</span>
-              </label>
-            ))}
+            {/* Add post options here if needed */}
           </div>
         </div>
 
@@ -536,33 +585,85 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Trạng thái
-            </label>
-            <select
-              value={formData.status}
-              onChange={(e) => handleInputChange('status', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="pending">Chờ duyệt</option>
-              <option value="active">Đang hiển thị</option>
-              <option value="expired">Hết hạn</option>
-            </select>
-          </div>
+          
         </div>
 
-        {/* Images */}
+        {/* Images Upload Section */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Hình ảnh
+          <label className="block text-sm font-medium text-black mb-2">
+            Hình ảnh phòng trọ
           </label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <PhotoIcon className="mx-auto h-12 w-12 text-gray-500" />
-            <p className="mt-2 text-sm text-gray-500">
-              Tính năng upload hình ảnh sẽ được thêm sau
-            </p>
+          
+          {/* Upload Area */}
+          <div 
+            className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {uploadingImages ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="ml-2 text-gray-600">Đang tải ảnh lên...</span>
+              </div>
+            ) : (
+              <>
+                <PhotoIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <p className="mt-2 text-sm text-gray-600">
+                  Nhấn để chọn ảnh hoặc kéo thả vào đây
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  JPG, PNG, WEBP tối đa 5MB mỗi ảnh ({formData.images.length}/10)
+                </p>
+              </>
+            )}
           </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+            disabled={uploadingImages || formData.images.length >= 10}
+          />
+
+          {/* Image Preview Grid */}
+          {formData.images.length > 0 && (
+            <div className="mt-4">
+              <h4 className="text-sm font-medium text-gray-700 mb-3">
+                Ảnh đã tải ({formData.images.length}/10)
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {formData.images.map((imageUrl, index) => (
+                  <div key={index} className="relative group">
+                    <div className="aspect-square rounded-lg overflow-hidden">
+                      <Image
+                        src={imageUrl}
+                        alt={`Preview ${index + 1}`}
+                        width={200}
+                        height={200}
+                        className="w-full h-full object-cover"
+                        unoptimized
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                      title="Xóa ảnh"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
+                    {index === 0 && (
+                      <div className="absolute bottom-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                        Ảnh đại diện
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Submit Buttons */}
@@ -578,7 +679,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
           )}
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || uploadingImages}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
           >
             {isLoading ? 'Đang lưu...' : (isEditing ? 'Cập nhật' : 'Tạo tin đăng')}

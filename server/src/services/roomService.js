@@ -12,7 +12,7 @@ class RoomService {
     }
 
     const images = imageResults.map((img) => ({
-      url: img.secure_url,
+      url: img.url,
       public_id: img.public_id,
     }));
 
@@ -67,7 +67,7 @@ class RoomService {
     if (files && files.length > 0) {
       const imageResults = await uploadService.uploadFiles(files, "Rooms");
       updateData.images = imageResults.map((img) => ({
-        url: img.secure_url,
+        url: img.url,
         public_id: img.public_id,
       }));
     }
@@ -83,7 +83,14 @@ class RoomService {
     if (!room) throw new Error("Room not found");
 
     if (room.images?.length > 0) {
-      await Promise.all(room.images.map((img) => uploadService.deleteFile(img.public_id)));
+      await Promise.all(room.images.map((img) => {
+        if (typeof img === 'string') {
+          // If img is a string (URL), we can't delete it from Cloudinary
+          // because we don't have the public_id
+          return Promise.resolve();
+        }
+        return uploadService.deleteFile(img.public_id);
+      }));
     }
 
     await Room.deleteOne({ _id: roomID });

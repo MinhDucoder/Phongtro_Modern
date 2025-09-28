@@ -22,13 +22,6 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { toastManager } from '@/components/ui/ToastManager';
 
 
-const statusOptions = [
-  { value: 'all', label: 'Tất cả trạng thái' },
-  { value: 'active', label: 'Đang hiển thị' },
-  { value: 'pending', label: 'Chờ duyệt' },
-  { value: 'expired', label: 'Hết hạn' },
-  { value: 'paused', label: 'Tạm dừng' },
-];
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -259,11 +252,6 @@ export default function MyPostings() {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
             >
-              {statusOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
             </select>
           </div>
         </div>
