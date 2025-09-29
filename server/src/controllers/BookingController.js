@@ -1,5 +1,6 @@
 import bookingService from "../services/bookingService.js";
 import mongoose from "mongoose";
+import { success, error } from "~/utils/responeHandler.js";
 class BookingController {
   async create(req, res, next) {
     try {
@@ -11,7 +12,7 @@ class BookingController {
       };
 
       const bookingResult = await bookingService.create(newBooking);
-      res.status(201).json(bookingResult);
+      res.success(201, "Booking created successfully", bookingResult);
     } catch (error) {
       next(error);
     }

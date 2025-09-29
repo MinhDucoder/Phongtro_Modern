@@ -39,7 +39,8 @@
     "resend": "^6.1.0",
     "router": "^2.2.0",
     "socket": "^1.1.21",
-    "socket.io": "^4.5.3"
+    "socket.io": "^4.5.3",
+    "vnpay": "^2.4.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.22.10",
