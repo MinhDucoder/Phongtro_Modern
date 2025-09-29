@@ -5,6 +5,7 @@ import { authenticate, authorize } from "../../middlewares/checkToken.js";
 import UploadController from "../../controllers/UploadController.js";
 import uploadMiddleware from "../../middlewares/uploadMiddleware.js";
 import { cleanupUploads } from "../../middlewares/uploadMiddleware.js";
+import UserSettingsController from "../../controllers/UserSettingsController.js";
 
 const userRoute = express.Router();
 
@@ -62,6 +63,48 @@ userRoute.put(
 userRoute.get("/activity", authenticate(), UserController.getActivity);
 userRoute.delete("/delete", authenticate(), UserController.deleteAccount);
 
+// User settings routes
+userRoute.get(
+  "/settings",
+  authenticate(),
+  UserSettingsController.getUserSettings
+);
+
+userRoute.put(
+  "/settings",
+  authenticate(),
+  UserSettingsController.updateUserSettings
+);
+
+userRoute.put(
+  "/settings/notifications",
+  authenticate(),
+  UserSettingsController.updateNotificationSettings
+);
+
+userRoute.put(
+  "/settings/privacy",
+  authenticate(),
+  UserSettingsController.updatePrivacySettings
+);
+
+userRoute.put(
+  "/settings/security",
+  authenticate(),
+  UserSettingsController.updateSecuritySettings
+);
+
+userRoute.put(
+  "/settings/display",
+  authenticate(),
+  UserSettingsController.updateDisplaySettings
+);
+
+userRoute.post(
+  "/settings/reset",
+  authenticate(),
+  UserSettingsController.resetSettings
+);
 
 
 export default userRoute;
