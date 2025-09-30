@@ -4,7 +4,7 @@ import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
-import { toast } from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 export interface PostDetail {
   id: string;
@@ -54,7 +54,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
       if (status === 'rejected') {
         const reason = rejectionReason.trim();
         if (!reason) {
-          toast.error('Vui lòng nhập lý do từ chối bài đăng');
+        toastManager.showError('Vui lòng nhập lý do từ chối bài đăng');
           reasonRef.current?.focus();
           setIsSubmitting(false);
           return;
@@ -64,7 +64,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
         await onStatusChange(post.id, status);
       }
       
-      toast.success(
+      toastManager.showSuccess(
         status === 'approved' 
           ? 'Đã phê duyệt bài đăng thành công' 
           : 'Đã từ chối bài đăng'
@@ -74,7 +74,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
       onClose();
     } catch (error) {
       console.error('Error updating post status:', error);
-      toast.error('Không thể cập nhật trạng thái bài đăng');
+      toastManager.showError('Không thể cập nhật trạng thái bài đăng');
     } finally {
       setIsSubmitting(false);
     }

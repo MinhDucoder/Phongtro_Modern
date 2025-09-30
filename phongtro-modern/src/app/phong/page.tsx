@@ -9,7 +9,7 @@ import {
   MapPinIcon,
   HomeIcon
 } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 export default function RoomsPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -115,7 +115,7 @@ export default function RoomsPage() {
         if (response.pagination) {
           setPagination(response.pagination);
         }
-        toast.success(`Đã tải ${response.data.length} phòng từ database`);
+      toastManager.showSuccess(`Đã tải ${response.data.length} phòng từ database`);
       } else {
         console.log('No data from API or empty response');
         toast('Database chưa có dữ liệu phòng. Vui lòng thêm dữ liệu vào database.', {

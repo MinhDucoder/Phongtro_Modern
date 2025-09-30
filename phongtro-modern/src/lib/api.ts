@@ -1,12 +1,159 @@
 // API cấu hình và service layer
 export const API_BASE_URL = 'http://localhost:5000/api/v1';
 
+// Token management
+interface TokenData {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number;
+}
+
+class TokenManager {
+  private static instance: TokenManager;
+  private tokenData: TokenData | null = null;
+  private refreshPromise: Promise<string> | null = null;
+
+  static getInstance(): TokenManager {
+    if (!TokenManager.instance) {
+      TokenManager.instance = new TokenManager();
+    }
+    return TokenManager.instance;
+  }
+
+  private constructor() {
+    this.loadTokenFromStorage();
+  }
+
+  private loadTokenFromStorage(): void {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      const stored = localStorage.getItem('auth_tokens');
+      if (stored) {
+        this.tokenData = JSON.parse(stored);
+        // Check if token is expired
+        if (this.tokenData && this.tokenData.expiresAt < Date.now()) {
+          this.clearTokens();
+        }
+      }
+    } catch (error) {
+      console.error('Error loading tokens from storage:', error);
+      this.clearTokens();
+    }
+  }
+
+  private saveTokenToStorage(tokenData: TokenData): void {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      localStorage.setItem('auth_tokens', JSON.stringify(tokenData));
+      this.tokenData = tokenData;
+    } catch (error) {
+      console.error('Error saving tokens to storage:', error);
+    }
+  }
+
+  setTokens(accessToken: string, refreshToken: string, expiresIn: number = 3600): void {
+    const expiresAt = Date.now() + (expiresIn * 1000); // Convert to milliseconds
+    const tokenData: TokenData = {
+      accessToken,
+      refreshToken,
+      expiresAt
+    };
+    this.saveTokenToStorage(tokenData);
+  }
+
+  getAccessToken(): string | null {
+    return this.tokenData?.accessToken || null;
+  }
+
+  getRefreshToken(): string | null {
+    return this.tokenData?.refreshToken || null;
+  }
+
+  isTokenExpired(): boolean {
+    if (!this.tokenData) return true;
+    // Add 5 minute buffer before actual expiry
+    return this.tokenData.expiresAt - (5 * 60 * 1000) < Date.now();
+  }
+
+  clearTokens(): void {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_tokens');
+      // Also clear cookie as backup
+      document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    }
+    this.tokenData = null;
+    this.refreshPromise = null;
+  }
+
+  async refreshAccessToken(): Promise<string> {
+    // If already refreshing, wait for the existing promise
+    if (this.refreshPromise) {
+      return this.refreshPromise;
+    }
+
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    this.refreshPromise = this.performTokenRefresh(refreshToken);
+    
+    try {
+      const newAccessToken = await this.refreshPromise;
+      return newAccessToken;
+    } finally {
+      this.refreshPromise = null;
+    }
+  }
+
+  private async performTokenRefresh(refreshToken: string): Promise<string> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ refreshToken })
+      });
+
+      if (!response.ok) {
+        throw new Error('Token refresh failed');
+      }
+
+      const data = await response.json();
+      
+      if (data.success && data.accessToken) {
+        // Update stored tokens
+        this.setTokens(
+          data.accessToken, 
+          data.refreshToken || refreshToken, 
+          data.expiresIn || 3600
+        );
+        return data.accessToken;
+      } else {
+        throw new Error('Invalid refresh response');
+      }
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      this.clearTokens();
+      throw error;
+    }
+  }
+}
+
+const tokenManager = TokenManager.getInstance();
+
 // Các kiểu dữ liệu cho API responses
 export interface ApiResponse<T = any> {
   success?: boolean;
   message: string;
   data?: T;
   token?: string;
+  refreshToken?: string;
+  expiresIn?: number;
   user?: User;
   error?: string;
   pagination?: {
@@ -114,17 +261,39 @@ export interface Post {
   viewCount?: number;
 }
 
-// Hàm gửi request API tổng quát
+// Hàm gửi request API tổng quát với automatic token refresh
 async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  retryCount: number = 0
 ): Promise<ApiResponse<T>> {
   const url = `${API_BASE_URL}${endpoint}`;
   console.log('apiRequest: Final URL =', url);
   
+  // Get access token
+  let accessToken = tokenManager.getAccessToken();
+  
+  // If token is expired, try to refresh it (except for auth endpoints)
+  if (accessToken && tokenManager.isTokenExpired() && 
+      !endpoint.includes('/auth/')) {
+    try {
+      accessToken = await tokenManager.refreshAccessToken();
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      // Clear tokens and let the request proceed (will likely get 401)
+      tokenManager.clearTokens();
+      accessToken = null;
+    }
+  }
+  
+  // Check if body is FormData
+  const isFormData = options.body instanceof FormData;
+  
   const defaultOptions: RequestInit = {
     headers: {
-      'Content-Type': 'application/json',
+      // Only set Content-Type for JSON, let browser set it for FormData
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {})
     },
     credentials: 'include', // Bao gồm cookies cho authentication
   };
@@ -174,18 +343,32 @@ async function apiRequest<T>(
       
       // Handle specific error cases
       if (response.status === 401) {
-        // Token expired or invalid - clear any stored auth data
-        if (typeof window !== 'undefined') {
-          document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-          
-          // Kiểm tra xem đây có phải là lỗi phiên đăng nhập hết hạn hay không
-          const isSessionTimeout = endpoint !== '/auth/login' && !endpoint.includes('/auth/register');
-          
-          if (isSessionTimeout) {
-            // Nếu đây không phải là yêu cầu login/register, có khả năng phiên làm việc đã hết hạn
-            // Thêm mã tại đây nếu muốn chuyển hướng người dùng đến trang đăng nhập
-            console.log('Phiên làm việc đã hết hạn, sẽ cần đăng nhập lại');
+        const isAuthEndpoint = endpoint === '/auth/login' || endpoint.includes('/auth/register');
+        const isRefreshEndpoint = endpoint === '/auth/refresh-token';
+        
+        // If this is not an auth endpoint and we haven't retried yet, try token refresh
+        if (!isAuthEndpoint && !isRefreshEndpoint && retryCount === 0) {
+          try {
+            console.log('Attempting token refresh due to 401...');
+            await tokenManager.refreshAccessToken();
+            // Retry the original request with new token
+            return apiRequest<T>(endpoint, options, retryCount + 1);
+          } catch (refreshError) {
+            console.error('Token refresh failed on 401 retry:', refreshError);
+            // Fall through to clear tokens and show error
           }
+        }
+        
+        // Clear tokens for any 401 error
+        tokenManager.clearTokens();
+        
+        // Notify about session expiry (except for auth endpoints)
+        if (!isAuthEndpoint && typeof window !== 'undefined') {
+          // Dispatch custom event for session expiry
+          window.dispatchEvent(new CustomEvent('session-expired', {
+            detail: { endpoint, retryCount }
+          }));
+          console.log('Phiên làm việc đã hết hạn, đã xóa tokens và dispatch event');
         }
         
         // Tạo thông báo lỗi thân thiện hơn cho 401
@@ -194,6 +377,8 @@ async function apiRequest<T>(
           friendlyMessage = "Email hoặc mật khẩu không chính xác";
         } else if (endpoint === '/auth/login') {
           friendlyMessage = "Thông tin đăng nhập không chính xác";
+        } else if (isRefreshEndpoint) {
+          friendlyMessage = "Phiên đăng nhập đã hết hạn";
         } else {
           friendlyMessage = "Phiên làm việc đã hết hạn, vui lòng đăng nhập lại";
         }
@@ -244,15 +429,27 @@ async function apiRequest<T>(
       throw new Error(friendlyMessage);
     }
     
-    // Check if response is JSON
+    // Check if response is JSON (skip for FormData requests)
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
-      console.error('Non-JSON response received:', {
-        status: response.status,
-        contentType,
-        url: url
-      });
-      throw new Error(`Server returned non-JSON response (${response.status})`);
+      if (isFormData) {
+        // For FormData requests, try to parse as JSON but don't fail if it's not JSON
+        try {
+          const data = await response.json();
+          return data;
+        } catch (e) {
+          // If JSON parsing fails, return the text response
+          const text = await response.text();
+          return { success: true, message: text };
+        }
+      } else {
+        console.error('Non-JSON response received:', {
+          status: response.status,
+          contentType,
+          url: url
+        });
+        throw new Error(`Server returned non-JSON response (${response.status})`);
+      }
     }
     
     const data = await response.json();
@@ -285,10 +482,19 @@ async function apiRequest<T>(
 export const authApi = {
   // Đăng nhập user
   async login(credentials: LoginRequest): Promise<ApiResponse> {
-    return apiRequest('/auth/login', {
+    const response = await apiRequest('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
+    
+    // Save tokens on successful login
+    if (response.success !== false && response.token) {
+      const refreshToken = response.refreshToken || response.token;
+      const expiresIn = response.expiresIn || 3600;
+      tokenManager.setTokens(response.token, refreshToken, expiresIn);
+    }
+    
+    return response;
   },
 
   // Đăng ký user
@@ -301,9 +507,20 @@ export const authApi = {
 
   // Đăng xuất user
   async logout(): Promise<ApiResponse> {
-    return apiRequest('/auth/logout', {
-      method: 'POST',
-    });
+    try {
+      const response = await apiRequest('/auth/logout', {
+        method: 'POST',
+      });
+      
+      // Clear tokens regardless of response
+      tokenManager.clearTokens();
+      
+      return response;
+    } catch (error) {
+      // Clear tokens even if logout API fails
+      tokenManager.clearTokens();
+      throw error;
+    }
   },
 
   // Xác thực email
@@ -313,11 +530,21 @@ export const authApi = {
     });
   },
 
-  // Làm mới token
+  // Làm mới token (public method for manual refresh)
   async refreshToken(): Promise<ApiResponse> {
-    return apiRequest('/auth/refresh-token', {
-      method: 'POST',
-    });
+    try {
+      const newToken = await tokenManager.refreshAccessToken();
+      return {
+        success: true,
+        message: 'Token refreshed successfully',
+        token: newToken
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Token refresh failed'
+      };
+    }
   },
 
   // Lấy thông tin profile của user hiện tại
@@ -329,26 +556,51 @@ export const authApi = {
     });
   },
 
+  // Cập nhật thông tin profile
+  async updateProfile(profileData: {
+    full_name?: string;
+    phone?: string;
+    address?: string;
+    dateOfBirth?: string;
+    gender?: string;
+    bio?: string;
+  }): Promise<ApiResponse> {
+    return apiRequest('/user/update', {
+      method: 'PATCH',
+      body: JSON.stringify(profileData),
+    });
+  },
+
+  // Upload avatar
+  async uploadAvatar(formData: FormData): Promise<ApiResponse> {
+    return apiRequest('/user/avatar', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        // Don't set Content-Type, let browser set it with boundary for FormData
+      },
+    });
+  },
+
+  // Remove avatar
+  async removeAvatar(): Promise<ApiResponse> {
+    return apiRequest('/user/avatar', {
+      method: 'DELETE',
+    });
+  },
+
   // Lấy thông tin user từ JWT token (API /me)
   async getMe(): Promise<ApiResponse> {
-    // Tạm thời disable API call để tránh lỗi 401
-    console.log('getMe() disabled to avoid 401 errors');
-    return {
-      success: false,
-      message: 'API disabled',
-    };
-    
-    /* 
     try {
       return await apiRequest('/user/me', {
         method: 'GET',
       });
     } catch (error) {
-      // Xử lý lỗi 401 một cách im lặng khi kiểm tra session
-      if (error instanceof Error && 
-          (error.message.includes('Phiên làm việc đã hết hạn') || 
-           error.message.includes('đăng nhập lại'))) {
-        // Trả về response thất bại mà không ném lỗi
+      if (error instanceof Error &&
+        (error.message.includes('Phiên làm việc đã hết hạn') ||
+          error.message.includes('đăng nhập lại'))) {
+        // Clear tokens on session expiry
+        tokenManager.clearTokens();
         return {
           success: false,
           message: 'Phiên làm việc đã hết hạn',
@@ -356,7 +608,23 @@ export const authApi = {
       }
       throw error;
     }
-    */
+  },
+  
+  // Get current token status
+  getTokenStatus(): { hasToken: boolean; isExpired: boolean; expiresIn?: number } {
+    const hasToken = !!tokenManager.getAccessToken();
+    const isExpired = tokenManager.isTokenExpired();
+    
+    return {
+      hasToken,
+      isExpired,
+      // Could add expiresIn calculation here if needed
+    };
+  },
+  
+  // Clear tokens manually (useful for testing)
+  clearTokens(): void {
+    tokenManager.clearTokens();
   },
   
   // Đổi mật khẩu
@@ -473,6 +741,14 @@ export const dashboardApi = {
     });
   },
 
+  // Create new post
+  async createPost(postData: any): Promise<ApiResponse> {
+    return apiRequest('/dashboard/posts', {
+      method: 'POST',
+      body: JSON.stringify(postData),
+    });
+  },
+
   // Update post
   async updatePost(postId: string, postData: any): Promise<ApiResponse> {
     return apiRequest(`/dashboard/posts/${postId}`, {
@@ -522,35 +798,8 @@ export const dashboardApi = {
     });
   },
 
-  // Get single post by ID
-  async getPostById(postId: string): Promise<ApiResponse> {
-    return apiRequest(`/dashboard/posts/${postId}`, {
-      method: 'GET',
-    });
-  },
-
-  // Create new post
-  async createPost(postData: any): Promise<ApiResponse> {
-    return apiRequest('/dashboard/posts', {
-      method: 'POST',
-      body: JSON.stringify(postData),
-    });
-  },
-
-  // Update existing post
-  async updatePost(postId: string, postData: any): Promise<ApiResponse> {
-    return apiRequest(`/dashboard/posts/${postId}`, {
-      method: 'PUT',
-      body: JSON.stringify(postData),
-    });
-  },
-
-  // Delete post
-  async deletePost(postId: string): Promise<ApiResponse> {
-    return apiRequest(`/dashboard/posts/${postId}`, {
-      method: 'DELETE',
-    });
-  },
+  // Note: getPostById, createPost, updatePost, deletePost are already defined above
+  // Removed duplicate definitions to fix linter errors
 
   // Get quick stats for widgets
   async getQuickStats(): Promise<ApiResponse> {
@@ -745,6 +994,55 @@ export const savedPropertiesApi = {
   },
 };
 
+export const userSettingsApi = {
+  async get(): Promise<ApiResponse> {
+    return apiRequest('/user/settings', {
+      method: 'GET',
+    });
+  },
+
+  async update(settings: any): Promise<ApiResponse> {
+    return apiRequest('/user/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings),
+    });
+  },
+
+  async updateNotifications(notifications: any): Promise<ApiResponse> {
+    return apiRequest('/user/settings/notifications', {
+      method: 'PUT',
+      body: JSON.stringify(notifications),
+    });
+  },
+
+  async updatePrivacy(privacy: any): Promise<ApiResponse> {
+    return apiRequest('/user/settings/privacy', {
+      method: 'PUT',
+      body: JSON.stringify(privacy),
+    });
+  },
+
+  async updateSecurity(security: any): Promise<ApiResponse> {
+    return apiRequest('/user/settings/security', {
+      method: 'PUT',
+      body: JSON.stringify(security),
+    });
+  },
+
+  async updateDisplay(display: any): Promise<ApiResponse> {
+    return apiRequest('/user/settings/display', {
+      method: 'PUT',
+      body: JSON.stringify(display),
+    });
+  },
+
+  async reset(): Promise<ApiResponse> {
+    return apiRequest('/user/settings/reset', {
+      method: 'POST',
+    });
+  },
+};
+
 export const postPublicApi = {
   async getPostDetail(postId: string): Promise<ApiResponse> {
     return apiRequest(`/posts/${postId}`, {
@@ -760,4 +1058,5 @@ export default {
   rentalRequests: rentalRequestApi,
   payment: paymentApi,
   savedProperties: savedPropertiesApi,
+  userSettings: userSettingsApi,
 };

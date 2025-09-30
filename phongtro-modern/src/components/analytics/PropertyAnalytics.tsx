@@ -17,91 +17,72 @@ import {
 } from '@heroicons/react/24/outline';
 import { dashboardApi } from '@/lib/api';
 import { getFirstImage } from '@/lib/imageUtils';
+import { toastManager } from '@/components/ui/ToastManager';
 
-// Mock analytics data
-const analyticsData = {
-  overview: {
-    totalViews: 2847,
-    totalLikes: 89,
-    totalCalls: 156,
-    totalMessages: 23,
-    viewsChange: '+12%',
-    likesChange: '-2%',
-    callsChange: '+8%',
-    messagesChange: '+25%',
-  },
-  topPerformingPosts: [
-    {
-      id: '1',
-      title: 'Phòng trọ gần ĐH Bách Khoa, full nội thất',
-      image: '/placeholder-room.svg',
-      views: 1234,
-      likes: 45,
-      calls: 67,
-      messages: 12,
-      revenue: 150000,
-      ctr: 5.4, // Click-through rate
-    },
-    {
-      id: '2',
-      title: 'Căn hộ mini có ban công, view đẹp',
-      image: '/placeholder-room.svg',
-      views: 892,
-      likes: 28,
-      calls: 34,
-      messages: 8,
-      revenue: 100000,
-      ctr: 3.8,
-    },
-    {
-      id: '3',
-      title: 'Nhà nguyên căn 2PN, có sân vườn',
-      image: '/placeholder-room.svg',
-      views: 567,
-      likes: 12,
-      calls: 23,
-      messages: 3,
-      revenue: 200000,
-      ctr: 4.1,
-    },
-  ],
-  demographics: {
-    ageGroups: [
-      { range: '18-25', percentage: 45, label: 'Sinh viên' },
-      { range: '26-35', percentage: 30, label: 'Nhân viên trẻ' },
-      { range: '36-45', percentage: 20, label: 'Gia đình trẻ' },
-      { range: '45+', percentage: 5, label: 'Khác' },
-    ],
-    devices: [
-      { type: 'Mobile', percentage: 65, icon: DevicePhoneMobileIcon },
-      { type: 'Desktop', percentage: 30, icon: ComputerDesktopIcon },
-      { type: 'Tablet', percentage: 5, icon: GlobeAltIcon },
-    ],
-    locations: [
-      { city: 'Hà Nội', percentage: 60, views: 1708 },
-      { city: 'TP.HCM', percentage: 25, views: 712 },
-      { city: 'Đà Nẵng', percentage: 10, views: 285 },
-      { city: 'Khác', percentage: 5, views: 142 },
-    ],
-  },
-  timeAnalytics: {
-    bestHours: [
-      { hour: '9:00', views: 234 },
-      { hour: '12:00', views: 189 },
-      { hour: '18:00', views: 345 },
-      { hour: '21:00', views: 278 },
-    ],
-    bestDays: [
-      { day: 'Thứ 2', views: 456 },
-      { day: 'Thứ 3', views: 398 },
-      { day: 'Thứ 4', views: 423 },
-      { day: 'Thứ 5', views: 445 },
-      { day: 'Thứ 6', views: 389 },
-      { day: 'Thứ 7', views: 298 },
-      { day: 'CN', views: 234 },
-    ],
-  }
-};
+interface OverviewStats {
+  totalViews: number;
+  totalLikes: number;
+  totalCalls: number;
+  totalMessages: number;
+  viewsChange?: string;
+  likesChange?: string;
+  callsChange?: string;
+  messagesChange?: string;
+}
+
+interface DeviceStat {
+  type: string;
+  percentage: number;
+  icon?: string;
+}
+
+interface LocationStat {
+  city: string;
+  percentage?: number;
+  views?: number;
+}
+
+interface AgeGroupStat {
+  range: string;
+  percentage: number;
+  label?: string;
+}
+
+interface TimeAnalytics {
+  bestHours?: Array<{ hour: string; views: number }>;
+  bestDays?: Array<{ day: string; views: number }>;
+}
+
+interface PostAnalytics {
+  _id?: string;
+  id?: string;
+  title?: string;
+  roomId?: any;
+  views?: number;
+  likes?: number;
+  calls?: number;
+  messages?: number;
+  ctr?: number;
+  revenue?: number;
+  analytics?: {
+    views?: number;
+    likes?: number;
+    calls?: number;
+    messages?: number;
+  };
+}
+
+interface DashboardAnalytics {
+  overview?: OverviewStats;
+  topPerformingPosts?: PostAnalytics[];
+  demographics?: {
+    ageGroups?: AgeGroupStat[];
+    devices?: DeviceStat[];
+    locations?: LocationStat[];
+  };
+  timeAnalytics?: TimeAnalytics;
+  dailyStats?: Array<{ date: string; views: number; likes: number; calls: number; messages: number }>;
+}
 
 interface StatCardProps {
   title: string;
@@ -135,7 +116,8 @@ const StatCard = ({ title, value, change, icon: Icon, color }: StatCardProps) =>
 export default function PropertyAnalytics() {
   const [selectedTimeRange, setSelectedTimeRange] = useState('7d');
   const [selectedProperty, setSelectedProperty] = useState('all');
-  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [analyticsData, setAnalyticsData] = useState<DashboardAnalytics | null>(null);
+  const [availablePosts, setAvailablePosts] = useState<PostAnalytics[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -157,16 +139,96 @@ export default function PropertyAnalytics() {
         postId: selectedProperty === 'all' ? undefined : selectedProperty
       });
 
-      if (response.success && response.data) {
-        setAnalyticsData(response.data);
-      } else {
-        setError(response.message || 'Không thể tải dữ liệu analytics');
+      if (!response || response.success === false) {
+        const message = response?.message || 'Không thể tải dữ liệu analytics';
+        setError(message);
         setAnalyticsData(null);
+        toastManager.showError(message);
+        return;
       }
+
+      const data = response.data as DashboardAnalytics;
+      if (!data) {
+        setAnalyticsData(null);
+        setError('Dữ liệu analytics trống.');
+        return;
+      }
+
+      // Ensure nested arrays exist to avoid runtime errors
+      const normalizedData: DashboardAnalytics = {
+        overview: {
+          totalViews: data.overview?.totalViews ?? 0,
+          totalLikes: data.overview?.totalLikes ?? 0,
+          totalCalls: data.overview?.totalCalls ?? 0,
+          totalMessages: data.overview?.totalMessages ?? 0,
+          viewsChange: data.overview?.viewsChange || '+0%',
+          likesChange: data.overview?.likesChange || '+0%',
+          callsChange: data.overview?.callsChange || '+0%',
+          messagesChange: data.overview?.messagesChange || '+0%',
+        },
+        topPerformingPosts: (data.topPerformingPosts || []).map((post) => ({
+          ...post,
+          views: Number(post.views ?? post.analytics?.views ?? 0),
+          likes: Number(post.likes ?? post.analytics?.likes ?? 0),
+          calls: Number(post.calls ?? post.analytics?.calls ?? 0),
+          messages: Number(post.messages ?? post.analytics?.messages ?? 0),
+          ctr: Number(post.ctr ?? 0),
+          revenue: Number(post.revenue ?? post.roomId?.price ?? 0),
+        })),
+        demographics: {
+          ageGroups: (data.demographics?.ageGroups || []).map((group) => ({
+            ...group,
+            percentage: Number(group.percentage ?? 0),
+          })),
+          devices: (data.demographics?.devices || []).map((device) => ({
+            ...device,
+            percentage: Number(device.percentage ?? 0),
+          })),
+          locations: (data.demographics?.locations || []).map((location) => ({
+            ...location,
+            percentage: Number(location.percentage ?? 0),
+            views: Number(location.views ?? 0),
+          })),
+        },
+        timeAnalytics: {
+          bestHours: (data.timeAnalytics?.bestHours || []).map((hour) => ({
+            hour: hour.hour,
+            views: Number(hour.views ?? 0),
+          })),
+          bestDays: (data.timeAnalytics?.bestDays || []).map((day) => ({
+            day: day.day,
+            views: Number(day.views ?? 0),
+          })),
+        },
+        dailyStats: (data.dailyStats || []).map((stat) => ({
+          date: stat.date,
+          views: Number(stat.views ?? 0),
+          likes: Number(stat.likes ?? 0),
+          calls: Number(stat.calls ?? 0),
+          messages: Number(stat.messages ?? 0),
+        })),
+      };
+
+      const sortedPosts = [...(normalizedData.topPerformingPosts || [])]
+        .sort((a, b) => (b.views || 0) - (a.views || 0));
+      const sortedDevices = [...(normalizedData.demographics?.devices || [])]
+        .sort((a, b) => (b.percentage || 0) - (a.percentage || 0));
+
+      setAnalyticsData({
+        ...normalizedData,
+        topPerformingPosts: sortedPosts,
+        demographics: {
+          ...normalizedData.demographics,
+          devices: sortedDevices,
+        },
+      });
+      setAvailablePosts(sortedPosts);
     } catch (err: any) {
       console.error('Error fetching analytics:', err);
-      setError(err.message || 'Có lỗi xảy ra khi tải dữ liệu analytics');
+      const message = err?.message || 'Có lỗi xảy ra khi tải dữ liệu analytics';
+      setError(message);
       setAnalyticsData(null);
+      toastManager.showError(message);
     } finally {
       setLoading(false);
     }
@@ -254,16 +316,16 @@ export default function PropertyAnalytics() {
     return (
       <div className="space-y-6">
         <div className="text-center py-12">
-          <svg className="mx-auto h-12 w-12 text-red-400 mb-4" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          <svg className="mx-auto h-12 w-12 text-gray-300 mb-4" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M9 2a1 1 0 011 1v2.126a7.002 7.002 0 015.874 5.873H18a1 1 0 110 2h-2.126A7.002 7.002 0 019 16.874V19a1 1 0 11-2 0v-2.126A7.002 7.002 0 011.126 11H-1a1 1 0 110-2h2.126A7.002 7.002 0 017 5.126V3a1 1 0 012-1z" />
           </svg>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Không thể tải dữ liệu</h3>
-          <p className="text-gray-500 mb-4">{error || 'Có lỗi xảy ra khi tải dữ liệu analytics'}</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có dữ liệu analytics</h3>
+          <p className="text-gray-500 mb-4">Hãy đăng tin và thu hút lượt xem để thấy thống kê tại đây.</p>
           <button 
             onClick={() => fetchAnalytics()}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
           >
-            Thử lại
+            Làm mới dữ liệu
           </button>
         </div>
       </div>
@@ -298,11 +360,15 @@ export default function PropertyAnalytics() {
             className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="all">Tất cả tin đăng</option>
-            {data.topPerformingPosts?.map((property: any) => (
-              <option key={property.id || property._id} value={property.id || property._id}>
-                {(property.title || property.roomId?.title || 'Tin đăng').substring(0, 30)}...
-              </option>
-            ))}
+            {availablePosts.map((property, index) => {
+              const id = property.id || property._id || `property-${index}`;
+              const label = property.title || property.roomId?.title || 'Tin đăng';
+              return (
+                <option key={id} value={id}>
+                  {label?.length > 32 ? `${label.substring(0, 29)}...` : label}
+                </option>
+              );
+            })}
           </select>
         </div>
       </div>
@@ -345,17 +411,28 @@ export default function PropertyAnalytics() {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Lượt xem theo thời gian</h3>
           <div className="h-64 bg-gray-50 rounded-lg flex items-end justify-around p-4">
-            {data.timeAnalytics?.bestDays?.length > 0 ? (
-              data.timeAnalytics.bestDays.map((day: any) => (
-                <div key={day.day} className="flex flex-col items-center">
-                  <div
-                    className="bg-blue-500 rounded-t w-8 mb-2"
-                    style={{ height: `${(day.views / 500) * 100}%`, minHeight: '20px' }}
-                  ></div>
-                  <span className="text-xs text-gray-600">{day.day}</span>
-                  <span className="text-xs font-medium text-gray-900">{day.views}</span>
-                </div>
-              ))
+            {data.dailyStats && data.dailyStats.length > 0 ? (
+              data.dailyStats
+                .slice(-7)
+                .map((day, index) => {
+                  const totalViews = Math.max(...(data.dailyStats || []).map((stat) => stat.views || 0), 1);
+                  const height = Math.max(((day.views || 0) / totalViews) * 100, 5);
+                  return (
+                    <div key={day.date || `day-${index}`} className="flex flex-col items-center">
+                      <div
+                        className="bg-blue-500 rounded-t w-8 mb-2"
+                        style={{ height: `${height}%`, minHeight: '16px' }}
+                      ></div>
+                      <span className="text-xs text-gray-600">
+                        {new Date(day.date).toLocaleDateString('vi-VN', {
+                          day: '2-digit',
+                          month: '2-digit',
+                        })}
+                      </span>
+                      <span className="text-xs font-medium text-gray-900">{(day.views || 0).toLocaleString()}</span>
+                    </div>
+                  );
+                })
             ) : (
               <div className="flex items-center justify-center h-full text-gray-500">
                 <p>Chưa có dữ liệu</p>
@@ -368,25 +445,20 @@ export default function PropertyAnalytics() {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Thiết bị truy cập</h3>
           <div className="space-y-4">
-            {data.demographics?.devices?.map((device: any) => {
-              // Map icon string to actual component
-              const getIconComponent = (iconName: string) => {
-                switch (iconName) {
-                  case 'DevicePhoneMobileIcon':
-                    return DevicePhoneMobileIcon;
-                  case 'ComputerDesktopIcon':
-                    return ComputerDesktopIcon;
-                  case 'GlobeAltIcon':
-                    return GlobeAltIcon;
-                  default:
-                    return DevicePhoneMobileIcon;
-                }
+            {(data.demographics?.devices || []).map((device: DeviceStat, index) => {
+              const normalizeIcon = (iconName?: string) => {
+                if (!iconName) return DevicePhoneMobileIcon;
+                const lower = iconName.toLowerCase();
+                if (lower.includes('desktop')) return ComputerDesktopIcon;
+                if (lower.includes('tablet')) return GlobeAltIcon;
+                return DevicePhoneMobileIcon;
               };
-              
-              const IconComponent = getIconComponent(device.icon);
+
+              const IconComponent = normalizeIcon(device.icon);
+              const percentage = device.percentage ?? 0;
               
               return (
-                <div key={device.type} className="flex items-center justify-between">
+                <div key={device.type || `device-${index}`} className="flex items-center justify-between">
                   <div className="flex items-center">
                     <IconComponent className="h-5 w-5 text-gray-500 mr-3" />
                     <span className="text-sm font-medium text-gray-900">{device.type}</span>
@@ -395,10 +467,10 @@ export default function PropertyAnalytics() {
                   <div className="w-24 bg-gray-200 rounded-full h-2 mr-3">
                     <div
                       className="bg-blue-500 h-2 rounded-full"
-                      style={{ width: `${device.percentage}%` }}
+                      style={{ width: `${Math.min(percentage, 100)}%` }}
                     ></div>
                   </div>
-                  <span className="text-sm text-gray-600">{device.percentage}%</span>
+                  <span className="text-sm text-gray-600">{percentage}%</span>
                   </div>
                 </div>
               );
@@ -413,7 +485,7 @@ export default function PropertyAnalytics() {
           <h3 className="text-lg font-medium text-gray-900">Tin đăng hiệu quả nhất</h3>
         </div>
         <div className="overflow-x-auto">
-          {data.topPerformingPosts?.length > 0 ? (
+          {(data.topPerformingPosts?.length || 0) > 0 ? (
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -441,8 +513,8 @@ export default function PropertyAnalytics() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {data.topPerformingPosts.map((property: any) => (
-                  <tr key={property.id || property._id} className="hover:bg-gray-50">
+                {(data.topPerformingPosts || []).map((property: any, index) => (
+                  <tr key={property.id || property._id || `property-${index}`} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Image
@@ -522,9 +594,9 @@ export default function PropertyAnalytics() {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Độ tuổi người xem</h3>
           <div className="space-y-4">
-            {data.demographics?.ageGroups?.length > 0 ? (
-              data.demographics.ageGroups.map((group: any) => (
-                <div key={group.range} className="flex items-center justify-between">
+            {(data.demographics?.ageGroups?.length || 0) > 0 ? (
+              (data.demographics?.ageGroups || []).map((group: any, index) => (
+                <div key={group.range || `age-${index}`} className="flex items-center justify-between">
                   <div className="flex items-center">
                     <UserGroupIcon className="h-5 w-5 text-gray-400 mr-2" />
                     <span className="text-sm font-medium text-gray-900">{group.range} tuổi</span>
@@ -553,9 +625,9 @@ export default function PropertyAnalytics() {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Vị trí người xem</h3>
           <div className="space-y-4">
-            {data.demographics?.locations?.length > 0 ? (
-              data.demographics.locations.map((location: any) => (
-                <div key={location.city} className="flex items-center justify-between">
+            {(data.demographics?.locations?.length || 0) > 0 ? (
+              (data.demographics?.locations || []).map((location: any, index) => (
+                <div key={location.city || `location-${index}`} className="flex items-center justify-between">
                   <div className="flex items-center">
                     <MapPinIcon className="h-5 w-5 text-gray-400 mr-2" />
                     <span className="text-sm font-medium text-gray-900">{location.city}</span>
@@ -587,9 +659,23 @@ export default function PropertyAnalytics() {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Giờ vàng (nhiều lượt xem nhất)</h3>
           <div className="space-y-3">
-            {data.timeAnalytics?.bestHours?.length > 0 ? (
-              data.timeAnalytics.bestHours.map((hour: any, index: number) => (
-                <div key={hour.hour} className="flex items-center justify-between">
+            {(() => {
+              const bestHours = data.timeAnalytics?.bestHours && data.timeAnalytics.bestHours.length > 0
+                ? data.timeAnalytics.bestHours
+                : (data.dailyStats || [])
+                    .map((stat) => ({ hour: stat.date, views: stat.views || 0 }))
+                    .sort((a, b) => (b.views || 0) - (a.views || 0))
+                    .slice(0, 4)
+                    .map((item) => ({
+                      hour: new Date(item.hour).toLocaleTimeString('vi-VN', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      }),
+                      views: item.views,
+                    }));
+
+              return bestHours && bestHours.length > 0 ? bestHours.map((hour, index) => (
+                <div key={hour.hour || `hour-${index}`} className="flex items-center justify-between">
                   <div className="flex items-center">
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium mr-3 ${
                       index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-600' : 'bg-gray-300'
@@ -599,14 +685,14 @@ export default function PropertyAnalytics() {
                     <ClockIcon className="h-4 w-4 text-gray-400 mr-2" />
                     <span className="text-sm font-medium text-gray-900">{hour.hour}</span>
                   </div>
-                  <span className="text-sm text-gray-600">{hour.views} lượt xem</span>
+                  <span className="text-sm text-gray-600">{(hour.views || 0).toLocaleString()} lượt xem</span>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-4 text-gray-500">
-                <p>Chưa có dữ liệu giờ vàng</p>
-              </div>
-            )}
+              )) : (
+                <div className="text-center py-4 text-gray-500">
+                  <p>Chưa có dữ liệu giờ vàng</p>
+                </div>
+              );
+            })()}
           </div>
           <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
             <p className="text-sm text-yellow-800">
@@ -661,27 +747,6 @@ export default function PropertyAnalytics() {
       </div>
 
       {/* Competitive Analysis */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Phân tích cạnh tranh</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600 mb-1">Top 20%</div>
-            <div className="text-sm text-blue-600">Xếp hạng trong khu vực</div>
-            <div className="text-xs text-gray-500 mt-1">So với 156 tin đăng tương tự</div>
-          </div>
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600 mb-1">+15%</div>
-            <div className="text-sm text-green-600">Cao hơn giá trung bình</div>
-            <div className="text-xs text-gray-500 mt-1">Giá TB khu vực: 3.2 triệu</div>
-          </div>
-          <div className="text-center p-4 bg-purple-50 rounded-lg">
-            <div className="text-2xl font-bold text-purple-600 mb-1">4.2/5</div>
-            <div className="text-sm text-purple-600">Điểm chất lượng tin</div>
-            <div className="text-xs text-gray-500 mt-1">Dựa trên ảnh, mô tả, phản hồi</div>
-          </div>
-        </div>
-      </div>
-
       {/* Export Options */}
       <div className="bg-white p-4 rounded-lg shadow-sm border">
         <div className="flex items-center justify-between">

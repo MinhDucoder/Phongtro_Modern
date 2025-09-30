@@ -4,6 +4,7 @@ import Room from "../models/roomSchema.js";
 import RentalRequest from "../models/rentalRequestSchema.js";
 import PostAnalytics from "../models/postAnalyticsSchema.js";
 import User from "../models/userSchema.js";
+import { ROOM_PROJECTION } from "../utils/constants.js";
 
 class DashboardService {
   // Get admin dashboard overview statistics
@@ -767,7 +768,6 @@ class DashboardService {
       // Sort by time and limit
       activities.sort((a, b) => new Date(b.time) - new Date(a.time));
       return activities.slice(0, limit);
-
     } catch (error) {
       throw new Error(`Error getting recent activities: ${error.message}`);
     }
@@ -833,7 +833,7 @@ class DashboardService {
 
       // Update room data if provided
       if (updateData.room) {
-        await Room.findByIdAndUpdate(post.roomId, updateData.room);
+        await Room.findByIdAndUpdate(post.roomId, updateData.room, { new: true });
       }
 
       // Update post data
@@ -851,7 +851,7 @@ class DashboardService {
 
       // Return updated post
       const updatedPost = await Post.findById(postId)
-        .populate('roomId')
+        .populate({ path: 'roomId', select: ROOM_PROJECTION })
         .lean();
 
       return updatedPost;
@@ -880,6 +880,156 @@ class DashboardService {
       return { message: 'Post deleted successfully' };
     } catch (error) {
       throw new Error(`Error deleting post: ${error.message}`);
+    }
+  }
+
+  // Get post analytics for dashboard
+  async getPostAnalytics(userId, options = {}) {
+    try {
+      const { timeRange = '7d', postId } = options;
+      
+      // Calculate date range
+      let startDate = new Date();
+      switch (timeRange) {
+        case '24h':
+          startDate.setHours(startDate.getHours() - 24);
+          break;
+        case '7d':
+          startDate.setDate(startDate.getDate() - 7);
+          break;
+        case '30d':
+          startDate.setDate(startDate.getDate() - 30);
+          break;
+        case '90d':
+          startDate.setDate(startDate.getDate() - 90);
+          break;
+        default:
+          startDate.setDate(startDate.getDate() - 7);
+      }
+
+      // Build query
+      const query = { createdAt: { $gte: startDate } };
+      if (postId) {
+        query.post = postId;
+      } else {
+        // Get posts of this landlord
+        const userPosts = await Post.find({ landlord: userId }).select('_id');
+        query.post = { $in: userPosts.map(p => p._id) };
+      }
+
+      // Get analytics data
+      const analytics = await PostAnalytics.find(query)
+        .populate('post', 'title status')
+        .sort({ createdAt: -1 })
+        .lean();
+
+      // Aggregate metrics
+      const totalMetrics = analytics.reduce((acc, item) => {
+        acc.views += item.metrics?.views || 0;
+        acc.favorites += item.metrics?.favorites || 0;
+        acc.calls += item.metrics?.calls || 0;
+        acc.messages += item.metrics?.messages || 0;
+        return acc;
+      }, { views: 0, favorites: 0, calls: 0, messages: 0 });
+
+      // Top performing posts
+      const postMetrics = {};
+      analytics.forEach(item => {
+        if (item.post && item.post._id) {
+          const postId = item.post._id.toString();
+          if (!postMetrics[postId]) {
+            postMetrics[postId] = {
+              postId: item.post._id,
+              title: item.post.title,
+              views: 0,
+              favorites: 0,
+              calls: 0,
+              messages: 0
+            };
+          }
+          postMetrics[postId].views += item.metrics?.views || 0;
+          postMetrics[postId].favorites += item.metrics?.favorites || 0;
+          postMetrics[postId].calls += item.metrics?.calls || 0;
+          postMetrics[postId].messages += item.metrics?.messages || 0;
+        }
+      });
+
+      const topPerformingPosts = Object.values(postMetrics)
+        .sort((a, b) => b.views - a.views)
+        .slice(0, 5);
+
+      return {
+        timeRange,
+        totalMetrics,
+        topPerformingPosts,
+        analytics: analytics.slice(0, 20) // Latest 20 records
+      };
+    } catch (error) {
+      throw new Error(`Error getting post analytics: ${error.message}`);
+    }
+  }
+
+  // Get recent activities for dashboard
+  async getRecentActivities(userId, limit = 10) {
+    try {
+      const activities = [];
+
+      // Get recent rental requests
+      const recentRequests = await RentalRequest.find({
+        'post.landlord': userId
+      })
+        .populate('tenant', 'full_name email')
+        .populate('post', 'title')
+        .sort({ createdAt: -1 })
+        .limit(Math.ceil(limit / 2))
+        .lean();
+
+      recentRequests.forEach(request => {
+        activities.push({
+          id: request._id,
+          type: 'rental_request',
+          message: `${request.tenant?.full_name || 'Người dùng'} đã gửi yêu cầu thuê "${request.post?.title || 'Phòng'}"`,
+          time: request.createdAt,
+          status: request.status,
+          meta: {
+            tenantName: request.tenant?.full_name,
+            postTitle: request.post?.title,
+            requestId: request._id
+          }
+        });
+      });
+
+      // Get recent posts status changes
+      const recentPosts = await Post.find({ landlord: userId })
+        .populate('roomId', 'title')
+        .sort({ updatedAt: -1 })
+        .limit(Math.ceil(limit / 2))
+        .lean();
+
+      recentPosts.forEach(post => {
+        const postTitle = post.roomId?.title || post.title || 'Tin đăng';
+        activities.push({
+          id: post._id,
+          type: 'post_update',
+          message: `Tin "${postTitle}" được cập nhật trạng thái: ${post.status}`,
+          time: post.updatedAt || post.createdAt,
+          status: post.status,
+          meta: {
+            postTitle: postTitle,
+            postStatus: post.status,
+            postId: post._id
+          }
+        });
+      });
+
+      // Sort by date and limit
+      const sortedActivities = activities
+        .sort((a, b) => new Date(b.time) - new Date(a.time))
+        .slice(0, limit);
+
+      return sortedActivities;
+    } catch (error) {
+      throw new Error(`Error getting recent activities: ${error.message}`);
     }
   }
 }

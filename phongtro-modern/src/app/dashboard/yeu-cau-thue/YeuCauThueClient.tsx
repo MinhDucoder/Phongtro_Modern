@@ -13,81 +13,10 @@ import {
   ChatBubbleLeftIcon
 } from '@heroicons/react/24/outline';
 import { rentalRequestApi } from '@/lib/api';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 import { getFirstImage } from '@/lib/imageUtils';
 
-// Mock data - trong thực tế sẽ fetch từ API
-const mockRequests = [
-  {
-    id: 'REQ-001',
-    status: 'pending', // pending, accepted, rejected, canceled
-    submittedAt: new Date('2024-01-15T10:30:00'),
-    property: {
-      id: '1',
-      title: 'PHÒNG TRỌ GIÁ MỀM CHỈ TỪ 3TR GẦN DƯỢC, BÁCH KHOA, NEU,...',
-      location: 'Hai Bà Trưng, Hà Nội',
-      image: '/placeholder-room.svg',
-      price: '3.8 triệu/tháng'
-    },
-    seeker: {
-      name: 'Nguyễn Văn A',
-      phone: '0987654321',
-      email: 'nguyenvana@email.com',
-      avatar: '/placeholder-room.svg',
-      age: 22,
-      occupation: 'Sinh viên',
-      message: 'Tôi muốn thuê phòng này để ở gần trường đại học. Có thể xem phòng vào cuối tuần không?',
-      rentalHistory: 'Lần đầu thuê phòng',
-      expectedMoveIn: '2024-02-01'
-    }
-  },
-  {
-    id: 'REQ-002',
-    status: 'accepted',
-    submittedAt: new Date('2024-01-14T15:20:00'),
-    property: {
-      id: '2',
-      title: 'GẦN NGOẠI THƯƠNG, GTVT, HUTECH, HỒNG BÀNG, UEF',
-      location: 'Bình Thạnh, Hồ Chí Minh',
-      image: '/placeholder-room.svg',
-      price: '3.3 triệu/tháng'
-    },
-    seeker: {
-      name: 'Trần Thị B',
-      phone: '0912345678',
-      email: 'tranthib@email.com',
-      avatar: '/placeholder-room.svg',
-      age: 25,
-      occupation: 'Nhân viên văn phòng',
-      message: 'Tôi đang tìm phòng gần công ty. Phòng này có phù hợp không?',
-      rentalHistory: 'Đã thuê phòng 2 năm',
-      expectedMoveIn: '2024-01-20'
-    }
-  },
-  {
-    id: 'REQ-003',
-    status: 'rejected',
-    submittedAt: new Date('2024-01-13T09:15:00'),
-    property: {
-      id: '3',
-      title: 'Ở ghép giường tầng sát vách DH Nguyễn Tất Thành',
-      location: 'Quận 4, Hồ Chí Minh',
-      image: '/placeholder-room.svg',
-      price: '1.3 triệu/tháng'
-    },
-    seeker: {
-      name: 'Lê Văn C',
-      phone: '0934567890',
-      email: 'levanc@email.com',
-      avatar: '/placeholder-room.svg',
-      age: 20,
-      occupation: 'Sinh viên',
-      message: 'Tôi muốn thuê phòng này để ở gần trường.',
-      rentalHistory: 'Lần đầu thuê phòng',
-      expectedMoveIn: '2024-01-25'
-    }
-  }
-];
+// Removed mock data - using real API only
 
 export default function YeuCauThueClient() {
   const [requests, setRequests] = useState<any[]>([]);
@@ -98,8 +27,16 @@ export default function YeuCauThueClient() {
   const [loading, setLoading] = useState(true);
 
   const lastFetchRef = useRef<{ key: string; ts: number } | null>(null);
+  // Fetch stats only once when component mounts
   useEffect(() => {
     setMounted(true);
+    console.log('Component mounted, fetching stats...');
+    fetchStats();
+  }, []);
+
+  // Fetch requests when status changes
+  useEffect(() => {
+    console.log('Tab changed to:', selectedStatus, 'Stats should remain unchanged');
     const key = `req-${selectedStatus}`;
     const now = Date.now();
     if (lastFetchRef.current && lastFetchRef.current.key === key && (now - lastFetchRef.current.ts) < 500) {
@@ -107,7 +44,6 @@ export default function YeuCauThueClient() {
     }
     lastFetchRef.current = { key, ts: now };
     fetchRequests({ showToast: true });
-    fetchStats();
   }, [selectedStatus]);
 
   const fetchRequests = async (options?: { showToast?: boolean }) => {
@@ -122,24 +58,15 @@ export default function YeuCauThueClient() {
       if (response && response.data && response.data.requests) {
         setRequests(response.data.requests);
         
-        // Calculate stats from the requests data
-        const calculatedStats = {
-          total: response.data.requests.length,
-          pending: response.data.requests.filter(r => r.status === 'pending').length,
-          accepted: response.data.requests.filter(r => r.status === 'accepted').length,
-          rejected: response.data.requests.filter(r => r.status === 'rejected').length,
-        };
-        setStats(calculatedStats);
-        
         if (options?.showToast) {
-          toast.success(`Đã tải ${response.data.requests.length} yêu cầu thuê`);
+          toastManager.showSuccess(`Đã tải ${response.data.requests.length} yêu cầu thuê`);
         }
       }
     } catch (error) {
       console.error('Error fetching requests:', error);
-      toast.error('Không thể tải danh sách yêu cầu thuê');
-      // Fallback to mock data
-      setRequests(mockRequests);
+      toastManager.showError('Không thể tải danh sách yêu cầu thuê');
+      // Set empty array on error - no fallback to mock data
+      setRequests([]);
     } finally {
       setLoading(false);
     }
@@ -147,20 +74,68 @@ export default function YeuCauThueClient() {
 
   const fetchStats = async () => {
     try {
+      console.log('Fetching stats from API...');
+      // Use dedicated stats API endpoint
       const response = await rentalRequestApi.getRequestStats();
-      if (response && response.data) {
+      console.log('Stats API response:', response);
+      
+      if (response && response.success !== false && response.data) {
         setStats(response.data);
+        console.log('Stats set successfully from API:', response.data);
+        return;
+      } else {
+        console.log('Stats API failed or no data, using fallback calculation');
       }
     } catch (error) {
-      console.error('Error fetching stats:', error);
-      // Fallback stats - calculate from current requests
-      const calculatedStats = {
-        total: requests.length,
-        pending: requests.filter(r => r.status === 'pending').length,
-        accepted: requests.filter(r => r.status === 'accepted').length,
-        rejected: requests.filter(r => r.status === 'rejected').length,
-      };
-      setStats(calculatedStats);
+      console.error('Stats API error:', error);
+      console.log('Using fallback calculation from requests');
+    }
+    
+    // Always use fallback calculation for now
+    await fetchStatsFromRequests();
+  };
+
+  const fetchStatsFromRequests = async () => {
+    try {
+      console.log('Fetching all requests for stats calculation...');
+      const response = await rentalRequestApi.getLandlordRequests({
+        page: 1,
+        limit: 1000,
+        status: undefined
+      });
+      
+      console.log('Requests API response:', response);
+      
+      if (response && response.data && response.data.requests) {
+        const allRequests = response.data.requests;
+        console.log('Total requests found:', allRequests.length);
+        console.log('Request statuses:', allRequests.map(r => r.status));
+        
+        const calculatedStats = {
+          total: allRequests.length,
+          pending: allRequests.filter(r => r.status === 'pending').length,
+          accepted: allRequests.filter(r => r.status === 'accepted').length,
+          rejected: allRequests.filter(r => r.status === 'rejected').length,
+        };
+        console.log('Calculated stats from requests:', calculatedStats);
+        setStats(calculatedStats);
+      } else {
+        console.log('No requests data found');
+        setStats({
+          total: 0,
+          pending: 0,
+          accepted: 0,
+          rejected: 0
+        });
+      }
+    } catch (error) {
+      console.error('Error in fallback stats calculation:', error);
+      setStats({
+        total: 0,
+        pending: 0,
+        accepted: 0,
+        rejected: 0
+      });
     }
   };
 
@@ -226,11 +201,11 @@ export default function YeuCauThueClient() {
         // Refresh requests and stats
         await fetchRequests();
         await fetchStats();
-        toast.success('Đã chấp nhận yêu cầu thuê');
+        toastManager.showSuccess('Đã chấp nhận yêu cầu thuê');
       }
     } catch (error) {
       console.error('Error accepting request:', error);
-      toast.error('Có lỗi xảy ra khi chấp nhận yêu cầu');
+      toastManager.showError('Có lỗi xảy ra khi chấp nhận yêu cầu');
     }
   };
 
@@ -249,16 +224,26 @@ export default function YeuCauThueClient() {
         // Refresh requests and stats
         await fetchRequests();
         await fetchStats();
-        toast.success('Đã từ chối yêu cầu thuê');
+        toastManager.showSuccess('Đã từ chối yêu cầu thuê');
       }
     } catch (error) {
       console.error('Error rejecting request:', error);
-      toast.error('Có lỗi xảy ra khi từ chối yêu cầu');
+      toastManager.showError('Có lỗi xảy ra khi từ chối yêu cầu');
     }
   };
 
   const formatDate = (date: Date) => {
     return date.toLocaleString('vi-VN');
+  };
+
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'pending': return 'chờ xử lý';
+      case 'accepted': return 'đã chấp nhận';
+      case 'rejected': return 'đã từ chối';
+      default: return status;
+    }
   };
 
   if (!mounted) {
@@ -286,7 +271,7 @@ export default function YeuCauThueClient() {
               <div>
                 <p className="text-sm text-gray-600">Chờ xử lý</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {requests.filter(r => r.status === 'pending').length}
+                  {stats?.pending || 0}
                 </p>
               </div>
             </div>
@@ -298,7 +283,7 @@ export default function YeuCauThueClient() {
               <div>
                 <p className="text-sm text-gray-600">Đã chấp nhận</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {requests.filter(r => r.status === 'accepted').length}
+                  {stats?.accepted || 0}
                 </p>
               </div>
             </div>
@@ -310,7 +295,7 @@ export default function YeuCauThueClient() {
               <div>
                 <p className="text-sm text-gray-600">Đã từ chối</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {requests.filter(r => r.status === 'rejected').length}
+                  {stats?.rejected || 0}
                 </p>
               </div>
             </div>
@@ -321,7 +306,7 @@ export default function YeuCauThueClient() {
               <UserIcon className="w-8 h-8 text-blue-600 mr-3" />
               <div>
                 <p className="text-sm text-gray-600">Tổng yêu cầu</p>
-                <p className="text-2xl font-bold text-gray-900">{requests.length}</p>
+                <p className="text-2xl font-bold text-gray-900">{stats?.total || 0}</p>
               </div>
             </div>
           </div>
@@ -348,7 +333,7 @@ export default function YeuCauThueClient() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              Chờ xử lý ({requests.filter(r => r.status === 'pending').length})
+              Chờ xử lý ({stats?.pending || 0})
             </button>
             <button
               onClick={() => setSelectedStatus('accepted')}
@@ -358,7 +343,7 @@ export default function YeuCauThueClient() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              Đã chấp nhận ({requests.filter(r => r.status === 'accepted').length})
+              Đã chấp nhận ({stats?.accepted || 0})
             </button>
             <button
               onClick={() => setSelectedStatus('rejected')}
@@ -368,14 +353,34 @@ export default function YeuCauThueClient() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              Đã từ chối ({requests.filter(r => r.status === 'rejected').length})
+              Đã từ chối ({stats?.rejected || 0})
             </button>
           </div>
         </div>
 
         {/* Requests List */}
         <div className="space-y-6">
-          {filteredRequests.map((request) => {
+          {filteredRequests.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <UserIcon className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có yêu cầu thuê</h3>
+              <p className="text-gray-600 mb-4">
+                {selectedStatus === 'all' 
+                  ? 'Chưa có yêu cầu thuê nào. Hãy đăng tin để thu hút khách thuê.' 
+                  : `Không có yêu cầu nào ở trạng thái "${getStatusLabel(selectedStatus)}".`
+                }
+              </p>
+              <button 
+                onClick={() => window.location.href = '/dang-tin'} 
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Đăng tin cho thuê
+              </button>
+            </div>
+          ) : (
+            filteredRequests.map((request) => {
             const statusInfo = getStatusInfo(request.status);
             const StatusIcon = statusInfo.icon;
             
@@ -504,21 +509,10 @@ export default function YeuCauThueClient() {
                 )}
               </div>
             );
-          })}
+          })
+          )}
         </div>
 
-        {filteredRequests.length === 0 && (
-          <div className="text-center py-12">
-            <UserIcon className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có yêu cầu thuê</h3>
-            <p className="text-gray-600">
-              {selectedStatus === 'all' 
-                ? 'Bạn chưa nhận được yêu cầu thuê nào.'
-                : `Không có yêu cầu nào ở trạng thái "${getStatusInfo(selectedStatus).label}".`
-              }
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { testConnection } from '@/lib/api';
+// import { testConnection } from '@/lib/api'; // Temporarily disabled
 
 export default function ConnectionTest() {
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -12,8 +12,9 @@ export default function ConnectionTest() {
     setTestResult(null);
     
     try {
-      const result = await testConnection();
-      setTestResult(result);
+      // const result = await testConnection();
+      // setTestResult(result);
+      setTestResult({ success: true, message: 'Test connection temporarily disabled' });
     } catch (error) {
       setTestResult({
         success: false,

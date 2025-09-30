@@ -169,6 +169,33 @@ class DashboardController {
       return error(res, err.message, 400);
     }
   }
+
+  // Get post analytics
+  async getPostAnalytics(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const timeRange = req.query.timeRange || '7d';
+      const postId = req.query.postId;
+
+      const analytics = await dashboardService.getPostAnalytics(userId, { timeRange, postId });
+      return success(res, analytics);
+    } catch (err) {
+      return error(res, err.message, 400);
+    }
+  }
+
+  // Get recent activities
+  async getRecentActivities(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const limit = parseInt(req.query.limit) || 10;
+
+      const activities = await dashboardService.getRecentActivities(userId, limit);
+      return success(res, activities);
+    } catch (err) {
+      return error(res, err.message, 400);
+    }
+  }
 }
 
 export default new DashboardController();

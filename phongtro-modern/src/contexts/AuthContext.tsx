@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authApi, User, ApiResponse } from '@/lib/api';
 import { toastManager } from '@/components/ui/ToastManager';
+import { useTokenRefresh } from '@/hooks/useTokenRefresh';
 
 interface AuthContextType {
   user: User | null;
@@ -33,6 +34,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const isAuthenticated = !!user;
 
+  // Handle session expiry
+  const { refreshToken } = useTokenRefresh({
+    onSessionExpired: async () => {
+      console.log('Session expired, clearing user state');
+      setUser(null);
+      authApi.clearTokens();
+    },
+    showToast: true
+  });
+
   // Check if user is logged in on app start
   useEffect(() => {
     if (!hasCheckedAuth) {
@@ -40,13 +51,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       checkAuthStatus();
     }
     
-    // Auto-refresh authentication every 10 minutes if user is logged in
+    // Auto-refresh user data every 15 minutes if user is logged in
     const refreshInterval = setInterval(() => {
       if (user && hasCheckedAuth) {
-        console.log('Auto-refreshing authentication...');
-        checkAuthStatus();
+        console.log('Auto-refreshing user data...');
+        refreshUserSilently();
       }
-    }, 10 * 60 * 1000); // 10 minutes
+    }, 15 * 60 * 1000); // 15 minutes
 
     return () => clearInterval(refreshInterval);
   }, [hasCheckedAuth, user]);
@@ -58,76 +69,57 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Clear the URL parameter
       window.history.replaceState({}, document.title, window.location.pathname);
       
-      // Hiển thị thông báo đăng nhập thành công từ OAuth
-      // showLoginSuccessToast(null); // Không có thông tin user ngay lập tức cho OAuth
-      
       // Fetch user info after successful OAuth login
       setTimeout(() => {
-        // Gọi phiên bản đặc biệt không hiển thị thông báo
         fetchUserProfileSilent();
-      }, 1000); // Delay 1 second to ensure cookie is set
+      }, 1000); // Delay 1 second to ensure tokens are set
     }
   }, []);
 
-  // Fallback: Check if user is authenticated but no user data
+  // Fallback: Check if user has valid token but no user data
   useEffect(() => {
-    const checkCookie = () => {
-      // Check if accessToken cookie exists but no user data
-      const cookies = document.cookie.split(';');
-      const hasAccessToken = cookies.some(cookie => cookie.trim().startsWith('accessToken='));
+    const checkToken = () => {
+      const tokenStatus = authApi.getTokenStatus();
       
-      if (hasAccessToken && !user && !isLoading) {
-        // Luôn sử dụng phiên bản im lặng khi tự động kiểm tra đăng nhập
+      if (tokenStatus.hasToken && !tokenStatus.isExpired && !user && !isLoading) {
+        console.log('Found valid token but no user data, fetching user profile...');
         fetchUserProfileSilent();
       }
     };
 
     // Check after 2 seconds
-    setTimeout(checkCookie, 2000);
+    setTimeout(checkToken, 2000);
   }, [user, isLoading]);
 
-  // Phiên bản chuẩn của fetchUserProfile - sẽ không được sử dụng trực tiếp từ OAuth callbacks
+  const handleMeResponse = (response: ApiResponse) => {
+    if (response.success && response.user) {
+      setUser(response.user as User);
+    } else {
+      setUser(null);
+
+      if (response.message?.includes('Phiên làm việc đã hết hạn')) {
+        authApi.clearTokens();
+      }
+    }
+  };
+
   const fetchUserProfile = async () => {
     try {
       setIsLoading(true);
       const response = await authApi.getMe();
-      
-      // API /me trả về user trong response.user
-      if (response.success && response.user) {
-        setUser(response.user as User);
-      } else {
-        // Không hiển thị lỗi, chỉ xóa trạng thái user
-        setUser(null);
-        
-        // Xóa cookie nếu phát hiện lỗi xác thực
-        if (response.message?.includes('Phiên làm việc đã hết hạn')) {
-          document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        }
-      }
+      handleMeResponse(response);
     } catch (error) {
-      // Xử lý lỗi im lặng, không hiển thị toast
       setUser(null);
     } finally {
       setIsLoading(false);
     }
   };
-  
-  // Phiên bản im lặng - không hiển thị thông báo đăng nhập thành công
-  // Được sử dụng cho OAuth callbacks để tránh hiển thị thông báo thành công hai lần
+
   const fetchUserProfileSilent = async () => {
     try {
       setIsLoading(true);
       const response = await authApi.getMe();
-      
-      if (response.success && response.user) {
-        setUser(response.user as User);
-      } else {
-        setUser(null);
-        
-        if (response.message?.includes('Phiên làm việc đã hết hạn')) {
-          document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        }
-      }
+      handleMeResponse(response);
     } catch (error) {
       setUser(null);
     } finally {
@@ -153,8 +145,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       if (response.success && response.user) {
         setUser(response.user);
+        toastManager.showLoginSuccess(response.user.full_name);
         
-        // Không hiển thị toast khi đăng nhập theo yêu cầu
         return { success: true, user: response.user };
       }
       
@@ -208,16 +200,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = async (): Promise<void> => {
     try {
-      // Không hiển thị toast khi đăng xuất theo yêu cầu
-      
-      // Gọi API logout
+      // Call API logout (this will also clear tokens)
       await authApi.logout();
     } catch (error) {
       console.error('Error during logout API call:', error);
-      // Vẫn logout local dù API có lỗi
+      // Clear tokens manually if API fails
+      authApi.clearTokens();
     } finally {
       // Clear local state
-      localStorage.removeItem('accessToken');
       setUser(null);
     }
   };
@@ -228,6 +218,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       console.error('Error refreshing user:', error);
       setUser(null);
+    }
+  };
+
+  const refreshUserSilently = async (): Promise<void> => {
+    try {
+      await fetchUserProfileSilent();
+    } catch (error) {
+      console.error('Error silently refreshing user:', error);
+      // Don't clear user on silent refresh failure
     }
   };
 

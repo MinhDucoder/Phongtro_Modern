@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -14,8 +14,6 @@ import {
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { toastManager } from '@/components/ui/ToastManager';
 import { savedPropertiesApi } from '@/lib/api';
-
-// Mock data removed - using real API data only
 
 const filterOptions = [
   { value: 'all', label: 'Tất cả' },
@@ -32,8 +30,92 @@ const sortOptions = [
   { value: 'views', label: 'Lượt xem nhiều nhất' },
 ];
 
+interface SavedPropertyContact {
+  name: string;
+  phone: string;
+  email?: string;
+}
+
+interface SavedProperty {
+  id: string;
+  postId?: string;
+  title: string;
+  description?: string;
+  price: number;
+  formattedPrice: string;
+  area: string;
+  address: string;
+  location: string;
+  image: string;
+  images: string[];
+  isAvailable: boolean;
+  isFeatured: boolean;
+  savedDate: string;
+  views: number;
+  contact: SavedPropertyContact;
+}
+
+const featuredLevels = ['vip', 'vip1', 'vip2', 'vip3', 'vip 1', 'vip 2', 'vip 3', 'platinum'];
+
+const normalizeImage = (image: any): string => {
+  if (!image) return '';
+  if (typeof image === 'string') return image;
+  if (typeof image === 'object' && typeof image.url === 'string') return image.url;
+  return '';
+};
+
+const normalizeImages = (images: any): string[] => {
+  if (!Array.isArray(images)) return [];
+  return images
+    .map(normalizeImage)
+    .filter((value): value is string => Boolean(value && typeof value === 'string')); // Filter out empty
+};
+
+const mapSavedProperty = (property: any): SavedProperty => {
+  const room = property.post?.roomId || property.room || {};
+
+  const priceValue = typeof property.price === 'number'
+    ? property.price
+    : parseFloat(property.price) || room.price || 0;
+
+  const formattedPrice = priceValue > 0
+    ? `${priceValue.toLocaleString()} VNĐ/tháng`
+    : 'Giá liên hệ';
+
+  const images = normalizeImages(
+    Array.isArray(property.images) && property.images.length > 0 ? property.images : room.images
+  );
+
+  const favoriteLevel = (property.post?.favouriteLevel || '').toLowerCase();
+
+  const primaryImage = normalizeImage(property.image) || images[0] || normalizeImage(room.coverImage);
+
+  return {
+    id: property.id || property._id,
+    postId: property.postId || property.post?._id || room?._id,
+    title: property.title || room.title || 'Tin đăng',
+    description: property.description || room.description,
+    price: priceValue,
+    formattedPrice,
+    area: property.area || (room.area ? `${room.area} m²` : '—'),
+    address: property.address || room.address || '',
+    location: property.location || room.city || '',
+    image: primaryImage || '/placeholder-room.svg',
+    images,
+    isAvailable: property.isAvailable ?? property.post?.status === 'active',
+    isFeatured: property.isFeatured ?? featuredLevels.includes(favoriteLevel),
+    savedDate: property.savedDate || property.savedAt || new Date().toISOString(),
+    views: property.views || property.post?.views || room.views || 0,
+    contact: {
+      name: property.contact?.name || property.post?.landlord?.full_name || 'Chủ nhà',
+      phone: property.contact?.phone || property.post?.landlord?.phone || '',
+      email: property.contact?.email || property.post?.landlord?.email,
+    },
+  };
+};
+
 export default function SavedProperties() {
-  const [savedProperties, setSavedProperties] = useState<any[]>([]);
+  const [savedProperties, setSavedProperties] = useState<SavedProperty[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
@@ -64,7 +146,8 @@ export default function SavedProperties() {
       });
 
       if (response.success && response.data) {
-        setSavedProperties(response.data.properties);
+        const normalized = (response.data.properties || []).map(mapSavedProperty);
+        setSavedProperties(normalized);
         setPagination(prev => ({
           ...prev,
           ...response.data.pagination
@@ -84,42 +167,48 @@ export default function SavedProperties() {
   };
 
   // Filter and sort properties
-  const filteredAndSortedProperties = savedProperties
-    .filter(property => {
-      const matchesSearch = property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           property.location.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      let matchesFilter = true;
-      switch (selectedFilter) {
-        case 'available':
-          matchesFilter = property.isAvailable;
-          break;
-        case 'unavailable':
-          matchesFilter = !property.isAvailable;
-          break;
-        case 'featured':
-          matchesFilter = property.isFeatured;
-          break;
-      }
-      
-      return matchesSearch && matchesFilter;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'newest':
-          return new Date(b.savedDate).getTime() - new Date(a.savedDate).getTime();
-        case 'oldest':
-          return new Date(a.savedDate).getTime() - new Date(b.savedDate).getTime();
-        case 'price_low':
-          return parseFloat(a.price) - parseFloat(b.price);
-        case 'price_high':
-          return parseFloat(b.price) - parseFloat(a.price);
-        case 'views':
-          return b.views - a.views;
-        default:
-          return 0;
-      }
-    });
+  const filteredAndSortedProperties = useMemo(() => {
+    const normalizedSearch = searchQuery.trim().toLowerCase();
+
+    return savedProperties
+      .filter(property => {
+        const matchesSearch = !normalizedSearch
+          || property.title.toLowerCase().includes(normalizedSearch)
+          || property.location.toLowerCase().includes(normalizedSearch)
+          || property.address.toLowerCase().includes(normalizedSearch);
+
+        let matchesFilter = true;
+        switch (selectedFilter) {
+          case 'available':
+            matchesFilter = property.isAvailable;
+            break;
+          case 'unavailable':
+            matchesFilter = !property.isAvailable;
+            break;
+          case 'featured':
+            matchesFilter = property.isFeatured;
+            break;
+        }
+
+        return matchesSearch && matchesFilter;
+      })
+      .sort((a, b) => {
+        switch (sortBy) {
+          case 'newest':
+            return new Date(b.savedDate).getTime() - new Date(a.savedDate).getTime();
+          case 'oldest':
+            return new Date(a.savedDate).getTime() - new Date(b.savedDate).getTime();
+          case 'price_low':
+            return (a.price || 0) - (b.price || 0);
+          case 'price_high':
+            return (b.price || 0) - (a.price || 0);
+          case 'views':
+            return (b.views || 0) - (a.views || 0);
+          default:
+            return 0;
+        }
+      });
+  }, [savedProperties, searchQuery, selectedFilter, sortBy]);
 
   const handleRemoveFromSaved = async (id: string) => {
     if (!confirm('Bạn có chắc chắn muốn xóa tin này khỏi danh sách yêu thích?')) return;
@@ -142,7 +231,12 @@ export default function SavedProperties() {
     }
   };
 
-  const handleContactCall = (phone: string) => {
+  const handleContactCall = (phone?: string) => {
+    if (!phone) {
+      toastManager.showError('Không có số điện thoại liên hệ');
+      return;
+    }
+
     window.open(`tel:${phone}`, '_self');
   };
 
@@ -260,7 +354,7 @@ export default function SavedProperties() {
                 <div className="flex items-start space-x-4">
                   {/* Image */}
                   <div className="flex-shrink-0 relative">
-                    {property.image && property.image.trim() !== '' ? (
+                    {typeof property.image === 'string' && property.image.trim() !== '' ? (
                       <Image
                         src={property.image}
                         alt={property.title || 'Property image'}
@@ -292,7 +386,7 @@ export default function SavedProperties() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <Link 
-                          href={`/phong-tro/${property.id}`}
+                          href={`/phong-tro/${property.postId || property.id}`}
                           className="text-lg font-medium text-gray-900 hover:text-blue-600 line-clamp-2"
                         >
                           {property.title}
@@ -306,7 +400,7 @@ export default function SavedProperties() {
                         <div className="flex items-center justify-between mt-2">
                           <div className="flex items-center space-x-4">
                             <span className="text-lg font-bold text-green-600">
-                              {property.price}
+                              {property.formattedPrice}
                             </span>
                             <span className="text-sm text-gray-500">
                               {property.area}
@@ -321,14 +415,15 @@ export default function SavedProperties() {
                               <EyeIcon className="h-4 w-4 mr-1" />
                               {property.views} lượt xem
                             </div>
-                            <span>Lưu: {new Date(property.savedDate || property.savedAt || '').toLocaleDateString('vi-VN')}</span>
+                            <span>Lưu: {new Date(property.savedDate).toLocaleDateString('vi-VN')}</span>
                           </div>
 
                           <div className="flex items-center space-x-2">
                             <span className="text-sm text-gray-600">{property.contact.name}</span>
                             <button
                               onClick={() => handleContactCall(property.contact.phone)}
-                              className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded text-white bg-green-600 hover:bg-green-700"
+                              disabled={!property.contact.phone}
+                              className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
                             >
                               <PhoneIcon className="h-4 w-4 mr-1" />
                               Gọi

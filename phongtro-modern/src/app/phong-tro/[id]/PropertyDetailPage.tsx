@@ -25,7 +25,24 @@ export default function PropertyDetailPage({ postId }: PropertyDetailPageProps) 
         const response = await postPublicApi.getPostDetail(postId);
 
         if (response?.data && isMounted) {
-          setData(response.data);
+          const d: any = response.data;
+          const normalized = {
+            ...d,
+            // Ensure UI can always read room fields from property.room
+            room: d.room || d.roomId || {},
+            // Provide a consistent contact object
+            contact:
+              d.contact ||
+              (d.landlord
+                ? {
+                    name: d.landlord.full_name,
+                    phone: d.landlord.phone,
+                    email: d.landlord.email,
+                    isVerified: d.landlord.role === 'landlord',
+                  }
+                : undefined),
+          };
+          setData(normalized);
         } else if (isMounted) {
           setError('Không tìm thấy tin đăng hoặc tin đã bị xóa.');
         }

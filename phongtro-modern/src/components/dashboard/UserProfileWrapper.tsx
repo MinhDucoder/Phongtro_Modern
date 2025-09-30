@@ -2,20 +2,23 @@
 
 import dynamic from 'next/dynamic';
 
-// Dynamically import UserProfile to ensure it's treated as Client Component
-const UserProfile = dynamic(() => import('./UserProfile'), {
+// Dynamically import ProfileOverview to ensure it's treated as Client Component
+const ProfileOverview = dynamic(() => import('./ProfileOverview'), {
   ssr: false,
   loading: () => (
-    <div className="animate-pulse">
-      <div className="bg-gray-200 h-64 rounded-lg mb-6"></div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-gray-200 h-48 rounded-lg"></div>
-        <div className="bg-gray-200 h-48 rounded-lg"></div>
+    <div className="animate-pulse space-y-6">
+      <div className="bg-gray-200 h-32 rounded-lg"></div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-gray-200 h-20 rounded-lg"></div>
+        <div className="bg-gray-200 h-20 rounded-lg"></div>
+        <div className="bg-gray-200 h-20 rounded-lg"></div>
+        <div className="bg-gray-200 h-20 rounded-lg"></div>
       </div>
+      <div className="bg-gray-200 h-48 rounded-lg"></div>
     </div>
   )
 });
 
 export default function UserProfileWrapper() {
-  return <UserProfile />;
+  return <ProfileOverview />;
 }

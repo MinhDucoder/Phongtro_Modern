@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { customToast } from '@/components/ui/CustomToast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 export default function ForgotPasswordForm() {
   const router = useRouter();
@@ -68,13 +68,13 @@ export default function ForgotPasswordForm() {
 
       if (data.success) {
         setIsSubmitted(true);
-        customToast.success('Email đã được gửi! Vui lòng kiểm tra hộp thư của bạn.');
+        toastManager.showSuccess('Email đã được gửi! Vui lòng kiểm tra hộp thư của bạn.');
       } else {
-        customToast.error(data.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.');
+        toastManager.showError(data.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.');
       }
     } catch (error) {
       console.error('Forgot password error:', error);
-      customToast.error('Có lỗi kết nối máy chủ. Vui lòng thử lại sau.');
+      toastManager.showError('Có lỗi kết nối máy chủ. Vui lòng thử lại sau.');
     } finally {
       setIsLoading(false);
     }

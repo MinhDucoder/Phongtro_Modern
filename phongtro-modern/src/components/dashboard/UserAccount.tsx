@@ -14,9 +14,9 @@ import {
   DevicePhoneMobileIcon,
   EnvelopeIcon
 } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 import { useAuth } from '@/contexts/AuthContext';
-import { authApi } from '@/lib/api';
+import { authApi, userSettingsApi } from '@/lib/api';
 
 interface UserAccountData {
   profile: {
@@ -139,15 +139,13 @@ export default function UserAccount() {
       // Fetch user profile and settings in parallel
       const [profileResponse, settingsResponse] = await Promise.all([
         authApi.getProfile(),
-        authApi.getUserSettings()
+        userSettingsApi.get(),
       ]);
-      
-      // Get profile data from API response
+
       const profileData = profileResponse?.data || profileResponse;
-      
-      
-      if (settingsResponse && settingsResponse.data) {
-        const apiSettings = settingsResponse.data;
+      const settingsData = settingsResponse?.data || settingsResponse;
+
+      if (settingsData) {
         setAccountData({
           profile: {
             name: profileData?.full_name || authUser.full_name || '',
@@ -159,28 +157,28 @@ export default function UserAccount() {
             gender: profileData?.gender || (authUser as any)?.gender || ''
           },
           notifications: {
-            email: apiSettings.notifications?.email ?? true,
-            sms: apiSettings.notifications?.sms ?? false,
-            push: apiSettings.notifications?.push ?? true,
-            marketing: apiSettings.notifications?.marketing ?? false,
-            newMessages: apiSettings.notifications?.newMessages ?? true,
-            postUpdates: apiSettings.notifications?.postUpdates ?? true,
-            systemUpdates: apiSettings.notifications?.systemUpdates ?? true,
-            rentalRequests: apiSettings.notifications?.rentalRequests ?? true,
-            favoriteUpdates: apiSettings.notifications?.favoriteUpdates ?? true
+            email: settingsData.notifications?.email ?? true,
+            sms: settingsData.notifications?.sms ?? false,
+            push: settingsData.notifications?.push ?? true,
+            marketing: settingsData.notifications?.marketing ?? false,
+            newMessages: settingsData.notifications?.newMessages ?? true,
+            postUpdates: settingsData.notifications?.postUpdates ?? true,
+            systemUpdates: settingsData.notifications?.systemUpdates ?? true,
+            rentalRequests: settingsData.notifications?.rentalRequests ?? true,
+            favoriteUpdates: settingsData.notifications?.favoriteUpdates ?? true
           },
           privacy: {
-            showPhone: apiSettings.privacy?.showPhone ?? true,
-            showEmail: apiSettings.privacy?.showEmail ?? false,
-            allowMessages: apiSettings.privacy?.allowMessages ?? true,
-            showOnlineStatus: apiSettings.privacy?.showOnlineStatus ?? true,
-            allowFriendRequests: apiSettings.privacy?.allowFriendRequests ?? true
+            showPhone: settingsData.privacy?.showPhone ?? true,
+            showEmail: settingsData.privacy?.showEmail ?? false,
+            allowMessages: settingsData.privacy?.allowMessages ?? true,
+            showOnlineStatus: settingsData.privacy?.showOnlineStatus ?? true,
+            allowFriendRequests: settingsData.privacy?.allowFriendRequests ?? true
           },
           security: {
-            twoFactor: apiSettings.security?.twoFactor ?? false,
-            loginAlerts: apiSettings.security?.loginAlerts ?? true,
-            sessionTimeout: apiSettings.security?.sessionTimeout ?? 30,
-            requirePasswordForChanges: apiSettings.security?.requirePasswordForChanges ?? true
+            twoFactor: settingsData.security?.twoFactor ?? false,
+            loginAlerts: settingsData.security?.loginAlerts ?? true,
+            sessionTimeout: settingsData.security?.sessionTimeout ?? 30,
+            requirePasswordForChanges: settingsData.security?.requirePasswordForChanges ?? true
           }
         });
       } else {
@@ -204,9 +202,9 @@ export default function UserAccount() {
       
       // Show specific error message for timeout
       if (error instanceof Error && error.message.includes('timeout')) {
-        toast.error('Kết nối chậm. Vui lòng thử lại sau.');
+        toastManager.showError('Kết nối chậm. Vui lòng thử lại sau.');
       } else if (error instanceof Error && error.message.includes('fetch failed')) {
-        toast.error('Không thể kết nối với server. Vui lòng kiểm tra kết nối mạng.');
+        toastManager.showError('Không thể kết nối với server. Vui lòng kiểm tra kết nối mạng.');
       }
       
       // Fallback to auth user data
@@ -230,7 +228,7 @@ export default function UserAccount() {
   // Save profile changes
   const handleSaveProfile = async () => {
     if (!authUser) {
-      toast.error('Vui lòng đăng nhập để lưu thông tin');
+      toastManager.showError('Vui lòng đăng nhập để lưu thông tin');
       return;
     }
 
@@ -239,16 +237,16 @@ export default function UserAccount() {
       await authApi.updateProfile(accountData.profile);
       await refreshUser(); // Refresh auth context
       setIsEditingProfile(false);
-      toast.success('Thông tin cá nhân đã được cập nhật thành công');
+      toastManager.showSuccess('Thông tin cá nhân đã được cập nhật thành công');
     } catch (error) {
       console.error('Error saving profile:', error);
       
       if (error instanceof Error && error.message.includes('timeout')) {
-        toast.error('Kết nối chậm. Vui lòng thử lại sau.');
+        toastManager.showError('Kết nối chậm. Vui lòng thử lại sau.');
       } else if (error instanceof Error && error.message.includes('fetch failed')) {
-        toast.error('Không thể kết nối với server. Vui lòng kiểm tra kết nối mạng.');
+        toastManager.showError('Không thể kết nối với server. Vui lòng kiểm tra kết nối mạng.');
       } else {
-        toast.error('Có lỗi xảy ra khi cập nhật thông tin cá nhân');
+        toastManager.showError('Có lỗi xảy ra khi cập nhật thông tin cá nhân');
       }
     } finally {
       setIsLoading(false);
@@ -258,17 +256,17 @@ export default function UserAccount() {
   // Change password
   const handleChangePassword = async () => {
     if (!authUser) {
-      toast.error('Vui lòng đăng nhập để thay đổi mật khẩu');
+      toastManager.showError('Vui lòng đăng nhập để thay đổi mật khẩu');
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('Mật khẩu xác nhận không khớp');
+      toastManager.showError('Mật khẩu xác nhận không khớp');
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error('Mật khẩu mới phải có ít nhất 6 ký tự');
+      toastManager.showError('Mật khẩu mới phải có ít nhất 6 ký tự');
       return;
     }
 
@@ -285,16 +283,16 @@ export default function UserAccount() {
         confirmPassword: '',
       });
       setShowChangePassword(false);
-      toast.success('Mật khẩu đã được thay đổi thành công');
+      toastManager.showSuccess('Mật khẩu đã được thay đổi thành công');
     } catch (error) {
       console.error('Error changing password:', error);
       
       if (error instanceof Error && error.message.includes('timeout')) {
-        toast.error('Kết nối chậm. Vui lòng thử lại sau.');
+        toastManager.showError('Kết nối chậm. Vui lòng thử lại sau.');
       } else if (error instanceof Error && error.message.includes('fetch failed')) {
-        toast.error('Không thể kết nối với server. Vui lòng kiểm tra kết nối mạng.');
+        toastManager.showError('Không thể kết nối với server. Vui lòng kiểm tra kết nối mạng.');
       } else {
-        toast.error('Mật khẩu hiện tại không đúng');
+        toastManager.showError('Mật khẩu hiện tại không đúng');
       }
     } finally {
       setIsLoading(false);
@@ -313,17 +311,17 @@ export default function UserAccount() {
     setAccountData(updatedData);
 
     try {
-      await authApi.updateNotificationSettings(updatedData.notifications);
-      toast.success('Cài đặt thông báo đã được cập nhật');
+      await userSettingsApi.updateNotificationSettings(updatedData.notifications);
+      toastManager.showSuccess('Cài đặt thông báo đã được cập nhật');
     } catch (error) {
       console.error('Error updating notification settings:', error);
       
       if (error instanceof Error && error.message.includes('timeout')) {
-        toast.error('Kết nối chậm. Vui lòng thử lại sau.');
+        toastManager.showError('Kết nối chậm. Vui lòng thử lại sau.');
       } else if (error instanceof Error && error.message.includes('fetch failed')) {
-        toast.error('Không thể kết nối với server. Vui lòng kiểm tra kết nối mạng.');
+        toastManager.showError('Không thể kết nối với server. Vui lòng kiểm tra kết nối mạng.');
       } else {
-        toast.error('Có lỗi xảy ra khi cập nhật cài đặt thông báo');
+        toastManager.showError('Có lỗi xảy ra khi cập nhật cài đặt thông báo');
       }
     }
   };
@@ -340,17 +338,17 @@ export default function UserAccount() {
     setAccountData(updatedData);
 
     try {
-      await authApi.updatePrivacySettings(updatedData.privacy);
-      toast.success('Cài đặt riêng tư đã được cập nhật');
+      await userSettingsApi.updatePrivacySettings(updatedData.privacy);
+      toastManager.showSuccess('Cài đặt riêng tư đã được cập nhật');
     } catch (error) {
       console.error('Error updating privacy settings:', error);
       
       if (error instanceof Error && error.message.includes('timeout')) {
-        toast.error('Kết nối chậm. Vui lòng thử lại sau.');
+        toastManager.showError('Kết nối chậm. Vui lòng thử lại sau.');
       } else if (error instanceof Error && error.message.includes('fetch failed')) {
-        toast.error('Không thể kết nối với server. Vui lòng kiểm tra kết nối mạng.');
+        toastManager.showError('Không thể kết nối với server. Vui lòng kiểm tra kết nối mạng.');
       } else {
-        toast.error('Có lỗi xảy ra khi cập nhật cài đặt riêng tư');
+        toastManager.showError('Có lỗi xảy ra khi cập nhật cài đặt riêng tư');
       }
     }
   };
@@ -367,17 +365,17 @@ export default function UserAccount() {
     setAccountData(updatedData);
 
     try {
-      await authApi.updateSecuritySettings(updatedData.security);
-      toast.success('Cài đặt bảo mật đã được cập nhật');
+      await userSettingsApi.updateSecuritySettings(updatedData.security);
+      toastManager.showSuccess('Cài đặt bảo mật đã được cập nhật');
     } catch (error) {
       console.error('Error updating security settings:', error);
       
       if (error instanceof Error && error.message.includes('timeout')) {
-        toast.error('Kết nối chậm. Vui lòng thử lại sau.');
+        toastManager.showError('Kết nối chậm. Vui lòng thử lại sau.');
       } else if (error instanceof Error && error.message.includes('fetch failed')) {
-        toast.error('Không thể kết nối với server. Vui lòng kiểm tra kết nối mạng.');
+        toastManager.showError('Không thể kết nối với server. Vui lòng kiểm tra kết nối mạng.');
       } else {
-        toast.error('Có lỗi xảy ra khi cập nhật cài đặt bảo mật');
+        toastManager.showError('Có lỗi xảy ra khi cập nhật cài đặt bảo mật');
       }
     }
   };

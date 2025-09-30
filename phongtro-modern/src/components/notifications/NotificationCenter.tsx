@@ -16,7 +16,7 @@ import {
   CheckIcon
 } from '@heroicons/react/24/outline';
 import { BellIcon as BellSolidIcon } from '@heroicons/react/24/solid';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface Notification {
   id: string;
@@ -235,9 +235,9 @@ export default function NotificationCenter() {
           ? { ...notification, isRead: true }
           : notification
       ));
-      toast.success(`Đã đánh dấu ${notificationIds.length} thông báo là đã đọc`);
+      toastManager.showSuccess(`Đã đánh dấu ${notificationIds.length} thông báo là đã đọc`);
     } catch {
-      toast.error('Có lỗi xảy ra');
+      toastManager.showError('Có lỗi xảy ra');
     } finally {
       setIsLoading(false);
     }
@@ -251,9 +251,9 @@ export default function NotificationCenter() {
       await new Promise(resolve => setTimeout(resolve, 500));
       setNotifications(prev => prev.filter(n => !notificationIds.includes(n.id)));
       setSelectedNotifications([]);
-      toast.success('Đã xóa thông báo');
+      toastManager.showSuccess('Đã xóa thông báo');
     } catch {
-      toast.error('Có lỗi xảy ra');
+      toastManager.showError('Có lỗi xảy ra');
     } finally {
       setIsLoading(false);
     }

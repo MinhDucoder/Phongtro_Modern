@@ -11,7 +11,7 @@ import {
   InformationCircleIcon,
   EllipsisVerticalIcon
 } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface Message {
   id: string;
@@ -176,7 +176,7 @@ export default function ChatWindow({ conversation, currentUser, onNewMessage }: 
     const file = e.target.files?.[0];
     if (file) {
       // Simulate file upload
-      toast.success('File đã được tải lên!');
+      toastManager.showSuccess('File đã được tải lên!');
       
       const message: Message = {
         id: `${conversation.id}-${Date.now()}`,

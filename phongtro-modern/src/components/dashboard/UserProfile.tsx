@@ -7,31 +7,12 @@ import {
   CheckCircleIcon,
   ShieldCheckIcon
 } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 import { authApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 
-// Mock user data - trong thực tế sẽ fetch từ API
-const mockUser = {
-  id: '1',
-  name: 'Nguyễn Văn A',
-  email: 'nguyenvana@email.com',
-  phone: '0987654321',
-  avatar: '/placeholder-room.svg',
-  address: 'Số 123, Phố ABC, Quận XYZ, Hà Nội',
-  dateOfBirth: '1990-01-15',
-  gender: 'male',
-  isVerified: true,
-  isPhoneVerified: true,
-  isEmailVerified: true,
-  memberSince: '2023-01-01',
-  totalPosts: 12,
-  totalViews: 2847,
-  rating: 4.8,
-  reviewCount: 25,
-};
-
-const notificationSettings = {
+// Default notification settings
+const defaultNotificationSettings = {
   emailNotifications: true,
   smsNotifications: false,
   pushNotifications: true,
@@ -44,7 +25,7 @@ const notificationSettings = {
 export default function UserProfile() {
   const { user: authUser, refreshUser } = useAuth();
   const [user, setUser] = useState<any>(null);
-  const [notifications, setNotifications] = useState(notificationSettings);
+  const [notifications, setNotifications] = useState(defaultNotificationSettings);
   const [isEditing, setIsEditing] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -75,22 +56,10 @@ export default function UserProfile() {
       
       try {
         setIsLoadingProfile(true);
-        const response = await fetch('/api/v1/user/profile', {
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (response.ok) {
-          // Check if response is JSON
-          const contentType = response.headers.get('content-type');
-          if (!contentType || !contentType.includes('application/json')) {
-            console.error('Non-JSON response from /user/profile:', contentType);
-            throw new Error('Server returned non-JSON response');
-          }
-          
-          const userData = await response.json();
+        const response = await authApi.getProfile();
+
+        if (response.success !== false && response) {
+          const userData = response.data || response;
           setUser(userData as any);
           setFormData({
             full_name: userData.full_name || '',
@@ -100,91 +69,12 @@ export default function UserProfile() {
             dateOfBirth: userData.dateOfBirth || '',
             gender: userData.gender || '',
           });
-        } else if (response.status === 401) {
-          // User not authenticated, use auth user data as fallback
-          console.log('User not authenticated, using fallback data');
-          setUser({
-            full_name: authUser.full_name,
-            email: authUser.email,
-            phone: '0123456789',
-            avatar: '/placeholder-room.svg',
-            address: '123 Đường ABC, Quận 1, TP.HCM',
-            dateOfBirth: '1990-01-01',
-            gender: 'male',
-            is_verified: true,
-            is_phone_verified: true,
-            is_email_verified: true,
-            member_since: '2023-01-01',
-            total_posts: 12,
-            total_views: 1250,
-            rating: 4.8,
-            review_count: 45,
-          } as any);
-          setFormData({
-            full_name: authUser.full_name || '',
-            email: authUser.email || '',
-            phone: '0123456789',
-            address: '123 Đường ABC, Quận 1, TP.HCM',
-            dateOfBirth: '1990-01-01',
-            gender: 'male',
-          });
         } else {
-          // For any other error, use fallback data
-          console.log(`API error ${response.status}, using fallback data`);
-          setUser({
-            full_name: authUser.full_name,
-            email: authUser.email,
-            phone: '0123456789',
-            avatar: '/placeholder-room.svg',
-            address: '123 Đường ABC, Quận 1, TP.HCM',
-            dateOfBirth: '1990-01-01',
-            gender: 'male',
-            is_verified: true,
-            is_phone_verified: true,
-            is_email_verified: true,
-            member_since: '2023-01-01',
-            total_posts: 12,
-            total_views: 1250,
-            rating: 4.8,
-            review_count: 45,
-          } as any);
-          setFormData({
-            full_name: authUser.full_name || '',
-            email: authUser.email || '',
-            phone: '0123456789',
-            address: '123 Đường ABC, Quận 1, TP.HCM',
-            dateOfBirth: '1990-01-01',
-            gender: 'male',
-          });
+          throw new Error(response.message || 'Không thể tải hồ sơ');
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
-        // Use auth user data as fallback
-        setUser({
-          full_name: authUser.full_name,
-          email: authUser.email,
-          phone: '0123456789',
-          avatar: '/placeholder-room.svg',
-          address: '123 Đường ABC, Quận 1, TP.HCM',
-          dateOfBirth: '1990-01-01',
-          gender: 'male',
-          is_verified: true,
-          is_phone_verified: true,
-          is_email_verified: true,
-          member_since: '2023-01-01',
-          total_posts: 12,
-          total_views: 1250,
-          rating: 4.8,
-          review_count: 45,
-        } as any);
-        setFormData({
-          full_name: authUser.full_name || '',
-          email: authUser.email || '',
-          phone: '0123456789',
-          address: '123 Đường ABC, Quận 1, TP.HCM',
-          dateOfBirth: '1990-01-01',
-          gender: 'male',
-        });
+        toastManager.showError('Không thể tải thông tin hồ sơ người dùng');
       } finally {
         setIsLoadingProfile(false);
       }
@@ -208,37 +98,29 @@ export default function UserProfile() {
   const handleSaveProfile = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/v1/user/update', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          full_name: formData.full_name,
-          phone: formData.phone,
-          address: formData.address,
-          dateOfBirth: formData.dateOfBirth,
-          gender: formData.gender,
-        }),
+      const response = await authApi.updateProfile({
+        full_name: formData.full_name,
+        phone: formData.phone,
+        address: formData.address,
+        dateOfBirth: formData.dateOfBirth,
+        gender: formData.gender,
       });
 
-      if (response.ok) {
-        const updatedUser = await response.json();
+      if (response.success !== false && response) {
+        const updatedUser = response.data || response;
         setUser((prev: any) => ({ ...((prev as any) || {}), ...((updatedUser as any) || {}) }));
         
         // Update auth context
         await refreshUser();
         
         setIsEditing(false);
-        toast.success('Cập nhật thông tin thành công!');
+        toastManager.showSuccess('Cập nhật thông tin thành công!');
       } else {
-        const error = await response.json();
-        toast.error(error.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+        toastManager.showError(response.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error('Có lỗi xảy ra. Vui lòng thử lại.');
+      toastManager.showError('Có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
@@ -246,12 +128,12 @@ export default function UserProfile() {
 
   const handleChangePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('Mật khẩu xác nhận không khớp');
+      toastManager.showError('Mật khẩu xác nhận không khớp');
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error('Mật khẩu mới phải có ít nhất 6 ký tự');
+      toastManager.showError('Mật khẩu mới phải có ít nhất 6 ký tự');
       return;
     }
 
@@ -269,13 +151,13 @@ export default function UserProfile() {
           confirmPassword: '',
         });
         setShowChangePassword(false);
-        toast.success('Đổi mật khẩu thành công!');
+        toastManager.showSuccess('Đổi mật khẩu thành công!');
       } else {
-        toast.error(response.message || 'Mật khẩu hiện tại không đúng');
+        toastManager.showError(response.message || 'Mật khẩu hiện tại không đúng');
       }
     } catch (error) {
       console.error('Error changing password:', error);
-      toast.error('Có lỗi xảy ra khi đổi mật khẩu');
+      toastManager.showError('Có lỗi xảy ra khi đổi mật khẩu');
     } finally {
       setIsLoading(false);
     }
@@ -286,9 +168,9 @@ export default function UserProfile() {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Cập nhật cài đặt thông báo thành công!');
+      toastManager.showSuccess('Cập nhật cài đặt thông báo thành công!');
     } catch {
-      toast.error('Có lỗi xảy ra');
+      toastManager.showError('Có lỗi xảy ra');
     } finally {
       setIsLoading(false);
     }
@@ -299,7 +181,7 @@ export default function UserProfile() {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Kích thước ảnh không được vượt quá 5MB');
+      toastManager.showError('Kích thước ảnh không được vượt quá 5MB');
       return;
     }
 
@@ -310,9 +192,9 @@ export default function UserProfile() {
       
       const imageUrl = URL.createObjectURL(file);
       setUser((prev: any) => ({ ...((prev as any) || {}), avatar: imageUrl }));
-      toast.success('Cập nhật ảnh đại diện thành công!');
+      toastManager.showSuccess('Cập nhật ảnh đại diện thành công!');
     } catch {
-      toast.error('Có lỗi xảy ra khi tải ảnh lên');
+      toastManager.showError('Có lỗi xảy ra khi tải ảnh lên');
     } finally {
       setIsLoading(false);
     }

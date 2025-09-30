@@ -38,6 +38,7 @@ input[type="email"],
 input[type="password"], 
 input[type="tel"], 
 input[type="search"],
+input[type="date"],
 textarea,
 select {
   color: #111827 !important;
@@ -58,6 +59,7 @@ input[type="email"]:focus,
 input[type="password"]:focus, 
 input[type="tel"]:focus, 
 input[type="search"]:focus,
+input[type="date"]:focus,
 textarea:focus,
 select:focus {
   outline: none !important;
@@ -71,6 +73,7 @@ input[type="email"],
 input[type="password"], 
 input[type="tel"], 
 input[type="search"],
+input[type="date"],
 textarea,
 select {
   border: 1px solid #d1d5db !important;
@@ -148,4 +151,25 @@ select {
   .text-light {
     color: #6b7280;
   }
+}
+
+/* Special styling for date inputs to ensure consistent text color */
+input[type="date"] {
+  color: #111827 !important;
+  background-color: #ffffff !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  color: #6b7280 !important;
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-datetime-edit-text {
+  color: #111827 !important;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: #111827 !important;
 }

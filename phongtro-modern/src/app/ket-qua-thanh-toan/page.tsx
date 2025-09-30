@@ -337,7 +337,8 @@ export default function PaymentResultPage() {
   );
 }
 
-export const metadata = {
-  title: 'Kết quả thanh toán | NhaTroVN',
-  description: 'Xem kết quả thanh toán đơn hàng thuê phòng trọ.',
-};
+// Metadata moved to avoid client component conflict
+// export const metadata = {
+//   title: 'Kết quả thanh toán | NhaTroVN',
+//   description: 'Xem kết quả thanh toán đơn hàng thuê phòng trọ.',
+// };

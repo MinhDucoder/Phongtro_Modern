@@ -17,7 +17,7 @@ import {
   CheckCircleIcon,
   XCircleIcon
 } from '@heroicons/react/24/outline';
-import { toast } from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 export interface PostDetail {
@@ -120,11 +120,11 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
       if (result.success && result.data) {
         setPostData(result.data);
       } else {
-        toast.error('Không thể tải thông tin chi tiết bài đăng');
+        toastManager.showError('Không thể tải thông tin chi tiết bài đăng');
       }
     } catch (error) {
       console.error('Error fetching post details:', error);
-      toast.error('Lỗi khi tải thông tin chi tiết');
+      toastManager.showError('Lỗi khi tải thông tin chi tiết');
       // Fallback to using the basic post data
       setPostData(post);
     } finally {
@@ -170,7 +170,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
       if (status === 'rejected') {
         const reason = rejectionReason.trim();
         if (!reason) {
-          toast.error('Vui lòng nhập lý do từ chối bài đăng');
+          toastManager.showError('Vui lòng nhập lý do từ chối bài đăng');
           reasonRef.current?.focus();
           setIsSubmitting(false);
           return;
@@ -179,7 +179,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
         // Kiểm tra nếu có lỗi nhưng không chọn loại lỗi cụ thể
         if (!(moderationIssues.contentIssues || moderationIssues.pricingIssues || 
               moderationIssues.imageIssues || moderationIssues.addressIssues)) {
-          toast.error('Vui lòng chọn ít nhất một loại vấn đề với bài đăng');
+          toastManager.showError('Vui lòng chọn ít nhất một loại vấn đề với bài đăng');
           setIsSubmitting(false);
           return;
         }
@@ -189,7 +189,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
         await onStatusChange(postData.id, status, undefined, options);
       }
       
-      toast.success(
+      toastManager.showSuccess(
         status === 'approved' 
           ? 'Đã phê duyệt bài đăng thành công' 
           : 'Đã từ chối bài đăng'
@@ -199,7 +199,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
       onClose();
     } catch (error) {
       console.error('Error updating post status:', error);
-      toast.error('Không thể cập nhật trạng thái bài đăng');
+      toastManager.showError('Không thể cập nhật trạng thái bài đăng');
     } finally {
       setIsSubmitting(false);
     }

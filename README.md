@@ -28,6 +28,10 @@ Hệ thống quản lý và đăng tin cho thuê phòng trọ, nhà nguyên căn
 - **Realtime Chat**: Socket.io
 - **Payment**: VNPay
 
+## Kiểm thử backend
+
+- `npm run test:rental-requests` (trong thư mục `server`) chạy bộ kiểm thử integration cho quy trình yêu cầu thuê (tạo yêu cầu, chấp nhận/từ chối). Bộ test sử dụng `mongodb-memory-server` và `supertest`, không cần cấu hình database riêng.
+
 ## Tài liệu kỹ thuật
 
 ### Cài đặt và chạy dự án

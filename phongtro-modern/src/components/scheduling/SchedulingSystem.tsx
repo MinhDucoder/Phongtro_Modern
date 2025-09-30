@@ -11,7 +11,7 @@ import {
   MapPinIcon,
   ChatBubbleLeftIcon
 } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface Appointment {
   id: string;
@@ -125,9 +125,9 @@ export default function SchedulingSystem() {
       setAppointments(prev => prev.map(apt =>
         apt.id === appointmentId ? { ...apt, status: newStatus as 'pending' | 'confirmed' | 'completed' | 'cancelled' } : apt
       ));
-      toast.success('Cập nhật trạng thái thành công');
+      toastManager.showSuccess('Cập nhật trạng thái thành công');
     } catch {
-      toast.error('Có lỗi xảy ra');
+      toastManager.showError('Có lỗi xảy ra');
     } finally {
       setIsLoading(false);
     }

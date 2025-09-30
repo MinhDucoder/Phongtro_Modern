@@ -15,7 +15,7 @@ import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import PostDetailModal from './EnhancedPostDetailModal';
-import { toast } from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 export interface Post {
   id: string;
@@ -87,11 +87,11 @@ export default function ModerationPanel() {
         setStats(data.data.statistics);
         setTotalPages(data.data.pagination.totalPages);
       } else {
-        toast.error(data.message || 'Có lỗi xảy ra khi tải dữ liệu');
+        toastManager.showError(data.message || 'Có lỗi xảy ra khi tải dữ liệu');
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
-      toast.error('Không thể tải dữ liệu bài đăng');
+      toastManager.showError('Không thể tải dữ liệu bài đăng');
     } finally {
       setIsLoading(false);
     }
@@ -130,13 +130,13 @@ export default function ModerationPanel() {
       }
       
       // Hiển thị thông báo thành công
-      toast.success(action === 'approve' ? 'Đã duyệt bài đăng' : 'Đã từ chối bài đăng');
+      toastManager.showSuccess(action === 'approve' ? 'Đã duyệt bài đăng' : 'Đã từ chối bài đăng');
       
       // Tải lại dữ liệu
       fetchPosts();
     } catch (error) {
       console.error('Error updating post status:', error);
-      toast.error(error instanceof Error ? error.message : 'Có lỗi xảy ra');
+      toastManager.showError(error instanceof Error ? error.message : 'Có lỗi xảy ra');
     } finally {
       setIsLoading(false);
       setShowActionModal(false);
@@ -183,14 +183,14 @@ export default function ModerationPanel() {
       }
       
       // Hiển thị thông báo thành công
-      toast.success(status === 'approved' ? 'Đã duyệt bài đăng' : 'Đã từ chối bài đăng');
+      toastManager.showSuccess(status === 'approved' ? 'Đã duyệt bài đăng' : 'Đã từ chối bài đăng');
       
       // Tải lại dữ liệu
       fetchPosts();
       return;
     } catch (error) {
       console.error('Error updating post status:', error);
-      toast.error(error instanceof Error ? error.message : 'Có lỗi xảy ra');
+      toastManager.showError(error instanceof Error ? error.message : 'Có lỗi xảy ra');
       throw error;
     }
   };

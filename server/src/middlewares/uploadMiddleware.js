@@ -3,10 +3,18 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Lưu file vào /uploads tạm
+// Lưu file vào /uploads tạm (tự tạo thư mục nếu chưa tồn tại)
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/"); // folder tạm
+    try {
+      const uploadDir = path.resolve("uploads"); // đảm bảo đường dẫn tuyệt đối tới thư mục uploads trong thư mục chạy server
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      cb(null, uploadDir);
+    } catch (err) {
+      cb(err);
+    }
   },
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname); // lấy đuôi file

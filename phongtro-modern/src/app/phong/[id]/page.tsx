@@ -15,7 +15,7 @@ import {
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import Image from 'next/image';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 export default function RoomDetailPage() {
   const params = useParams();
@@ -104,7 +104,7 @@ export default function RoomDetailPage() {
 
   const handleToggleFavorite = () => {
     setIsFavorite(!isFavorite);
-    toast.success(isFavorite ? 'Đã bỏ yêu thích' : 'Đã thêm vào yêu thích');
+    toastManager.showSuccess(isFavorite ? 'Đã bỏ yêu thích' : 'Đã thêm vào yêu thích');
   };
 
   const handleShare = () => {
@@ -116,7 +116,7 @@ export default function RoomDetailPage() {
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
-      toast.success('Đã copy link vào clipboard');
+      toastManager.showSuccess('Đã copy link vào clipboard');
     }
   };
 

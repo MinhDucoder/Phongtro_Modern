@@ -21,6 +21,14 @@ const userSchema = new Schema(
       return !this.google_id && !this.facebook_id;
     }},
     phone: { type: String, trim: true },
+    address: { type: String, trim: true },
+    dateOfBirth: { type: Date },
+    gender: { 
+      type: String, 
+      enum: ["male", "female", "other"],
+      trim: true 
+    },
+    bio: { type: String, trim: true },
     role: {
       type: String,
       enum: ["user", "landlord", "admin"],

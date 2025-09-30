@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardGuard from '@/components/auth/DashboardGuard';
-import { showLogoutSuccessToast } from '@/components/ui/LogoutSuccessToast';
+import { toastManager } from '@/components/ui/ToastManager';
 import { 
   HomeIcon, 
   DocumentTextIcon, 
@@ -34,8 +34,8 @@ const navigation = [
   { name: 'Tin nhắn', href: '/chat', icon: ChatBubbleLeftRightIcon },
   { name: 'Thông báo', href: '/thong-bao', icon: BellIcon },
   { name: 'Lịch sử thanh toán', href: '/dashboard/thanh-toan', icon: CreditCardIcon },
-  { name: 'Thông tin cá nhân', href: '/dashboard/profile', icon: UserIcon },
-  { name: 'Cài đặt', href: '/dashboard/settings', icon: CogIcon },
+  { name: 'Hồ sơ của tôi', href: '/dashboard/profile', icon: UserIcon },
+  { name: 'Cài đặt tài khoản', href: '/dashboard/settings', icon: CogIcon },
 ];
 
 interface DashboardLayoutProps {
@@ -53,11 +53,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const handleLogout = async () => {
     try {
       await logout();
-      showLogoutSuccessToast(); // Hiển thị toast đăng xuất với thời gian 2s
+      toastManager.showSuccess('Đã đăng xuất thành công', {
+        description: 'Hẹn gặp lại bạn!',
+      });
       router.push('/');
     } catch (error) {
       console.error('Logout error:', error);
-      // Xử lý lỗi im lặng
+      toastManager.showError('Có lỗi khi đăng xuất');
     }
   };
 

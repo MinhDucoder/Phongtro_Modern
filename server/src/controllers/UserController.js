@@ -28,17 +28,39 @@ class UserController {
   // [PATCH] /user/update
   async updateProfile(req, res) {
     try {
-      const { full_name, phone, avatar } = req.body;
+      const { full_name, phone, avatar, address, dateOfBirth, gender, bio } = req.body;
+
+      // Build update object with only provided fields
+      const updateData = {};
+      if (full_name !== undefined) updateData.full_name = full_name;
+      if (phone !== undefined) updateData.phone = phone;
+      if (avatar !== undefined) updateData.avatar = avatar;
+      if (address !== undefined) updateData.address = address;
+      if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth;
+      if (gender !== undefined) updateData.gender = gender;
+      if (bio !== undefined) updateData.bio = bio;
 
       const updatedUser = await User.findByIdAndUpdate(
         req.user.id,
-        { full_name, phone, avatar },
+        updateData,
         { new: true, runValidators: true }
       ).select("-password -refresh_token -verification_token");
 
-      res.json(updatedUser);
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({
+        success: true,
+        message: "Profile updated successfully",
+        data: updatedUser
+      });
     } catch (error) {
-      res.status(400).json({ message: error.message });
+      console.error('Update profile error:', error);
+      res.status(400).json({ 
+        success: false,
+        message: error.message 
+      });
     }
   }
 
@@ -129,6 +151,108 @@ class UserController {
       res.json({ message: "Account deactivated successfully" });
     } catch (error) {
       res.status(500).json({ message: error.message });
+    }
+  }
+
+  // [POST] /user/avatar - Upload avatar
+  async uploadAvatar(req, res) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ 
+          success: false,
+          message: "Không có file được upload" 
+        });
+      }
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({ 
+          success: false,
+          message: "Chỉ chấp nhận file ảnh (JPG, PNG, GIF)" 
+        });
+      }
+
+      // Validate file size (5MB max)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (req.file.size > maxSize) {
+        return res.status(400).json({ 
+          success: false,
+          message: "Kích thước file không được vượt quá 5MB" 
+        });
+      }
+
+      // Upload to Cloudinary
+      const uploadService = (await import('../services/uploadService.js')).default;
+      const result = await uploadService.uploadFile(
+        req.file.path,
+        "UserAvatars"
+      );
+
+      // Update user avatar
+      const user = await User.findByIdAndUpdate(
+        req.user.id,
+        { avatar: result.url },
+        { new: true, runValidators: true }
+      ).select("-password -refresh_token -verification_token");
+
+      if (!user) {
+        return res.status(404).json({ 
+          success: false,
+          message: "Không tìm thấy user" 
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Upload ảnh đại diện thành công",
+        data: {
+          avatar: result.url,
+          user: user
+        }
+      });
+
+    } catch (error) {
+      console.error('Upload avatar error:', error);
+      res.status(500).json({ 
+        success: false,
+        message: error.message || "Có lỗi xảy ra khi upload ảnh đại diện" 
+      });
+    }
+  }
+
+  // [DELETE] /user/avatar - Remove avatar
+  async removeAvatar(req, res) {
+    try {
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return res.status(404).json({ 
+          success: false,
+          message: "Không tìm thấy user" 
+        });
+      }
+
+      // Update user to remove avatar
+      const updatedUser = await User.findByIdAndUpdate(
+        req.user.id,
+        { $unset: { avatar: 1 } },
+        { new: true, runValidators: true }
+      ).select("-password -refresh_token -verification_token");
+
+      res.json({
+        success: true,
+        message: "Xóa ảnh đại diện thành công",
+        data: {
+          user: updatedUser
+        }
+      });
+
+    } catch (error) {
+      console.error('Remove avatar error:', error);
+      res.status(500).json({ 
+        success: false,
+        message: error.message || "Có lỗi xảy ra khi xóa ảnh đại diện" 
+      });
     }
   }
 }

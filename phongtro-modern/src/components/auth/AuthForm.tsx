@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { customToast } from '@/components/ui/CustomToast';
-import { type } from 'os';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface AuthFormProps {
   type: 'login' | 'register';
@@ -168,6 +167,7 @@ export default function AuthForm({ type }: AuthFormProps) {
       }
     } catch (error) {
       console.error('Form submission error:', error);
+      toastManager.showError('Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại.');
     }
   };
 

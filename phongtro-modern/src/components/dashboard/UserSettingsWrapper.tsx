@@ -2,21 +2,23 @@
 
 import dynamic from 'next/dynamic';
 
-// Dynamically import UserSettings to ensure it's treated as Client Component
-const UserSettings = dynamic(() => import('./UserSettings'), {
+// Dynamically import ConsolidatedSettings to ensure it's treated as Client Component
+const ConsolidatedSettings = dynamic(() => import('./ConsolidatedSettings'), {
   ssr: false,
   loading: () => (
     <div className="animate-pulse">
-      <div className="bg-gray-200 h-32 rounded-lg mb-6"></div>
-      <div className="space-y-4">
-        <div className="bg-gray-200 h-24 rounded-lg"></div>
-        <div className="bg-gray-200 h-24 rounded-lg"></div>
-        <div className="bg-gray-200 h-24 rounded-lg"></div>
+      <div className="flex gap-6">
+        <div className="w-1/4">
+          <div className="bg-gray-200 h-64 rounded-lg"></div>
+        </div>
+        <div className="w-3/4">
+          <div className="bg-gray-200 h-96 rounded-lg"></div>
+        </div>
       </div>
     </div>
   )
 });
 
 export default function UserSettingsWrapper() {
-  return <UserSettings />;
+  return <ConsolidatedSettings />;
 }

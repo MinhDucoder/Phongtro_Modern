@@ -14,7 +14,7 @@ import {
   FireIcon,
   BoltIcon
 } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface ServicePackage {
   id: string;
@@ -146,7 +146,7 @@ export default function PaymentPage() {
 
   const handlePayment = async () => {
     if (!selectedPackage || !selectedPaymentMethod) {
-      toast.error('Vui lòng chọn gói dịch vụ và phương thức thanh toán');
+      toastManager.showError('Vui lòng chọn gói dịch vụ và phương thức thanh toán');
       return;
     }
 
@@ -156,10 +156,10 @@ export default function PaymentPage() {
       // Simulate payment processing
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      toast.success('Thanh toán thành công! Tin đăng của bạn đã được kích hoạt.');
+      toastManager.showSuccess('Thanh toán thành công! Tin đăng của bạn đã được kích hoạt.');
       router.push('/dashboard/tin-dang');
     } catch {
-      toast.error('Có lỗi xảy ra trong quá trình thanh toán');
+      toastManager.showError('Có lỗi xảy ra trong quá trình thanh toán');
     } finally {
       setIsProcessing(false);
     }

@@ -106,12 +106,12 @@ export default function PostModerationQueue() {
         setSelectedPost(response.data.data);
         setDetailModalOpen(true);
       } else {
-        toast.error(response.data.message || 'Không thể tải chi tiết bài đăng');
+        toastManager.showError(response.data.message || 'Không thể tải chi tiết bài đăng');
       }
     } catch (err) {
       console.error('Error fetching post details:', err);
       const axiosError = err as AxiosError<any>;
-      toast.error(axiosError.response?.data?.message || 'Lỗi khi tải chi tiết bài đăng');
+      toastManager.showError(axiosError.response?.data?.message || 'Lỗi khi tải chi tiết bài đăng');
     } finally {
       setLoading(false);
     }
@@ -128,7 +128,7 @@ export default function PostModerationQueue() {
       });
       
       if (response.data.success) {
-        toast.success(
+        toastManager.showSuccess(
           status === 'approved' 
             ? 'Bài đăng đã được duyệt thành công' 
             : 'Bài đăng đã được từ chối'
@@ -138,12 +138,12 @@ export default function PostModerationQueue() {
         fetchPosts();
         setDetailModalOpen(false);
       } else {
-        toast.error(response.data.message || 'Không thể cập nhật trạng thái bài đăng');
+        toastManager.showError(response.data.message || 'Không thể cập nhật trạng thái bài đăng');
       }
     } catch (err) {
       console.error('Error updating post status:', err);
       const axiosError = err as AxiosError<any>;
-      toast.error(axiosError.response?.data?.message || 'Lỗi khi cập nhật trạng thái bài đăng');
+      toastManager.showError(axiosError.response?.data?.message || 'Lỗi khi cập nhật trạng thái bài đăng');
     } finally {
       setLoading(false);
     }

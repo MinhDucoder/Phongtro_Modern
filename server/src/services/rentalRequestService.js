@@ -2,6 +2,7 @@
 import RentalRequest from "../models/rentalRequestSchema.js";
 import Post from "../models/postSchema.js";
 import User from "../models/userSchema.js";
+import mongoose from "mongoose";
 
 class RentalRequestService {
   // Create a new rental request
@@ -109,8 +110,11 @@ class RentalRequestService {
   // Get request statistics for landlord
   async getRequestStats(landlordId) {
     try {
+      // Ensure ObjectId type inside aggregation and count queries
+      const landlordObjectId = new mongoose.Types.ObjectId(landlordId);
+
       const stats = await RentalRequest.aggregate([
-        { $match: { landlord: landlordId } },
+        { $match: { landlord: landlordObjectId } },
         {
           $group: {
             _id: '$status',
@@ -137,12 +141,12 @@ class RentalRequestService {
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
       const recentRequests = await RentalRequest.countDocuments({
-        landlord: landlordId,
+        landlord: landlordObjectId,
         createdAt: { $gte: sevenDaysAgo }
       });
 
       const previousWeekRequests = await RentalRequest.countDocuments({
-        landlord: landlordId,
+        landlord: landlordObjectId,
         createdAt: { 
           $gte: new Date(sevenDaysAgo.getTime() - 7 * 24 * 60 * 60 * 1000),
           $lt: sevenDaysAgo

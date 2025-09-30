@@ -15,7 +15,7 @@ import {
   XCircleIcon
 } from '@heroicons/react/24/outline';
 import { rentalRequestApi } from '@/lib/api';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 export default function YeuCauDaGuiClient() {
   const router = useRouter();
@@ -52,7 +52,7 @@ export default function YeuCauDaGuiClient() {
       }
     } catch (error) {
       console.error('Error fetching tenant requests:', error);
-      toast.error('Không thể tải danh sách yêu cầu thuê');
+      toastManager.showError('Không thể tải danh sách yêu cầu thuê');
     } finally {
       setLoading(false);
     }

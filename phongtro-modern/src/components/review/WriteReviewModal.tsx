@@ -8,7 +8,7 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface WriteReviewModalProps {
   isOpen: boolean;
@@ -93,17 +93,17 @@ export default function WriteReviewModal({
     e.preventDefault();
     
     if (reviewData.rating === 0) {
-      toast.error('Vui lòng chọn đánh giá tổng thể');
+      toastManager.showError('Vui lòng chọn đánh giá tổng thể');
       return;
     }
 
     if (!reviewData.title.trim()) {
-      toast.error('Vui lòng nhập tiêu đề đánh giá');
+      toastManager.showError('Vui lòng nhập tiêu đề đánh giá');
       return;
     }
 
     if (!reviewData.content.trim()) {
-      toast.error('Vui lòng nhập nội dung đánh giá');
+      toastManager.showError('Vui lòng nhập nội dung đánh giá');
       return;
     }
 
@@ -121,7 +121,7 @@ export default function WriteReviewModal({
         status: 'published'
       };
       
-      toast.success('Đánh giá đã được gửi thành công!');
+      toastManager.showSuccess('Đánh giá đã được gửi thành công!');
       onReviewSubmitted?.(review);
       onClose();
       
@@ -141,7 +141,7 @@ export default function WriteReviewModal({
         anonymous: false
       });
     } catch (error) {
-      toast.error('Có lỗi xảy ra. Vui lòng thử lại.');
+      toastManager.showError('Có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
     }

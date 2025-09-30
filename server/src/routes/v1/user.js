@@ -106,5 +106,18 @@ userRoute.post(
   UserSettingsController.resetSettings
 );
 
+// Avatar upload routes
+userRoute.post(
+  "/avatar",
+  authenticate(),
+  uploadMiddleware.single('avatar'),
+  UserController.uploadAvatar
+);
+
+userRoute.delete(
+  "/avatar",
+  authenticate(),
+  UserController.removeAvatar
+);
 
 export default userRoute;

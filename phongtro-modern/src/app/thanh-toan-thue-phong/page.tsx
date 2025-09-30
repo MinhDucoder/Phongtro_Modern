@@ -13,7 +13,7 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 // Mock data - trong thực tế sẽ fetch từ API
 const mockOrder = {
@@ -92,7 +92,7 @@ export default function RentalPaymentPage() {
 
   const handlePayment = async () => {
     if (!selectedPaymentMethod) {
-      toast.error('Vui lòng chọn phương thức thanh toán');
+      toastManager.showError('Vui lòng chọn phương thức thanh toán');
       return;
     }
 
@@ -106,14 +106,14 @@ export default function RentalPaymentPage() {
       const isSuccess = Math.random() > 0.2; // 80% success rate
       
       if (isSuccess) {
-        toast.success('Thanh toán thành công!');
+        toastManager.showSuccess('Thanh toán thành công!');
         router.push(`/ket-qua-thanh-toan?orderId=${order.id}&status=success`);
       } else {
-        toast.error('Thanh toán thất bại. Vui lòng thử lại.');
+        toastManager.showError('Thanh toán thất bại. Vui lòng thử lại.');
         router.push(`/ket-qua-thanh-toan?orderId=${order.id}&status=failed`);
       }
     } catch (error) {
-      toast.error('Có lỗi xảy ra trong quá trình thanh toán');
+      toastManager.showError('Có lỗi xảy ra trong quá trình thanh toán');
       router.push(`/ket-qua-thanh-toan?orderId=${order.id}&status=error`);
     } finally {
       setIsProcessing(false);
@@ -314,7 +314,8 @@ export default function RentalPaymentPage() {
   );
 }
 
-export const metadata = {
-  title: 'Thanh toán thuê phòng | NhaTroVN',
-  description: 'Thanh toán an toàn cho đơn hàng thuê phòng trọ.',
-};
+// Metadata moved to avoid client component conflict
+// export const metadata = {
+//   title: 'Thanh toán thuê phòng | NhaTroVN',
+//   description: 'Thanh toán an toàn cho đơn hàng thuê phòng trọ.',
+// };

@@ -13,7 +13,7 @@ import {
   QrCodeIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 import { paymentApi } from '@/lib/api';
 
 interface PaymentRecord {
@@ -131,7 +131,7 @@ export default function PaymentHistory() {
       console.error('Error fetching payments:', error);
       setError(error.message || 'Có lỗi xảy ra khi tải dữ liệu');
       setPayments([]);
-      toast.error('Không thể tải lịch sử thanh toán');
+      toastManager.showError('Không thể tải lịch sử thanh toán');
     } finally {
       setLoading(false);
     }
@@ -163,7 +163,7 @@ export default function PaymentHistory() {
   const handleDownloadInvoice = async (payment: PaymentRecord) => {
     try {
       if (payment.invoiceUrl) {
-        toast.success('Đang tải hóa đơn...');
+        toastManager.showSuccess('Đang tải hóa đơn...');
         // Try to download from API
         const response = await paymentApi.downloadInvoice(payment.id);
         if (response.success && response.data?.invoiceUrl) {
@@ -174,17 +174,17 @@ export default function PaymentHistory() {
           window.open(payment.invoiceUrl, '_blank');
         }
       } else {
-        toast.error('Hóa đơn chưa có sẵn');
+        toastManager.showError('Hóa đơn chưa có sẵn');
       }
     } catch (error) {
       console.error('Error downloading invoice:', error);
-      toast.error('Không thể tải hóa đơn');
+      toastManager.showError('Không thể tải hóa đơn');
     }
   };
 
   const handleRetryPayment = (payment: PaymentRecord) => {
     if (payment.status === 'failed') {
-      toast.success('Đang chuyển hướng đến trang thanh toán...');
+      toastManager.showSuccess('Đang chuyển hướng đến trang thanh toán...');
       // In a real app, this would redirect to payment page
     }
   };

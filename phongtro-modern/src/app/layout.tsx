@@ -5,8 +5,8 @@ import "../styles/toast-animations.css";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import ClientErrorBoundary from "@/components/ui/ClientErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { CustomToaster } from "@/components/ui/CustomToast";
 import ConnectionStatus from "@/components/ui/ConnectionStatus";
+import { ToastProvider } from "@/components/ui/ToastManager";
 
 const geistSans = Inter({
   variable: "--font-geist-sans",
@@ -87,10 +87,10 @@ export default function RootLayout({
       >
         <ClientErrorBoundary>
           <AuthProvider>
+            <ToastProvider />
             <ConditionalLayout>
               {children}
             </ConditionalLayout>
-            <CustomToaster />
             {/* <ConnectionStatus /> */}
           </AuthProvider>
         </ClientErrorBoundary>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   UserIcon,
   BellIcon,
@@ -11,120 +11,228 @@ import {
   EyeIcon,
   EyeSlashIcon
 } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 import { useAuth } from '@/contexts/AuthContext';
-import { authApi } from '@/lib/api';
+import { authApi, userSettingsApi } from '@/lib/api';
 
-interface UserSettings {
+type SettingsTab = 'profile' | 'notifications' | 'privacy' | 'security';
+
+interface SettingsState {
   profile: {
-    name: string;
+    full_name: string;
     email: string;
     phone: string;
-    avatar?: string;
   };
   notifications: {
     email: boolean;
     sms: boolean;
     push: boolean;
     marketing: boolean;
+    newMessages: boolean;
+    postUpdates: boolean;
+    systemUpdates: boolean;
+    rentalRequests: boolean;
+    favoriteUpdates: boolean;
   };
   privacy: {
     showPhone: boolean;
     showEmail: boolean;
     allowMessages: boolean;
+    showOnlineStatus: boolean;
+    allowFriendRequests: boolean;
   };
   security: {
     twoFactor: boolean;
     loginAlerts: boolean;
+    sessionTimeout: number;
+    requirePasswordForChanges: boolean;
   };
 }
 
-const defaultSettings: UserSettings = {
+const defaultSettings: SettingsState = {
   profile: {
-    name: 'Nguyễn Văn A',
-    email: 'nguyenvana@email.com',
-    phone: '0987654321'
+    full_name: '',
+    email: '',
+    phone: '',
   },
   notifications: {
     email: true,
-    sms: true,
+    sms: false,
     push: true,
-    marketing: false
+    marketing: false,
+    newMessages: true,
+    postUpdates: true,
+    systemUpdates: true,
+    rentalRequests: true,
+    favoriteUpdates: true,
   },
   privacy: {
     showPhone: true,
     showEmail: false,
-    allowMessages: true
+    allowMessages: true,
+    showOnlineStatus: true,
+    allowFriendRequests: true,
   },
   security: {
     twoFactor: false,
-    loginAlerts: true
-  }
+    loginAlerts: true,
+    sessionTimeout: 30,
+    requirePasswordForChanges: true,
+  },
 };
 
 export default function UserSettings() {
-  const { user: authUser } = useAuth();
-  const [settings, setSettings] = useState<UserSettings>(defaultSettings);
-  const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'privacy' | 'security'>('profile');
+  const { user: authUser, refreshUser } = useAuth();
+  const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
+  const [settings, setSettings] = useState<SettingsState>(defaultSettings);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
 
+  const tabs = useMemo(
+    () => ([
+      { id: 'profile', name: 'Thông tin cá nhân', icon: UserIcon },
+      { id: 'notifications', name: 'Thông báo', icon: BellIcon },
+      { id: 'privacy', name: 'Quyền riêng tư', icon: ShieldCheckIcon },
+      { id: 'security', name: 'Bảo mật', icon: KeyIcon },
+    ] as { id: SettingsTab; name: string; icon: any }[]),
+    []
+  );
+
   useEffect(() => {
-    setMounted(true);
-    
-    // Load user data from auth context
-    if (authUser) {
-      setSettings(prev => ({
-        ...prev,
-        profile: {
-          name: authUser.full_name || '',
-          email: authUser.email || '',
-          phone: authUser.phone || '',
-          avatar: authUser.avatar || ''
-        }
-      }));
-    }
+    const loadSettings = async () => {
+      if (!authUser) return;
+      setIsLoading(true);
+
+      try {
+        const response = await userSettingsApi.get();
+        const fetched = (response.data || response) as any;
+
+        const profile = {
+          full_name: authUser.full_name || '',
+          email: fetched?.user?.email || authUser.email || '',
+          phone: fetched?.user?.phone || authUser.phone || '',
+        };
+
+        setSettings({
+          profile,
+          notifications: {
+            ...defaultSettings.notifications,
+            ...(fetched.notifications || {}),
+          },
+          privacy: {
+            ...defaultSettings.privacy,
+            ...(fetched.privacy || {}),
+          },
+          security: {
+            ...defaultSettings.security,
+            ...(fetched.security || {}),
+          },
+        });
+      } catch (error) {
+        console.error('Error loading user settings:', error);
+        toastManager.showError('Không thể tải cài đặt người dùng');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSettings();
   }, [authUser]);
 
-  const handleSaveSettings = async () => {
+  const handleSaveProfile = async () => {
     if (!authUser) {
-      toast.error('Vui lòng đăng nhập để lưu cài đặt');
+      toastManager.showError('Vui lòng đăng nhập để lưu thông tin');
       return;
     }
 
-    setIsLoading(true);
+    setIsSaving(true);
     try {
-      // TODO: Implement actual API call for settings
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Cài đặt đã được lưu thành công');
-    } catch {
-      toast.error('Có lỗi xảy ra khi lưu cài đặt');
+      await userSettingsApi.update({ profile: settings.profile });
+      await refreshUser();
+      toastManager.showSuccess('Cập nhật thông tin cá nhân thành công');
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toastManager.showError('Không thể lưu thông tin cá nhân');
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveNotifications = async () => {
+    setIsSaving(true);
+    try {
+      await userSettingsApi.updateNotifications(settings.notifications);
+      toastManager.showSuccess('Đã lưu cài đặt thông báo');
+    } catch (error) {
+      console.error('Error updating notifications:', error);
+      toastManager.showError('Không thể cập nhật cài đặt thông báo');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSavePrivacy = async () => {
+    setIsSaving(true);
+    try {
+      await userSettingsApi.updatePrivacy(settings.privacy);
+      toastManager.showSuccess('Đã lưu cài đặt quyền riêng tư');
+    } catch (error) {
+      console.error('Error updating privacy settings:', error);
+      toastManager.showError('Không thể cập nhật cài đặt quyền riêng tư');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveSecurityPreferences = async () => {
+    setIsSaving(true);
+    try {
+      await userSettingsApi.updateSecurity(settings.security);
+      toastManager.showSuccess('Đã lưu cài đặt bảo mật');
+    } catch (error) {
+      console.error('Error updating security settings:', error);
+      toastManager.showError('Không thể cập nhật cài đặt bảo mật');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveCurrentTab = () => {
+    switch (activeTab) {
+      case 'profile':
+        return handleSaveProfile();
+      case 'notifications':
+        return handleSaveNotifications();
+      case 'privacy':
+        return handleSavePrivacy();
+      case 'security':
+        return handleSaveSecurityPreferences();
+      default:
+        return Promise.resolve();
     }
   };
 
   const handleChangePassword = async () => {
     if (!authUser) {
-      toast.error('Vui lòng đăng nhập để thay đổi mật khẩu');
+      toastManager.showError('Vui lòng đăng nhập để thay đổi mật khẩu');
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('Mật khẩu xác nhận không khớp');
+      toastManager.showError('Mật khẩu xác nhận không khớp');
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error('Mật khẩu mới phải có ít nhất 6 ký tự');
+      toastManager.showError('Mật khẩu mới phải có ít nhất 6 ký tự');
       return;
     }
 
@@ -141,26 +249,19 @@ export default function UserSettings() {
           newPassword: '',
           confirmPassword: '',
         });
-        toast.success('Mật khẩu đã được thay đổi thành công');
+        toastManager.showSuccess('Mật khẩu đã được thay đổi thành công');
       } else {
-        toast.error(response.message || 'Mật khẩu hiện tại không đúng');
+        toastManager.showError(response.message || 'Mật khẩu hiện tại không đúng');
       }
     } catch (error) {
       console.error('Error changing password:', error);
-      toast.error('Có lỗi xảy ra khi thay đổi mật khẩu');
+      toastManager.showError('Có lỗi xảy ra khi thay đổi mật khẩu');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const tabs = [
-    { id: 'profile', name: 'Thông tin cá nhân', icon: UserIcon },
-    { id: 'notifications', name: 'Thông báo', icon: BellIcon },
-    { id: 'privacy', name: 'Quyền riêng tư', icon: ShieldCheckIcon },
-    { id: 'security', name: 'Bảo mật', icon: KeyIcon }
-  ];
-
-  if (!mounted) {
+  if (isLoading) {
     return (
       <div className="p-6 bg-white rounded-lg shadow animate-pulse">
         <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
@@ -198,7 +299,7 @@ export default function UserSettings() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as 'profile' | 'notifications' | 'privacy' | 'security')}
+                  onClick={() => setActiveTab(tab.id as SettingsTab)}
                   className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                     isActive
                       ? 'bg-blue-100 text-blue-700'
@@ -227,10 +328,10 @@ export default function UserSettings() {
                     </label>
                     <input
                       type="text"
-                      value={settings.profile.name}
+                      value={settings.profile.full_name}
                       onChange={(e) => setSettings(prev => ({
                         ...prev,
-                        profile: { ...prev.profile, name: e.target.value }
+                        profile: { ...prev.profile, full_name: e.target.value }
                       }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
@@ -554,11 +655,11 @@ export default function UserSettings() {
           {/* Save Button */}
           <div className="mt-8 pt-6 border-t border-gray-200">
             <button
-              onClick={handleSaveSettings}
-              disabled={isLoading}
+              onClick={handleSaveCurrentTab}
+              disabled={isSaving}
               className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-2 rounded-lg font-medium transition-colors"
             >
-              {isLoading ? 'Đang lưu...' : 'Lưu cài đặt'}
+              {isSaving ? 'Đang lưu...' : 'Lưu cài đặt'}
             </button>
           </div>
         </div>

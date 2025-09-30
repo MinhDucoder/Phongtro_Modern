@@ -7,7 +7,7 @@ import Pagination from '@/components/ui/Pagination';
 import StructuredData from '@/components/seo/StructuredData';
 import { roomApi, Room, Post } from '@/lib/api';
 import RoomCard from '@/components/room/RoomCard';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -55,7 +55,7 @@ export default function Home() {
         console.log('Posts state updated. Current posts array length:', posts.length);
         
         if (posts.length > 0) {
-          toast.success(`Đã tải ${posts.length} tin đăng đã duyệt từ database`);
+      toastManager.showSuccess(`Đã tải ${posts.length} tin đăng đã duyệt từ database`);
         } else {
           console.log('No approved posts available');
           toast('Chưa có tin đăng nào được duyệt. Vui lòng chờ admin duyệt tin.', {

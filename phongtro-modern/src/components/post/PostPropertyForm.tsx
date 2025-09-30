@@ -11,7 +11,7 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface FormData {
   // Loại tin và gói dịch vụ
@@ -153,18 +153,18 @@ export default function PostPropertyForm() {
     const maxFiles = 10;
     
     if (formData.images.length + files.length > maxFiles) {
-      toast.error(`Chỉ được upload tối đa ${maxFiles} ảnh`);
+      toastManager.showError(`Chỉ được upload tối đa ${maxFiles} ảnh`);
       return;
     }
 
     // Validate file types and sizes
     const validFiles = files.filter(file => {
       if (!file.type.startsWith('image/')) {
-        toast.error(`File ${file.name} không phải là ảnh`);
+        toastManager.showError(`File ${file.name} không phải là ảnh`);
         return false;
       }
       if (file.size > 5 * 1024 * 1024) { // 5MB
-        toast.error(`File ${file.name} quá lớn (tối đa 5MB)`);
+        toastManager.showError(`File ${file.name} quá lớn (tối đa 5MB)`);
         return false;
       }
       return true;
@@ -187,63 +187,63 @@ export default function PostPropertyForm() {
     switch (step) {
       case 1:
         if (!formData.propertyType) {
-          toast.error('Vui lòng chọn loại bất động sản');
+          toastManager.showError('Vui lòng chọn loại bất động sản');
           return false;
         }
         if (!formData.title.trim()) {
-          toast.error('Vui lòng nhập tiêu đề');
+          toastManager.showError('Vui lòng nhập tiêu đề');
           return false;
         }
         if (formData.title.length < 30) {
-          toast.error('Tiêu đề phải có ít nhất 30 ký tự');
+          toastManager.showError('Tiêu đề phải có ít nhất 30 ký tự');
           return false;
         }
         if (!formData.description.trim()) {
-          toast.error('Vui lòng nhập mô tả');
+          toastManager.showError('Vui lòng nhập mô tả');
           return false;
         }
         if (formData.description.length < 100) {
-          toast.error('Mô tả phải có ít nhất 100 ký tự');
+          toastManager.showError('Mô tả phải có ít nhất 100 ký tự');
           return false;
         }
         return true;
         
       case 2:
         if (!formData.province || !formData.district || !formData.address.trim()) {
-          toast.error('Vui lòng điền đầy đủ thông tin địa chỉ');
+          toastManager.showError('Vui lòng điền đầy đủ thông tin địa chỉ');
           return false;
         }
         return true;
         
       case 3:
         if (!formData.area || !formData.price) {
-          toast.error('Vui lòng điền đầy đủ thông tin diện tích và giá');
+          toastManager.showError('Vui lòng điền đầy đủ thông tin diện tích và giá');
           return false;
         }
         if (parseInt(formData.area) <= 0) {
-          toast.error('Diện tích phải lớn hơn 0');
+          toastManager.showError('Diện tích phải lớn hơn 0');
           return false;
         }
         if (parseInt(formData.price) <= 0) {
-          toast.error('Giá thuê phải lớn hơn 0');
+          toastManager.showError('Giá thuê phải lớn hơn 0');
           return false;
         }
         return true;
         
       case 4:
         if (formData.images.length === 0) {
-          toast.error('Vui lòng upload ít nhất 1 ảnh');
+          toastManager.showError('Vui lòng upload ít nhất 1 ảnh');
           return false;
         }
         return true;
         
       case 5:
         if (!formData.contactName.trim() || !formData.contactPhone.trim()) {
-          toast.error('Vui lòng điền đầy đủ thông tin liên hệ');
+          toastManager.showError('Vui lòng điền đầy đủ thông tin liên hệ');
           return false;
         }
         if (!/^[0-9]{10}$/.test(formData.contactPhone.replace(/\s/g, ''))) {
-          toast.error('Số điện thoại không hợp lệ');
+          toastManager.showError('Số điện thoại không hợp lệ');
           return false;
         }
         return true;
@@ -272,10 +272,10 @@ export default function PostPropertyForm() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      toast.success('Đăng tin thành công! Tin của bạn đang chờ duyệt.');
+      toastManager.showSuccess('Đăng tin thành công! Tin của bạn đang chờ duyệt.');
       router.push('/');
     } catch {
-      toast.error('Có lỗi xảy ra. Vui lòng thử lại.');
+      toastManager.showError('Có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
     }

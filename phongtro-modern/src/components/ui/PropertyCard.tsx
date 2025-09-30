@@ -14,7 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon, StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { useState, useEffect } from 'react';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface PropertyCardProps {
   id: string;
@@ -71,7 +71,7 @@ export default function PropertyCard({
     e.preventDefault();
     e.stopPropagation();
     setIsLiked(!isLiked);
-    toast.success(isLiked ? 'Đã bỏ yêu thích' : 'Đã thêm vào yêu thích');
+    toastManager.showSuccess(isLiked ? 'Đã bỏ yêu thích' : 'Đã thêm vào yêu thích');
   };
 
   const handleShare = (e: React.MouseEvent) => {
@@ -85,7 +85,7 @@ export default function PropertyCard({
       });
     } else {
       navigator.clipboard.writeText(window.location.origin + `/phong-tro/${id}`);
-      toast.success('Đã copy link vào clipboard');
+      toastManager.showSuccess('Đã copy link vào clipboard');
     }
   };
 

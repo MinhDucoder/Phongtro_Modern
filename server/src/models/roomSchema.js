@@ -50,6 +50,21 @@ const roomSchema = new mongoose.Schema(
         ],
       },
     ],
+    // Nội quy phòng
+    rules: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    // Điểm lân cận
+    nearbyPlaces: [
+      {
+        name: { type: String, trim: true },
+        distance: { type: String, trim: true },
+        type: { type: String, trim: true }, // university | market | hospital | supermarket | ...
+      },
+    ],
     propertyType: {
       type: String,
       enum: [

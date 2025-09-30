@@ -33,6 +33,9 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
       internet: '',
       parking: ''
     },
+    // New: house rules & nearby places
+    rules: [] as string[],
+    nearbyPlaces: [] as Array<{ name: string; distance: string; type: string }>,
     // Property type
     propertyType: 'phong_tro',
     roomType: '',
@@ -108,6 +111,8 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
             internet: room.utilities?.internet?.toString() || '',
             parking: room.utilities?.parking?.toString() || ''
           },
+          rules: room.rules || [],
+          nearbyPlaces: room.nearbyPlaces || [],
           propertyType: room.propertyType || post.propertyType || 'phong_tro',
           roomType: room.roomType || post.roomType || '',
           options: post.options || [],
@@ -147,6 +152,45 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
       [field]: prev[field].includes(value)
         ? prev[field].filter(item => item !== value)
         : [...prev[field], value]
+    }));
+  };
+
+  const handleAddRule = () => {
+    setFormData(prev => ({ ...prev, rules: [...prev.rules, ''] }));
+  };
+
+  const handleRuleChange = (index: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      rules: prev.rules.map((r, i) => (i === index ? value : r))
+    }));
+  };
+
+  const handleRemoveRule = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      rules: prev.rules.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleAddNearby = () => {
+    setFormData(prev => ({
+      ...prev,
+      nearbyPlaces: [...prev.nearbyPlaces, { name: '', distance: '', type: 'university' }]
+    }));
+  };
+
+  const handleNearbyChange = (index: number, field: 'name' | 'distance' | 'type', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      nearbyPlaces: prev.nearbyPlaces.map((p, i) => (i === index ? { ...p, [field]: value } : p))
+    }));
+  };
+
+  const handleRemoveNearby = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      nearbyPlaces: prev.nearbyPlaces.filter((_, i) => i !== index)
     }));
   };
 
@@ -254,6 +298,8 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
             internet: parseInt(formData.utilities.internet) || 0,
             parking: parseInt(formData.utilities.parking) || 0
           },
+          rules: formData.rules.filter(Boolean),
+          nearbyPlaces: formData.nearbyPlaces.filter(p => p.name && p.distance),
           propertyType: formData.propertyType,
           roomType: formData.roomType || undefined
         },
@@ -517,6 +563,96 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
           </div>
         </div>
 
+        {/* House Rules */}
+        <div>
+          <label className="block text-sm font-medium text-black mb-2">
+            Nội quy phòng
+          </label>
+          <div className="space-y-2">
+            {formData.rules.map((rule, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={rule}
+                  onChange={(e) => handleRuleChange(index, e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500 text-gray-900"
+                  placeholder={`Nội quy #${index + 1}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveRule(index)}
+                  className="px-2 py-2 text-red-600 hover:bg-red-50 rounded"
+                  title="Xóa nội quy"
+                >
+                  <TrashIcon className="h-5 w-5" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={handleAddRule}
+              className="mt-2 inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50"
+            >
+              Thêm nội quy
+            </button>
+          </div>
+        </div>
+
+        {/* Nearby Places */}
+        <div>
+          <label className="block text-sm font-medium text-black mb-2">
+            Điểm lân cận
+          </label>
+          <div className="space-y-3">
+            {formData.nearbyPlaces.map((p, index) => (
+              <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
+                <input
+                  type="text"
+                  value={p.name}
+                  onChange={(e) => handleNearbyChange(index, 'name', e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500 text-gray-900"
+                  placeholder="Tên địa điểm (VD: ĐH Bách Khoa)"
+                />
+                <input
+                  type="text"
+                  value={p.distance}
+                  onChange={(e) => handleNearbyChange(index, 'distance', e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500 text-gray-900"
+                  placeholder="Khoảng cách (VD: 500m)"
+                />
+                <div className="flex items-center gap-2">
+                  <select
+                    value={p.type}
+                    onChange={(e) => handleNearbyChange(index, 'type', e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="university">Trường đại học</option>
+                    <option value="market">Chợ</option>
+                    <option value="supermarket">Siêu thị</option>
+                    <option value="hospital">Bệnh viện</option>
+                    <option value="park">Công viên</option>
+                    <option value="other">Khác</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveNearby(index)}
+                    className="px-2 py-2 text-red-600 hover:bg-red-50 rounded"
+                    title="Xóa điểm"
+                  >
+                    <TrashIcon className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={handleAddNearby}
+              className="mt-2 inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50"
+            >
+              Thêm điểm lân cận
+            </button>
+          </div>
+        </div>
         {/* Utilities */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">

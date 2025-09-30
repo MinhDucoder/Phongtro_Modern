@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Bars3Icon, XMarkIcon, UserIcon, PlusIcon, HomeIcon, BuildingOfficeIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { showLogoutSuccessToast } from '@/components/ui/LogoutSuccessToast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 const mainNavigation = [
   { name: 'Phòng trọ', href: '/phong-tro', icon: HomeIcon },
@@ -31,14 +31,13 @@ export default function Header() {
     console.log('Logout button clicked!');
     try {
       await logout();
-      showLogoutSuccessToast(); // Hiển thị toast đăng xuất với thời gian 2s
+      toastManager.showSuccess('Đã đăng xuất thành công', {
+        description: 'Hẹn gặp lại bạn!',
+      });
       router.push('/');
     } catch (error) {
       console.error('Logout error:', error);
-      // Sử dụng custom toast cho lỗi đăng xuất
-      import('@/components/ui/CustomToast').then(module => {
-        module.customToast.error('Có lỗi khi đăng xuất');
-      });
+      toastManager.showError('Có lỗi khi đăng xuất');
     }
   };
 

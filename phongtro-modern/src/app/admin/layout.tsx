@@ -1,6 +1,5 @@
 'use client';
 
-import { Toaster } from "react-hot-toast";
 import AdminGuard from "@/components/auth/AdminGuard";
 
 export default function AdminLayout({

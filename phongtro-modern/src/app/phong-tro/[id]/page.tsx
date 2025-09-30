@@ -1,9 +1,10 @@
 import PropertyDetailPage from './PropertyDetailPage';
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export default function Page({ params }: PageProps) {
-  return <PropertyDetailPage postId={params.id} />;
+export default async function Page({ params }: PageProps) {
+  const { id } = await params; // Next.js (App Router) requires awaiting params
+  return <PropertyDetailPage postId={id} />;
 }
