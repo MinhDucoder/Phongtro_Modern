@@ -67,7 +67,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const user = {
     name: authUser?.full_name || 'Nguyễn Văn A',
     email: authUser?.email || 'nguyenvana@email.com',
-    avatar: '/placeholder-room.svg',
+    avatar: authUser?.avatar && authUser.avatar !== '/placeholder-room.svg' ? authUser.avatar : '/placeholder-room.svg',
     isVerified: true,
     memberSince: '2023',
   };

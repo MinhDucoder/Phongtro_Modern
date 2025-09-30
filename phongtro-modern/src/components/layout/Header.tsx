@@ -88,9 +88,19 @@ export default function Header() {
                   <div className="flex items-center space-x-2">
                     <Link 
                       href={user?.role === 'landlord' ? '/dashboard' : user?.role === 'admin' ? '/admin' : '/profile'}
-                      className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm hover:bg-blue-600 transition-colors cursor-pointer"
+                      className="flex items-center justify-center"
                     >
-                      {user?.full_name ? user.full_name[0].toUpperCase() : 'N'}
+                      {user?.avatar && user.avatar !== '/placeholder-room.svg' ? (
+                        <img
+                          src={user.avatar}
+                          alt={user?.full_name || 'Avatar'}
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm hover:bg-blue-600 transition-colors cursor-pointer">
+                          {user?.full_name ? user.full_name[0].toUpperCase() : 'N'}
+                        </div>
+                      )}
                     </Link>
                     <span className="text-sm font-medium text-gray-700">
                       {user?.full_name || user?.email}

@@ -103,6 +103,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  // Lắng nghe sự kiện cập nhật hồ sơ/ảnh đại diện để refresh user toàn app
+  useEffect(() => {
+    const onProfileUpdated = () => {
+      refreshUserSilently();
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('profile-updated', onProfileUpdated as EventListener);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('profile-updated', onProfileUpdated as EventListener);
+      }
+    };
+  }, []);
+
   const fetchUserProfile = async () => {
     try {
       setIsLoading(true);

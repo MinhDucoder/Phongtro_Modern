@@ -28,6 +28,7 @@ interface PropertyCardProps {
     name: string;
     phone: string;
     isVerified?: boolean;
+    avatar?: string;
   };
   postedTime: string;
   isFeatured?: boolean;
@@ -262,6 +263,13 @@ export default function PropertyCard({
         {/* Contact and time */}
         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
           <div className="flex items-center space-x-2">
+            {contact?.avatar ? (
+              <img src={contact.avatar} alt={contact.name} className="w-6 h-6 rounded-full object-cover" />
+            ) : (
+              <div className="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-semibold">
+                {contact?.name?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+            )}
             <div className="flex items-center">
               <span className="text-sm font-medium text-darker">{contact.name}</span>
               {contact.isVerified && (

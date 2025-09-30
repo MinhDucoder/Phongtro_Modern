@@ -190,6 +190,7 @@ const getPropertyTypeBadge = (type: string) => {
 
 export default function PostManagement() {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [stats, setStats] = useState<PostStatistics>({
     totalPosts: 0,
     activePosts: 0,
@@ -201,7 +202,7 @@ export default function PostManagement() {
     platinumPosts: 0
   });
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('pending');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -265,6 +266,48 @@ export default function PostManagement() {
       toastManager.showError('Lỗi kết nối server');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleSelectOne = (postId: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(postId)) next.delete(postId); else next.add(postId);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === posts.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(posts.map(p => p._id)));
+    }
+  };
+
+  const bulkUpdateStatus = async (status: 'active' | 'rejected') => {
+    if (selectedIds.size === 0) {
+      toastManager.showError('Vui lòng chọn ít nhất 1 tin');
+      return;
+    }
+    try {
+      const ids = Array.from(selectedIds);
+      let success = 0;
+      for (const id of ids) {
+        const res = await fetch(`/api/admin/posts/${id}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ status })
+        });
+        const data = await res.json();
+        if (data?.success) success += 1;
+      }
+      toastManager.showSuccess(`Đã cập nhật ${success}/${ids.length} tin`);
+      setSelectedIds(new Set());
+      fetchPosts();
+    } catch (e) {
+      toastManager.showError('Không thể cập nhật hàng loạt');
     }
   };
 
@@ -413,7 +456,7 @@ export default function PostManagement() {
         </div>
           </div>
 
-      {/* Filters */}
+      {/* Filters & Bulk actions */}
       <div className="bg-white rounded-lg shadow-sm border p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search */}
@@ -456,6 +499,31 @@ export default function PostManagement() {
               <option value="nha_nguyen_can">Nhà nguyên căn</option>
             </select>
             </div>
+        {posts.length > 0 && (
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              onClick={toggleSelectAll}
+              className="px-3 py-2 border rounded-md text-sm text-gray-700 hover:bg-gray-50"
+            >
+              {selectedIds.size === posts.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+            </button>
+            <button
+              onClick={() => bulkUpdateStatus('active')}
+              className="px-3 py-2 rounded-md text-sm bg-green-600 text-white hover:bg-green-700"
+            >
+              Duyệt (kích hoạt)
+            </button>
+            <button
+              onClick={() => bulkUpdateStatus('rejected')}
+              className="px-3 py-2 rounded-md text-sm bg-red-600 text-white hover:bg-red-700"
+            >
+              Từ chối
+            </button>
+            {selectedIds.size > 0 && (
+              <span className="text-sm text-gray-600">Đã chọn {selectedIds.size} tin</span>
+            )}
+          </div>
+        )}
         </div>
               </div>
 
@@ -466,7 +534,8 @@ export default function PostManagement() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tin đăng
+                  <input type="checkbox" aria-label="select-all" onChange={toggleSelectAll} checked={posts.length>0 && selectedIds.size===posts.length} className="mr-3 align-middle" />
+                  Tin đăng
                 </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Loại
@@ -511,6 +580,13 @@ export default function PostManagement() {
                   <tr key={post._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          className="mr-3"
+                          checked={selectedIds.has(post._id)}
+                          onChange={() => toggleSelectOne(post._id)}
+                          aria-label="select-row"
+                        />
                         <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center">
                           {post.images && post.images.length > 0 ? (
                             <img
@@ -546,11 +622,19 @@ export default function PostManagement() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                          <span className="text-xs font-medium text-white">
-                            {post.landlord?.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                          </span>
-                      </div>
+                        {post?.landlord && (post as any).landlord?.avatar ? (
+                          <img
+                            src={(post as any).landlord.avatar}
+                            alt={post.landlord.full_name || 'User'}
+                            className="h-8 w-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
+                            <span className="text-xs font-medium text-white">
+                              {post.landlord?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                            </span>
+                          </div>
+                        )}
                         <div className="ml-3">
                           <div className="text-sm font-medium text-gray-900">{post.landlord?.full_name || 'N/A'}</div>
                           <div className="text-sm text-gray-500">{post.landlord?.phone || 'N/A'}</div>
@@ -565,6 +649,32 @@ export default function PostManagement() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">
+                        {post.status === 'pending' && (
+                          <>
+                            <button
+                              onClick={async () => {
+                                setSelectedPost(post);
+                                setNewStatus('active');
+                                await handleStatusChange(post);
+                              }}
+                              className="px-2 py-1 rounded-md bg-green-600 text-white hover:bg-green-700"
+                              title="Duyệt tin"
+                            >
+                              Duyệt
+                            </button>
+                            <button
+                              onClick={async () => {
+                                setSelectedPost(post);
+                                setNewStatus('rejected');
+                                await handleStatusChange(post);
+                              }}
+                              className="px-2 py-1 rounded-md bg-red-600 text-white hover:bg-red-700"
+                              title="Từ chối"
+                            >
+                              Từ chối
+                            </button>
+                          </>
+                        )}
                         <button
                           onClick={() => {
                             setSelectedPost(post);

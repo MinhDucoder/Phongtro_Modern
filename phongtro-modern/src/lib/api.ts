@@ -173,6 +173,7 @@ export interface User {
   is_verified: boolean;
   created_at: string;
   last_login?: string;
+  avatar?: string;
 }
 
 export interface LoginRequest {

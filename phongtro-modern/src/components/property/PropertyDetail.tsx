@@ -118,6 +118,9 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
     phone: property.landlord?.phone,
     email: property.landlord?.email,
     isVerified: property.landlord?.role === 'landlord',
+    avatar: (property as any)?.landlord?.avatar && (property as any).landlord.avatar !== '/placeholder-room.svg'
+      ? (property as any).landlord.avatar
+      : undefined,
   };
 
   const price = room?.price ? `${room.price.toLocaleString()} VNĐ/tháng` : 'Giá liên hệ';
@@ -459,7 +462,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               <div className="flex items-center mb-6">
                 <div className="relative">
                   <Image
-                    src={contact?.avatar || '/placeholder-avatar.svg'}
+                    src={contact?.avatar || '/placeholder-room.svg'}
                     alt={contact?.name || 'Chủ nhà'}
                     width={70}
                     height={70}
