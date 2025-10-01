@@ -92,8 +92,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [user, isLoading]);
 
   const handleMeResponse = (response: ApiResponse) => {
-    if (response.success && response.user) {
-      setUser(response.user as User);
+    if (response.success !== false && response) {
+      // getProfile() trả về user data trực tiếp, không wrap trong response.user
+      const userData = response.data || response;
+      setUser(userData as User);
     } else {
       setUser(null);
 
@@ -121,7 +123,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const fetchUserProfile = async () => {
     try {
       setIsLoading(true);
-      const response = await authApi.getMe();
+      const response = await authApi.getProfile();
       handleMeResponse(response);
     } catch (error) {
       setUser(null);
@@ -133,9 +135,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const fetchUserProfileSilent = async () => {
     try {
       setIsLoading(true);
-      const response = await authApi.getMe();
+      
+      // Check if we have valid tokens before making the request
+      const tokenStatus = authApi.getTokenStatus();
+      if (!tokenStatus.hasToken || tokenStatus.isExpired) {
+        console.log('No valid token available, skipping silent fetch');
+        setUser(null);
+        return;
+      }
+      
+      const response = await authApi.getProfile();
       handleMeResponse(response);
     } catch (error) {
+      console.log('Silent fetch failed:', error);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -144,12 +156,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const checkAuthStatus = async () => {
     try {
+      // Check token status first
+      const tokenStatus = authApi.getTokenStatus();
+      if (!tokenStatus.hasToken) {
+        console.log('No token found, user not authenticated');
+        setUser(null);
+        setIsLoading(false);
+        return;
+      }
+      
       // Try to get user info from server using httpOnly cookie
       // Sử dụng phiên bản silent để không hiển thị thông báo
       await fetchUserProfileSilent();
     } catch (error) {
+      console.log('Auth check failed:', error);
       // Clear user state if authentication fails
       setUser(null);
+      setIsLoading(false);
     }
   };
 

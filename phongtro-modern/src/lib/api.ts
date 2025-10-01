@@ -95,6 +95,8 @@ class TokenManager {
 
     const refreshToken = this.getRefreshToken();
     if (!refreshToken) {
+      console.warn('No refresh token available - user needs to login again');
+      this.clearTokens();
       throw new Error('No refresh token available');
     }
 
@@ -173,7 +175,7 @@ export interface User {
   is_verified: boolean;
   created_at: string;
   last_login?: string;
-  avatar?: string;
+  avatar?: string | { url: string; public_id: string };
 }
 
 export interface LoginRequest {
@@ -278,7 +280,15 @@ async function apiRequest<T>(
   if (accessToken && tokenManager.isTokenExpired() && 
       !endpoint.includes('/auth/')) {
     try {
-      accessToken = await tokenManager.refreshAccessToken();
+      // Check if we have a refresh token before attempting refresh
+      const refreshToken = tokenManager.getRefreshToken();
+      if (!refreshToken) {
+        console.log('No refresh token available, clearing tokens');
+        tokenManager.clearTokens();
+        accessToken = null;
+      } else {
+        accessToken = await tokenManager.refreshAccessToken();
+      }
     } catch (error) {
       console.error('Token refresh failed:', error);
       // Clear tokens and let the request proceed (will likely get 401)
