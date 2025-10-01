@@ -230,7 +230,7 @@ export default function ChatWindow({ conversation, currentUser, onNewMessage }: 
         <div className="flex items-center space-x-3">
           <div className="relative">
             <Image
-              src={conversation.participant.avatar}
+              src={typeof conversation.participant.avatar === 'string' && conversation.participant.avatar.trim() !== '' ? conversation.participant.avatar : '/placeholder-room.svg'}
               alt={conversation.participant.name}
               width={40}
               height={40}
@@ -272,7 +272,7 @@ export default function ChatWindow({ conversation, currentUser, onNewMessage }: 
       <div className="p-3 bg-blue-50 border-b">
         <div className="flex items-center space-x-3">
           <Image
-            src={conversation.property.image}
+            src={typeof conversation.property.image === 'string' && conversation.property.image.trim() !== '' ? conversation.property.image : '/placeholder-room.svg'}
             alt={conversation.property.title}
             width={40}
             height={40}
@@ -318,7 +318,7 @@ export default function ChatWindow({ conversation, currentUser, onNewMessage }: 
                     <div className="w-8 h-8 flex-shrink-0">
                       {showAvatar && (
                         <Image
-                          src={conversation.participant.avatar}
+                          src={typeof conversation.participant.avatar === 'string' && conversation.participant.avatar.trim() !== '' ? conversation.participant.avatar : '/placeholder-room.svg'}
                           alt={conversation.participant.name}
                           width={32}
                           height={32}
@@ -349,7 +349,7 @@ export default function ChatWindow({ conversation, currentUser, onNewMessage }: 
                     <div className="w-8 h-8 flex-shrink-0">
                       {showAvatar && (
                         <Image
-                          src={currentUser.avatar}
+                          src={typeof currentUser.avatar === 'string' && currentUser.avatar.trim() !== '' ? currentUser.avatar : '/placeholder-room.svg'}
                           alt={currentUser.name}
                           width={32}
                           height={32}
@@ -368,7 +368,7 @@ export default function ChatWindow({ conversation, currentUser, onNewMessage }: 
         {isTyping && (
           <div className="flex items-end space-x-2 mb-4">
             <Image
-              src={conversation.participant.avatar}
+              src={typeof conversation.participant.avatar === 'string' && conversation.participant.avatar.trim() !== '' ? conversation.participant.avatar : '/placeholder-room.svg'}
               alt={conversation.participant.name}
               width={32}
               height={32}

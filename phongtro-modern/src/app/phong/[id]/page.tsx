@@ -179,7 +179,9 @@ export default function RoomDetailPage() {
               <div className="relative h-96">
                 {room.images && room.images.length > 0 ? (
                   <Image
-                    src={room.images[currentImageIndex]}
+                    src={typeof room.images[currentImageIndex] === 'string' 
+                      ? room.images[currentImageIndex] 
+                      : '/placeholder-room.svg'}
                     alt={room.title}
                     fill
                     className="object-cover"

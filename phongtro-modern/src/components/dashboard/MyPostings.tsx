@@ -428,14 +428,21 @@ export default function MyPostings() {
                   {/* Image */}
                   <div className="flex-shrink-0 w-full sm:w-auto">
                     <div className="relative">
-                      <Image
-                        src={getFirstImage(posting.roomId?.images)}
-                        alt={posting.roomId?.title || 'Room image'}
-                        width={120}
-                        height={90}
-                        className="w-full sm:w-30 h-48 sm:h-24 object-cover rounded-lg cursor-pointer"
-                        onClick={() => router.push(`/phong-tro/${posting._id}`)}
-                      />
+                      {(() => {
+                        const imageSrc = getFirstImage(posting.roomId?.images);
+                        // Additional safety check to ensure we never pass an empty object
+                        const safeSrc = typeof imageSrc === 'string' && imageSrc.trim() !== '' ? imageSrc : '/placeholder-room.svg';
+                        return (
+                          <Image
+                            src={safeSrc}
+                            alt={posting.roomId?.title || 'Room image'}
+                            width={120}
+                            height={90}
+                            className="w-full sm:w-30 h-48 sm:h-24 object-cover rounded-lg cursor-pointer"
+                            onClick={() => router.push(`/phong-tro/${posting._id}`)}
+                          />
+                        );
+                      })()}
                       {posting.favouriteLevel && posting.favouriteLevel !== 'free' && (
                         <div className="absolute top-2 left-2">
                           {getPackageBadge(posting.favouriteLevel)}

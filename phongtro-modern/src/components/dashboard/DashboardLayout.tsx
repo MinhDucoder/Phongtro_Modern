@@ -164,7 +164,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <div className="flex-shrink-0">
                     <Image
                       className="h-10 w-10 rounded-full"
-                      src={user.avatar}
+                      src={typeof user.avatar === 'string' && user.avatar.trim() !== '' ? user.avatar : '/placeholder-room.svg'}
                       alt={user.name || 'User Avatar'}
                       width={40}
                       height={40}

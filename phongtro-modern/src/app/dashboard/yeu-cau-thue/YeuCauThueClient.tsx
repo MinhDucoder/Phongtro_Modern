@@ -414,11 +414,17 @@ export default function YeuCauThueClient() {
                       Phòng được yêu cầu
                     </h4>
                     <div className="flex items-start space-x-3">
-                      <img 
-                        src={getFirstImage(request.post?.roomId?.images)} 
-                        alt={request.post?.roomId?.title || 'Room image'}
-                        className="w-16 h-16 object-cover rounded-lg"
-                      />
+                      {(() => {
+                        const imageSrc = getFirstImage(request.post?.roomId?.images);
+                        const safeSrc = typeof imageSrc === 'string' && imageSrc.trim() !== '' ? imageSrc : '/placeholder-room.svg';
+                        return (
+                          <img 
+                            src={safeSrc} 
+                            alt={request.post?.roomId?.title || 'Room image'}
+                            className="w-16 h-16 object-cover rounded-lg"
+                          />
+                        );
+                      })()}
                       <div>
                         <p className="font-medium text-gray-900 line-clamp-2">
                           {request.post?.roomId?.title || 'Không có tiêu đề'}

@@ -93,6 +93,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
         const post = response.data;
         const room = post.roomId;
         
+        
         setFormData({
           title: room.title || '',
           description: room.description || '',
@@ -103,7 +104,30 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
           district: room.district || '',
           ward: room.ward || '',
           amenities: room.amenities || [],
-          images: room.images?.map((img: any) => img.url || img) || [],
+          images: room.images?.map((img: any) => {
+            // Handle nested arrays (e.g., [[{url: "..."}]])
+            if (Array.isArray(img)) {
+              const firstItem = img[0];
+              if (typeof firstItem === 'string') {
+                return firstItem;
+              }
+              if (firstItem && typeof firstItem === 'object' && firstItem.url) {
+                return firstItem.url;
+              }
+            }
+            
+            // Handle direct string
+            if (typeof img === 'string') {
+              return img;
+            }
+            
+            // Handle direct object
+            if (img && typeof img === 'object' && img.url) {
+              return img.url;
+            }
+            
+            return img;
+          }) || [],
           deposit: room.deposit?.toString() || '',
           utilities: {
             electricity: room.utilities?.electricity?.toString() || '',
@@ -119,6 +143,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
           favouriteLevel: post.favouriteLevel || 'free',
           status: post.status || 'pending'
         });
+        
       }
     } catch (error) {
       console.error('Error loading post:', error);
@@ -773,14 +798,41 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
                 {formData.images.map((imageUrl, index) => (
                   <div key={index} className="relative group">
                     <div className="aspect-square rounded-lg overflow-hidden">
-                      <Image
-                        src={imageUrl}
-                        alt={`Preview ${index + 1}`}
-                        width={200}
-                        height={200}
-                        className="w-full h-full object-cover"
-                        unoptimized
-                      />
+                      {(() => {
+                        // Handle different types of imageUrl
+                        let src = '/placeholder-room.svg';
+                        
+                        if (imageUrl) {
+                          // Handle nested arrays
+                          if (Array.isArray(imageUrl)) {
+                            const firstItem = imageUrl[0];
+                            if (typeof firstItem === 'string' && firstItem.trim() !== '') {
+                              src = firstItem;
+                            } else if (firstItem && typeof firstItem === 'object' && firstItem.url && typeof firstItem.url === 'string' && firstItem.url.trim() !== '') {
+                              src = firstItem.url;
+                            }
+                          }
+                          // Handle direct string
+                          else if (typeof imageUrl === 'string' && imageUrl.trim() !== '') {
+                            src = imageUrl;
+                          } 
+                          // Handle direct object
+                          else if (typeof imageUrl === 'object' && imageUrl.url && typeof imageUrl.url === 'string' && imageUrl.url.trim() !== '') {
+                            src = imageUrl.url;
+                          }
+                        }
+                        
+                        return (
+                          <Image
+                            src={src}
+                            alt={`Preview ${index + 1}`}
+                            width={200}
+                            height={200}
+                            className="w-full h-full object-cover"
+                            unoptimized
+                          />
+                        );
+                      })()}
                     </div>
                     <button
                       type="button"

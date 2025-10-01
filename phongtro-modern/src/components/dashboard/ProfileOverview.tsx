@@ -263,7 +263,7 @@ export default function ProfileOverview() {
                 <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-200">
                   {user?.avatar && user.avatar !== '/placeholder-room.svg' ? (
                     <Image
-                      src={user.avatar}
+                      src={typeof user.avatar === 'string' && user.avatar.trim() !== '' ? user.avatar : '/placeholder-room.svg'}
                       alt={user?.full_name || 'User'}
                       width={80}
                       height={80}

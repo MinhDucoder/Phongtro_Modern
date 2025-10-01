@@ -92,7 +92,7 @@ export default function Header() {
                     >
                       {user?.avatar && user.avatar !== '/placeholder-room.svg' ? (
                         <img
-                          src={user.avatar}
+                          src={typeof user.avatar === 'string' && user.avatar.trim() !== '' ? user.avatar : '/placeholder-room.svg'}
                           alt={user?.full_name || 'Avatar'}
                           className="w-8 h-8 rounded-full object-cover"
                         />
