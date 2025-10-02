@@ -1,0 +1,235 @@
+/* Chat UI Animations and Micro-interactions */
+
+/* Message bubble animations */
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes messageFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes typingPulse {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+/* Message bubble entrance animation */
+.message-bubble {
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+/* Message bubble with fade in */
+.message-bubble-fade {
+  animation: messageFadeIn 0.2s ease-out;
+}
+
+/* Typing indicator animation */
+.typing-indicator {
+  animation: typingPulse 1.4s infinite ease-in-out;
+}
+
+/* Conversation list item hover effect */
+.conversation-item {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.conversation-item:hover {
+  transform: translateY(-1px);
+}
+
+/* Loading shimmer effect */
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Smooth scroll behavior */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Button press animation */
+.button-press {
+  transition: transform 0.1s ease-in-out;
+}
+
+.button-press:active {
+  transform: scale(0.95);
+}
+
+/* FAB hover animation */
+.fab-hover {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fab-hover:hover {
+  transform: translateY(-2px);
+}
+
+/* Input focus animation */
+.input-focus {
+  transition: all 0.2s ease-in-out;
+}
+
+.input-focus:focus {
+  transform: scale(1.02);
+}
+
+/* Online status pulse */
+.online-pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+/* Message status icon animation */
+.message-status {
+  transition: all 0.2s ease-in-out;
+}
+
+.message-status:hover {
+  transform: scale(1.1);
+}
+
+/* Sidebar slide animation */
+.sidebar-slide {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Chat window fade in */
+.chat-window-fade {
+  animation: messageFadeIn 0.4s ease-out;
+}
+
+/* Empty state animation */
+.empty-state {
+  animation: messageFadeIn 0.6s ease-out;
+}
+
+/* Gradient text animation */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gradient-text {
+  background: linear-gradient(-45deg, #3b82f6, #1d4ed8, #1e40af, #3b82f6);
+  background-size: 400% 400%;
+  animation: gradientShift 3s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Unread badge bounce */
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0,0,0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+.unread-bounce {
+  animation: bounce 1s ease-in-out;
+}
+
+/* Message timestamp fade in */
+.timestamp-fade {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.message-bubble:hover .timestamp-fade {
+  opacity: 1;
+}
+
+/* Responsive animations */
+@media (max-width: 768px) {
+  .message-bubble {
+    animation-duration: 0.2s;
+  }
+  
+  .conversation-item:hover {
+    transform: none;
+  }
+}
+
+/* Dark mode animations (for future use) */
+@media (prefers-color-scheme: dark) {
+  .shimmer {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    background-size: 200px 100%;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .message-bubble,
+  .message-bubble-fade,
+  .conversation-item,
+  .button-press,
+  .fab-hover,
+  .input-focus,
+  .sidebar-slide,
+  .chat-window-fade,
+  .empty-state {
+    animation: none;
+    transition: none;
+  }
+}
+
+

@@ -376,7 +376,7 @@ function ToastItem({ toast, onClose }: { toast: ToastInternal; onClose: () => vo
         scale: 1.02,
         transition: { duration: 0.2 }
       }}
-      className={`pointer-events-auto overflow-hidden rounded-2xl shadow-2xl ring-1 backdrop-blur-xl ${styles.ring} transform-gpu`}
+      className={`pointer-events-auto overflow-hidden rounded-xl shadow-2xl ring-1 backdrop-blur-xl ${styles.ring} transform-gpu`}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >

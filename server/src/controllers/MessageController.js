@@ -13,9 +13,9 @@ class MessageController {
 
       const [items, total] = await Promise.all([
         Message.find({ conversationId })
-          .populate("User", "full_name avatar role")
-          .populate("User", "full_name avatar role")
-          .sort({ created_at: -1 })
+          .populate("sender", "full_name avatar role")
+          .populate("receiver", "full_name avatar role")
+          .sort({ createdAt: 1 })
           .skip(skip)
           .limit(limit),
         Message.countDocuments({ conversationId })

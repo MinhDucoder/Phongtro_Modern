@@ -32,7 +32,7 @@ const messageSchema = new Schema(
       default: "sent",
     },
   },
-  { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
+  { timestamps: true }
 );
 
 export default model("Message", messageSchema);

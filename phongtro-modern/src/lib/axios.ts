@@ -11,8 +11,20 @@ const api = axios.create({
 // Add a request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Bạn có thể thêm logic xử lý trước khi gửi request ở đây
-    // Ví dụ: thêm token vào header
+    // Add auth token to requests
+    if (typeof window !== 'undefined') {
+      try {
+        const authTokens = localStorage.getItem('auth_tokens');
+        if (authTokens) {
+          const tokenData = JSON.parse(authTokens);
+          if (tokenData.accessToken) {
+            config.headers.Authorization = `Bearer ${tokenData.accessToken}`;
+          }
+        }
+      } catch (error) {
+        console.error('Error getting auth token:', error);
+      }
+    }
     return config;
   },
   (error) => {

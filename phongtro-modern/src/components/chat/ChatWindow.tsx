@@ -4,165 +4,95 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import {
   PaperAirplaneIcon,
-  FaceSmileIcon,
   PaperClipIcon,
   PhoneIcon,
   VideoCameraIcon,
   InformationCircleIcon,
   EllipsisVerticalIcon
 } from '@heroicons/react/24/outline';
+import { CheckIcon } from '@heroicons/react/24/solid';
 import { toastManager } from '@/components/ui/ToastManager';
-
-interface Message {
-  id: string;
-  content: string;
-  senderId: string;
-  timestamp: Date;
-  type: 'text' | 'image' | 'file';
-  fileUrl?: string;
-  fileName?: string;
-  isRead: boolean;
-}
-
-interface Conversation {
-  id: string;
-  participant: {
-    id: string;
-    name: string;
-    avatar: string;
-    isOnline: boolean;
-    lastSeen: Date | null;
-  };
-  property: {
-    id: string;
-    title: string;
-    image: string;
-  };
-  lastMessage: {
-    content: string;
-    timestamp: Date;
-    senderId: string;
-  };
-  unreadCount: number;
-  updatedAt: Date;
-}
+import { useChat } from '@/contexts/ChatContext';
+import { Conversation, Message } from '@/lib/chatApi';
+import { chatHelpers } from '@/lib/chatApi';
+import OnlineStatusIndicator from './OnlineStatusIndicator';
+import TypingIndicator from './TypingIndicator';
 
 interface ChatWindowProps {
   conversation: Conversation;
   currentUser: {
-    id: string;
-    name: string;
-    avatar: string;
+    _id: string;
+    full_name: string;
+    avatar?: string;
   };
-  onNewMessage: (conversationId: string, message: {id: string, text: string, timestamp: string, sender: string}) => void;
 }
 
-// Mock messages data
-const generateMockMessages = (conversationId: string, currentUserId: string, participantId: string): Message[] => {
-  const baseMessages = [
-    { content: 'Chào bạn! Tôi quan tâm đến tin đăng này', senderId: participantId, type: 'text' as const },
-    { content: 'Chào bạn! Phòng vẫn còn trống ạ', senderId: currentUserId, type: 'text' as const },
-    { content: 'Vậy giá thuê là bao nhiêu ạ?', senderId: participantId, type: 'text' as const },
-    { content: 'Giá thuê là 3.5 triệu/tháng bạn nhé, đã bao gồm điện nước', senderId: currentUserId, type: 'text' as const },
-    { content: 'Bạn có thể cho tôi xem thêm ảnh phòng được không?', senderId: participantId, type: 'text' as const },
-    { content: 'Được ạ, tôi sẽ gửi thêm ảnh cho bạn', senderId: currentUserId, type: 'text' as const },
-    { content: 'Khi nào bạn có thể đến xem phòng?', senderId: currentUserId, type: 'text' as const },
-    { content: 'Tôi có thể đến xem vào cuối tuần này được không ạ?', senderId: participantId, type: 'text' as const },
-    { content: 'Được bạn, tôi sẽ sắp xếp thời gian. Bạn có thể đến vào chủ nhật không?', senderId: currentUserId, type: 'text' as const },
-    { content: 'Phòng còn trống không ạ?', senderId: participantId, type: 'text' as const },
-  ];
-
-  return baseMessages.map((msg, index) => ({
-    id: `${conversationId}-${index}`,
-    content: msg.content,
-    senderId: msg.senderId,
-    timestamp: new Date(Date.now() - (baseMessages.length - index) * 10 * 60 * 1000), // 10 minutes apart
-    type: msg.type,
-    isRead: true,
-  }));
-};
-
-export default function ChatWindow({ conversation, currentUser, onNewMessage }: ChatWindowProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+export default function ChatWindow({ conversation, currentUser }: ChatWindowProps) {
+  const { messages, sendMessage, markMessageSeen, isLoading } = useChat();
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  // Emoji picker removed for simplified UI
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
-  // Load messages for this conversation
-  useEffect(() => {
-    const mockMessages = generateMockMessages(conversation.id, currentUser.id, conversation.participant.id);
-    setMessages(mockMessages);
-  }, [conversation.id, currentUser.id, conversation.participant.id]);
+  const partner = chatHelpers.getConversationPartner(conversation, currentUser._id);
 
   // Auto scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Simulate typing indicator
+  // Track scroll to toggle FAB visibility
   useEffect(() => {
-    let typingTimeout: NodeJS.Timeout;
-    
-    if (Math.random() > 0.98) { // 2% chance to show typing
-      setIsTyping(true);
-      typingTimeout = setTimeout(() => setIsTyping(false), 3000);
-    }
+    const container = messagesContainerRef.current;
+    if (!container) return;
 
-    return () => clearTimeout(typingTimeout);
-  }, [messages]);
+    const handleScroll = () => {
+      const isNearBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight < 64;
+      setShowScrollToBottom(!isNearBottom);
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    // Initialize
+    handleScroll();
+    return () => container.removeEventListener('scroll', handleScroll as any);
+  }, []);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Mark messages as seen when conversation is active
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage && lastMessage.sender !== currentUser._id && lastMessage.status !== 'seen') {
+        markMessageSeen(lastMessage._id);
+      }
+    }
+  }, [messages, currentUser._id, markMessageSeen]);
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
 
-    const message: Message = {
-      id: `${conversation.id}-${Date.now()}`,
-      content: newMessage,
-      senderId: currentUser.id,
-      timestamp: new Date(),
-      type: 'text',
-      isRead: false,
-    };
+    if (!partner) {
+      toastManager.showError('Không tìm thấy người nhận tin nhắn');
+      return;
+    }
 
-    setMessages(prev => [...prev, message]);
-    onNewMessage(conversation.id, {
-      id: Date.now().toString(),
+    console.log('📤 ChatWindow - Sending message:', {
       text: newMessage,
-      timestamp: new Date().toISOString(),
-      sender: currentUser.id,
+      conversationId: conversation._id,
+      partnerId: partner._id,
+      partner: partner,
+      currentMessages: messages.length
     });
-    
+
+    sendMessage(newMessage, conversation._id, partner._id);
     setNewMessage('');
-
-    // Simulate response after 2-5 seconds
-    setTimeout(() => {
-      const responses = [
-        'Cảm ơn bạn!',
-        'Tôi sẽ xem xét và phản hồi lại',
-        'Được ạ, không vấn đề gì',
-        'Bạn có thể liên hệ trực tiếp với tôi qua số điện thoại',
-        'Tôi sẽ sắp xếp thời gian phù hợp',
-      ];
-      
-      const response = responses[Math.floor(Math.random() * responses.length)];
-      const responseMessage: Message = {
-        id: `${conversation.id}-${Date.now()}-response`,
-        content: response,
-        senderId: conversation.participant.id,
-        timestamp: new Date(),
-        type: 'text',
-        isRead: false,
-      };
-
-      setMessages(prev => [...prev, responseMessage]);
-      onNewMessage(conversation.id, {
-        id: Date.now().toString(),
-        text: response,
-        timestamp: new Date().toISOString(),
-        sender: conversation.participant.id,
-      });
-    }, Math.random() * 3000 + 2000);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -175,31 +105,39 @@ export default function ChatWindow({ conversation, currentUser, onNewMessage }: 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Simulate file upload
-      toastManager.showSuccess('File đã được tải lên!');
-      
-      const message: Message = {
-        id: `${conversation.id}-${Date.now()}`,
-        content: `Đã gửi file: ${file.name}`,
-        senderId: currentUser.id,
-        timestamp: new Date(),
-        type: 'file',
-        fileName: file.name,
-        isRead: false,
-      };
-
-      setMessages(prev => [...prev, message]);
+      toastManager.showInfo('Tính năng upload file đang được phát triển');
+      // TODO: Implement file upload with socket
     }
   };
 
-  const formatTime = (date: Date) => {
+  // Auto-resize textarea
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    if (!textareaRef.current) return;
+    const ta = textareaRef.current;
+    const maxHeight = 120;
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, maxHeight) + 'px';
+  }, [newMessage]);
+
+  const formatTime = (dateString: string) => {
+    if (!dateString) return '--:--';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '--:--';
+    
     return date.toLocaleTimeString('vi-VN', { 
       hour: '2-digit', 
       minute: '2-digit' 
     });
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'Không xác định';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Không xác định';
+    
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -213,43 +151,78 @@ export default function ChatWindow({ conversation, currentUser, onNewMessage }: 
     }
   };
 
-  // Group messages by date
-  const groupedMessages = messages.reduce((groups, message) => {
-    const date = message.timestamp.toDateString();
-    if (!groups[date]) {
-      groups[date] = [];
+  const MessageStatusIcon = ({ status }: { status: string }) => {
+    if (status === 'seen') {
+      return (
+        <span className="inline-flex items-center gap-0.5 text-blue-500">
+          <CheckIcon className="h-3 w-3" />
+          <CheckIcon className="h-3 w-3 -ml-2" />
+        </span>
+      );
     }
-    groups[date].push(message);
-    return groups;
-  }, {} as Record<string, Message[]>);
+    if (status === 'delivered') {
+      return (
+        <span className="inline-flex items-center gap-0.5 text-gray-400">
+          <CheckIcon className="h-3 w-3" />
+          <CheckIcon className="h-3 w-3 -ml-2" />
+        </span>
+      );
+    }
+    if (status === 'sent') {
+      return (
+        <span className="inline-flex items-center text-gray-300">
+          <CheckIcon className="h-3 w-3" />
+        </span>
+      );
+    }
+    return null;
+  };
+
+  // Group messages by date and ensure chronological order
+  const groupedMessages = messages
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) // Sort messages chronologically
+    .reduce((groups, message) => {
+      const date = new Date(message.createdAt).toDateString();
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(message);
+      return groups;
+    }, {} as Record<string, Message[]>);
+
+  if (!partner) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-500">Không tìm thấy thông tin người trò chuyện</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
       {/* Chat Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-white">
+      <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b bg-white">
         <div className="flex items-center space-x-3">
           <div className="relative">
-            <Image
-              src={typeof conversation.participant.avatar === 'string' && conversation.participant.avatar.trim() !== '' ? conversation.participant.avatar : '/placeholder-room.svg'}
-              alt={conversation.participant.name}
-              width={40}
-              height={40}
-              className="w-10 h-10 rounded-full object-cover"
-            />
-            {conversation.participant.isOnline && (
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-            )}
-          </div>
-          <div>
-            <h3 className="font-medium text-gray-900">{conversation.participant.name}</h3>
-            <p className="text-sm text-gray-500">
-              {conversation.participant.isOnline ? (
-                <span className="text-green-600">Đang online</span>
-              ) : (
-                `Hoạt động ${conversation.participant.lastSeen?.toLocaleTimeString('vi-VN')}`
-              )}
-            </p>
-          </div>
+                  <Image
+                    src={partner.avatar || '/placeholder-room.svg'}
+                    alt={partner.full_name || 'Unknown User'}
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <h3 className="font-medium text-gray-900">{partner.full_name || 'Unknown User'}</h3>
+                    <OnlineStatusIndicator isOnline={true} size="sm" />
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    <span className="text-gray-600">{partner.role}</span>
+                  </p>
+                </div>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -268,49 +241,80 @@ export default function ChatWindow({ conversation, currentUser, onNewMessage }: 
         </div>
       </div>
 
-      {/* Property Info Banner */}
-      <div className="p-3 bg-blue-50 border-b">
-        <div className="flex items-center space-x-3">
-          <Image
-            src={typeof conversation.property.image === 'string' && conversation.property.image.trim() !== '' ? conversation.property.image : '/placeholder-room.svg'}
-            alt={conversation.property.title}
-            width={40}
-            height={40}
-            className="w-10 h-10 rounded object-cover"
-          />
-          <div className="flex-1">
-            <p className="text-sm font-medium text-gray-900">{conversation.property.title}</p>
-            <p className="text-xs text-gray-500">Tin đăng đang thảo luận</p>
-          </div>
-          <a
-            href={`/phong-tro/${conversation.property.id}`}
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-          >
-            Xem tin
-          </a>
-        </div>
-      </div>
+      {/* Conversation Info Banner removed per user preference */}
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
-        {Object.entries(groupedMessages).map(([date, dayMessages]) => (
+      {/* Messages - Only this section scrolls */}
+      <div
+        ref={messagesContainerRef}
+        className="relative flex-1 overflow-y-auto p-4 bg-gray-50"
+        style={{ maxHeight: 'calc(100vh - 200px)' }}
+      >
+        {/* Loading state */}
+        {isLoading && (
+          <div className="space-y-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className={`flex ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}>
+                <div className="h-6 w-48 bg-gray-200 rounded-xl animate-pulse" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!isLoading && messages.length === 0 && (
+          <div className="h-full flex items-center justify-center text-center">
+            <div>
+              <p className="text-gray-500">Hãy bắt đầu cuộc trò chuyện với {partner.full_name || 'người dùng'}.</p>
+              <div className="mt-3 flex flex-wrap gap-2 justify-center">
+                {['Xin chào!', 'Bạn có rảnh nói chuyện không?', 'Cho mình hỏi về phòng ạ'].map((reply) => (
+                  <button
+                    key={reply}
+                    onClick={() => setNewMessage(reply)}
+                    className="px-3 py-1.5 text-sm bg-white text-gray-700 rounded-full hover:bg-blue-50 hover:text-blue-700 border border-gray-200"
+                  >
+                    {reply}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {Object.entries(groupedMessages)
+          .sort(([dateA], [dateB]) => new Date(dateA).getTime() - new Date(dateB).getTime()) // Sort dates chronologically
+          .map(([date, dayMessages]) => (
           <div key={date}>
             {/* Date separator */}
             <div className="flex items-center justify-center my-4">
-              <div className="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">
-                {formatDate(new Date(date))}
+              <div className="bg-white text-gray-600 text-xs px-3 py-1 rounded-full border border-gray-200">
+                {formatDate(date)}
               </div>
             </div>
 
             {/* Messages for this date */}
             {dayMessages.map((message, index) => {
-              const isCurrentUser = message.senderId === currentUser.id;
-              const showAvatar = index === 0 || dayMessages[index - 1].senderId !== message.senderId;
+              const isCurrentUser = chatHelpers.isMessageFromCurrentUser(message, currentUser._id);
+              const isFirstOfGroup = index === 0 || dayMessages[index - 1].sender !== message.sender;
+              const isLastOfGroup = index === dayMessages.length - 1 || dayMessages[index + 1].sender !== message.sender;
+              
+              // Debug logging
+              if (index === 0) {
+                console.log('Message sender debug:', {
+                  messageSender: message.sender,
+                  currentUserId: currentUser._id,
+                  senderType: typeof message.sender,
+                  userIdType: typeof currentUser._id,
+                  isCurrentUser: isCurrentUser,
+                  messageText: message.text
+                });
+              }
+              
+              const showAvatar = isFirstOfGroup;
 
               return (
                 <div
-                  key={message.id}
-                  className={`flex items-end space-x-2 mb-4 ${
+                  key={message._id}
+                  className={`flex items-end space-x-2 ${isFirstOfGroup ? 'mt-2' : 'mt-0.5'} mb-0.5 ${
                     isCurrentUser ? 'justify-end' : 'justify-start'
                   }`}
                 >
@@ -318,8 +322,8 @@ export default function ChatWindow({ conversation, currentUser, onNewMessage }: 
                     <div className="w-8 h-8 flex-shrink-0">
                       {showAvatar && (
                         <Image
-                          src={typeof conversation.participant.avatar === 'string' && conversation.participant.avatar.trim() !== '' ? conversation.participant.avatar : '/placeholder-room.svg'}
-                          alt={conversation.participant.name}
+                          src={partner.avatar || '/placeholder-room.svg'}
+                          alt={partner.full_name || 'Unknown User'}
                           width={32}
                           height={32}
                           className="w-8 h-8 rounded-full object-cover"
@@ -329,28 +333,40 @@ export default function ChatWindow({ conversation, currentUser, onNewMessage }: 
                   )}
 
                   <div
-                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                    className={`max-w-full md:max-w-[75%] px-4 py-2 ${
                       isCurrentUser
                         ? 'bg-blue-600 text-white'
-                        : 'bg-white text-gray-900 border'
+                        : 'bg-gray-100 text-gray-900 border border-gray-200'
+                    } ${
+                      // Bubble radius to visually group consecutive messages
+                      isCurrentUser
+                        ? `${isFirstOfGroup ? 'rounded-t-2xl' : 'rounded-t-lg'} ${isLastOfGroup ? 'rounded-b-2xl' : 'rounded-b-lg'} rounded-l-2xl`
+                        : `${isFirstOfGroup ? 'rounded-t-2xl' : 'rounded-t-lg'} ${isLastOfGroup ? 'rounded-b-2xl' : 'rounded-b-lg'} rounded-r-2xl`
                     }`}
                   >
-                    <p className="text-sm">{message.content}</p>
-                    <p
-                      className={`text-xs mt-1 ${
-                        isCurrentUser ? 'text-blue-100' : 'text-gray-500'
-                      }`}
-                    >
-                      {formatTime(message.timestamp)}
-                    </p>
+                    <p className="text-sm">{message.text || ''}</p>
+                           <div className="flex items-center justify-between mt-1">
+                              <p
+                                className={`text-xs ${
+                                  isCurrentUser ? 'text-blue-100' : 'text-gray-600'
+                                }`}
+                              >
+                               {formatTime(message.createdAt)}
+                             </p>
+                              {isCurrentUser && (
+                                <span className="ml-2">
+                                  <MessageStatusIcon status={message.status} />
+                                </span>
+                              )}
+                           </div>
                   </div>
 
                   {isCurrentUser && (
                     <div className="w-8 h-8 flex-shrink-0">
                       {showAvatar && (
                         <Image
-                          src={typeof currentUser.avatar === 'string' && currentUser.avatar.trim() !== '' ? currentUser.avatar : '/placeholder-room.svg'}
-                          alt={currentUser.name}
+                          src={currentUser.avatar || '/placeholder-room.svg'}
+                          alt={currentUser.full_name}
                           width={32}
                           height={32}
                           className="w-8 h-8 rounded-full object-cover"
@@ -364,84 +380,76 @@ export default function ChatWindow({ conversation, currentUser, onNewMessage }: 
           </div>
         ))}
 
-        {/* Typing indicator */}
-        {isTyping && (
-          <div className="flex items-end space-x-2 mb-4">
-            <Image
-              src={typeof conversation.participant.avatar === 'string' && conversation.participant.avatar.trim() !== '' ? conversation.participant.avatar : '/placeholder-room.svg'}
-              alt={conversation.participant.name}
-              width={32}
-              height={32}
-              className="w-8 h-8 rounded-full object-cover"
-            />
-            <div className="bg-white border rounded-2xl px-4 py-2">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-              </div>
-            </div>
-          </div>
-        )}
+              {/* Typing indicator */}
+              {isTyping && (
+                <TypingIndicator userName={partner?.full_name} />
+              )}
 
         <div ref={messagesEndRef} />
+
+        {/* Scroll-to-bottom button */}
+        {showScrollToBottom && (
+          <button
+            onClick={scrollToBottom}
+            className="absolute bottom-4 right-4 p-3 rounded-full bg-blue-600 text-white shadow hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-300"
+            aria-label="Cuộn xuống cuối"
+          >
+            <PaperAirplaneIcon className="h-5 w-5 rotate-90" />
+          </button>
+        )}
       </div>
 
-      {/* Message Input */}
-      <div className="p-4 bg-white border-t">
-        <div className="flex items-end space-x-3">
-          {/* File upload */}
+      {/* Enhanced Message Input */}
+      <div className="p-4 bg-white border-t border-gray-200">
+        <div className="flex items-center space-x-2.5">
+          {/* Hidden file input */}
           <input
             ref={fileInputRef}
             type="file"
             onChange={handleFileUpload}
             className="hidden"
           />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <PaperClipIcon className="h-5 w-5" />
-          </button>
 
           {/* Message input */}
           <div className="flex-1 relative">
+            {/* Attachment inside input */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
+              aria-label="Đính kèm"
+            >
+              <PaperClipIcon className="h-5 w-5" />
+            </button>
             <textarea
+              ref={textareaRef}
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Nhập tin nhắn..."
+              placeholder="Nhập tin nhắn... (Enter để gửi, Shift+Enter để xuống dòng)"
               rows={1}
-              className="w-full px-4 py-2 border border-gray-300 rounded-2xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              style={{ minHeight: '40px', maxHeight: '120px' }}
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-2xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all duration-200 no-scrollbar"
+              style={{ minHeight: '44px', maxHeight: '120px', overflowY: 'auto' }}
             />
-            
-            {/* Emoji button */}
-            <button
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              <FaceSmileIcon className="h-5 w-5" />
-            </button>
           </div>
 
-          {/* Send button */}
+          {/* Enhanced Send button */}
           <button
             onClick={handleSendMessage}
             disabled={!newMessage.trim()}
-            className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="h-[46px] w-[46px] flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow"
+            aria-label="Gửi"
           >
             <PaperAirplaneIcon className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Quick replies */}
-        <div className="flex flex-wrap gap-2 mt-3">
+        {/* Enhanced Quick replies */}
+        <div className="flex flex-wrap gap-2 mt-4">
           {['Phòng còn trống không?', 'Giá có thương lượng được không?', 'Khi nào có thể xem phòng?'].map((reply) => (
             <button
               key={reply}
               onClick={() => setNewMessage(reply)}
-              className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
+              className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition border border-gray-200"
             >
               {reply}
             </button>

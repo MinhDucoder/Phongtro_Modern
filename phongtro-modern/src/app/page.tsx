@@ -8,11 +8,15 @@ import StructuredData from '@/components/seo/StructuredData';
 import { roomApi, Room, Post } from '@/lib/api';
 import RoomCard from '@/components/room/RoomCard';
 import { toastManager } from '@/components/ui/ToastManager';
+import StatsOverview from '@/components/stats/StatsOverview';
+import RealTimeCounter from '@/components/stats/RealTimeCounter';
+import TrendingChart from '@/components/stats/TrendingChart';
 
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [savedProperties, setSavedProperties] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 6;
@@ -87,8 +91,16 @@ export default function Home() {
   
 
   const handleToggleFavorite = (roomId: string) => {
-    setFavorites(prev => 
-      prev.includes(roomId) 
+    setFavorites(prev =>
+      prev.includes(roomId)
+        ? prev.filter(id => id !== roomId)
+        : [...prev, roomId]
+    );
+  };
+
+  const handleToggleSaved = (roomId: string) => {
+    setSavedProperties(prev =>
+      prev.includes(roomId)
         ? prev.filter(id => id !== roomId)
         : [...prev, roomId]
     );
@@ -139,6 +151,7 @@ export default function Home() {
 
       {/* Search Filter */}
       <SearchFilter />
+
 
       {/* Property Listings */}
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -192,6 +205,7 @@ export default function Home() {
                   key={post._id}
                   room={{
                     ...post.roomId,
+                    _id: post._id, // Sử dụng post._id thay vì room._id
                     // Thêm thông tin từ post nếu cần
                     postId: post._id,
                     status: post.status,
@@ -201,6 +215,9 @@ export default function Home() {
                   }}
                   onToggleFavorite={handleToggleFavorite}
                   isFavorite={favorites.includes(post._id)}
+                  onToggleSaved={handleToggleSaved}
+                  isSaved={savedProperties.includes(post._id)}
+                  favoriteId={null} // TODO: Get from API response
                 />
               ) : (
                 <div key={post._id} className="bg-red-100 p-4 rounded">

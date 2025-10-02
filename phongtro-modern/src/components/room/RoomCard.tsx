@@ -8,19 +8,28 @@ import {
   HomeIcon, 
   EyeIcon,
   PhoneIcon,
-  HeartIcon
+  HeartIcon,
+  BookmarkIcon
 } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import { HeartIcon as HeartSolidIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { savedPropertiesApi } from '@/lib/api';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface RoomCardProps {
   room: Room;
   onToggleFavorite?: (roomId: string) => void;
   isFavorite?: boolean;
+  onToggleSaved?: (roomId: string) => void;
+  isSaved?: boolean;
+  favoriteId?: string; // ID của favorite record trong database
 }
 
-export default function RoomCard({ room, onToggleFavorite, isFavorite = false }: RoomCardProps) {
+export default function RoomCard({ room, onToggleFavorite, isFavorite = false, onToggleSaved, isSaved = false, favoriteId }: RoomCardProps) {
   const [imageError, setImageError] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -39,6 +48,57 @@ export default function RoomCard({ room, onToggleFavorite, isFavorite = false }:
 
   const getStatusLabel = (isAvailable: boolean) => {
     return isAvailable ? 'Còn trống' : 'Đã thuê';
+  };
+
+  const handleSaveProperty = async () => {
+    console.log('🔖 Save Property Debug:', {
+      isAuthenticated,
+      roomId: room._id,
+      isSaved,
+      favoriteId
+    });
+
+    if (!isAuthenticated) {
+      toastManager.showError('Vui lòng đăng nhập để lưu tin', {
+        description: 'Bạn cần đăng nhập để sử dụng tính năng này',
+        action: {
+          label: 'Đăng nhập',
+          onClick: () => window.location.href = '/dang-nhap'
+        }
+      });
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      
+      if (isSaved) {
+        // Remove from saved
+        console.log('🗑️ Removing property from saved...');
+        if (favoriteId) {
+          await savedPropertiesApi.removeProperty(favoriteId);
+        }
+        onToggleSaved?.(room._id);
+        toastManager.showSuccess('Đã bỏ lưu tin');
+      } else {
+        // Add to saved
+        console.log('💾 Saving property...', { postId: room._id });
+        const response = await savedPropertiesApi.saveProperty(room._id);
+        console.log('✅ Save response:', response);
+        onToggleSaved?.(room._id);
+        toastManager.showSuccess('Đã lưu tin thành công');
+      }
+    } catch (error) {
+      console.error('❌ Error saving property:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data
+      });
+      toastManager.showError('Có lỗi xảy ra khi lưu tin');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const isValidImageUrl = (url: string | undefined | null): boolean => {
@@ -99,17 +159,37 @@ export default function RoomCard({ room, onToggleFavorite, isFavorite = false }:
           </span>
         </div>
 
-        {/* Favorite Button */}
-        <button
-          onClick={() => onToggleFavorite?.(room._id)}
-          className="absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white transition-colors"
-        >
-          {isFavorite ? (
-            <HeartSolidIcon className="h-5 w-5 text-red-500" />
-          ) : (
-            <HeartIcon className="h-5 w-5 text-gray-600" />
-          )}
-        </button>
+        {/* Action Buttons */}
+        <div className="absolute top-2 right-2 flex flex-col gap-1">
+          {/* Favorite Button */}
+          <button
+            onClick={() => onToggleFavorite?.(room._id)}
+            className="p-1 rounded-full bg-white/80 hover:bg-white transition-colors"
+            title={isFavorite ? 'Bỏ yêu thích' : 'Yêu thích'}
+          >
+            {isFavorite ? (
+              <HeartSolidIcon className="h-5 w-5 text-red-500" />
+            ) : (
+              <HeartIcon className="h-5 w-5 text-gray-600" />
+            )}
+          </button>
+
+          {/* Save Button */}
+          <button
+            onClick={handleSaveProperty}
+            disabled={isSaving}
+            className="p-1 rounded-full bg-white/80 hover:bg-white transition-colors disabled:opacity-50"
+            title={isSaved ? 'Bỏ lưu tin' : 'Lưu tin'}
+          >
+            {isSaving ? (
+              <div className="h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            ) : isSaved ? (
+              <BookmarkSolidIcon className="h-5 w-5 text-blue-500" />
+            ) : (
+              <BookmarkIcon className="h-5 w-5 text-gray-600" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Content */}

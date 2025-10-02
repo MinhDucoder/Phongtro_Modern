@@ -206,7 +206,7 @@ export default function PaymentPage() {
               return (
                 <div
                   key={pkg.id}
-                  className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-200 cursor-pointer ${
+                  className={`relative bg-white rounded-xl shadow-lg border-2 transition-all duration-200 cursor-pointer ${
                     isSelected 
                       ? 'border-blue-500 ring-4 ring-blue-100' 
                       : 'border-gray-200 hover:border-gray-300'

@@ -1,6 +1,15 @@
 import PostPropertyForm from '@/components/post/PostPropertyForm';
+import { LandlordOnly } from '@/components/auth/ProtectedRoute';
 
 export default function PostPropertyPage() {
+  return (
+    <LandlordOnly>
+      <PostPropertyContent />
+    </LandlordOnly>
+  );
+}
+
+function PostPropertyContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}

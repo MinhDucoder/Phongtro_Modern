@@ -100,7 +100,7 @@ export default function PostModerationQueue() {
   const handleViewDetails = async (post: Post) => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/admin/moderation/post/${post.id}`);
+      const response = await axios.get(`/api/admin/moderation/${post.id}/get`);
       
       if (response.data.success) {
         setSelectedPost(response.data.data);
@@ -124,7 +124,8 @@ export default function PostModerationQueue() {
       
       const response = await axios.patch(`/api/admin/moderation/${postId}`, {
         status,
-        reason: status === 'rejected' ? reason : undefined
+        reason: status === 'rejected' ? reason : undefined,
+        notifyLandlord: true
       });
       
       if (response.data.success) {

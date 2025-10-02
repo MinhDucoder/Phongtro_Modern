@@ -1,4 +1,11 @@
 @import "tailwindcss";
+@import "../styles/chat-animations.css";
+
+/* Chat page specific - no page scroll */
+.chat-page {
+  overflow: hidden;
+  height: 100vh;
+}
 
 :root {
   --background: #ffffff;
@@ -150,6 +157,15 @@ select {
   
   .text-light {
     color: #6b7280;
+  }
+
+  /* Hide scrollbars (keep scroll functionality) */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
   }
 }
 

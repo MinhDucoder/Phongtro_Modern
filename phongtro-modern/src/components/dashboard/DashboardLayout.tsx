@@ -40,9 +40,10 @@ const navigation = [
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
+  requireLandlord?: boolean; // if true, enforce landlord/admin via DashboardGuard
 }
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+export default function DashboardLayout({ children, requireLandlord = true }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarHidden, setSidebarHidden] = useState(false);
@@ -67,13 +68,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const user = {
     name: authUser?.full_name || 'Nguyễn Văn A',
     email: authUser?.email || 'nguyenvana@email.com',
-    avatar: authUser?.avatar && authUser.avatar !== '/placeholder-room.svg' ? authUser.avatar : '/placeholder-room.svg',
+    avatar: (() => {
+      const a: any = authUser?.avatar;
+      const url = typeof a === 'string' ? (a.trim() || undefined) : a && (a.url || a.secure_url || a.path || a.src || a?.href);
+      return url && url !== '/placeholder-room.svg' ? url : '/placeholder-room.svg';
+    })(),
     isVerified: true,
     memberSince: '2023',
   };
 
-  return (
-    <DashboardGuard>
+  const Shell = ({ children }: { children: React.ReactNode }) => (
       <div className="h-screen bg-gray-50 flex" suppressHydrationWarning>
       {/* Mobile sidebar */}
       {sidebarOpen && (
@@ -303,6 +307,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </main>
       </div>
     </div>
+  );
+
+  return requireLandlord ? (
+    <DashboardGuard>
+      <Shell>{children}</Shell>
     </DashboardGuard>
+  ) : (
+    <Shell>{children}</Shell>
   );
 }

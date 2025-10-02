@@ -1,4 +1,5 @@
 import YeuCauDaGuiClient from './YeuCauDaGuiClient';
+import { AuthRequired } from '@/components/auth/ProtectedRoute';
 
 export const metadata = {
   title: 'Yêu cầu thuê phòng đã gửi | NhaTroVN',
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function YeuCauDaGuiPage() {
-  return <YeuCauDaGuiClient />;
+  return (
+    <AuthRequired>
+      <YeuCauDaGuiClient />
+    </AuthRequired>
+  );
 }

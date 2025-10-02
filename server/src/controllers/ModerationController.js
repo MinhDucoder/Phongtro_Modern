@@ -3,6 +3,7 @@ import User from "../models/userSchema.js";
 import Room from "../models/roomSchema.js";
 import catchAsync from "../middlewares/catchAsync.js";
 import mongoose from "mongoose";
+import { sendPostApprovedNotification, sendPostRejectedNotification } from "../utils/notificationHelper.js";
 
 class ModerationController {
   // Dashboard tổng quan
@@ -394,32 +395,36 @@ class ModerationController {
     try {
       // Prepare update data for post
       const updateData = {
-        status: status === 'approved' ? 'active' : 'rejected',
-        moderatedAt: new Date(),
-        moderatedBy: req.user._id,
-        'moderation.lastReviewedAt': new Date(),
-        'moderation.reviewCount': { $inc: 1 }
+        $set: {
+          status: status === 'approved' ? 'active' : 'rejected',
+          moderatedAt: new Date(),
+          moderatedBy: req.user._id,
+          'moderation.lastReviewedAt': new Date(),
+        },
+        $inc: {
+          'moderation.reviewCount': 1
+        }
       };
       
       if (status === 'rejected') {
         // Add rejection details
-        updateData.rejectionReason = reason;
+        updateData.$set.rejectionReason = reason;
         
         // Set resubmission eligibility date (3 days from now)
         const resubmissionDate = new Date();
         resubmissionDate.setDate(resubmissionDate.getDate() + 3);
-        updateData.resubmissionEligibleDate = resubmissionDate;
+        updateData.$set.resubmissionEligibleDate = resubmissionDate;
         
         // Add moderation issues flags if provided
-        if (contentIssues !== undefined) updateData['moderation.contentIssues'] = contentIssues;
-        if (pricingIssues !== undefined) updateData['moderation.pricingIssues'] = pricingIssues;
-        if (imageIssues !== undefined) updateData['moderation.imageIssues'] = imageIssues;
-        if (addressIssues !== undefined) updateData['moderation.addressIssues'] = addressIssues;
-        if (violationDetails) updateData['moderation.violationDetails'] = violationDetails;
+        if (contentIssues !== undefined) updateData.$set['moderation.contentIssues'] = contentIssues;
+        if (pricingIssues !== undefined) updateData.$set['moderation.pricingIssues'] = pricingIssues;
+        if (imageIssues !== undefined) updateData.$set['moderation.imageIssues'] = imageIssues;
+        if (addressIssues !== undefined) updateData.$set['moderation.addressIssues'] = addressIssues;
+        if (violationDetails) updateData.$set['moderation.violationDetails'] = violationDetails;
       }
       
       if (notes) {
-        updateData.moderationNotes = notes;
+        updateData.$set.moderationNotes = notes;
       }
       
       // Update the post with the prepared data
@@ -473,24 +478,24 @@ class ModerationController {
       // Send notification to landlord if requested
       if (notifyLandlord && existingPost.landlord) {
         try {
-          // This is a placeholder for a notification system
-          // In a real implementation, you would call a notification service
-          console.log(`Notification to landlord ${existingPost.landlord._id}: Post ${postId} ${status === 'approved' ? 'approved' : 'rejected'}`);
+          const postTitle = existingPost.roomId?.title || 'Phòng trọ';
           
-          // Example notification data
-          const notificationData = {
-            userId: existingPost.landlord._id,
-            title: status === 'approved' ? 'Bài đăng đã được duyệt' : 'Bài đăng bị từ chối',
-            message: status === 'approved' 
-              ? `Bài đăng "${existingPost.roomId?.title || 'Phòng trọ'}" đã được duyệt và hiển thị công khai.`
-              : `Bài đăng "${existingPost.roomId?.title || 'Phòng trọ'}" đã bị từ chối với lý do: ${reason}`,
-            type: status === 'approved' ? 'post_approved' : 'post_rejected',
-            entityId: postId,
-            isRead: false
-          };
+          if (status === 'approved') {
+            await sendPostApprovedNotification(
+              existingPost.landlord._id,
+              postTitle,
+              postId
+            );
+          } else {
+            await sendPostRejectedNotification(
+              existingPost.landlord._id,
+              postTitle,
+              reason || 'Không đạt tiêu chuẩn',
+              postId
+            );
+          }
           
-          // TODO: Implement actual notification saving
-          // await Notification.create(notificationData);
+          console.log(`✅ Notification sent to landlord ${existingPost.landlord._id}: Post ${postId} ${status}`);
         } catch (notificationError) {
           console.error('Error sending notification:', notificationError);
           // Non-critical error, continue with response

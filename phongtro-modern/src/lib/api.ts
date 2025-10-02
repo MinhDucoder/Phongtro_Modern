@@ -265,13 +265,12 @@ export interface Post {
 }
 
 // Hàm gửi request API tổng quát với automatic token refresh
-async function apiRequest<T>(
+export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
   retryCount: number = 0
 ): Promise<ApiResponse<T>> {
   const url = `${API_BASE_URL}${endpoint}`;
-  console.log('apiRequest: Final URL =', url);
   
   // Get access token
   let accessToken = tokenManager.getAccessToken();
@@ -1062,6 +1061,140 @@ export const postPublicApi = {
   },
 };
 
+// Statistics API
+export const statsApi = {
+  // Lấy tổng quan thống kê
+  async getOverview(): Promise<ApiResponse> {
+    return apiRequest('/stats/overview', {
+      method: 'GET',
+    });
+  },
+
+  // Lấy thống kê real-time
+  async getRealTime(): Promise<ApiResponse> {
+    return apiRequest('/stats/real-time', {
+      method: 'GET',
+    });
+  },
+
+  // Lấy xu hướng thống kê
+  async getTrending(params?: {
+    period?: '7d' | '30d';
+    limit?: number;
+  }): Promise<ApiResponse> {
+    const queryString = params ? `?${new URLSearchParams(
+      Object.entries(params).reduce((acc, [key, value]) => {
+        if (value !== undefined && value !== null) {
+          acc[key] = value.toString();
+        }
+        return acc;
+      }, {} as Record<string, string>)
+    ).toString()}` : '';
+    
+    return apiRequest(`/stats/trending${queryString}`, {
+      method: 'GET',
+    });
+  },
+
+  // Lấy thống kê theo thành phố
+  async getCityStats(): Promise<ApiResponse> {
+    return apiRequest('/stats/cities', {
+      method: 'GET',
+    });
+  },
+
+  // Lấy thống kê theo loại phòng
+  async getPropertyTypeStats(): Promise<ApiResponse> {
+    return apiRequest('/stats/property-types', {
+      method: 'GET',
+    });
+  },
+
+  // Lấy thống kê giá thuê
+  async getPriceStats(params?: {
+    city?: string;
+    propertyType?: string;
+  }): Promise<ApiResponse> {
+    const queryString = params ? `?${new URLSearchParams(
+      Object.entries(params).reduce((acc, [key, value]) => {
+        if (value !== undefined && value !== null) {
+          acc[key] = value.toString();
+        }
+        return acc;
+      }, {} as Record<string, string>)
+    ).toString()}` : '';
+    
+    return apiRequest(`/stats/prices${queryString}`, {
+      method: 'GET',
+    });
+  },
+
+  // Lấy thống kê người dùng (cần authentication)
+  async getUserStats(): Promise<ApiResponse> {
+    return apiRequest('/stats/users', {
+      method: 'GET',
+    });
+  },
+};
+
+// Notification API
+export const notificationApi = {
+  // Get all notifications
+  async getNotifications(params?: {
+    filter?: 'all' | 'unread' | 'important';
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse> {
+    const queryString = params ? `?${new URLSearchParams(
+      Object.entries(params).reduce((acc, [key, value]) => {
+        if (value !== undefined && value !== null) {
+          acc[key] = value.toString();
+        }
+        return acc;
+      }, {} as Record<string, string>)
+    ).toString()}` : '';
+    
+    return apiRequest(`/notifications${queryString}`, {
+      method: 'GET',
+    });
+  },
+
+  // Get unread count
+  async getUnreadCount(): Promise<ApiResponse> {
+    return apiRequest('/notifications/unread-count', {
+      method: 'GET',
+    });
+  },
+
+  // Mark notification as read
+  async markAsRead(notificationId: string): Promise<ApiResponse> {
+    return apiRequest(`/notifications/${notificationId}/read`, {
+      method: 'PUT',
+    });
+  },
+
+  // Mark all as read
+  async markAllAsRead(): Promise<ApiResponse> {
+    return apiRequest('/notifications/mark-all-read', {
+      method: 'PUT',
+    });
+  },
+
+  // Delete notification
+  async deleteNotification(notificationId: string): Promise<ApiResponse> {
+    return apiRequest(`/notifications/${notificationId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Delete all notifications
+  async deleteAllNotifications(): Promise<ApiResponse> {
+    return apiRequest('/notifications', {
+      method: 'DELETE',
+    });
+  },
+};
+
 export default {
   auth: authApi,
   rooms: roomApi,
@@ -1070,4 +1203,6 @@ export default {
   payment: paymentApi,
   savedProperties: savedPropertiesApi,
   userSettings: userSettingsApi,
+  stats: statsApi,
+  notifications: notificationApi,
 };
