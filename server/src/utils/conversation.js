@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Conversation from "~/models/conversation.js";
+import Conversation from "../models/conversation.js";
 
 export default async function findOrCreateConversation(userId, otherUserId) {
   // đảm bảo ObjectId hợp lệ

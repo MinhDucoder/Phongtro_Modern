@@ -29,12 +29,12 @@ export const sendVerificationEmail = async (userEmail, verificationToken) => {
       subject: 'Xác thực tài khoản PhongTroVN',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #2563EB;">Xác thực tài khoản của bạn</h1>
+          <h1 style="color:~2563EB;">Xác thực tài khoản của bạn</h1>
           <p>Cảm ơn bạn đã đăng ký tài khoản tại PhongTroVN.</p>
           <p>Vui lòng click vào link bên dưới để xác thực tài khoản:</p>
           <a href="${verificationUrl}" 
              style="display: inline-block; 
-                    background-color: #2563EB; 
+                    background-color:~2563EB; 
                     color: white; 
                     padding: 10px 20px; 
                     text-decoration: none; 
@@ -42,10 +42,10 @@ export const sendVerificationEmail = async (userEmail, verificationToken) => {
                     margin: 15px 0;">
             Xác thực tài khoản
           </a>
-          <p style="color: #666;">Link xác thực sẽ hết hạn sau 24 giờ.</p>
-          <p style="color: #666;">Nếu bạn không đăng ký tài khoản này, vui lòng bỏ qua email này.</p>
-          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
-            <small style="color: #666;">Email này được gửi tự động, vui lòng không trả lời.</small>
+          <p style="color:~666;">Link xác thực sẽ hết hạn sau 24 giờ.</p>
+          <p style="color:~666;">Nếu bạn không đăng ký tài khoản này, vui lòng bỏ qua email này.</p>
+          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid~eee;">
+            <small style="color:~666;">Email này được gửi tự động, vui lòng không trả lời.</small>
           </div>
         </div>
       `

@@ -1,7 +1,7 @@
 // socket/chatHandler.js
 import Conversation from "../models/conversation.js";
 import Message from "../models/message.js";
-import findOrCreateConversation from "~/utils/conversation.js";
+import findOrCreateConversation from "../utils/conversation.js";
 
 export default function chatHandler(io, socket) {
   // 👉 Join conversation room

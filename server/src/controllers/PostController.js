@@ -1,6 +1,7 @@
 // src/controllers/postController.js
 import postService from "../services/postService.js";
 import { success, error } from "../utils/responeHandler.js";
+import redis from "../config/redis.config.mjs";
 
 class PostController {
   async create(req, res, next) {
@@ -15,7 +16,7 @@ class PostController {
   async list(req, res, next) {
     try {
       const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 20;
+      const limit = parseInt(req.query.limit) || 10;
       const filters = {};
       const sort = {};
 
@@ -28,8 +29,28 @@ class PostController {
       } else {
         sort.createdAt = -1;
       }
+      // Tạo một khóa duy nhất cho mỗi tập hợp tham số truy vấn
+      const cacheKey = `posts:${page}:${limit}:${JSON.stringify(
+        filters
+      )}:${JSON.stringify(sort)}`;
+      // Kiểm tra dữ liệu trong Redis trước
+      const cachedData = await redis.get(cacheKey);
 
-      const result = await postService.listPosts({ page, limit, filters, sort });
+      if(cachedData) {
+        console.log("Serving from cache");
+        return success(res, JSON.parse(cachedData));
+      }
+
+      const result = await postService.listPosts({
+        page,
+        limit,
+        filters,
+        sort,
+      });
+
+      await redis.set(cacheKey, JSON.stringify(result), { EX: 3600 }); // Cache trong 1 giờ
+
+      console.log("Serving from database");
       return success(res, result);
     } catch (err) {
       return error(res, err.message, 400);
@@ -47,7 +68,11 @@ class PostController {
 
   async update(req, res, next) {
     try {
-      const post = await postService.updatePost(req.params.id, req.user.id, req.body);
+      const post = await postService.updatePost(
+        req.params.id,
+        req.user.id,
+        req.body
+      );
       return success(res, post);
     } catch (err) {
       return error(res, err.message, 400);

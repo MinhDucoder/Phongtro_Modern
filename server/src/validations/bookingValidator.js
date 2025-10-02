@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 // Custom validator để check ObjectId
 const objectId = (value, helpers) => {
   if (!mongoose.Types.ObjectId.isValid(value)) {
-    return helpers.message('"{{#label}}" phải là ObjectId hợp lệ');
+    return helpers.message('"{{ ~label}}" phải là ObjectId hợp lệ');
   }
   return value;
 };
