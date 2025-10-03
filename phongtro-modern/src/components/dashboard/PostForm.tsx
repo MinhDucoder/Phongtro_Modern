@@ -911,60 +911,65 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
                 Ảnh đã tải ({formData.images.length}/10)
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {formData.images.map((imageUrl, index) => (
-                  <div key={index} className="relative group">
-                    <div className="aspect-square rounded-lg overflow-hidden">
-                      {(() => {
-                        // Handle different types of imageUrl
-                        let src = '/placeholder-room.svg';
-                        
-                        if (imageUrl) {
-                          // Handle nested arrays
-                          if (Array.isArray(imageUrl)) {
-                            const firstItem = imageUrl[0];
-                            if (typeof firstItem === 'string' && firstItem.trim() !== '') {
-                              src = firstItem;
-                            } else if (firstItem && typeof firstItem === 'object' && firstItem.url && typeof firstItem.url === 'string' && firstItem.url.trim() !== '') {
-                              src = firstItem.url;
+                {formData.images.map((imageUrlRaw, index) => {
+                  // Explicitly type imageUrl to avoid 'never' type error
+                  type ImageUrlType = string | { url: string } | Array<string | { url: string }>;
+                  const imageUrl = imageUrlRaw as ImageUrlType;
+                  return (
+                    <div key={index} className="relative group">
+                      <div className="aspect-square rounded-lg overflow-hidden">
+                        {(() => {
+                          // Handle different types of imageUrl
+                          let src = '/placeholder-room.svg';
+                          
+                          if (imageUrl) {
+                            // Handle nested arrays
+                            if (Array.isArray(imageUrl)) {
+                              const firstItem = imageUrl[0];
+                              if (typeof firstItem === 'string' && firstItem.trim() !== '') {
+                                src = firstItem;
+                              } else if (firstItem && typeof firstItem === 'object' && 'url' in firstItem && typeof firstItem.url === 'string' && firstItem.url.trim() !== '') {
+                                src = firstItem.url;
+                              }
+                            }
+                            // Handle direct string
+                            else if (typeof imageUrl === 'string' && imageUrl.trim() !== '') {
+                              src = imageUrl;
+                            } 
+                            // Handle direct object
+                            else if (typeof imageUrl === 'object' && 'url' in imageUrl && typeof imageUrl.url === 'string' && imageUrl.url.trim() !== '') {
+                              src = imageUrl.url;
                             }
                           }
-                          // Handle direct string
-                          else if (typeof imageUrl === 'string' && imageUrl.trim() !== '') {
-                            src = imageUrl;
-                          } 
-                          // Handle direct object
-                          else if (typeof imageUrl === 'object' && imageUrl.url && typeof imageUrl.url === 'string' && imageUrl.url.trim() !== '') {
-                            src = imageUrl.url;
-                          }
-                        }
-                        
-                        return (
-                          <Image
-                            src={src}
-                            alt={`Preview ${index + 1}`}
-                            width={200}
-                            height={200}
-                            className="w-full h-full object-cover"
-                            unoptimized
-                          />
-                        );
-                      })()}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(index)}
-                      className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
-                      title="Xóa ảnh"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
-                    {index === 0 && (
-                      <div className="absolute bottom-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                        Ảnh đại diện
+                          
+                          return (
+                            <Image
+                              src={src}
+                              alt={`Preview ${index + 1}`}
+                              width={200}
+                              height={200}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                            />
+                          );
+                        })()}
                       </div>
-                    )}
-                  </div>
-                ))}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(index)}
+                        className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                        title="Xóa ảnh"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </button>
+                      {index === 0 && (
+                        <div className="absolute bottom-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                          Ảnh đại diện
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
