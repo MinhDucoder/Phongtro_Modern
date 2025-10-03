@@ -87,6 +87,18 @@ export function SocketProvider({ children }: SocketProviderProps) {
       setIsConnected(false);
     });
 
+    // Listen for notifications
+    newSocket.on('notification', (notification) => {
+      console.log('🔔 Received notification:', notification);
+      
+      // Dispatch custom event for notification
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('notification-received', {
+          detail: notification
+        }));
+      }
+    });
+
     setSocket(newSocket);
 
     // Cleanup

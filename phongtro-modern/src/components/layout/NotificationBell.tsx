@@ -65,12 +65,17 @@ export default function NotificationBell() {
     };
   }, [isOpen]);
 
-  // Show toast when new notification arrives
+  // Show toast when new notification arrives (trừ tin nhắn và duyệt tin - đã xử lý riêng)
   useEffect(() => {
     // Chỉ trigger khi có notification MỚI (không phải lần đầu load)
     if (unreadCount > prevUnreadCountRef.current) {
-      // Tìm notification mới nhất (chưa đọc)
-      const latestNotification = notifications.find(n => !n.isRead);
+      // Tìm notification mới nhất (chưa đọc) - trừ tin nhắn và duyệt tin
+      const latestNotification = notifications.find(n => 
+        !n.isRead && 
+        n.type !== 'message' && 
+        n.type !== 'post_approved' && 
+        n.type !== 'post_rejected'
+      );
       
       if (latestNotification) {
         console.log('[NotificationBell] New notification received:', latestNotification);
@@ -97,6 +102,48 @@ export default function NotificationBell() {
     
     prevUnreadCountRef.current = unreadCount;
   }, [unreadCount, notifications]);
+
+  // Listen for real-time notifications from socket
+  useEffect(() => {
+    const handleNotificationReceived = (event: CustomEvent) => {
+      const notification = event.detail;
+      console.log('🔔 Real-time notification received:', notification);
+      
+      // Show toast for message notifications và duyệt tin
+      if (notification.type === 'message' || notification.type === 'post_approved' || notification.type === 'post_rejected') {
+        const actionLabel = notification.type === 'message' ? 'Xem tin nhắn' : 'Xem bài đăng';
+        
+        toastManager.showInfo(notification.title, {
+          description: notification.content,
+          duration: 5000,
+          action: {
+            label: actionLabel,
+            onClick: () => {
+              if (notification.link) {
+                window.location.href = notification.link;
+              }
+            }
+          }
+        });
+      }
+      
+      // Trigger notification refresh
+      setHasNewNotification(true);
+      setTimeout(() => {
+        setHasNewNotification(false);
+      }, 3000);
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('notification-received', handleNotificationReceived as EventListener);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('notification-received', handleNotificationReceived as EventListener);
+      }
+    };
+  }, []);
 
   // Don't show for unauthenticated users
   if (!isAuthenticated) {

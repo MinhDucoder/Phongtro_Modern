@@ -6,37 +6,42 @@ import UploadController from "../../controllers/UploadController.js";
 import uploadMiddleware from "../../middlewares/uploadMiddleware.js";
 import { cleanupUploads } from "../../middlewares/uploadMiddleware.js";
 import UserSettingsController from "../../controllers/UserSettingsController.js";
+import { cacheMiddleware } from "../../middlewares/cacheMiddleware.js";
 
 const userRoute = express.Router();
 
-// API /me để lấy thông tin user từ JWT token
-userRoute.get("/me", (req, res) => {
+// API /me để lấy thông tin user từ JWT token và database (tối ưu + cache)
+userRoute.get("/me", authenticate(), cacheMiddleware(30), async (req, res) => {
   try {
-    console.log('GET /me - Headers:', req.headers);
-    console.log('GET /me - Cookies:', req.cookies);
+    console.log('GET /me - User ID:', req.user.id);
     
-    const accessToken = req.cookies?.accessToken || req.headers.authorization?.split(" ")[1];
+    // Lấy thông tin user đầy đủ từ database với tối ưu
+    const User = (await import("../../models/userSchema.js")).default;
+    const user = await User.findById(req.user.id)
+      .select("-password -refresh_token -verification_token -google_id -facebook_id")
+      .lean() // Sử dụng lean() để tăng tốc độ
+      .exec();
     
-    if (!accessToken) {
-      return res.status(401).json({ message: "Vui lòng đăng nhập" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
     
-    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET || 'asdfsadfsadf');
-    console.log('GET /me - Decoded token:', decoded);
+    console.log('GET /me - User found:', {
+      id: user._id,
+      full_name: user.full_name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar
+    });
     
-    // Trả về thông tin user từ JWT token
+    // Trả về thông tin user đầy đủ từ database
     res.json({
       success: true,
-      user: {
-        _id: decoded.id,
-        full_name: decoded.full_name,
-        email: decoded.email,
-        role: decoded.role
-      }
+      user: user
     });
   } catch (error) {
     console.error('GET /me error:', error);
-    res.status(401).json({ message: "Token không hợp lệ" });
+    res.status(500).json({ message: error.message });
   }
 });
 

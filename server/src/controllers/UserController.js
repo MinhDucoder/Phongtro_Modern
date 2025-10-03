@@ -8,9 +8,10 @@ class UserController {
   async getProfile(req, res) {
     try {
       console.log('getProfile - req.user.id:', req.user.id);
-      const user = await User.findById(req.user.id).select(
-        "-password -refresh_token -verification_token"
-      );
+      const user = await User.findById(req.user.id)
+        .select("-password -refresh_token -verification_token -google_id -facebook_id")
+        .lean() // Sử dụng lean() để tăng tốc độ
+        .exec();
       if (!user) return res.status(404).json({ message: "User not found" });
       console.log('getProfile - user found:', {
         id: user._id,

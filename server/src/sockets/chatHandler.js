@@ -2,6 +2,8 @@
 import Conversation from "../models/conversation.js";
 import Message from "../models/message.js";
 import findOrCreateConversation from "../utils/conversation.js";
+import { sendNotification } from "../utils/notificationHelper.js";
+import User from "../models/userSchema.js";
 
 export default function chatHandler(io, socket) {
   // 👉 Join conversation room
@@ -88,7 +90,41 @@ export default function chatHandler(io, socket) {
         // 3. Emit cho room
         io.to(convId.toString()).emit("receiveMessage", message);
 
-        // 4. Callback ack
+        // 4. Tạo thông báo cho người nhận (nếu không phải là tin nhắn tự gửi)
+        if (sender !== receiver) {
+          try {
+            // Lấy thông tin người gửi để tạo thông báo
+            const senderUser = await User.findById(sender).select('full_name avatar');
+            
+            if (senderUser) {
+              await sendNotification({
+                userId: receiver,
+                type: "message",
+                title: "Tin nhắn mới",
+                content: `${senderUser.full_name}: ${text || '[Hình ảnh]'}`,
+                link: `/chat?conversation=${convId}`,
+                priority: "high",
+                relatedUser: {
+                  id: sender,
+                  name: senderUser.full_name,
+                  avatar: senderUser.avatar?.url || senderUser.avatar
+                },
+                metadata: {
+                  conversationId: convId.toString(),
+                  messageId: message._id.toString(),
+                  senderId: sender
+                }
+              });
+              
+              console.log(`📢 Message notification sent to user ${receiver} from ${senderUser.full_name}`);
+            }
+          } catch (notificationError) {
+            console.error("❌ Error creating message notification:", notificationError);
+            // Không throw error để không ảnh hưởng đến việc gửi tin nhắn
+          }
+        }
+
+        // 5. Callback ack
         if (callback)
           callback({
             success: true,

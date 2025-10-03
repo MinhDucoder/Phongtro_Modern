@@ -31,6 +31,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
+  const [isFetching, setIsFetching] = useState(false); // Prevent duplicate calls
 
   const isAuthenticated = !!user;
   
@@ -54,14 +55,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     showToast: true
   });
 
-  // Check if user is logged in on app start
+  // Check if user is logged in on app start - simplified logic
   useEffect(() => {
     if (!hasCheckedAuth) {
       setHasCheckedAuth(true);
-      // Thêm delay để đảm bảo localStorage đã sẵn sàng
-      setTimeout(() => {
-        checkAuthStatus();
-      }, 500);
+      // Immediate check without delay
+      checkAuthStatus();
     }
     
     // Auto-refresh user data every 15 minutes if user is logged in
@@ -75,26 +74,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => clearInterval(refreshInterval);
   }, [hasCheckedAuth, user]);
 
-  // Additional effect to handle page refresh
+  // Additional effect to ensure auth check on mount
   useEffect(() => {
-    const handlePageLoad = () => {
-      console.log('Page loaded, checking auth status...');
-      if (!hasCheckedAuth) {
-        setHasCheckedAuth(true);
-        checkAuthStatus();
-      }
-    };
-
-    // Check auth on page load
-    if (typeof window !== 'undefined') {
-      if (document.readyState === 'complete') {
-        handlePageLoad();
-      } else {
-        window.addEventListener('load', handlePageLoad);
-        return () => window.removeEventListener('load', handlePageLoad);
-      }
+    if (typeof window !== 'undefined' && !hasCheckedAuth) {
+      console.log('🔐 Initial auth check on mount');
+      setHasCheckedAuth(true);
+      checkAuthStatus();
     }
-  }, [hasCheckedAuth]);
+  }, []);
 
   // Check for Google OAuth success redirect
   useEffect(() => {
@@ -110,27 +97,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
-  // Fallback: Check if user has valid token but no user data
-  useEffect(() => {
-    const checkToken = () => {
-      const tokenStatus = authApi.getTokenStatus();
-      
-      if (tokenStatus.hasToken && !tokenStatus.isExpired && !user && !isLoading) {
-        console.log('Found valid token but no user data, fetching user profile...');
-        fetchUserProfileSilent();
-      }
-    };
-
-    // Check after 2 seconds
-    setTimeout(checkToken, 2000);
-  }, [user, isLoading]);
+  // Removed fallback logic to avoid conflicts
 
   const handleMeResponse = (response: ApiResponse) => {
+    console.log('🔐 Handling user response:', response);
+    
     if (response.success !== false && response) {
-      // getProfile() trả về user data trực tiếp, không wrap trong response.user
-      const userData = response.data || response;
+      // getMe() trả về user data trong response.user
+      const userData = response.user || response.data || response;
+      console.log('🔐 Setting user data:', {
+        id: userData._id,
+        name: userData.full_name,
+        avatar: userData.avatar
+      });
       setUser(userData as User);
     } else {
+      console.log('🔐 No valid user data, clearing user state');
       setUser(null);
 
       if (response.message?.includes('Phiên làm việc đã hết hạn')) {
@@ -157,7 +139,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const fetchUserProfile = async () => {
     try {
       setIsLoading(true);
-      const response = await authApi.getProfile();
+      const response = await authApi.getMe();
       handleMeResponse(response);
     } catch (error) {
       setUser(null);
@@ -167,7 +149,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const fetchUserProfileSilent = async () => {
+    // Prevent duplicate calls
+    if (isFetching) {
+      console.log('Already fetching user data, skipping...');
+      return;
+    }
+    
     try {
+      setIsFetching(true);
       setIsLoading(true);
       
       // Check if we have valid tokens before making the request
@@ -190,7 +179,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
       
       console.log('Fetching user profile silently...');
-      const response = await authApi.getProfile();
+      const response = await authApi.getMe();
       console.log('Profile response:', response);
       handleMeResponse(response);
     } catch (error) {
@@ -198,6 +187,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(null);
     } finally {
       setIsLoading(false);
+      setIsFetching(false);
     }
   };
 
@@ -249,6 +239,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (response.success && response.user) {
         setUser(response.user);
         toastManager.showLoginSuccess(response.user.full_name);
+        
+        // Fetch full user data including avatar after successful login
+        setTimeout(() => {
+          fetchUserProfileSilent();
+        }, 100);
         
         return { success: true, user: response.user };
       }

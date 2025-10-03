@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardGuard from '@/components/auth/DashboardGuard';
 import { toastManager } from '@/components/ui/ToastManager';
+import { useImagePreload } from '@/hooks/useImagePreload';
 import { 
   HomeIcon, 
   DocumentTextIcon, 
@@ -51,6 +52,15 @@ export default function DashboardLayout({ children, requireLandlord = true }: Da
   const router = useRouter();
   const { logout, user: authUser } = useAuth();
 
+  // Preload avatar image for better performance
+  const avatarUrl = (() => {
+    const a: any = authUser?.avatar;
+    const url = typeof a === 'string' ? (a.trim() || undefined) : a && (a.url || a.secure_url || a.path || a.src || a?.href);
+    return url && url !== '/placeholder-room.svg' ? url : '/placeholder-room.svg';
+  })();
+  
+  useImagePreload(avatarUrl);
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -68,11 +78,7 @@ export default function DashboardLayout({ children, requireLandlord = true }: Da
   const user = {
     name: authUser?.full_name || 'Nguyễn Văn A',
     email: authUser?.email || 'nguyenvana@email.com',
-    avatar: (() => {
-      const a: any = authUser?.avatar;
-      const url = typeof a === 'string' ? (a.trim() || undefined) : a && (a.url || a.secure_url || a.path || a.src || a?.href);
-      return url && url !== '/placeholder-room.svg' ? url : '/placeholder-room.svg';
-    })(),
+    avatar: avatarUrl,
     isVerified: true,
     memberSince: '2023',
   };

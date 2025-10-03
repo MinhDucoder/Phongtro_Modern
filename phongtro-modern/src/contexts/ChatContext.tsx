@@ -321,7 +321,8 @@ export function ChatProvider({ children }: ChatProviderProps) {
           senderName = partner?.full_name;
         }
 
-        toastManager.showInfo(`Tin nhắn mới từ ${senderName || 'Người dùng'}`);
+        // Bỏ toast đơn giản, chỉ giữ toast có nội dung chi tiết
+        // toastManager.showInfo(`Tin nhắn mới từ ${senderName || 'Người dùng'}`);
       }
     };
 

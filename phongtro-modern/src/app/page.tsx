@@ -19,7 +19,28 @@ export default function Home() {
   const [savedProperties, setSavedProperties] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [hasShownToast, setHasShownToast] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('hasShownPostsToast') === 'true';
+    }
+    return false;
+  });
   const ITEMS_PER_PAGE = 6;
+
+  useEffect(() => {
+    // Reset toast flag khi F5 (reload trang)
+    if (typeof window !== 'undefined') {
+      const handleBeforeUnload = () => {
+        sessionStorage.removeItem('hasShownPostsToast');
+      };
+      
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }
+  }, []);
 
   useEffect(() => {
     fetchFeaturedPosts(currentPage);
@@ -58,9 +79,13 @@ export default function Home() {
         setTotalPages(Math.ceil(data.data.total / ITEMS_PER_PAGE));
         console.log('Posts state updated. Current posts array length:', posts.length);
         
-        if (posts.length > 0) {
-      toastManager.showSuccess(`Đã tải ${posts.length} tin đăng đã duyệt từ database`);
-        } else {
+        if (posts.length > 0 && !hasShownToast) {
+          toastManager.showSuccess(`Đã tải ${posts.length} tin đăng đã duyệt từ database`);
+          setHasShownToast(true);
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('hasShownPostsToast', 'true');
+          }
+        } else if (posts.length === 0) {
           console.log('No approved posts available');
           toast('Chưa có tin đăng nào được duyệt. Vui lòng chờ admin duyệt tin.', {
             icon: '⚠️',
