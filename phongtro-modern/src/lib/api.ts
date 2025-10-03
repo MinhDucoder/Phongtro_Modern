@@ -689,7 +689,15 @@ export const roomApi = {
 
   // Tạo phòng mới
   async createRoom(roomData: any): Promise<ApiResponse> {
-    return apiRequest('/rooms', {
+    // Nếu roomData là FormData thì gửi trực tiếp, không stringify
+    if (roomData instanceof FormData) {
+      return apiRequest('/rooms/create', {
+        method: 'POST',
+        body: roomData, // Không stringify FormData
+      });
+    }
+    
+    return apiRequest('/rooms/create', {
       method: 'POST',
       body: JSON.stringify(roomData),
     });
@@ -738,6 +746,7 @@ export const dashboardApi = {
     limit?: number;
     status?: string;
     search?: string;
+    sort?: string;
   }): Promise<ApiResponse> {
     const queryString = params ? `?${new URLSearchParams(
       Object.entries(params).reduce((acc, [key, value]) => {
@@ -762,7 +771,7 @@ export const dashboardApi = {
 
   // Create new post
   async createPost(postData: any): Promise<ApiResponse> {
-    return apiRequest('/dashboard/posts', {
+    return apiRequest('/posts', {
       method: 'POST',
       body: JSON.stringify(postData),
     });
@@ -1062,6 +1071,52 @@ export const userSettingsApi = {
   },
 };
 
+export const subscriptionApi = {
+  // Lấy danh sách gói đăng tin
+  getPackages: () => apiRequest('/subscriptions/packages'),
+  
+  // Lấy subscription hiện tại
+  getCurrentSubscription: () => apiRequest('/subscriptions/current'),
+  
+  // Tạo đơn hàng mua gói
+  purchasePackage: (data: { packageId: string; paymentMethod: string }) => 
+    apiRequest('/subscriptions/purchase', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  
+  // Lấy lịch sử subscription
+  getHistory: (params?: any) => {
+    const queryString = params ? `?${new URLSearchParams(params).toString()}` : '';
+    return apiRequest(`/subscriptions/history${queryString}`);
+  },
+
+  // Lấy thông tin subscription và lượt đăng tin
+  getSubscriptionInfo: () => apiRequest('/posts/subscription-info'),
+  
+  // Kiểm tra quyền đăng tin
+  checkPostPermission: async () => {
+    try {
+      return await apiRequest('/subscriptions/check-permission');
+    } catch (error: any) {
+      // Trường hợp đặc biệt: user chưa có subscription
+      if (error.message?.includes('chưa có gói đăng tin') || 
+          error.message?.includes('không tìm thấy subscription')) {
+        return {
+          success: false,
+          message: error.message,
+          data: {
+            canPost: false,
+            remainingPosts: 0,
+            subscription: null
+          }
+        };
+      }
+      throw error;
+    }
+  },
+};
+
 export const postPublicApi = {
   async getPostDetail(postId: string): Promise<ApiResponse> {
     return apiRequest(`/posts/${postId}`, {
@@ -1212,6 +1267,7 @@ export default {
   payment: paymentApi,
   savedProperties: savedPropertiesApi,
   userSettings: userSettingsApi,
+  subscription: subscriptionApi,
   stats: statsApi,
   notifications: notificationApi,
 };

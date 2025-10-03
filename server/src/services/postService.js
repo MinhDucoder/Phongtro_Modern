@@ -3,10 +3,50 @@ import mongoose from "mongoose";
 import Post from "../models/postSchema.js";
 import Room from "../models/roomSchema.js";
 import PostAnalytics from "../models/postAnalyticsSchema.js";
+import Subscription from "../models/subscriptionSchema.js";
 import { LANDLORD_PROJECTION, ROOM_PROJECTION } from "../utils/constants.js";
 
 class PostService {
-  async createPost(userId, { roomId, options, favouriteLevel }) {
+  async createPost(userId, postData) {
+    console.log('=== CREATE POST SERVICE ===');
+    console.log('User ID:', userId);
+    console.log('Post Data:', postData);
+    
+    // Kiểm tra subscription trước khi tạo post
+    const subscription = await Subscription.findOne({
+      user: userId,
+      status: "active",
+      endDate: { $gt: new Date() }
+    });
+
+    if (!subscription) {
+      throw new Error("SUBSCRIPTION_REQUIRED:Bạn cần có gói đăng tin để tạo bài đăng. Vui lòng chọn gói phù hợp.");
+    }
+
+    // Kiểm tra đã sử dụng hết lượt chưa
+    if (subscription.usedPosts >= subscription.postLimit) {
+      throw new Error(`LIMIT_EXCEEDED:Bạn đã sử dụng hết ${subscription.postLimit} lượt đăng tin của gói ${subscription.packageName}. Vui lòng nâng cấp gói để tiếp tục đăng tin.`);
+    }
+
+    let roomId = postData.roomId;
+    
+    // Nếu có data room, tạo room mới
+    if (postData.room && !roomId) {
+      console.log('Creating new room...');
+      const roomData = {
+        ...postData.room,
+        landlord: userId,
+      };
+      
+      const newRoom = await Room.create(roomData);
+      console.log('Room created:', newRoom._id);
+      roomId = newRoom._id;
+    }
+    
+    if (!roomId) {
+      throw new Error("Room ID is required");
+    }
+
     const room = await Room.findById(roomId);
     if (!room) throw new Error("Room not found");
     if (String(room.landlord) !== String(userId)) {
@@ -16,14 +56,54 @@ class PostService {
     const post = await Post.create({
       roomId,
       landlord: userId,
-      options,
-      favouriteLevel,
+      options: postData.options || [],
+      favouriteLevel: postData.favouriteLevel || 0,
+      status: postData.status || 'pending',
     });
+
+    // Cập nhật số lượt đã sử dụng
+    await Subscription.findByIdAndUpdate(subscription._id, {
+      $inc: { usedPosts: 1 }
+    });
+
+    console.log('Post created successfully:', post._id);
+    console.log('Subscription updated - used posts:', subscription.usedPosts + 1);
 
     return post.populate([
       { path: "roomId", select: ROOM_PROJECTION },
       { path: "landlord", select: LANDLORD_PROJECTION },
     ]);
+  }
+
+  async getUserSubscriptionInfo(userId) {
+    const subscription = await Subscription.findOne({
+      user: userId,
+      status: "active",
+      endDate: { $gt: new Date() }
+    });
+
+    if (!subscription) {
+      return {
+        hasActiveSubscription: false,
+        message: "Không có gói đăng tin nào đang hoạt động"
+      };
+    }
+
+    const remainingPosts = subscription.postLimit - subscription.usedPosts;
+    
+    return {
+      hasActiveSubscription: true,
+      subscription: {
+        packageName: subscription.packageName,
+        packageType: subscription.packageType,
+        postLimit: subscription.postLimit,
+        usedPosts: subscription.usedPosts,
+        remainingPosts: remainingPosts,
+        endDate: subscription.endDate,
+        isExpired: subscription.endDate <= new Date(),
+        canCreatePost: remainingPosts > 0 && subscription.endDate > new Date()
+      }
+    };
   }
 
   async listPosts({ page = 1, limit = 20, filters = {}, sort = { createdAt: -1 } }) {

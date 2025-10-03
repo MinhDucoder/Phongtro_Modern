@@ -26,6 +26,7 @@ export const authenticate = () => {
       }
 
       const decoded = jwt.verify(accessToken, process.env.JWT_SECRET || 'asdfsadfsadf');
+      console.log("decoded token:", decoded);
       req.user = decoded;
       next();
     } catch (error) {

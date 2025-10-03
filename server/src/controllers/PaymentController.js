@@ -1,11 +1,12 @@
 import Payment from "../models/paymentSchema.js";
 import { success, error } from "../utils/responeHandler.js";
+import mongoose from "mongoose";
 
 class PaymentController {
   // Get payment history for a user
   async getPaymentHistory(req, res, next) {
     try {
-      const userId = req.user.id;
+      const userId = new mongoose.Types.ObjectId(req.user.id);
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
       const status = req.query.status;
@@ -70,7 +71,9 @@ class PaymentController {
   // Get payment statistics for a user
   async getPaymentStats(req, res, next) {
     try {
-      const userId = req.user.id;
+      const userId = new mongoose.Types.ObjectId(req.user.id);
+
+      console.log('📊 Getting payment stats for user:', userId);
 
       // Get basic stats
       const totalPayments = await Payment.countDocuments({ user: userId });
@@ -87,11 +90,15 @@ class PaymentController {
         status: 'failed' 
       });
 
+      console.log('📊 Basic stats:', { totalPayments, completedPayments, pendingPayments, failedPayments });
+
       // Get total amount spent
       const totalSpent = await Payment.aggregate([
         { $match: { user: userId, status: 'completed' } },
         { $group: { _id: null, total: { $sum: '$amount' } } }
       ]);
+
+      console.log('💰 Total spent:', totalSpent[0]?.total || 0);
 
       // Get current active package
       const currentDate = new Date();
@@ -101,6 +108,8 @@ class PaymentController {
         packageStartDate: { $lte: currentDate },
         packageEndDate: { $gte: currentDate }
       }).sort({ packageEndDate: -1 }).lean();
+
+      console.log('📦 Active package:', activePackage ? activePackage.packageName : 'None');
 
       // Get monthly spending for last 6 months
       const sixMonthsAgo = new Date();
@@ -127,6 +136,8 @@ class PaymentController {
         { $sort: { '_id.year': 1, '_id.month': 1 } }
       ]);
 
+      console.log('📈 Monthly spending records:', monthlySpending.length);
+
       // Get package type distribution
       const packageDistribution = await Payment.aggregate([
         { $match: { user: userId, status: 'completed' } },
@@ -138,6 +149,8 @@ class PaymentController {
           }
         }
       ]);
+
+      console.log('📊 Package distribution:', packageDistribution);
 
       const stats = {
         totalPayments,
@@ -155,8 +168,10 @@ class PaymentController {
         packageDistribution
       };
 
+      console.log('✅ Payment stats compiled successfully');
       return success(res, stats);
     } catch (err) {
+      console.error('❌ Error getting payment stats:', err);
       return error(res, err.message, 500);
     }
   }
@@ -164,7 +179,7 @@ class PaymentController {
   // Get single payment detail
   async getPaymentDetail(req, res, next) {
     try {
-      const userId = req.user.id;
+      const userId = new mongoose.Types.ObjectId(req.user.id);
       const paymentId = req.params.id;
 
       const payment = await Payment.findOne({
@@ -262,7 +277,7 @@ class PaymentController {
   // Download invoice
   async downloadInvoice(req, res, next) {
     try {
-      const userId = req.user.id;
+      const userId = new mongoose.Types.ObjectId(req.user.id);
       const paymentId = req.params.id;
 
       const payment = await Payment.findOne({

@@ -3,8 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { XMarkIcon, PhotoIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import { dashboardApi } from '@/lib/api';
+import Link from 'next/link';
+import { dashboardApi, subscriptionApi } from '@/lib/api';
 import { uploadImages, validateImageFile, deleteImage } from '@/lib/imageUtils';
+import PackageSelector from './PackageSelector';
 import toast from 'react-hot-toast';
 
 interface PostFormProps {
@@ -48,6 +50,11 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(!!postId);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [checkingPermission, setCheckingPermission] = useState(false);
+  const [canPost, setCanPost] = useState(true);
+  const [remainingPosts, setRemainingPosts] = useState(0);
+  const [currentSubscription, setCurrentSubscription] = useState<any>(null);
+  const [showPackageSelector, setShowPackageSelector] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const propertyTypeOptions = [
@@ -82,8 +89,47 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
   useEffect(() => {
     if (isEditing && postId) {
       loadPostData();
+    } else {
+      // Kiểm tra quyền đăng tin cho post mới
+      checkPostPermission();
     }
   }, [postId, isEditing]);
+
+  const checkPostPermission = async () => {
+    if (isEditing) return; // Không cần kiểm tra khi edit
+
+    setCheckingPermission(true);
+    try {
+      const response = await subscriptionApi.checkPostPermission();
+      
+      if (response.success && response.data) {
+        const data = response.data as any;
+        setCanPost(data.canPost);
+        setRemainingPosts(data.remainingPosts);
+        setCurrentSubscription(data.subscription);
+        
+        if (!data.canPost) {
+          setShowPackageSelector(true);
+          toast.error(`Bạn đã hết lượt đăng tin. Vui lòng nâng cấp gói để tiếp tục.`);
+        }
+      } else {
+        // User chưa có subscription
+        setCanPost(false);
+        setRemainingPosts(0);
+        setCurrentSubscription(null);
+        setShowPackageSelector(true);
+        toast('Bạn chưa có gói đăng tin. Vui lòng chọn gói để bắt đầu đăng tin.');
+      }
+    } catch (error: any) {
+      console.error('Error checking post permission:', error);
+      // Fallback: coi như chưa có gói
+      setCanPost(false);
+      setShowPackageSelector(true);
+      toast.error('Có lỗi khi kiểm tra quyền đăng tin. Vui lòng thử lại.');
+    } finally {
+      setCheckingPermission(false);
+    }
+  };
 
   const loadPostData = async () => {
     try {
@@ -302,8 +348,18 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
       return;
     }
 
+    // Kiểm tra quyền đăng tin nếu là post mới
+    if (!isEditing && !canPost) {
+      toast.error('Bạn không có quyền đăng tin. Vui lòng nâng cấp gói.');
+      setShowPackageSelector(true);
+      return;
+    }
+
     setIsLoading(true);
     try {
+      // Sử dụng favouriteLevel từ subscription hiện tại
+      const favouriteLevel = currentSubscription?.packageType || formData.favouriteLevel;
+      
       const postData = {
         room: {
           title: formData.title,
@@ -331,7 +387,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
         propertyType: formData.propertyType,
         roomType: formData.roomType || undefined,
         options: formData.options,
-        favouriteLevel: formData.favouriteLevel,
+        favouriteLevel: favouriteLevel,
         status: formData.status
       };
 
@@ -340,6 +396,8 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
         response = await dashboardApi.updatePost(postId!, postData);
       } else {
         response = await dashboardApi.createPost(postData);
+        // Reload permission sau khi tạo post thành công
+        await checkPostPermission();
       }
 
       if (response) {
@@ -378,6 +436,55 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
           </button>
         )}
       </div>
+
+      {/* Thông báo về gói đăng tin */}
+      {!isEditing && (
+        <>
+          {checkingPermission ? (
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <span className="ml-2 text-blue-700">Đang kiểm tra quyền đăng tin...</span>
+              </div>
+            </div>
+          ) : currentSubscription ? (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <h3 className="font-medium text-green-800 mb-1">
+                Gói đăng tin: {currentSubscription.packageName}
+              </h3>
+              <p className="text-sm text-green-700">
+                Còn lại: {remainingPosts} lượt đăng tin
+              </p>
+              {remainingPosts === 0 && (
+                <p className="text-sm text-red-600 mt-1">
+                  Bạn đã hết lượt đăng tin. Vui lòng nâng cấp gói để tiếp tục.
+                </p>
+              )}
+            </div>
+          ) : null}
+
+          {/* Package Selector Modal */}
+          {showPackageSelector && (
+            <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg">
+              <PackageSelector 
+                onPackageSelect={(packageType) => {
+                  setFormData(prev => ({ ...prev, favouriteLevel: packageType }));
+                }}
+                showCurrentPackage={true}
+              />
+              <div className="mt-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowPackageSelector(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         {/* Basic Info */}
@@ -733,17 +840,26 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Gói tin đăng
             </label>
-            <select
-              value={formData.favouriteLevel}
-              onChange={(e) => handleInputChange('favouriteLevel', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {favouriteLevels.map((level) => (
-                <option key={level.value} value={level.value}>
-                  {level.label}
-                </option>
-              ))}
-            </select>
+            {currentSubscription ? (
+              <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+                <span className="text-gray-700">{currentSubscription.packageName}</span>
+                <span className="text-sm text-gray-500 ml-2">
+                  (Độ ưu tiên: {currentSubscription.priority})
+                </span>
+              </div>
+            ) : (
+              <select
+                value={formData.favouriteLevel}
+                onChange={(e) => handleInputChange('favouriteLevel', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {favouriteLevels.map((level) => (
+                  <option key={level.value} value={level.value}>
+                    {level.label}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           
@@ -795,60 +911,65 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
                 Ảnh đã tải ({formData.images.length}/10)
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {formData.images.map((imageUrl, index) => (
-                  <div key={index} className="relative group">
-                    <div className="aspect-square rounded-lg overflow-hidden">
-                      {(() => {
-                        // Handle different types of imageUrl
-                        let src = '/placeholder-room.svg';
-                        
-                        if (imageUrl) {
-                          // Handle nested arrays
-                          if (Array.isArray(imageUrl)) {
-                            const firstItem = imageUrl[0];
-                            if (typeof firstItem === 'string' && firstItem.trim() !== '') {
-                              src = firstItem;
-                            } else if (firstItem && typeof firstItem === 'object' && firstItem.url && typeof firstItem.url === 'string' && firstItem.url.trim() !== '') {
-                              src = firstItem.url;
+                {formData.images.map((imageUrlRaw, index) => {
+                  // Explicitly type imageUrl to avoid 'never' type error
+                  type ImageUrlType = string | { url: string } | Array<string | { url: string }>;
+                  const imageUrl = imageUrlRaw as ImageUrlType;
+                  return (
+                    <div key={index} className="relative group">
+                      <div className="aspect-square rounded-lg overflow-hidden">
+                        {(() => {
+                          // Handle different types of imageUrl
+                          let src = '/placeholder-room.svg';
+                          
+                          if (imageUrl) {
+                            // Handle nested arrays
+                            if (Array.isArray(imageUrl)) {
+                              const firstItem = imageUrl[0];
+                              if (typeof firstItem === 'string' && firstItem.trim() !== '') {
+                                src = firstItem;
+                              } else if (firstItem && typeof firstItem === 'object' && 'url' in firstItem && typeof firstItem.url === 'string' && firstItem.url.trim() !== '') {
+                                src = firstItem.url;
+                              }
+                            }
+                            // Handle direct string
+                            else if (typeof imageUrl === 'string' && imageUrl.trim() !== '') {
+                              src = imageUrl;
+                            } 
+                            // Handle direct object
+                            else if (typeof imageUrl === 'object' && 'url' in imageUrl && typeof imageUrl.url === 'string' && imageUrl.url.trim() !== '') {
+                              src = imageUrl.url;
                             }
                           }
-                          // Handle direct string
-                          else if (typeof imageUrl === 'string' && imageUrl.trim() !== '') {
-                            src = imageUrl;
-                          } 
-                          // Handle direct object
-                          else if (typeof imageUrl === 'object' && imageUrl.url && typeof imageUrl.url === 'string' && imageUrl.url.trim() !== '') {
-                            src = imageUrl.url;
-                          }
-                        }
-                        
-                        return (
-                          <Image
-                            src={src}
-                            alt={`Preview ${index + 1}`}
-                            width={200}
-                            height={200}
-                            className="w-full h-full object-cover"
-                            unoptimized
-                          />
-                        );
-                      })()}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(index)}
-                      className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
-                      title="Xóa ảnh"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
-                    {index === 0 && (
-                      <div className="absolute bottom-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                        Ảnh đại diện
+                          
+                          return (
+                            <Image
+                              src={src}
+                              alt={`Preview ${index + 1}`}
+                              width={200}
+                              height={200}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                            />
+                          );
+                        })()}
                       </div>
-                    )}
-                  </div>
-                ))}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(index)}
+                        className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                        title="Xóa ảnh"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </button>
+                      {index === 0 && (
+                        <div className="absolute bottom-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                          Ảnh đại diện
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -867,11 +988,22 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
           )}
           <button
             type="submit"
-            disabled={isLoading || uploadingImages}
+            disabled={isLoading || uploadingImages || (!isEditing && !canPost)}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
           >
-            {isLoading ? 'Đang lưu...' : (isEditing ? 'Cập nhật' : 'Tạo tin đăng')}
+            {isLoading ? 'Đang lưu...' : (isEditing ? 'Cập nhật' : 
+              !canPost ? 'Hết lượt đăng tin' : 'Tạo tin đăng')}
           </button>
+          
+          {/* Nút nâng cấp gói */}
+          {!isEditing && !canPost && (
+            <Link
+              href="/thanh-toan"
+              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 inline-block text-center"
+            >
+              Nâng cấp gói
+            </Link>
+          )}
         </div>
       </form>
     </div>

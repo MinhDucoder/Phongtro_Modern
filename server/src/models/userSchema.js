@@ -35,6 +35,14 @@ const userSchema = new Schema(
       default: "user",
     },
     balance: { type: Number, default: 0 },
+    currentSubscription: {
+      type: Schema.Types.ObjectId,
+      ref: "Subscription",
+    },
+    subscriptionHistory: [{
+      type: Schema.Types.ObjectId,
+      ref: "Subscription",
+    }],
     is_verified: { type: Boolean, default: false },
     last_login: { type: Date, default: null },
     is_deleted: { type: Boolean, default: false }, // Cờ xóa mềm

@@ -13,7 +13,7 @@ export function getSafeImageUrl(imageUrl: string | undefined | null): string {
 /**
  * Get the first image from an array, with fallback
  */
-export function getFirstImage(images: any[] | undefined | null): string {
+export function getFirstImage(images: any): string {
   // Handle null, undefined, or empty values
   if (!images) {
     return '/placeholder-room.svg';
@@ -22,13 +22,13 @@ export function getFirstImage(images: any[] | undefined | null): string {
   // Handle objects that might be passed instead of arrays
   if (typeof images === 'object' && !Array.isArray(images)) {
     // If it's an object, try to find a valid image property
-    if (images.url) {
+    if ('url' in images && images.url) {
       return getSafeImageUrl(images.url);
     }
-    if (images.src) {
+    if ('src' in images && images.src) {
       return getSafeImageUrl(images.src);
     }
-    if (images.image) {
+    if ('image' in images && images.image) {
       return getSafeImageUrl(images.image);
     }
     // If it's an empty object or doesn't have image properties, return placeholder

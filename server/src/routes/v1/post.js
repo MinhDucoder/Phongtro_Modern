@@ -1,12 +1,21 @@
 import express from "express";
 import PostController from "../../controllers/PostController.js";
 import { authenticate, authorize } from "../../middlewares/checkToken.js";
+import { checkPostPermission, usePostSlot, refundPostSlot } from "../../middlewares/subscriptionMiddleware.js";
 import catchAsync from "../../middlewares/catchAsync.js";
 
 const postRoute = express.Router();
 
+// Route kiểm tra thông tin subscription
+postRoute.get("/subscription-info", authenticate(), catchAsync(PostController.getSubscriptionInfo));
+
 //comment authenicate() de test
-postRoute.post("/", authenticate(), catchAsync(PostController.create));
+postRoute.post("/", 
+  authenticate(), 
+  checkPostPermission, 
+  catchAsync(PostController.create),
+  usePostSlot
+);
 
 // Public route - chỉ trả về posts active
 postRoute.get("/", catchAsync(PostController.list));
@@ -16,6 +25,11 @@ postRoute.get("/admin/all", authenticate(), authorize("admin"), catchAsync(PostC
 
 postRoute.get('/:id', catchAsync(PostController.detail));
 postRoute.put("/:id", authenticate(), authorize("admin"), catchAsync(PostController.update));
-postRoute.delete("/:id", authenticate(), authorize("admin"), catchAsync(PostController.remove));
+postRoute.delete("/:id", 
+  authenticate(), 
+  authorize("admin"), 
+  refundPostSlot,
+  catchAsync(PostController.remove)
+);
 
 export default postRoute;

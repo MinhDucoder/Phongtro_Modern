@@ -1,6 +1,8 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/userSchema.js";
+import Subscription from "../models/subscriptionSchema.js";
+import PackagePlan from "../models/packagePlanSchema.js";
 import dotenv from "dotenv";
 import fs from "fs/promises";
 import { generateVerificationToken, sendVerificationEmail, generatePasswordResetToken, sendPasswordResetEmail } from '../services/emailService.js';
@@ -36,6 +38,42 @@ class AuthController {
     });
 
     await newUser.save();
+
+    // Tự động tạo gói đăng tin miễn phí cho user mới
+    try {
+      // Tìm gói miễn phí
+      const freePackage = await PackagePlan.findOne({ type: "free", isActive: true });
+      
+      if (freePackage) {
+        // Tạo subscription miễn phí
+        const freeSubscription = await Subscription.create({
+          user: newUser._id,
+          packageType: freePackage.type,
+          packageName: freePackage.name,
+          price: freePackage.price,
+          duration: freePackage.duration,
+          postLimit: freePackage.postLimit,
+          priority: freePackage.priority,
+          features: freePackage.features,
+          startDate: new Date(),
+          endDate: new Date(Date.now() + freePackage.duration * 24 * 60 * 60 * 1000),
+          status: "active",
+          usedPosts: 0 // Bắt đầu với 0 lượt đã sử dụng
+        });
+
+        // Cập nhật user với subscription
+        await User.findByIdAndUpdate(newUser._id, {
+          currentSubscription: freeSubscription._id,
+        });
+
+        console.log('Created free subscription for new user:', freeSubscription._id);
+      } else {
+        console.warn('Free package not found, user registered without subscription');
+      }
+    } catch (subscriptionError) {
+      console.error('Error creating free subscription:', subscriptionError);
+      // Không throw error để không ảnh hưởng đến việc đăng ký
+    }
 
     console.log('Starting email verification process...');
     console.log('Environment variables:', {

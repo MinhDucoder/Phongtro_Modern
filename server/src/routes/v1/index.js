@@ -3,6 +3,7 @@ import socialAuthRouter from "./socialAuthRoutes.js";
 import roomRoute from "./rooms.js";
 import bookingRoute from "./booking.js";
 import paymentRoute from "./payment.js";
+import subscriptionRoute from "./subscription.js";
 import reviewRoute from "./review.js";
 import notificationRoute from "./notification.js";
 import reportRoute from "./report.js";
@@ -31,6 +32,7 @@ const Route = (app) => {
         posts: "/api/v1/posts",
         rooms: "/api/v1/rooms",
         users: "/api/v1/user",
+        subscriptions: "/api/v1/subscriptions",
       },
     });
   });
@@ -45,6 +47,7 @@ const Route = (app) => {
   app.use("/api/v1/conversations", conversationRoute);
   app.use("/api/v1/messages", messageRoute);
   app.use("/api/v1/payments", paymentRoute);
+  app.use("/api/v1/subscriptions", subscriptionRoute);
   app.use("/api/v1/reviews", reviewRoute);
   app.use("/api/v1/notifications", notificationRoute);
   app.use("/api/v1/reports", reportRoute);

@@ -1,3 +1,8 @@
 import { authenticate } from './checkToken.js';
 
-export default authenticate();
+const authMiddleware = authenticate();
+
+export default authMiddleware;
+
+// Export authenticateToken as alias for authenticate
+export const authenticateToken = authMiddleware;

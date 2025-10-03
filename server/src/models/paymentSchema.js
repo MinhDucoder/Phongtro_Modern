@@ -118,11 +118,10 @@ const paymentSchema = new mongoose.Schema(
       type: String,
     },
     
-    // Metadata
+    // Metadata - sử dụng Mixed type để lưu trữ linh hoạt
     metadata: {
-      userAgent: String,
-      ipAddress: String,
-      deviceType: String,
+      type: mongoose.Schema.Types.Mixed,
+      default: {}
     },
   },
   {
