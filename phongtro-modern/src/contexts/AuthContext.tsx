@@ -33,6 +33,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
   const isAuthenticated = !!user;
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('🔐 Auth State:', {
+      user: user ? { id: user._id, name: user.full_name } : null,
+      isAuthenticated,
+      isLoading,
+      hasCheckedAuth
+    });
+  }, [user, isAuthenticated, isLoading, hasCheckedAuth]);
 
   // Handle session expiry
   const { refreshToken } = useTokenRefresh({
@@ -48,7 +58,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     if (!hasCheckedAuth) {
       setHasCheckedAuth(true);
-      checkAuthStatus();
+      // Thêm delay để đảm bảo localStorage đã sẵn sàng
+      setTimeout(() => {
+        checkAuthStatus();
+      }, 500);
     }
     
     // Auto-refresh user data every 15 minutes if user is logged in
@@ -61,6 +74,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     return () => clearInterval(refreshInterval);
   }, [hasCheckedAuth, user]);
+
+  // Additional effect to handle page refresh
+  useEffect(() => {
+    const handlePageLoad = () => {
+      console.log('Page loaded, checking auth status...');
+      if (!hasCheckedAuth) {
+        setHasCheckedAuth(true);
+        checkAuthStatus();
+      }
+    };
+
+    // Check auth on page load
+    if (typeof window !== 'undefined') {
+      if (document.readyState === 'complete') {
+        handlePageLoad();
+      } else {
+        window.addEventListener('load', handlePageLoad);
+        return () => window.removeEventListener('load', handlePageLoad);
+      }
+    }
+  }, [hasCheckedAuth]);
 
   // Check for Google OAuth success redirect
   useEffect(() => {
@@ -138,13 +172,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       // Check if we have valid tokens before making the request
       const tokenStatus = authApi.getTokenStatus();
-      if (!tokenStatus.hasToken || tokenStatus.isExpired) {
-        console.log('No valid token available, skipping silent fetch');
+      if (!tokenStatus.hasToken) {
+        console.log('No token available, skipping silent fetch');
         setUser(null);
         return;
       }
       
+      if (tokenStatus.isExpired) {
+        console.log('Token expired, attempting refresh before fetch...');
+        try {
+          await refreshToken();
+        } catch (refreshError) {
+          console.log('Token refresh failed in silent fetch:', refreshError);
+          setUser(null);
+          return;
+        }
+      }
+      
+      console.log('Fetching user profile silently...');
       const response = await authApi.getProfile();
+      console.log('Profile response:', response);
       handleMeResponse(response);
     } catch (error) {
       console.log('Silent fetch failed:', error);
@@ -156,8 +203,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const checkAuthStatus = async () => {
     try {
+      console.log('🔐 Checking auth status...');
+      
       // Check token status first
       const tokenStatus = authApi.getTokenStatus();
+      console.log('Token status:', tokenStatus);
+      
       if (!tokenStatus.hasToken) {
         console.log('No token found, user not authenticated');
         setUser(null);
@@ -165,9 +216,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return;
       }
       
-      // Try to get user info from server using httpOnly cookie
-      // Sử dụng phiên bản silent để không hiển thị thông báo
-      await fetchUserProfileSilent();
+      if (tokenStatus.isExpired) {
+        console.log('Token expired, attempting refresh...');
+        try {
+          await refreshToken();
+          // After refresh, try to get user profile
+          await fetchUserProfileSilent();
+        } catch (refreshError) {
+          console.log('Token refresh failed:', refreshError);
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+      } else {
+        console.log('Token valid, fetching user profile...');
+        // Try to get user info from server
+        await fetchUserProfileSilent();
+      }
     } catch (error) {
       console.log('Auth check failed:', error);
       // Clear user state if authentication fails
@@ -292,3 +357,4 @@ export function useAuth(): AuthContextType {
   }
   return context;
 }
+

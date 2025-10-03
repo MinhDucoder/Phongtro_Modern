@@ -7,8 +7,17 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import api from '@/lib/api';
 import { toast } from 'react-hot-toast';
+import { LandlordOnly } from '@/components/auth/ProtectedRoute';
 
 export default function PostPropertyPage() {
+  return (
+    <LandlordOnly>
+      <PostPropertyContent />
+    </LandlordOnly>
+  );
+}
+
+function PostPropertyContent() {
   const searchParams = useSearchParams();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);

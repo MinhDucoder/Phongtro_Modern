@@ -113,15 +113,21 @@ export default function ModerationPanel() {
     setIsLoading(true);
     
     try {
+      const payload = {
+        status: action === 'approve' ? 'approved' : 'rejected',
+        reason: action === 'reject' ? rejectionReason : undefined,
+        notifyLandlord: true,
+      };
+      
+      console.log('[Frontend] Sending moderation request:', { postId, payload });
+      
       const response = await fetch(`/api/admin/moderation/${postId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          status: action === 'approve' ? 'approved' : 'rejected',
-          reason: action === 'reject' ? rejectionReason : undefined,
-        }),
+        credentials: 'include',
+        body: JSON.stringify(payload),
       });
       
       if (!response.ok) {
@@ -160,21 +166,27 @@ export default function ModerationPanel() {
 
   const handleDetailModalStatusChange = async (postId: string, status: 'approved' | 'rejected', reason?: string, options?: any) => {
     try {
+      const payload = {
+        status,
+        reason,
+        notes: options?.notes,
+        contentIssues: options?.contentIssues,
+        pricingIssues: options?.pricingIssues,
+        imageIssues: options?.imageIssues,
+        addressIssues: options?.addressIssues,
+        violationDetails: options?.violationDetails,
+        notifyLandlord: true,
+      };
+      
+      console.log('[Frontend Detail] Sending moderation request:', { postId, payload });
+      
       const response = await fetch(`/api/admin/moderation/${postId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          status,
-          reason,
-          notes: options?.notes,
-          contentIssues: options?.contentIssues,
-          pricingIssues: options?.pricingIssues,
-          imageIssues: options?.imageIssues,
-          addressIssues: options?.addressIssues,
-          violationDetails: options?.violationDetails
-        }),
+        credentials: 'include',
+        body: JSON.stringify(payload),
       });
       
       if (!response.ok) {

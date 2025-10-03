@@ -40,7 +40,7 @@
 }
 
 .toast-card {
-  @apply pointer-events-auto rounded-2xl bg-white shadow-2xl ring-1 ring-slate-900/5 border border-slate-100 backdrop-blur-md;
+  @apply pointer-events-auto rounded-xl bg-white shadow-2xl ring-1 ring-slate-900/5 border border-slate-100 backdrop-blur-md;
 }
 
 .toast-accent {

@@ -144,7 +144,7 @@ export default function DashboardLayoutFixed({ children }: DashboardLayoutProps)
                   <div className="flex justify-center">
                     <Image
                       className="h-8 w-8 rounded-full"
-                      src={user.avatar}
+                      src={typeof user.avatar === 'string' && user.avatar.trim() !== '' ? user.avatar : '/placeholder-room.svg'}
                       alt={user.name || 'User Avatar'}
                       width={32}
                       height={32}
@@ -223,7 +223,7 @@ export default function DashboardLayoutFixed({ children }: DashboardLayoutProps)
                     )}
                     <Image
                       className="h-8 w-8 rounded-full"
-                      src={user.avatar}
+                      src={typeof user.avatar === 'string' && user.avatar.trim() !== '' ? user.avatar : '/placeholder-room.svg'}
                       alt={user.name || 'User Avatar'}
                       width={32}
                       height={32}

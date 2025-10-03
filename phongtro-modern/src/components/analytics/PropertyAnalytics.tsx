@@ -517,13 +517,19 @@ export default function PropertyAnalytics() {
                   <tr key={property.id || property._id || `property-${index}`} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <Image
-                          src={getFirstImage(property.roomId?.images || property.images)}
-                          alt={property.title || property.roomId?.title || 'Room image'}
-                          width={40}
-                          height={40}
-                          className="w-10 h-10 rounded object-cover mr-3"
-                        />
+                        {(() => {
+                          const imageSrc = getFirstImage(property.roomId?.images || property.images);
+                          const safeSrc = typeof imageSrc === 'string' && imageSrc.trim() !== '' ? imageSrc : '/placeholder-room.svg';
+                          return (
+                            <Image
+                              src={safeSrc}
+                              alt={property.title || property.roomId?.title || 'Room image'}
+                              width={40}
+                              height={40}
+                              className="w-10 h-10 rounded object-cover mr-3"
+                            />
+                          );
+                        })()}
                         <div>
                           <div className="text-sm font-medium text-gray-900 line-clamp-1">
                             {property.title || property.roomId?.title || 'Tin đăng'}

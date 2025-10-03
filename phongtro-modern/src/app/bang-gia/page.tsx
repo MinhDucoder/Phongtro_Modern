@@ -142,7 +142,7 @@ export default function BangGiaPage() {
               return (
                 <div
                   key={pkg.id}
-                  className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-200 ${
+                  className={`relative bg-white rounded-xl shadow-lg border-2 transition-all duration-200 ${
                     isPopular 
                       ? 'border-orange-500 scale-105' 
                       : 'border-gray-200 hover:border-gray-300'

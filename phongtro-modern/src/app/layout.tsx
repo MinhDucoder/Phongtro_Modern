@@ -5,6 +5,8 @@ import "../styles/toast-animations.css";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import ClientErrorBoundary from "@/components/ui/ClientErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SocketProvider } from "@/contexts/SocketContext";
+import { ChatProvider } from "@/contexts/ChatContext";
 import ConnectionStatus from "@/components/ui/ConnectionStatus";
 import { ToastProvider } from "@/components/ui/ToastManager";
 
@@ -87,11 +89,15 @@ export default function RootLayout({
       >
         <ClientErrorBoundary>
           <AuthProvider>
-            <ToastProvider />
-            <ConditionalLayout>
-              {children}
-            </ConditionalLayout>
-            {/* <ConnectionStatus /> */}
+            <SocketProvider>
+              <ChatProvider>
+                <ToastProvider />
+                <ConditionalLayout>
+                  {children}
+                </ConditionalLayout>
+                {/* <ConnectionStatus /> */}
+              </ChatProvider>
+            </SocketProvider>
           </AuthProvider>
         </ClientErrorBoundary>
       </body>

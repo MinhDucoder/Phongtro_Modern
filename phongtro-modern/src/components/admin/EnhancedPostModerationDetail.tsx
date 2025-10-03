@@ -71,7 +71,7 @@ export default function EnhancedPostModerationDetail({
     const fetchPostData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`/api/moderation/post/${postId}`);
+        const response = await axios.get(`/api/admin/moderation/${postId}/get`);
         setPostData(response.data.data);
         setError(null);
       } catch (err: any) {
@@ -112,7 +112,7 @@ export default function EnhancedPostModerationDetail({
         notifyLandlord: true
       };
 
-      await axios.put(`/api/moderation/post/${postId}`, payload);
+      await axios.patch(`/api/admin/moderation/${postId}`, payload);
 
       if (onSuccess) {
         onSuccess(status);

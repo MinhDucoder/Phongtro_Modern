@@ -110,7 +110,9 @@ export default function PropertyCard({
       <div className="relative h-48 group/image">
         <Link href={`/phong-tro/${id}`}>
           <Image
-            src={images[currentImageIndex] || '/placeholder-room.svg'}
+            src={typeof images[currentImageIndex] === 'string' 
+              ? images[currentImageIndex] 
+              : '/placeholder-room.svg'}
             alt={title}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"

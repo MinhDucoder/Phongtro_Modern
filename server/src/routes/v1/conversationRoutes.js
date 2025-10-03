@@ -7,5 +7,6 @@ const conversationRoute = express.Router();
 
 conversationRoute.post("/", authenticate(), conversationController.create);
 conversationRoute.get("/", authenticate(), conversationController.list);
+conversationRoute.get("/:id", authenticate(), conversationController.show);
 
 export default conversationRoute;

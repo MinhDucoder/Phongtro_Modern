@@ -27,7 +27,7 @@ const conversationSchema = new Schema(
       default: {},
     },
   },
-  { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
+  { timestamps: true }
 );
 
 export default model("Conversation", conversationSchema);

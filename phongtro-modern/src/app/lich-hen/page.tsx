@@ -1,11 +1,14 @@
 import SchedulingSystem from '@/components/scheduling/SchedulingSystem';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { AuthRequired } from '@/components/auth/ProtectedRoute';
 
 export default function SchedulingPage() {
   return (
-    <DashboardLayout>
-      <SchedulingSystem />
-    </DashboardLayout>
+    <AuthRequired>
+      <DashboardLayout>
+        <SchedulingSystem />
+      </DashboardLayout>
+    </AuthRequired>
   );
 }
 

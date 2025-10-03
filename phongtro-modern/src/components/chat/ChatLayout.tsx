@@ -5,103 +5,16 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import ConversationList from './ConversationList';
 import ChatWindow from './ChatWindow';
+import SocketStatusIndicator from './SocketStatusIndicator';
+import { useChat } from '@/contexts/ChatContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   ChatBubbleLeftRightIcon,
   Bars3Icon,
   XMarkIcon 
 } from '@heroicons/react/24/outline';
 
-// Mock data - trong thực tế sẽ fetch từ API hoặc WebSocket
-const mockConversations = [
-  {
-    id: '1',
-    participant: {
-      id: '2',
-      name: 'Chị Hoa',
-      avatar: '/placeholder-room.svg',
-      isOnline: true,
-      lastSeen: null,
-    },
-    property: {
-      id: '1',
-      title: 'Phòng trọ gần ĐH Bách Khoa',
-      image: '/placeholder-room.svg',
-    },
-    lastMessage: {
-      content: 'Phòng còn trống không ạ?',
-      timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
-      senderId: '2',
-    },
-    unreadCount: 2,
-    updatedAt: new Date(Date.now() - 5 * 60 * 1000),
-  },
-  {
-    id: '2',
-    participant: {
-      id: '3',
-      name: 'Anh Nam',
-      avatar: '/placeholder-room.svg',
-      isOnline: false,
-      lastSeen: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-    },
-    property: {
-      id: '2',
-      title: 'Căn hộ mini có ban công',
-      image: '/placeholder-room.svg',
-    },
-    lastMessage: {
-      content: 'Cảm ơn bạn, tôi sẽ liên hệ lại sau',
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-      senderId: '3',
-    },
-    unreadCount: 0,
-    updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-  },
-  {
-    id: '3',
-    participant: {
-      id: '4',
-      name: 'Chị Lan',
-      avatar: '/placeholder-room.svg',
-      isOnline: true,
-      lastSeen: null,
-    },
-    property: {
-      id: '3',
-      title: 'Nhà nguyên căn 2PN',
-      image: '/placeholder-room.svg',
-    },
-    lastMessage: {
-      content: 'Tôi có thể xem nhà vào cuối tuần được không?',
-      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-      senderId: '4',
-    },
-    unreadCount: 1,
-    updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-  },
-  {
-    id: '4',
-    participant: {
-      id: '5',
-      name: 'Anh Minh',
-      avatar: '/placeholder-room.svg',
-      isOnline: false,
-      lastSeen: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
-    },
-    property: {
-      id: '4',
-      title: 'Studio apartment modern',
-      image: '/placeholder-room.svg',
-    },
-    lastMessage: {
-      content: 'Phòng rất đẹp, giá cả hợp lý',
-      timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
-      senderId: '1', // Current user
-    },
-    unreadCount: 0,
-    updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-  },
-];
+// Removed mock data - now using real data from ChatContext
 
 interface ChatLayoutProps {
   activeConversationId?: string;
@@ -109,145 +22,124 @@ interface ChatLayoutProps {
 
 export default function ChatLayout({ activeConversationId }: ChatLayoutProps) {
   const router = useRouter();
-  const [conversations, setConversations] = useState(mockConversations);
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(
-    activeConversationId || null
-  );
+  const { user } = useAuth();
+  const { 
+    conversations, 
+    activeConversation, 
+    isLoading, 
+    error,
+    setActiveConversation,
+    clearError 
+  } = useChat();
+  
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-
-  // Current user info
-  const currentUser = {
-    id: '1',
-    name: 'Nguyễn Văn A',
-    avatar: '/placeholder-room.svg',
-  };
 
   useEffect(() => {
     if (activeConversationId) {
-      setSelectedConversation(activeConversationId);
-    }
-  }, [activeConversationId]);
-
-  // Simulate real-time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulate receiving new messages
-      if (Math.random() > 0.95) { // 5% chance every second
-        const randomConversation = conversations[Math.floor(Math.random() * conversations.length)];
-        const newMessage = {
-          content: [
-            'Bạn có thể cho tôi xem thêm ảnh không?',
-            'Phòng còn trống không ạ?',
-            'Giá có thương lượng được không?',
-            'Khi nào có thể xem phòng?',
-            'Cảm ơn bạn!',
-          ][Math.floor(Math.random() * 5)],
-          timestamp: new Date(),
-          senderId: randomConversation.participant.id,
-        };
-
-        setConversations(prev => prev.map(conv => 
-          conv.id === randomConversation.id
-            ? {
-                ...conv,
-                lastMessage: newMessage,
-                unreadCount: conv.id === selectedConversation ? 0 : conv.unreadCount + 1,
-                updatedAt: new Date(),
-              }
-            : conv
-        ));
+      const conversation = conversations.find(conv => conv._id === activeConversationId);
+      if (conversation) {
+        setActiveConversation(conversation);
       }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [conversations, selectedConversation]);
+    }
+  }, [activeConversationId, conversations, setActiveConversation]);
 
   const handleConversationSelect = (conversationId: string) => {
-    setSelectedConversation(conversationId);
-    setIsMobileSidebarOpen(false);
-    
-    // Mark as read
-    setConversations(prev => prev.map(conv =>
-      conv.id === conversationId
-        ? { ...conv, unreadCount: 0 }
-        : conv
-    ));
-
-    // Update URL
-    router.push(`/chat/${conversationId}`);
+    const conversation = conversations.find(conv => conv._id === conversationId);
+    if (conversation) {
+      setActiveConversation(conversation);
+      setIsMobileSidebarOpen(false);
+      router.push(`/chat/${conversationId}`);
+    }
   };
 
-  const handleNewMessage = (conversationId: string, message: {id: string, text: string, timestamp: string, sender: string}) => {
-    setConversations(prev => prev.map(conv =>
-      conv.id === conversationId
-        ? {
-            ...conv,
-            lastMessage: {
-              content: message.text,
-              timestamp: new Date(message.timestamp),
-              senderId: message.sender
-            },
-            updatedAt: new Date(),
-          }
-        : conv
-    ));
-  };
+  const totalUnreadCount = conversations.reduce((sum, conv) => {
+    return sum + (conv.unread[user?._id || ''] || 0);
+  }, 0);
 
-  const activeConversation = conversations.find(conv => conv.id === selectedConversation);
-  const totalUnreadCount = conversations.reduce((sum, conv) => sum + conv.unreadCount, 0);
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Vui lòng đăng nhập
+          </h3>
+          <p className="text-gray-500">
+            Bạn cần đăng nhập để sử dụng tính năng chat
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+    <div className="h-screen bg-gray-50 flex p-0 overflow-hidden">
+      {/* Main Chat Container - Full viewport height, no page scroll */}
+      <div className="w-full h-full bg-white rounded-none overflow-hidden flex flex-col">
+        {/* Header - Solid background, no blur */}
+        <div className="bg-white border-b border-gray-200">
+        <div className="px-3 py-3 sm:px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <button
                 onClick={() => setIsMobileSidebarOpen(true)}
-                className="lg:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors mr-3"
+                className="lg:hidden p-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-all duration-200 mr-3"
               >
-                <Bars3Icon className="h-6 w-6" />
+                <Bars3Icon className="h-5 w-5" />
               </button>
-              <ChatBubbleLeftRightIcon className="h-6 w-6 text-blue-600 mr-2" />
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">Tin nhắn</h1>
-                {totalUnreadCount > 0 && (
-                  <p className="text-sm text-gray-500">
-                    {totalUnreadCount} tin nhắn chưa đọc
-                  </p>
-                )}
+              
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-blue-600 rounded-xl shadow-sm">
+                  <ChatBubbleLeftRightIcon className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <h1 className="text-xl font-bold text-gray-900">
+                      Tin nhắn
+                    </h1>
+                    <SocketStatusIndicator />
+                  </div>
+                  {totalUnreadCount > 0 ? (
+                    <p className="text-sm text-blue-600 font-medium">
+                      {totalUnreadCount} tin nhắn chưa đọc
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      {conversations.length} cuộc trò chuyện
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
             
-            {activeConversation && (
-              <div className="hidden sm:flex items-center">
-                <Image
-                  src={activeConversation.participant.avatar}
-                  alt={activeConversation.participant.name}
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 rounded-full mr-2"
-                />
-                <div>
-                  <p className="text-sm font-medium text-gray-900">
-                    {activeConversation.participant.name}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {activeConversation.participant.isOnline ? (
-                      <span className="text-green-600">Đang online</span>
-                    ) : (
-                      `Hoạt động ${activeConversation.participant.lastSeen?.toLocaleTimeString('vi-VN')}`
-                    )}
-                  </p>
+            {activeConversation && (() => {
+              const partner = activeConversation.participants.find(p => p._id !== user._id);
+              return partner && (
+                <div className="hidden sm:flex items-center">
+                  <Image
+                    src={partner.avatar || '/placeholder-room.svg'}
+                    alt={partner.full_name || 'Unknown User'}
+                    width={28}
+                    height={28}
+                    className="w-7 h-7 rounded-full mr-2"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {partner.full_name || 'Unknown User'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      <span className="text-gray-600">{partner.role}</span>
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto h-[calc(100vh-80px)] flex">
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
         {/* Mobile Sidebar Overlay */}
         {isMobileSidebarOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
@@ -266,46 +158,78 @@ export default function ChatLayout({ activeConversationId }: ChatLayoutProps) {
               </div>
               <ConversationList
                 conversations={conversations}
-                selectedConversation={selectedConversation}
+                selectedConversation={activeConversation?._id || null}
                 onConversationSelect={handleConversationSelect}
-                currentUser={currentUser}
+                currentUser={{
+                  _id: user._id,
+                  full_name: user.full_name,
+                  avatar: typeof user.avatar === 'string' ? user.avatar : user.avatar?.url
+                }}
               />
             </div>
           </div>
         )}
 
-        {/* Desktop Sidebar */}
-        <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r lg:bg-white">
+        {/* Desktop Sidebar - Compact width */}
+        <div className="hidden lg:flex lg:w-72 lg:flex-col lg:border-r lg:bg-gray-50">
           <ConversationList
             conversations={conversations}
-            selectedConversation={selectedConversation}
+            selectedConversation={activeConversation?._id || null}
             onConversationSelect={handleConversationSelect}
-            currentUser={currentUser}
+            currentUser={{
+              _id: user._id,
+              full_name: user.full_name,
+              avatar: typeof user.avatar === 'string' ? user.avatar : user.avatar?.url
+            }}
           />
         </div>
 
-        {/* Chat Window */}
+        {/* Chat Window - Takes remaining space */}
         <div className="flex-1 flex flex-col bg-white">
-          {selectedConversation ? (
+          {activeConversation ? (
             <ChatWindow
-              conversation={activeConversation!}
-              currentUser={currentUser}
-              onNewMessage={handleNewMessage}
+              conversation={activeConversation}
+              currentUser={{
+                _id: user._id,
+                full_name: user.full_name,
+                avatar: typeof user.avatar === 'string' ? user.avatar : user.avatar?.url
+              }}
             />
-          ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Chọn một cuộc trò chuyện
-                </h3>
-                <p className="text-gray-500">
-                  Chọn cuộc trò chuyện từ danh sách bên trái để bắt đầu nhắn tin
-                </p>
-              </div>
-            </div>
-          )}
+                ) : (
+                  <div className="flex-1 flex items-center justify-center bg-gray-50">
+                    <div className="text-center max-w-lg mx-auto px-6">
+                      <div className="mb-6">
+                        <div className="mx-auto w-16 h-16 bg-gray-200 rounded-2xl flex items-center justify-center">
+                          <ChatBubbleLeftRightIcon className="h-8 w-8 text-gray-600" />
+                        </div>
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        Chào mừng đến với Tin nhắn
+                      </h3>
+                      <p className="text-gray-600 leading-relaxed mb-6">
+                        Chọn cuộc trò chuyện từ danh sách bên trái để bắt đầu.
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+                          <p className="text-sm font-medium text-gray-700">Tin nhắn tức thì</p>
+                        </div>
+                        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+                          <p className="text-sm font-medium text-gray-700">Bảo mật cao</p>
+                        </div>
+                        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+                          <p className="text-sm font-medium text-gray-700">Đa nền tảng</p>
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200">
+                        <p className="text-sm text-gray-600">
+                          💡 <strong className="text-gray-800">Mẹo:</strong> Thêm <code className="bg-gray-100 px-2 py-1 rounded-lg text-xs font-mono">?debug=true</code> vào URL để hiển thị công cụ test
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                 )}
         </div>
+      </div>
       </div>
     </div>
   );

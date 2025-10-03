@@ -30,11 +30,14 @@ export async function PATCH(
     
     // Get request body
     const body = await request.json();
-    const { status, reason, notes, contentIssues, pricingIssues, imageIssues, addressIssues, violationDetails } = body;
+    const { status, reason, notes, contentIssues, pricingIssues, imageIssues, addressIssues, violationDetails, notifyLandlord } = body;
+    
+    console.log('[API Route] Moderation request:', { id, status, reason, body });
     
     if (!status || !['approved', 'rejected'].includes(status)) {
+      console.error('[API Route] Invalid status:', status);
       return NextResponse.json(
-        { success: false, message: 'Trạng thái không hợp lệ' },
+        { success: false, message: `Trạng thái không hợp lệ: ${status}` },
         { status: 400 }
       );
     }
@@ -57,14 +60,15 @@ export async function PATCH(
             'Cookie': `accessToken=${token}`
           },
           body: JSON.stringify({
-            status: status === 'approved' ? 'active' : 'rejected',
+            status,
             reason,
             notes,
             contentIssues,
             pricingIssues,
             imageIssues,
             addressIssues,
-            violationDetails
+            violationDetails,
+            notifyLandlord: true
           }),
           credentials: 'include'
         }

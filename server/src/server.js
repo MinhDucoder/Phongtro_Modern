@@ -13,6 +13,8 @@ import Route from "./routes/v1/index.js";
 import errorHandler from "./middlewares/errorhandle.js";
 import { socketAuth } from "./middlewares/checkToken.js";
 import chatHandler from "./sockets/chatHandler.js";
+import notificationHandler from "./sockets/notificationHandler.js";
+import { initNotificationHelper } from "./utils/notificationHelper.js";
 
 const app = express();
 
@@ -77,6 +79,9 @@ const io = new Server(httpServer, {
   serveClient: true, // cho phép /socket.io/socket.io.js
 });
 
+// Initialize notification helper with io instance
+initNotificationHelper(io);
+
 // middleware auth
 io.use(socketAuth);
 
@@ -84,6 +89,7 @@ io.use(socketAuth);
 io.on("connection", (socket) => {
   console.log("⚡ Socket connected:", socket.id);
   chatHandler(io, socket);
+  notificationHandler.setupHandlers(io, socket);
 
   socket.on("disconnect", () => {
     console.log("❌ Socket disconnected:", socket.id);
@@ -91,6 +97,8 @@ io.on("connection", (socket) => {
 });
 
 // ===== Start server (API + Socket.IO) =====
-httpServer.listen(apiPort, hostname, () => {
-  console.log(`🚀 Server (API + Socket.IO) running at http://${hostname}:${apiPort}/`);
+httpServer.listen(apiPort, '0.0.0.0', () => {
+  console.log(`🚀 Server (API + Socket.IO) running at:`);
+  console.log(`   - http://localhost:${apiPort}/`);
+  console.log(`   - http://127.0.0.1:${apiPort}/`);
 });

@@ -77,9 +77,9 @@ export default function chatHandler(io, socket) {
         // 2. Update lastMessage + updatedAt + unread count
         await Conversation.findByIdAndUpdate(convId, {
           lastMessage: {
-            text: message.text,
+            text: message.text || '',
             sender: message.sender,
-            createdAt: message.createdAt,
+            createdAt: message.createdAt || new Date(),
           },
           updatedAt: new Date(),
           $inc: { [`unread.${receiver}`]: 1 },
