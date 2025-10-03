@@ -5,8 +5,40 @@ import { success, error } from "../utils/responeHandler.js";
 class PostController {
   async create(req, res, next) {
     try {
+      console.log('=== POST CREATE REQUEST ===');
+      console.log('User ID:', req.user?.id);
+      console.log('Request Body:', req.body);
+      
       const post = await postService.createPost(req.user.id, req.body);
       return success(res, post, 201);
+    } catch (err) {
+      console.error('=== POST CREATE ERROR ===');
+      console.error('Error message:', err.message);
+      console.error('Error stack:', err.stack);
+      
+      // Xử lý lỗi đặc biệt cho subscription
+      if (err.message.startsWith('SUBSCRIPTION_REQUIRED:')) {
+        return error(res, err.message.replace('SUBSCRIPTION_REQUIRED:', ''), 403, {
+          code: 'SUBSCRIPTION_REQUIRED',
+          redirectTo: '/thanh-toan'
+        });
+      }
+      
+      if (err.message.startsWith('LIMIT_EXCEEDED:')) {
+        return error(res, err.message.replace('LIMIT_EXCEEDED:', ''), 403, {
+          code: 'LIMIT_EXCEEDED',
+          redirectTo: '/thanh-toan'
+        });
+      }
+      
+      return error(res, err.message, 400);
+    }
+  }
+
+  async getSubscriptionInfo(req, res, next) {
+    try {
+      const info = await postService.getUserSubscriptionInfo(req.user.id);
+      return success(res, info);
     } catch (err) {
       return error(res, err.message, 400);
     }

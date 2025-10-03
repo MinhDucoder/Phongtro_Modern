@@ -3,6 +3,8 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import api from '@/lib/api';
+import PostLimitExceededModal from '@/components/subscription/PostLimitExceededModal';
 import { 
   PhotoIcon, 
   XMarkIcon, 
@@ -110,6 +112,8 @@ export default function PostPropertyForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
   
   const [formData, setFormData] = useState<FormData>({
     propertyType: '',
@@ -269,13 +273,71 @@ export default function PostPropertyForm() {
     setIsSubmitting(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Bước 1: Tạo FormData để upload room với hình ảnh
+      const formDataToSend = new FormData();
+      
+      // Thêm thông tin room
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('address', formData.address);
+      formDataToSend.append('province', formData.province);
+      formDataToSend.append('district', formData.district);
+      formDataToSend.append('ward', formData.ward);
+      formDataToSend.append('area', formData.area);
+      formDataToSend.append('price', formData.price);
+      formDataToSend.append('deposit', formData.deposit);
+      formDataToSend.append('electricCost', formData.electricCost);
+      formDataToSend.append('waterCost', formData.waterCost);
+      formDataToSend.append('internetCost', formData.internetCost);
+      formDataToSend.append('parkingCost', formData.parkingCost);
+      formDataToSend.append('type', formData.propertyType);
+      
+      // Thêm amenities
+      formData.amenities.forEach(amenity => {
+        formDataToSend.append('amenities[]', amenity);
+      });
+      
+      // Thêm hình ảnh
+      formData.images.forEach(image => {
+        formDataToSend.append('images', image);
+      });
+
+      console.log('Creating room...');
+      const roomResponse = await api.rooms.createRoom(formDataToSend);
+      console.log('Room created:', roomResponse);
+
+      // Bước 2: Tạo post với room vừa tạo
+      const postData = {
+        roomId: roomResponse.data._id,
+        options: formData.amenities,
+        favouriteLevel: formData.servicePackage === 'free' ? 0 : 1,
+      };
+
+      console.log('Creating post with data:', postData);
+      const postResponse = await api.dashboard.createPost(postData);
+      console.log('Post created:', postResponse);
       
       toastManager.showSuccess('Đăng tin thành công! Tin của bạn đang chờ duyệt.');
-      router.push('/');
-    } catch {
-      toastManager.showError('Có lỗi xảy ra. Vui lòng thử lại.');
+      router.push('/dashboard');
+    } catch (error: any) {
+      console.error('Error creating post:', error);
+      
+      // Xử lý lỗi subscription
+      if (error.message?.includes('LIMIT_EXCEEDED') || 
+          error.message?.includes('đã hết lượt') ||
+          error.message?.includes('hết lượt đăng tin') ||
+          error.message?.includes('subscription')) {
+        
+        setSubscriptionInfo({
+          packageName: 'Miễn phí',
+          usedPosts: 3,
+          postLimit: 3
+        });
+        setShowLimitModal(true);
+        toastManager.showError('Bạn đã hết lượt đăng tin. Vui lòng nâng cấp gói để tiếp tục.');
+      } else {
+        toastManager.showError(error.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -922,6 +984,15 @@ export default function PostPropertyForm() {
           )}
         </div>
       </div>
+
+      {/* Modal cảnh báo hết lượt đăng tin */}
+      <PostLimitExceededModal
+        isOpen={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+        packageName={subscriptionInfo?.packageName}
+        usedPosts={subscriptionInfo?.usedPosts}
+        postLimit={subscriptionInfo?.postLimit}
+      />
     </div>
   );
 }

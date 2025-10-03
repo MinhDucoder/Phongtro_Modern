@@ -1,11 +1,15 @@
 import express from 'express';
 import PaymentController from '../../controllers/PaymentController.js';
+import SubscriptionController from '../../controllers/SubscriptionController.js';
 import { authenticate, authorize } from '../../middlewares/checkToken.js';
 import catchAsync from '../../middlewares/catchAsync.js';
 
 const paymentRoute = express.Router();
 
-// All payment routes require authentication
+// VNPay callback (không cần auth)
+paymentRoute.get('/payment_return', catchAsync(SubscriptionController.handlePaymentCallback));
+
+// All other payment routes require authentication
 paymentRoute.use(authenticate());
 
 // Dashboard payment routes (for landlords to view their payment history)
