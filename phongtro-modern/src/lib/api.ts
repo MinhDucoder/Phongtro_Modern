@@ -737,6 +737,7 @@ export const dashboardApi = {
     limit?: number;
     status?: string;
     search?: string;
+    sort?: string;
   }): Promise<ApiResponse> {
     const queryString = params ? `?${new URLSearchParams(
       Object.entries(params).reduce((acc, [key, value]) => {
