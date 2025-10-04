@@ -20,7 +20,7 @@ class PostController {
       const filters = {};
       const sort = {};
 
-      // Ví dụ filter
+      // Ví dụ filterrooo
       if (req.query.city) filters["roomId.city"] = req.query.city;
       if (req.query.status) filters.status = req.query.status;
 
