@@ -1,28 +1,69 @@
 import redis from "~/config/redis.config.mjs";
-import postService from "./postService";
+import postService from "./postService.js";
 
-function buildCacheKey({ filers = {}, page = 1, limit = 10, sort = {} }) {
+/**
+ * Tạo cache key từ filters, sort, page, limit
+ */
+function buildCacheKey({ filters = {}, page = 1, limit = 10, sort = {} }) {
   const filterKey =
-    Object.entries(filers)
-      .map(([key, value]) => `${key}:${value}`)
+    Object.entries(filters)
+      .sort()
+      .map(([k, v]) => `${k}:${v}`)
       .join("|") || "nofilter";
+
   const sortKey =
     Object.entries(sort)
-      .map(([key, value]) => `${key}:${value}`)
+      .sort()
+      .map(([k, v]) => `${k}:${v}`)
       .join("|") || "nosort";
+
   return `posts:${filterKey}:sort:${sortKey}:page:${page}:limit:${limit}`;
 }
 
-export async function clearPostCache() {
+/**
+ * Lấy cache theo key
+ */
+export async function getCache(key) {
   try {
-    const pattern = "posts:*";
-    let cursor = 0;
+    const data = await redis.get(key);
+    return data ? JSON.parse(data) : null;
+  } catch (err) {
+    console.error("Redis GET error:", err);
+    return null;
+  }
+}
 
+/**
+ * Lưu cache với TTL
+ */
+export async function setCache(key, value, ttl = 3600) {
+  try {
+    await redis.setEx(key, ttl, JSON.stringify(value));
+  } catch (err) {
+    console.error("Redis SET error:", err);
+  }
+}
+
+/**
+ * Xóa cache theo key
+ */
+export async function delCache(key) {
+  try {
+    await redis.del(key);
+    console.log(`🗑️ Đã xóa cache key: ${key}`);
+  } catch (err) {
+    console.error("Redis DEL error:", err);
+  }
+}
+
+/**
+ * Xóa cache theo pattern (dùng SCAN tránh block Redis)
+ */
+export async function clearCacheByPattern(pattern) {
+  try {
+    let cursor = 0;
     do {
-      const reply = await redis.scan(cursor, {
-        MATCH: pattern,
-        COUNT: 100,
-      });
+      const reply = await redis.scan(cursor, { MATCH: pattern, COUNT: 100 });
       cursor = parseInt(reply.cursor);
       const keys = reply.keys;
 
@@ -34,104 +75,85 @@ export async function clearPostCache() {
       }
     } while (cursor !== 0);
   } catch (error) {
-    console.error("Lỗi clearPostsCache:", error);
+    console.error("Lỗi clearCacheByPattern:", error);
     throw new Error(`Lỗi khi xóa cache: ${error.message}`);
   }
 }
 
+/**
+ * Lấy cache nếu có, không thì fetch từ DB rồi set lại
+ */
+export async function getOrSetCache(keyParams, fetchFn, ttl = 600) {
+  const key = buildCacheKey(keyParams);
+
+  try {
+    const cached = await redis.get(key);
+    if (cached) {
+      console.log("✅ Cache hit:", key);
+      return JSON.parse(cached);
+    }
+
+    console.log("❌ Cache miss:", key);
+    const data = await fetchFn();
+    await redis.setEx(key, ttl, JSON.stringify(data));
+    return data;
+  } catch (err) {
+    console.error("Redis getOrSetCache error:", err);
+    // fallback → gọi DB trực tiếp
+    return fetchFn();
+  }
+}
+
+/**
+ * Preload cache cho các query phổ biến
+ */
 export async function buildCacheForPopularQueries() {
   try {
     const [hnPosts, dnPosts, hcmPosts, priceAsc, priceDesc] = await Promise.all(
       [
-        postService.getPosts({
-          filers: { roomId: "Hà Nội" },
+        postService.listPosts({
+          filters: { "roomId.city": "Hà Nội" },
           page: 1,
           limit: 10,
+          sort: { createdAt: -1 },
         }),
-        postService.getPosts({
-          filers: { roomId: "Đà Nẵng" },
+        postService.listPosts({
+          filters: { "roomId.city": "Đà Nẵng" },
           page: 1,
           limit: 10,
+          sort: { createdAt: -1 },
         }),
-        postService.getPosts({
-          filers: { roomId: "Hồ Chí Minh" },
+        postService.listPosts({
+          filters: { "roomId.city": "Hồ Chí Minh" },
           page: 1,
           limit: 10,
+          sort: { createdAt: -1 },
         }),
-        postService.getPosts({ sort: { price: 1 }, page: 1, limit: 10 }),
-        postService.getPosts({ sort: { price: -1 }, page: 1, limit: 10 }),
+        postService.listPosts({ sort: { price: 1 }, page: 1, limit: 10 }),
+        postService.listPosts({ sort: { price: -1 }, page: 1, limit: 10 }),
       ]
     );
 
+    const cacheItems = [
+      { filters: { "roomId.city": "Hà Nội" }, sort: { createdAt: -1 }, data: hnPosts },
+      { filters: { "roomId.city": "Đà Nẵng" }, sort: { createdAt: -1 }, data: dnPosts },
+      { filters: { "roomId.city": "Hồ Chí Minh" }, sort: { createdAt: -1 }, data: hcmPosts },
+      { sort: { price: 1 }, data: priceAsc },
+      { sort: { price: -1 }, data: priceDesc },
+    ];
+
     const pipeline = redis.multi();
-    pipeline.setEx(
-      buildCacheKey({
-        filters: { roomId: "Hà Nội" },
-        page: 1,
-        limit: 10,
-        sort: { createAt: -1 },
-      }),
-      3600,
-      JSON.stringify(hnPosts)
-    );
-    pipeline.setEx(
-      buildCacheKey({
-        filters: { roomId: "Hồ Chí Minh" },
-        page: 1,
-        limit: 10,
-        sort: { createAt: -1 },
-      }),
-      3600,
-      JSON.stringify(hcmPosts)
-    );
-    pipeline.setEx(
-      buildCacheKey({
-        filters: { roomId: "Đã Nẵng" },
-        page: 1,
-        limit: 10,
-        sort: { createAt: -1 },
-      }),
-      3600,
-      JSON.stringify(dnPosts)
-    );
-    pipeline.setEx(
-      buildCacheKey({
-        page: 1,
-        limit: 10,
-        sort: { price: 1 },
-      }),
-      3600,
-      JSON.stringify(priceAsc)
-    );
-    pipeline.setEx(
-      buildCacheKey({
-        page: 1,
-        limit: 10,
-        sort: { price: -1 },
-      }),
-      3600,
-      JSON.stringify(priceDesc)
-    );
+    cacheItems.forEach(({ filters = {}, sort = {}, data }) => {
+      const key = buildCacheKey({ filters, sort, page: 1, limit: 10 });
+      pipeline.setEx(key, 3600, JSON.stringify(data));
+    });
 
     await pipeline.exec();
-    console.log("✅ Đã tạo cache cho các truy vấn phổ biến");
+    console.log("✅ Đã preload cache cho các query phổ biến");
   } catch (error) {
     console.error("Lỗi buildCacheForPopularQueries:", error);
     throw new Error(`Lỗi khi tạo cache: ${error.message}`);
   }
 }
 
-export async function getOrSetCache(keyParams, fetchFn, ttl = 600) {
-  const key = buildCacheKey(keyParams);
-  const cached = await redis.get(key);
-
-  if (cached) {
-    console.log("Cache hit for key:", key);
-    return JSON.parse(cached);
-  }
-
-  console.log("Cache miss for key:", key);
-    const data = await fetchFn();
-    await redis.setEx(key, ttl, JSON.stringify(data));
-    return data;
-}
+export { buildCacheKey };
