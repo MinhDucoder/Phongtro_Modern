@@ -12,6 +12,7 @@ import postRoute from "./post.js";
 import userRoute from "./user.js";
 import conversationRoute from "./conversationRoutes.js";
 import messageRoute from "./messageRoutes.js";
+import searchRoute from "./searchRoute.js";
 
 const Route = (app) => {
   // Root route
@@ -30,6 +31,7 @@ const Route = (app) => {
 
   app.use("/api/v1/auth", authRouter);
   app.use("/api/v1/auth", socialAuthRouter);
+  app.use("/api/v1/search", searchRoute);
   app.use("/api/v1/user", userRoute);
   app.use("/api/v1/role-request", roleRoute);
   app.use("/api/v1/rooms", roomRoute);
