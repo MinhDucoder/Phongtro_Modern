@@ -15,6 +15,7 @@ import { socketAuth } from "./middlewares/checkToken.js";
 import chatHandler from "./sockets/chatHandler.js";
 import notificationHandler from "./sockets/notificationHandler.js";
 import { initNotificationHelper } from "./utils/notificationHelper.js";
+import postExpirationService from "./services/postExpirationService.js";
 
 const app = express();
 
@@ -101,4 +102,7 @@ httpServer.listen(apiPort, '0.0.0.0', () => {
   console.log(`🚀 Server (API + Socket.IO) running at:`);
   console.log(`   - http://localhost:${apiPort}/`);
   console.log(`   - http://127.0.0.1:${apiPort}/`);
+  
+  // Khởi động cron job để auto-expire posts
+  postExpirationService.startExpirationCronJob();
 });

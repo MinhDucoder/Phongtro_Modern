@@ -4,7 +4,7 @@ import PostPropertyForm from '@/components/post/PostPropertyForm';
 import SubscriptionInfo from '@/components/subscription/SubscriptionInfo';
 import PostLimitExceededModal from '@/components/subscription/PostLimitExceededModal';
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { toast } from 'react-hot-toast';
 import { LandlordOnly } from '@/components/auth/ProtectedRoute';
@@ -19,6 +19,7 @@ export default function PostPropertyPage() {
 
 function PostPropertyContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -29,21 +30,50 @@ function PostPropertyContent() {
     
     // Kiểm tra payment status từ URL
     const paymentStatus = searchParams.get('payment');
-    const packageName = searchParams.get('package');
+    const vipPackage = searchParams.get('vipPackage');
+    const postId = searchParams.get('postId');
     
-    if (paymentStatus === 'success') {
-      toast.success(`🎉 Thanh toán thành công! Bạn đã nâng cấp lên gói ${packageName}`, {
+    if (paymentStatus === 'success' && vipPackage) {
+      const packageNames: Record<string, string> = {
+        vip1: 'VIP 1',
+        vip2: 'VIP 2',
+        vip3: 'VIP 3'
+      };
+      
+      toast.success(`🎉 Thanh toán thành công! Tin đăng ${packageNames[vipPackage]} của bạn đang chờ duyệt.`, {
+        duration: 6000,
+      });
+      
+      // Remove payment params from URL
+      setTimeout(() => {
+        window.history.replaceState({}, '', '/dang-tin');
+        router.push('/dashboard/tin-dang');
+      }, 2000);
+    } else if (paymentStatus === 'failed') {
+      const code = searchParams.get('code');
+      const reason = searchParams.get('reason');
+      
+      let errorMessage = '❌ Thanh toán thất bại. ';
+      if (reason === 'invalid_signature') {
+        errorMessage += 'Chữ ký không hợp lệ.';
+      } else if (reason === 'payment_not_found') {
+        errorMessage += 'Không tìm thấy giao dịch.';
+      } else if (code) {
+        errorMessage += `Mã lỗi: ${code}`;
+      }
+      
+      toast.error(errorMessage, {
         duration: 5000,
       });
-      // Remove payment params from URL
+      
       window.history.replaceState({}, '', '/dang-tin');
-    } else if (paymentStatus === 'failed') {
-      toast.error('❌ Thanh toán thất bại. Vui lòng thử lại.', {
+    } else if (paymentStatus === 'error') {
+      toast.error('⚠️ Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.', {
         duration: 5000,
       });
       window.history.replaceState({}, '', '/dang-tin');
     }
-  }, [searchParams]);
+  }, [searchParams, router]);
 
   const checkSubscription = async () => {
     try {

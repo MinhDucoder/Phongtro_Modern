@@ -59,6 +59,37 @@ const postSchema = new mongoose.Schema(
       enum: ["pending", "active", "expired", "rejected", "paused"],
       default: "pending",
     },
+    // Thời hạn tin đăng
+    expiresAt: {
+      type: Date,
+      required: true,
+      index: true, // Index để query tin hết hạn nhanh
+    },
+    postDuration: {
+      type: Number, // Số ngày tin đăng có hiệu lực (7, 15, 30...)
+      required: true,
+      default: 30,
+    },
+    // Có thể gia hạn tin không
+    canExtend: {
+      type: Boolean,
+      default: true,
+    },
+    // Số lần đã gia hạn
+    extendedCount: {
+      type: Number,
+      default: 0,
+    },
+    // Lịch sử gia hạn
+    extensionHistory: [{
+      extendedAt: Date,
+      extendedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      addedDays: Number,
+      newExpiryDate: Date,
+    }],
     // Moderation fields
     moderatedBy: {
       type: mongoose.Schema.Types.ObjectId,

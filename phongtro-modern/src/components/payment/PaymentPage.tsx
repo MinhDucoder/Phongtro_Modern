@@ -113,19 +113,41 @@ export default function PaymentPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [currentSubscription, setCurrentSubscription] = useState<any>(null);
 
   useEffect(() => {
     setMounted(true);
     loadPackages();
+    loadCurrentSubscription();
     
     // Kiểm tra payment status từ URL
     const paymentStatus = searchParams.get('payment');
+    const action = searchParams.get('action');
+    
     if (paymentStatus === 'failed') {
       toastManager.showError('Thanh toán thất bại. Vui lòng thử lại.');
-      // Remove payment params from URL
+      window.history.replaceState({}, '', '/thanh-toan');
+    } else if (paymentStatus === 'success') {
+      if (action === 'extended') {
+        toastManager.showSuccess('🎉 Gia hạn gói thành công! Thời gian và lượt đăng đã được cộng thêm.');
+      }
       window.history.replaceState({}, '', '/thanh-toan');
     }
   }, [searchParams]);
+
+  const loadCurrentSubscription = async () => {
+    try {
+      const response = await subscriptionApi.getCurrentSubscription();
+      if (response.success && response.data) {
+        const data = response.data as any;
+        if (data.subscription) {
+          setCurrentSubscription(data.subscription);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading current subscription:', error);
+    }
+  };
 
   const loadPackages = async () => {
     try {

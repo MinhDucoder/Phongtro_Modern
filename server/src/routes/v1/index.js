@@ -20,6 +20,7 @@ import systemRoute from "./system.js";
 import moderationRoutes from "./moderation.js";
 import statsRoute from "./stats.js";
 import debugRoute from "../debug.js";
+import vipPostPaymentRoute from "./vipPostPayment.js";
 
 const Route = (app) => {
   // Root route
@@ -58,6 +59,7 @@ const Route = (app) => {
   app.use("/api/v1/saved-properties", savedPropertiesRoute);
   app.use("/api/v1/system", systemRoute);
   app.use("/api/v1/stats", statsRoute);
+  app.use("/api/v1/vip-post-payment", vipPostPaymentRoute);
   app.use("/api/debug", debugRoute);
 };
 
