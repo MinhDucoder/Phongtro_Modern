@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Meilisearch Suggest</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 40px auto;
+        max-width: 600px;
+      }
+
+      h1 {
+        text-align: center;
+        color: #2f54eb;
+      }
+
+      input {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+
+      .results {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .card {
+        padding: 12px 16px;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        background: #fafafa;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+
+      .title {
+        font-weight: bold;
+        color: #333;
+      }
+
+      .price {
+        color: #1677ff;
+        font-size: 14px;
+      }
+
+      mark {
+        background: #fffa90;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Tìm kiếm phòng trọ 🏠</h1>
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="Nhập từ khóa (VD: Cầu Giấy, Tân Mai...)"
+      autofocus
+    />
+    <div id="results" class="results"></div>
+
+    <script>
+      const input = document.getElementById("searchInput");
+      const resultsDiv = document.getElementById("results");
+
+      let debounceTimer;
+
+      input.addEventListener("input", (e) => {
+        const keyword = e.target.value.trim();
+
+        clearTimeout(debounceTimer);
+
+        debounceTimer = setTimeout(async () => {
+          if (keyword.length === 0) {
+            resultsDiv.innerHTML = "";
+            return;
+          }
+
+          try {
+            const res = await fetch(`/search/suggest?q=${encodeURIComponent(keyword)}`);
+            const data = await res.json();
+
+            if (!data.success) {
+              resultsDiv.innerHTML = `<p style="color:red">${data.message}</p>`;
+              return;
+            }
+
+            const hits = data.results || [];
+            if (hits.length === 0) {
+              resultsDiv.innerHTML = `<p>Không tìm thấy kết quả</p>`;
+              return;
+            }
+
+            resultsDiv.innerHTML = hits
+              .map(
+                (item) => `
+                <div class="card">
+                  <div class="title">${item._formatted?.title || item.title}</div>
+                  <div class="price">${item.price?.toLocaleString()} VND</div>
+                </div>
+              `
+              )
+              .join("");
+          } catch (err) {
+            console.error(err);
+            resultsDiv.innerHTML = `<p style="color:red">Lỗi khi tìm kiếm</p>`;
+          }
+        }, 300);
+      });
+    </script>
+  </body>
+</html>
+    

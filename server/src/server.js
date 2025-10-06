@@ -14,6 +14,14 @@ import errorHandler from "./middlewares/errorhandle.js";
 import { socketAuth } from "./middlewares/checkToken.js";
 import chatHandler from "./sockets/chatHandler.js";
 
+import { initSearchConfig } from "~/services/meiliSearchService.js";
+
+const initSearch = async () => {
+  await initSearchConfig();
+};
+
+initSearch();
+
 const app = express();
 const hostname = "localhost";
 const apiPort = 5000;
@@ -81,5 +89,7 @@ io.on("connection", (socket) => {
 
 // ===== Start server (API + Socket.IO) =====
 httpServer.listen(apiPort, hostname, () => {
-  console.log(`🚀 Server (API + Socket.IO) running at http://${hostname}:${apiPort}/`);
+  console.log(
+    `🚀 Server (API + Socket.IO) running at http://${hostname}:${apiPort}/`
+  );
 });

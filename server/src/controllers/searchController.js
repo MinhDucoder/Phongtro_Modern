@@ -1,5 +1,5 @@
 import { getOrSetCache } from "~/services/redisService";
-import { searchPosts } from "~/services/meliService";
+import { searchPosts } from "~/services/meiliSearchService";
 import { success, error } from "~/utils/responeHandler";
 class SearchController {
   async suggest(req, res, next) {

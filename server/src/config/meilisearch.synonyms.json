@@ -1,0 +1,28 @@
+{
+  "phòng trọ": ["nhà trọ", "trọ sinh viên", "chỗ trọ", "thuê phòng", "phòng cho thuê"],
+  "chung cư": ["cc mini", "chung cư mini", "căn hộ", "can ho"],
+  "nhà nguyên căn": ["nguyên căn", "nguyên căn cho thuê"],
+  "homestay": ["homstay", "phòng tập thể"],
+
+  "cầu giấy": ["cg", "cau giay"],
+  "đống đa": ["dda", "dong da"],
+  "hoàng mai": ["hm", "hoang mai"],
+  "tây hồ": ["th", "tay ho"],
+  "hai bà trưng": ["hbt", "hai ba trung"],
+  "thanh xuân": ["tx", "thanh xuan"],
+  "từ liêm": ["tl", "tu liem", "bac tu liem", "nam tu liem"],
+  "tân mai": ["tm", "tan mai"],
+
+  "điều hòa": ["máy lạnh", "máy điều hòa"],
+  "nóng lạnh": ["bình nóng lạnh", "máy nước nóng"],
+  "wifi": ["internet", "mạng wifi"],
+  "gác xép": ["gác lửng", "gac xep"],
+  "ban công": ["sân phơi", "bancong"],
+  "khép kín": ["khep kin", "wc riêng", "nhà vệ sinh riêng"],
+  "chung chủ": ["chungchu", "ở cùng chủ"],
+  "tự do": ["tự do giờ giấc", "ra vào tự do"],
+
+  "giá rẻ": ["rẻ", "giá thấp", "bình dân"],
+  "sinh viên": ["sv", "học sinh", "sinh vien"],
+  "trung tâm": ["gần trung tâm", "khu trung tâm"]
+}
