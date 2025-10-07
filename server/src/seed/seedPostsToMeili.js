@@ -28,7 +28,7 @@ export async function syncPostsToMeili() {
 
   // 3️⃣ Đẩy dữ liệu lên Meilisearch
   const task = await index.addDocuments(formatted);
-  console.log("🚀 Sync task queued:", task);
+  console.log("🚀 Sync task start queued:", task);
 
   console.timeEnd("Sync Meilisearch");
   return task;
