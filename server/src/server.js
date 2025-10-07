@@ -64,6 +64,11 @@ app.use(errorHandler);
 // ===== Tạo HTTP server chung =====
 const httpServer = createServer(app);
 
+//co the gan them cac giao thuc khac nhu websocket, grpc...
+/**
+ * @param {import("socket.io").Server} io
+ * @param {import("socket.io").Socket} socket
+ */
 // ===== Socket.IO gắn chung vào httpServer =====
 const io = new Server(httpServer, {
   cors: {
