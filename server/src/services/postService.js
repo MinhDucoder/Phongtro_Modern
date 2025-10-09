@@ -28,22 +28,72 @@ class PostService {
 
   async listPosts({
     page = 1,
-    limit = 20,
+    limit = 10,
     filters = {},
     sort = { createdAt: -1 },
   }) {
     const skip = (page - 1) * limit;
 
-    const posts = await Post.find(filters)
-      .populate({ path: "roomId", select: ROOM_PROJECTION })
-      .populate("landlord", LANDLORD_PROJECTION)
-      .skip(skip)
-      .limit(limit)
-      .sort(sort);
+    const pipeline = [
+      {
+        $lookup: {
+          from: "rooms",
+          localField: "roomId",
+          foreignField: "_id",
+          as: "room",
+        },
+      },
+      { $unwind: "$room" },
+    ];
 
-    const total = await Post.countDocuments(filters);
+    // 🧱 Build match conditions
+    const match = {};
 
-    return { total, items: posts };
+    // Status filter
+    match.status = filters.status || "active";
+
+    // City filter
+    if (filters.city) match["room.city"] = filters.city;
+
+    // Price range
+    if (filters.price_min || filters.price_max) {
+      match["room.price"] = {};
+      if (filters.price_min)
+        match["room.price"].$gte = Number(filters.price_min);
+      if (filters.price_max)
+        match["room.price"].$lte = Number(filters.price_max);
+    }
+
+    pipeline.push({ $match: match });
+    pipeline.push({ $sort: sort });
+    pipeline.push({ $skip: skip });
+    pipeline.push({ $limit: limit });
+
+    // ✅ Query song song để tối ưu
+    const [posts, totalResult] = await Promise.all([
+      Post.aggregate(pipeline),
+      Post.aggregate([
+        {
+          $lookup: {
+            from: "rooms",
+            localField: "roomId",
+            foreignField: "_id",
+            as: "room",
+          },
+        },
+        { $unwind: "$room" },
+        { $match: match },
+        { $count: "total" },
+      ]),
+    ]);
+
+    const total = totalResult[0]?.total || 0;
+
+    return {
+      total,
+      totalPages: Math.ceil(total / limit),
+      items: posts,
+    };
   }
 
   async getPostById(postId) {

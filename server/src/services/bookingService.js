@@ -44,6 +44,7 @@ class BookingService {
     }
 
     const booking = await Booking.findByIdAndUpdate(id, data, {
+      status:"comfirmed",
       new: true,
       runValidators: true,
     }).populate("room");
