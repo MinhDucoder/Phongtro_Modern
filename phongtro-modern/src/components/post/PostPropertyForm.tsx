@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import api from '@/lib/api';
@@ -114,6 +114,8 @@ export default function PostPropertyForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
+  const [userSubscription, setUserSubscription] = useState<any>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(true);
   
   const [formData, setFormData] = useState<FormData>({
     propertyType: '',
@@ -138,6 +140,27 @@ export default function PostPropertyForm() {
     contactEmail: '',
     contactAddress: '',
   });
+
+  // Load thông tin subscription khi component mount
+  useEffect(() => {
+    const loadSubscriptionInfo = async () => {
+      try {
+        setLoadingSubscription(true);
+        const response = await api.dashboard.getSubscriptionInfo();
+        console.log('Subscription info:', response);
+        
+        if (response.data?.hasActiveSubscription && response.data?.subscription?.canCreatePost) {
+          setUserSubscription(response.data.subscription);
+        }
+      } catch (error) {
+        console.error('Error loading subscription:', error);
+      } finally {
+        setLoadingSubscription(false);
+      }
+    };
+
+    loadSubscriptionInfo();
+  }, []);
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -198,16 +221,8 @@ export default function PostPropertyForm() {
           toastManager.showError('Vui lòng nhập tiêu đề');
           return false;
         }
-        if (formData.title.length < 30) {
-          toastManager.showError('Tiêu đề phải có ít nhất 30 ký tự');
-          return false;
-        }
         if (!formData.description.trim()) {
           toastManager.showError('Vui lòng nhập mô tả');
-          return false;
-        }
-        if (formData.description.length < 100) {
-          toastManager.showError('Mô tả phải có ít nhất 100 ký tự');
           return false;
         }
         return true;
@@ -273,7 +288,121 @@ export default function PostPropertyForm() {
     setIsSubmitting(true);
     
     try {
-      // Bước 1: Tạo FormData để upload room với hình ảnh
+      const selectedPackage = servicePackages.find(pkg => pkg.value === formData.servicePackage);
+      
+      // Nếu user có subscription active, sử dụng lượt đăng từ subscription
+      if (userSubscription && userSubscription.canCreatePost) {
+        // Tạo FormData để upload hình ảnh
+        const formDataToSend = new FormData();
+        
+        // Thêm thông tin room
+        formDataToSend.append('title', formData.title);
+        formDataToSend.append('description', formData.description);
+        formDataToSend.append('address', formData.address);
+        formDataToSend.append('province', formData.province);
+        formDataToSend.append('district', formData.district);
+        formDataToSend.append('ward', formData.ward);
+        formDataToSend.append('area', formData.area);
+        formDataToSend.append('price', formData.price);
+        formDataToSend.append('deposit', formData.deposit);
+        formDataToSend.append('electricCost', formData.electricCost);
+        formDataToSend.append('waterCost', formData.waterCost);
+        formDataToSend.append('internetCost', formData.internetCost);
+        formDataToSend.append('parkingCost', formData.parkingCost);
+        formDataToSend.append('type', formData.propertyType);
+        
+        // Thêm amenities
+        formData.amenities.forEach(amenity => {
+          formDataToSend.append('amenities[]', amenity);
+        });
+        
+        // Thêm hình ảnh
+        formData.images.forEach(image => {
+          formDataToSend.append('images', image);
+        });
+
+        console.log('Creating room with subscription...');
+        const roomResponse = await api.rooms.createRoom(formDataToSend);
+        console.log('Room created:', roomResponse);
+
+        // Tạo post với room vừa tạo
+        const postData = {
+          roomId: roomResponse.data._id,
+          options: formData.amenities,
+          favouriteLevel: 'free', // Subscription users get standard posts
+        };
+
+        console.log('Creating post with subscription:', postData);
+        const postResponse = await api.dashboard.createPost(postData);
+        console.log('Post created:', postResponse);
+        
+        toastManager.showSuccess(`Đăng tin thành công! Còn lại ${userSubscription.remainingPosts - 1}/${userSubscription.postLimit} lượt đăng.`);
+        router.push('/dashboard/tin-dang');
+        return;
+      }
+      
+      // Nếu chọn gói VIP (có phí), chuyển sang thanh toán
+      if (selectedPackage && selectedPackage.price > 0) {
+        // Tạo FormData để upload hình ảnh trước
+        const formDataToSend = new FormData();
+        
+        // Thêm thông tin room
+        formDataToSend.append('title', formData.title);
+        formDataToSend.append('description', formData.description);
+        formDataToSend.append('address', formData.address);
+        formDataToSend.append('province', formData.province);
+        formDataToSend.append('district', formData.district);
+        formDataToSend.append('ward', formData.ward);
+        formDataToSend.append('area', formData.area);
+        formDataToSend.append('price', formData.price);
+        formDataToSend.append('deposit', formData.deposit);
+        formDataToSend.append('electricCost', formData.electricCost);
+        formDataToSend.append('waterCost', formData.waterCost);
+        formDataToSend.append('internetCost', formData.internetCost);
+        formDataToSend.append('parkingCost', formData.parkingCost);
+        formDataToSend.append('type', formData.propertyType);
+        
+        // Thêm amenities
+        formData.amenities.forEach(amenity => {
+          formDataToSend.append('amenities[]', amenity);
+        });
+        
+        // Thêm hình ảnh
+        formData.images.forEach(image => {
+          formDataToSend.append('images', image);
+        });
+
+        console.log('Creating room for VIP post...');
+        const roomResponse = await api.rooms.createRoom(formDataToSend);
+        console.log('Room created:', roomResponse);
+
+        // Chuẩn bị data để tạo post sau khi thanh toán
+        const postDataForPayment = {
+          roomId: roomResponse.data._id,
+          options: formData.amenities,
+          propertyType: formData.propertyType,
+        };
+
+        // Tạo payment URL
+        console.log('Creating VIP payment...');
+        const paymentResponse = await api.vipPostPayment.createPayment({
+          vipPackage: formData.servicePackage,
+          postData: postDataForPayment
+        });
+
+        console.log('Payment URL created:', paymentResponse);
+
+        // Redirect đến VNPay
+        if (paymentResponse.data?.paymentUrl) {
+          window.location.href = paymentResponse.data.paymentUrl;
+        } else {
+          throw new Error('Không thể tạo link thanh toán');
+        }
+        
+        return; // Dừng lại, chờ callback từ VNPay
+      }
+
+      // Nếu gói FREE, tạo post bình thường
       const formDataToSend = new FormData();
       
       // Thêm thông tin room
@@ -306,11 +435,11 @@ export default function PostPropertyForm() {
       const roomResponse = await api.rooms.createRoom(formDataToSend);
       console.log('Room created:', roomResponse);
 
-      // Bước 2: Tạo post với room vừa tạo
+      // Tạo post với room vừa tạo
       const postData = {
         roomId: roomResponse.data._id,
         options: formData.amenities,
-        favouriteLevel: formData.servicePackage === 'free' ? 0 : 1,
+        favouriteLevel: 'free',
       };
 
       console.log('Creating post with data:', postData);
@@ -318,7 +447,7 @@ export default function PostPropertyForm() {
       console.log('Post created:', postResponse);
       
       toastManager.showSuccess('Đăng tin thành công! Tin của bạn đang chờ duyệt.');
-      router.push('/dashboard');
+      router.push('/dashboard/tin-dang');
     } catch (error: any) {
       console.error('Error creating post:', error);
       
@@ -417,37 +546,78 @@ export default function PostPropertyForm() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Gói dịch vụ
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {servicePackages.map((pkg) => (
-                  <div
-                    key={pkg.value}
-                    onClick={() => handleInputChange('servicePackage', pkg.value)}
-                    className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                      formData.servicePackage === pkg.value
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold">{pkg.label}</h3>
-                      <span className="text-lg font-bold text-green-600">
-                        {pkg.price === 0 ? 'Miễn phí' : `${pkg.price.toLocaleString()}đ`}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2">{pkg.duration}</p>
-                    <ul className="text-xs text-gray-500">
-                      {pkg.features.map((feature, index) => (
-                        <li key={index}>• {feature}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+            {/* Hiển thị thông tin subscription hoặc gói VIP */}
+            {loadingSubscription ? (
+              <div className="text-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="text-sm text-gray-500 mt-2">Đang tải thông tin gói...</p>
               </div>
-            </div>
+            ) : userSubscription && userSubscription.canCreatePost ? (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <CheckCircleIcon className="w-6 h-6 text-green-500" />
+                      <h3 className="text-lg font-bold text-gray-900">
+                        Gói {userSubscription.packageName}
+                      </h3>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Bạn đang sử dụng gói đăng ký có sẵn
+                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-white rounded-lg p-3">
+                        <p className="text-xs text-gray-500 mb-1">Đã sử dụng</p>
+                        <p className="text-xl font-bold text-blue-600">
+                          {userSubscription.usedPosts}/{userSubscription.postLimit}
+                        </p>
+                      </div>
+                      <div className="bg-white rounded-lg p-3">
+                        <p className="text-xs text-gray-500 mb-1">Còn lại</p>
+                        <p className="text-xl font-bold text-green-600">
+                          {userSubscription.remainingPosts} lượt
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-3 text-xs text-gray-500">
+                      <p>Hết hạn: {new Date(userSubscription.endDate).toLocaleDateString('vi-VN')}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Gói dịch vụ
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {servicePackages.map((pkg) => (
+                    <div
+                      key={pkg.value}
+                      onClick={() => handleInputChange('servicePackage', pkg.value)}
+                      className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                        formData.servicePackage === pkg.value
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-semibold">{pkg.label}</h3>
+                        <span className="text-lg font-bold text-green-600">
+                          {pkg.price === 0 ? 'Miễn phí' : `${pkg.price.toLocaleString()}đ`}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">{pkg.duration}</p>
+                      <ul className="text-xs text-gray-500">
+                        {pkg.features.map((feature, index) => (
+                          <li key={index}>• {feature}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -461,8 +631,7 @@ export default function PostPropertyForm() {
                 placeholder="VD: Cho thuê phòng trọ đầy đủ nội thất gần trường đại học..."
                 maxLength={120}
               />
-              <div className="mt-1 flex justify-between text-sm text-gray-500">
-                <span>Tối thiểu 30 ký tự</span>
+              <div className="mt-1 flex justify-end text-sm text-gray-500">
                 <span>{formData.title.length}/120</span>
               </div>
             </div>
@@ -479,8 +648,7 @@ export default function PostPropertyForm() {
                 placeholder="Mô tả chi tiết về phòng trọ: vị trí, tiện nghi, quy định..."
                 maxLength={3000}
               />
-              <div className="mt-1 flex justify-between text-sm text-gray-500">
-                <span>Tối thiểu 100 ký tự</span>
+              <div className="mt-1 flex justify-end text-sm text-gray-500">
                 <span>{formData.description.length}/3000</span>
               </div>
             </div>

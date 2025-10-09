@@ -17,7 +17,7 @@ class PostService {
       user: userId,
       status: "active",
       endDate: { $gt: new Date() }
-    });
+    }).populate('packagePlan'); // Populate để lấy postDuration
 
     if (!subscription) {
       throw new Error("SUBSCRIPTION_REQUIRED:Bạn cần có gói đăng tin để tạo bài đăng. Vui lòng chọn gói phù hợp.");
@@ -53,12 +53,21 @@ class PostService {
       throw new Error("Not your room");
     }
 
+    // Tính toán ngày hết hạn dựa trên subscription
+    // Ưu tiên dùng packagePlan.postDuration nếu có populate, fallback sang subscription.duration
+    const postDuration = subscription.packagePlan?.postDuration || subscription.duration || 30; // Mặc định 30 ngày
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + postDuration);
+
     const post = await Post.create({
       roomId,
       landlord: userId,
       options: postData.options || [],
-      favouriteLevel: postData.favouriteLevel || 0,
+      favouriteLevel: postData.favouriteLevel || 'free',
       status: postData.status || 'pending',
+      expiresAt: expiresAt,
+      postDuration: postDuration,
+      canExtend: subscription.packagePlan?.allowExtension !== false, // Mặc định true nếu không có packagePlan
     });
 
     // Cập nhật số lượt đã sử dụng
@@ -67,6 +76,7 @@ class PostService {
     });
 
     console.log('Post created successfully:', post._id);
+    console.log('Post expires at:', expiresAt);
     console.log('Subscription updated - used posts:', subscription.usedPosts + 1);
 
     return post.populate([

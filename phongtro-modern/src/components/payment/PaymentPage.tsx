@@ -113,19 +113,41 @@ export default function PaymentPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [currentSubscription, setCurrentSubscription] = useState<any>(null);
 
   useEffect(() => {
     setMounted(true);
     loadPackages();
+    loadCurrentSubscription();
     
     // Kiểm tra payment status từ URL
     const paymentStatus = searchParams.get('payment');
+    const action = searchParams.get('action');
+    
     if (paymentStatus === 'failed') {
       toastManager.showError('Thanh toán thất bại. Vui lòng thử lại.');
-      // Remove payment params from URL
+      window.history.replaceState({}, '', '/thanh-toan');
+    } else if (paymentStatus === 'success') {
+      if (action === 'extended') {
+        toastManager.showSuccess('🎉 Gia hạn gói thành công! Thời gian và lượt đăng đã được cộng thêm.');
+      }
       window.history.replaceState({}, '', '/thanh-toan');
     }
   }, [searchParams]);
+
+  const loadCurrentSubscription = async () => {
+    try {
+      const response = await subscriptionApi.getCurrentSubscription();
+      if (response.success && response.data) {
+        const data = response.data as any;
+        if (data.subscription) {
+          setCurrentSubscription(data.subscription);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading current subscription:', error);
+    }
+  };
 
   const loadPackages = async () => {
     try {
@@ -134,12 +156,18 @@ export default function PaymentPage() {
       
       if (response.success && response.data) {
         const packages = Array.isArray(response.data) ? response.data : [response.data];
-        const packagesWithUI = packages.map((pkg: any, index: number) => ({
+        
+        // Chỉ lấy các gói trả phí (loại bỏ gói miễn phí)
+        const paidPackages = packages.filter((pkg: any) => 
+          pkg.price > 0 && pkg.priority > 0
+        );
+        
+        const packagesWithUI = paidPackages.map((pkg: any, index: number) => ({
           ...pkg,
           uniqueKey: pkg._id || `package-${index}`, // Fallback key
           icon: getPackageIcon(pkg.priority),
           color: getPackageColor(pkg.priority),
-          popular: pkg.priority === 2, // Premium package
+          popular: pkg.priority === 2, // Premium package (Gói Vàng)
           features: [
             `Đăng tin trong ${pkg.duration} ngày`,
             `Số lượt đăng: ${pkg.postLimit} bài`,
@@ -168,7 +196,7 @@ export default function PaymentPage() {
         }));
         
         setPackages(packagesWithUI);
-        console.log('Loaded packages:', packagesWithUI); // Debug log
+        console.log('Loaded paid packages only:', packagesWithUI); // Debug log
       }
     } catch (error) {
       console.error('Error loading packages:', error);

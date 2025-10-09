@@ -48,6 +48,7 @@ class AuthController {
         // Tạo subscription miễn phí
         const freeSubscription = await Subscription.create({
           user: newUser._id,
+          packagePlan: freePackage._id, // Thêm reference
           packageType: freePackage.type,
           packageName: freePackage.name,
           price: freePackage.price,

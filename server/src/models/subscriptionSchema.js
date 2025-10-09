@@ -9,6 +9,10 @@ const subscriptionSchema = new Schema(
       ref: "User",
       required: true,
     },
+    packagePlan: {
+      type: Schema.Types.ObjectId,
+      ref: "PackagePlan",
+    },
     packageType: {
       type: String,
       enum: ["free", "silver", "gold", "platinum"],
@@ -54,6 +58,10 @@ const subscriptionSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Payment",
     },
+    payments: [{
+      type: Schema.Types.ObjectId,
+      ref: "Payment",
+    }],
     isActive: {
       type: Boolean,
       default: true,

@@ -36,6 +36,7 @@ class SubscriptionController {
         if (freePackage) {
           const newSubscription = await Subscription.create({
             user: userId,
+            packagePlan: freePackage._id, // Thêm reference
             packageType: freePackage.type,
             packageName: freePackage.name,
             price: freePackage.price,
@@ -107,9 +108,8 @@ class SubscriptionController {
 
       console.log('Current subscription:', currentSubscription);
 
-      if (currentSubscription && currentSubscription.packageType === packagePlan.type) {
-        return error(res, "Bạn đã đăng ký gói này rồi", 400);
-      }
+      // CHO PHÉP MUA THÊM GÓI - Không chặn nếu đã có gói cùng loại
+      // User có thể gia hạn/mua thêm gói bất cứ lúc nào
 
       console.log('Creating payment record...');
       
@@ -214,7 +214,7 @@ class SubscriptionController {
           paidAt: new Date(),
         });
 
-        // Tạo subscription mới
+        // Tạo hoặc gia hạn subscription
         console.log('Payment metadata:', payment.metadata);
         console.log('Looking for package ID:', payment.metadata?.packagePlan);
         
@@ -227,40 +227,89 @@ class SubscriptionController {
           return error(res, "Không tìm thấy thông tin gói đăng tin", 404);
         }
         
-        // Hủy subscription cũ (nếu có)
-        await Subscription.updateMany(
-          { user: payment.user, status: "active" },
-          { status: "cancelled" }
-        );
-
-        const startDate = new Date();
-        const endDate = new Date(startDate.getTime() + packagePlan.duration * 24 * 60 * 60 * 1000);
-
-        const subscription = await Subscription.create({
+        // Tìm subscription hiện tại đang active
+        const currentSubscription = await Subscription.findOne({
           user: payment.user,
-          packageType: packagePlan.type,
-          packageName: packagePlan.name,
-          price: packagePlan.price,
-          duration: packagePlan.duration,
-          postLimit: packagePlan.postLimit,
-          priority: packagePlan.priority,
-          features: packagePlan.features,
-          startDate,
-          endDate,
           status: "active",
-          payment: payment._id,
+          endDate: { $gt: new Date() },
         });
+
+        let subscription;
+        
+        // Nếu đã có subscription active và cùng loại gói -> GIA HẠN (cộng dồn)
+        if (currentSubscription && currentSubscription.packageType === packagePlan.type) {
+          console.log('Extending existing subscription (stacking)...');
+          
+          // Tính toán thời gian mới: từ endDate hiện tại + duration mới
+          const newEndDate = new Date(currentSubscription.endDate.getTime() + packagePlan.duration * 24 * 60 * 60 * 1000);
+          
+          // Cộng thêm số lượt đăng tin
+          const newPostLimit = currentSubscription.postLimit + packagePlan.postLimit;
+          
+          // Cập nhật subscription hiện tại
+          subscription = await Subscription.findByIdAndUpdate(
+            currentSubscription._id,
+            {
+              endDate: newEndDate,
+              postLimit: newPostLimit,
+              duration: currentSubscription.duration + packagePlan.duration, // Cộng dồn thời gian
+              // Giữ nguyên usedPosts - không reset
+              $push: { payments: payment._id }, // Thêm payment ID vào lịch sử
+            },
+            { new: true }
+          );
+          
+          console.log('Subscription extended successfully:', {
+            oldEndDate: currentSubscription.endDate,
+            newEndDate: newEndDate,
+            oldPostLimit: currentSubscription.postLimit,
+            newPostLimit: newPostLimit,
+            usedPosts: subscription.usedPosts,
+            remainingPosts: newPostLimit - subscription.usedPosts
+          });
+        } else {
+          // Hủy subscription cũ (nếu có và khác loại)
+          if (currentSubscription) {
+            await Subscription.findByIdAndUpdate(currentSubscription._id, {
+              status: "cancelled"
+            });
+          }
+
+          // Tạo subscription mới
+          const startDate = new Date();
+          const endDate = new Date(startDate.getTime() + packagePlan.duration * 24 * 60 * 60 * 1000);
+
+          subscription = await Subscription.create({
+            user: payment.user,
+            packagePlan: packagePlan._id, // Thêm reference
+            packageType: packagePlan.type,
+            packageName: packagePlan.name,
+            price: packagePlan.price,
+            duration: packagePlan.duration,
+            postLimit: packagePlan.postLimit,
+            priority: packagePlan.priority,
+            features: packagePlan.features,
+            startDate,
+            endDate,
+            status: "active",
+            payment: payment._id,
+            payments: [payment._id], // Mảng lưu tất cả payments
+          });
+          
+          console.log('New subscription created:', subscription);
+        }
 
         // Cập nhật user
         await User.findByIdAndUpdate(payment.user, {
           currentSubscription: subscription._id,
-          $push: { subscriptionHistory: subscription._id },
+          $addToSet: { subscriptionHistory: subscription._id }, // Dùng $addToSet để tránh duplicate
         });
 
-        // Redirect về trang dashboard tin đăng với thông báo thành công
-        const callbackUrl = new URL(`${process.env.FRONTEND_URL}/dashboard/tin-dang`);
+        // Redirect về trang kết quả thanh toán với thông báo thành công
+        const callbackUrl = new URL(`${process.env.FRONTEND_URL}/ket-qua-thanh-toan-goi`);
         callbackUrl.searchParams.set('payment', 'success');
         callbackUrl.searchParams.set('package', packagePlan.name);
+        callbackUrl.searchParams.set('action', currentSubscription && currentSubscription.packageType === packagePlan.type ? 'extended' : 'new');
         callbackUrl.searchParams.set('vnp_ResponseCode', responseCode);
         callbackUrl.searchParams.set('vnp_TransactionNo', vnpayData.vnp_TransactionNo);
         
@@ -272,17 +321,18 @@ class SubscriptionController {
           failureReason: vnpayData.vnp_ResponseCode,
         });
 
-        const callbackUrl = new URL(`${process.env.FRONTEND_URL}/thanh-toan`);
+        const callbackUrl = new URL(`${process.env.FRONTEND_URL}/ket-qua-thanh-toan-goi`);
         callbackUrl.searchParams.set('payment', 'failed');
         callbackUrl.searchParams.set('vnp_ResponseCode', responseCode);
+        callbackUrl.searchParams.set('package', 'Unknown');
         
         return res.redirect(callbackUrl.toString());
       }
     } catch (err) {
       console.error("Payment callback error:", err);
-      const callbackUrl = new URL(`${process.env.FRONTEND_URL}/thanh-toan-goi`);
-      callbackUrl.searchParams.set('vnp_ResponseCode', '99'); // Error
-      callbackUrl.searchParams.set('vnp_TransactionStatus', '02'); // Error
+      const callbackUrl = new URL(`${process.env.FRONTEND_URL}/ket-qua-thanh-toan-goi`);
+      callbackUrl.searchParams.set('payment', 'error');
+      callbackUrl.searchParams.set('vnp_ResponseCode', '99');
       
       return res.redirect(callbackUrl.toString());
     }

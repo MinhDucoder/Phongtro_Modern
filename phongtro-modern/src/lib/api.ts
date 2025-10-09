@@ -122,6 +122,17 @@ class TokenManager {
       });
 
       if (!response.ok) {
+        // Nếu refresh token hết hạn hoặc không hợp lệ, xóa tokens và không log error
+        if (response.status === 401 || response.status === 403) {
+          this.clearTokens();
+          // Redirect to login nếu đang ở trang yêu cầu auth
+          if (typeof window !== 'undefined' && 
+              (window.location.pathname.startsWith('/dashboard') || 
+               window.location.pathname.startsWith('/profile'))) {
+            window.location.href = '/dang-nhap?redirect=' + encodeURIComponent(window.location.pathname);
+          }
+          throw new Error('Session expired');
+        }
         throw new Error('Token refresh failed');
       }
 
@@ -139,7 +150,10 @@ class TokenManager {
         throw new Error('Invalid refresh response');
       }
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      // Chỉ log error nếu không phải lỗi session expired
+      if (error instanceof Error && error.message !== 'Session expired') {
+        console.error('Token refresh error:', error);
+      }
       this.clearTokens();
       throw error;
     }
@@ -368,13 +382,13 @@ export async function apiRequest<T>(
         // If this is not an auth endpoint and we haven't retried yet, try token refresh
         if (!isAuthEndpoint && !isRefreshEndpoint && retryCount === 0) {
           try {
-            console.log('Attempting token refresh due to 401...');
             await tokenManager.refreshAccessToken();
             // Retry the original request with new token
             return apiRequest<T>(endpoint, options, retryCount + 1);
           } catch (refreshError) {
-            console.error('Token refresh failed on 401 retry:', refreshError);
-            // Fall through to clear tokens and show error
+            // Token refresh failed, silently clear tokens
+            tokenManager.clearTokens();
+            // Fall through to show error
           }
         }
         
@@ -387,7 +401,6 @@ export async function apiRequest<T>(
           window.dispatchEvent(new CustomEvent('session-expired', {
             detail: { endpoint, retryCount }
           }));
-          console.log('Phiên làm việc đã hết hạn, đã xóa tokens và dispatch event');
         }
         
         // Tạo thông báo lỗi thân thiện hơn cho 401
@@ -595,13 +608,13 @@ export const authApi = {
   },
 
   // Lấy thông tin user cơ bản (bao gồm avatar) từ /user/me
-  async getMe(): Promise<ApiResponse> {
-    console.log('getMe: API_BASE_URL =', API_BASE_URL);
-    console.log('getMe: Full URL =', `${API_BASE_URL}/user/me`);
-    return apiRequest('/user/me', {
-      method: 'GET',
-    });
-  },
+  // async getMe(): Promise<ApiResponse> {
+  //   console.log('getMe: API_BASE_URL =', API_BASE_URL);
+  //   console.log('getMe: Full URL =', `${API_BASE_URL}/user/me`);
+  //   return apiRequest('/user/me', {
+  //     method: 'GET',
+  //   });
+  // },
 
   // Cập nhật thông tin profile
   async updateProfile(profileData: {
@@ -860,6 +873,13 @@ export const dashboardApi = {
   // Get quick stats for widgets
   async getQuickStats(): Promise<ApiResponse> {
     return apiRequest('/dashboard/quick-stats', {
+      method: 'GET',
+    });
+  },
+
+  // Get user subscription info
+  async getSubscriptionInfo(): Promise<ApiResponse> {
+    return apiRequest('/posts/subscription-info', {
       method: 'GET',
     });
   },
@@ -1287,6 +1307,34 @@ export const notificationApi = {
   },
 };
 
+// VIP Post Payment API
+export const vipPostPaymentApi = {
+  // Lấy danh sách gói VIP
+  async getVIPPackages(): Promise<ApiResponse> {
+    return apiRequest('/vip-post-payment/packages', {
+      method: 'GET',
+    });
+  },
+
+  // Tạo URL thanh toán VIP
+  async createPayment(data: {
+    vipPackage: string;
+    postData: any;
+  }): Promise<ApiResponse> {
+    return apiRequest('/vip-post-payment/create-payment', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Kiểm tra trạng thái thanh toán
+  async checkPaymentStatus(paymentId: string): Promise<ApiResponse> {
+    return apiRequest(`/vip-post-payment/status/${paymentId}`, {
+      method: 'GET',
+    });
+  },
+};
+
 export default {
   auth: authApi,
   rooms: roomApi,
@@ -1298,4 +1346,5 @@ export default {
   subscription: subscriptionApi,
   stats: statsApi,
   notifications: notificationApi,
+  vipPostPayment: vipPostPaymentApi,
 };
