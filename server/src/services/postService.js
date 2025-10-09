@@ -230,6 +230,7 @@ class PostService {
         nearbyPlaces: room.nearbyPlaces || [],
         propertyType: room.propertyType,
         roomType: room.roomType,
+        location: room.location,
         isAvailable: room.isAvailable,
         createdAt: room.createdAt,
         updatedAt: room.updatedAt

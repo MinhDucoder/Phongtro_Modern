@@ -106,8 +106,23 @@ const roomSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    // GeoJSON location for MongoDB geospatial queries
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        required: false
+      }
+    }
   },
   { timestamps: true }
 );
+
+// Create geospatial index for location field
+roomSchema.index({ location: '2dsphere' });
 
 export default mongoose.model("Room", roomSchema);

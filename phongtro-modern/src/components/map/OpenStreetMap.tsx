@@ -275,11 +275,12 @@ export default function OpenStreetMap({
             lng: lng
           });
           setRoomInfo(post);
-        } else if (post?.roomId?.coordinate?.lat && post?.roomId?.coordinate?.lng) {
-          // Fallback: lấy tọa độ từ roomId.coordinate
+        } else if (post?.roomId?.location?.coordinates && post.roomId.location.coordinates.length === 2) {
+          // Fallback: lấy tọa độ từ roomId.location.coordinates
+          const [lng, lat] = post.roomId.location.coordinates;
           setCoordinates({
-            lat: post.roomId.coordinate.lat,
-            lng: post.roomId.coordinate.lng
+            lat: lat,
+            lng: lng
           });
           setRoomInfo(post);
         } else {
