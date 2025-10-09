@@ -202,6 +202,10 @@ export interface Room {
   images: string[];
   amenities: string[];
   isAvailable: boolean;
+  coordinate?: {
+    lat: number;
+    lng: number;
+  } | null;
   createdAt: string;
   updatedAt: string;
   // Optional fields that might come from post
@@ -303,9 +307,13 @@ export async function apiRequest<T>(
     headers: {
       // Only set Content-Type for JSON, let browser set it for FormData
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-      ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {})
+      ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+      // Add cache control for login requests
+      ...(endpoint.includes('/auth/login') ? { 'Cache-Control': 'no-cache' } : {})
     },
     credentials: 'include', // Bao gồm cookies cho authentication
+    // Add mode for CORS handling
+    mode: 'cors',
   };
 
   const config = {
@@ -318,9 +326,10 @@ export async function apiRequest<T>(
   };
 
   try {
-    // Add timeout
+    // Add timeout - increased to 30 seconds for login requests
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
+    const timeoutDuration = endpoint.includes('/auth/login') ? 30000 : 15000; // 30s for login, 15s for others
+    const timeoutId = setTimeout(() => controller.abort(), timeoutDuration);
     
     const response = await fetch(url, {
       ...config,
@@ -467,13 +476,19 @@ export async function apiRequest<T>(
   } catch (error) {
     // Xử lý lỗi timeout
     if (error instanceof Error && error.name === 'AbortError') {
-      console.warn('API request timeout:', url);
+      console.warn('API request timeout:', url, 'Timeout duration:', timeoutDuration + 'ms');
+      if (endpoint.includes('/auth/login')) {
+        throw new Error('Đăng nhập mất quá nhiều thời gian. Vui lòng kiểm tra kết nối mạng và thử lại');
+      }
       throw new Error('Kết nối đến máy chủ bị gián đoạn, vui lòng thử lại');
     }
     
     // Xử lý lỗi mạng
     if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-      console.warn('Network error:', url);
+      console.warn('Network error:', url, 'Error details:', error.message);
+      if (endpoint.includes('/auth/login')) {
+        throw new Error('Không thể kết nối đến máy chủ đăng nhập. Vui lòng kiểm tra kết nối mạng');
+      }
       throw new Error('Không thể kết nối đến máy chủ, vui lòng kiểm tra kết nối mạng');
     }
     
@@ -483,7 +498,7 @@ export async function apiRequest<T>(
     }
     
     // Lỗi không xác định
-    console.error('Unhandled API error:', error);
+    console.error('Unhandled API error:', error, 'URL:', url);
     throw new Error('Có lỗi xảy ra khi kết nối với server');
   }
 }
@@ -492,19 +507,32 @@ export async function apiRequest<T>(
 export const authApi = {
   // Đăng nhập user
   async login(credentials: LoginRequest): Promise<ApiResponse> {
-    const response = await apiRequest('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+    console.log('🔐 Starting login request for:', credentials.email);
+    const startTime = Date.now();
     
-    // Save tokens on successful login
-    if (response.success !== false && response.token) {
-      const refreshToken = response.refreshToken || response.token;
-      const expiresIn = response.expiresIn || 3600;
-      tokenManager.setTokens(response.token, refreshToken, expiresIn);
+    try {
+      const response = await apiRequest('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(credentials),
+      });
+      
+      const duration = Date.now() - startTime;
+      console.log('🔐 Login request completed in:', duration + 'ms');
+      
+      // Save tokens on successful login
+      if (response.success !== false && response.token) {
+        const refreshToken = response.refreshToken || response.token;
+        const expiresIn = response.expiresIn || 3600;
+        tokenManager.setTokens(response.token, refreshToken, expiresIn);
+        console.log('🔐 Tokens saved successfully');
+      }
+      
+      return response;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      console.error('🔐 Login request failed after:', duration + 'ms', error);
+      throw error;
     }
-    
-    return response;
   },
 
   // Đăng ký user

@@ -234,7 +234,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = async (email: string, password: string): Promise<{ success: boolean; user?: User }> => {
     try {
       setIsLoading(true);
+      console.log('🔐 AuthContext: Starting login for:', email);
+      
       const response: ApiResponse = await authApi.login({ email, password });
+      console.log('🔐 AuthContext: Login response received:', response);
       
       if (response.success && response.user) {
         setUser(response.user);
@@ -249,19 +252,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
       
       // Server trả về thất bại nhưng không có thông báo lỗi
-      toastManager.showLoginError(response.message || 'Đăng nhập không thành công');
+      const errorMsg = response.message || 'Đăng nhập không thành công';
+      console.log('🔐 AuthContext: Login failed:', errorMsg);
+      toastManager.showLoginError(errorMsg);
       return { success: false };
     } catch (error) {
       // Xử lý các lỗi từ API
       let errorMessage = 'Không thể đăng nhập vào hệ thống, vui lòng thử lại';
       
       if (error instanceof Error) {
+        console.error('🔐 AuthContext: Login error:', error.message);
+        
         // Xử lý thông báo lỗi thân thiện
         if (error.message.includes('Email hoặc mật khẩu không chính xác') ||
             error.message.includes('Thông tin đăng nhập không chính xác')) {
           errorMessage = 'Email hoặc mật khẩu không chính xác';
-        } else if (error.message.includes('kết nối') || error.message.includes('mạng')) {
-          errorMessage = 'Không thể kết nối đến máy chủ, vui lòng kiểm tra kết nối mạng';
+        } else if (error.message.includes('kết nối') || error.message.includes('mạng') || 
+                   error.message.includes('timeout') || error.message.includes('thời gian')) {
+          errorMessage = 'Không thể kết nối đến máy chủ, vui lòng kiểm tra kết nối mạng và thử lại';
         } else if (error.message) {
           errorMessage = error.message;
         }

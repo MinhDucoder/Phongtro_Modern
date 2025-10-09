@@ -31,6 +31,10 @@ import {
 import { HeartIcon as HeartSolidIcon, StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 import { toastManager } from '@/components/ui/ToastManager';
+import OpenStreetMap from '@/components/map/OpenStreetMap';
+import PropertyAnalytics from '@/components/analytics/PropertyAnalytics';
+import PropertyReviews from '@/components/review/PropertyReviews';
+import EnhancedLandlordCard from '@/components/property/EnhancedLandlordCard';
 
 interface PropertyDetailProps {
   property: {
@@ -104,6 +108,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   const [showAllImages, setShowAllImages] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Mock auth state
+  const [activeTab, setActiveTab] = useState<'overview' | 'map' | 'analytics' | 'reviews'>('overview');
 
   const room = (property as any).room || (property as any).roomId || property;
   const images = Array.isArray(room?.images)
@@ -198,9 +203,9 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
           </ol>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4">
             {/* Enhanced Image Gallery */}
             <div className="bg-white rounded-xl overflow-hidden shadow-lg border border-gray-200">
               <div className="relative h-[28rem] group">
@@ -265,7 +270,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               {/* Enhanced Image Thumbnails */}
               <div className="p-6 bg-gray-50">
                 <div className="grid grid-cols-4 gap-3">
-                  {galleryImages.slice(0, 4).map((image, index) => (
+                  {galleryImages.slice(0, 4).map((image: string, index: number) => (
                     <div key={index} className="relative group">
                       <Image
                         src={image || '/placeholder-room.svg'}
@@ -298,22 +303,83 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               </div>
             </div>
 
-            {/* Enhanced Property Info */}
-            <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200">
+          </div>
+
+          {/* Enhanced Sidebar */}
+          <div className="space-y-4">
+            {/* Enhanced Landlord Card */}
+            <EnhancedLandlordCard
+              landlord={{
+                _id: (property.landlord as any)?._id || 'unknown',
+                full_name: contact?.name || 'Chủ nhà',
+                phone: contact?.phone,
+                email: contact?.email,
+                avatar: contact?.avatar,
+                role: property.landlord?.role || 'landlord',
+                is_verified: contact?.isVerified || false,
+                joinedDate: (contact as any)?.joinedDate || new Date().toISOString(),
+                totalProperties: 5, // Mock data
+                averageRating: 4.5, // Mock data
+                totalReviews: 23, // Mock data
+                responseTime: 'Trong vòng 1 giờ',
+                onlineStatus: 'online' as const,
+                lastActive: new Date().toISOString()
+              }}
+              propertyId={property._id || property.id || ''}
+            />
+          </div>
+        </div>
+
+        {/* Tab Navigation - Moved below image gallery */}
+        <div className="mt-4">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200">
+            <div className="border-b border-gray-200">
+              <nav className="flex space-x-8 px-6">
+                {[
+                  { id: 'overview', label: 'Tổng quan', icon: HomeIcon },
+                  { id: 'map', label: 'Bản đồ', icon: MapPinIcon },
+                  { id: 'analytics', label: 'Thống kê', icon: EyeIcon },
+                  { id: 'reviews', label: 'Đánh giá', icon: StarIcon }
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
+                      activeTab === tab.id
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <tab.icon className="w-5 h-5 mr-2" />
+                      {tab.label}
+                    </div>
+                  </button>
+                ))}
+              </nav>
+            </div>
+
+            <div className="p-4">
+              {activeTab === 'overview' && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  {/* Left Column - Main Info */}
+                  <div className="lg:col-span-2 space-y-4">
+                    {/* Property Basic Info */}
+                    <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
               {/* Stats and Meta Info */}
-              <div className="flex flex-wrap items-center justify-between mb-6">
-                <div className="flex items-center space-x-6 text-sm">
+                      <div className="flex flex-wrap items-center justify-between mb-4">
+                        <div className="flex items-center space-x-4 text-sm">
                   <div className="flex items-center text-gray-600">
                     <EyeIcon className="w-4 h-4 mr-2" />
                     <span className="font-medium">
                       {(property.analytics?.views || property.viewCount || 0).toLocaleString()} lượt xem
                     </span>
                   </div>
-                  {property.updatedAt && (
+                          {(property as any).updatedAt && (
                     <div className="flex items-center text-gray-600">
                       <ClockIcon className="w-4 h-4 mr-2" />
                       <span className="font-medium">
-                        Cập nhật: {new Date(property.updatedAt).toLocaleDateString('vi-VN')}
+                                Cập nhật: {new Date((property as any).updatedAt).toLocaleDateString('vi-VN')}
                       </span>
                     </div>
                   )}
@@ -336,47 +402,48 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               </div>
 
               {/* Title */}
-              <h1 className="text-3xl font-bold text-gray-900 mb-6 leading-tight">
+                      <h1 className="text-2xl font-bold text-gray-900 mb-4 leading-tight">
                 {room?.title || property.title || 'Tin đăng'}
               </h1>
 
               {/* Price and Area */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
-                  <div className="text-sm font-medium text-green-700 mb-1">Giá thuê</div>
-                  <div className="text-4xl font-bold text-green-600">
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
+                          <div className="text-xs font-medium text-green-700 mb-1">Giá thuê</div>
+                          <div className="text-2xl font-bold text-green-600">
                     {price}
                   </div>
                 </div>
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
-                  <div className="text-sm font-medium text-blue-700 mb-1">Diện tích</div>
-                  <div className="text-3xl font-bold text-blue-600">
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                          <div className="text-xs font-medium text-blue-700 mb-1">Diện tích</div>
+                          <div className="text-2xl font-bold text-blue-600">
                     {area}
                   </div>
                 </div>
               </div>
 
               {/* Location */}
-              <div className="flex items-start mb-8 p-4 bg-gray-50 rounded-xl">
-                <MapPinIcon className="w-6 h-6 text-blue-600 mr-3 mt-1 flex-shrink-0" />
+                      <div className="flex items-start p-3 bg-gray-50 rounded-lg">
+                        <MapPinIcon className="w-5 h-5 text-blue-600 mr-3 mt-1 flex-shrink-0" />
                 <div>
-                  <p className="font-semibold text-gray-900 text-lg">{location}</p>
-                  <p className="text-gray-700">{room?.address || property.address}</p>
+                          <p className="font-semibold text-gray-900">{location}</p>
+                          <p className="text-gray-700 text-sm">{room?.address || property.address}</p>
+                        </div>
                 </div>
               </div>
 
-              {/* Enhanced Description */}
-              <div className="border-t border-gray-200 pt-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                  <UserIcon className="w-6 h-6 mr-3 text-blue-600" />
+                    {/* Description */}
+                    <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+                      <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <UserIcon className="w-5 h-5 mr-2 text-blue-600" />
                   Mô tả chi tiết
                 </h2>
                 <div className="prose max-w-none">
                   {(room?.description || property.description || '')
                     .split('\n')
                     .filter(Boolean)
-                    .map((paragraph, index) => (
-                      <p key={index} className="mb-4 text-gray-700 leading-relaxed whitespace-pre-line">
+                          .map((paragraph: string, index: number) => (
+                            <p key={index} className="mb-3 text-gray-700 leading-relaxed text-sm whitespace-pre-line">
                         {paragraph}
                       </p>
                     ))}
@@ -384,170 +451,113 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               </div>
             </div>
 
-            {/* Enhanced Amenities */}
-            <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                <CheckCircleIcon className="w-6 h-6 mr-3 text-green-600" />
-                Tiện nghi có sẵn
+                  {/* Right Column - Amenities & Rules */}
+                  <div className="space-y-4">
+                    {/* Amenities */}
+                    <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+                      <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <CheckCircleIcon className="w-5 h-5 mr-2 text-green-600" />
+                        Tiện nghi
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {(room?.amenities || property.amenities || []).map((amenity, index) => (
-                  <div key={index} className="flex items-center p-3 bg-green-50 rounded-lg border border-green-200">
-                    <CheckCircleIcon className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span className="text-gray-900 font-medium">{amenity}</span>
+                      <div className="space-y-2">
+                        {(room?.amenities || property.amenities || []).map((amenity: string, index: number) => (
+                          <div key={index} className="flex items-center p-2 bg-green-50 rounded-lg border border-green-200">
+                            <CheckCircleIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
+                            <span className="text-gray-900 font-medium text-sm">{amenity}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Enhanced Rules */}
-            <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                <ExclamationTriangleIcon className="w-6 h-6 mr-3 text-orange-600" />
-                Nội quy phòng
+                    {/* Rules */}
+                    <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+                      <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <ExclamationTriangleIcon className="w-5 h-5 mr-2 text-orange-600" />
+                        Nội quy
               </h2>
               {Array.isArray(room?.rules) && room.rules.length > 0 ? (
-                <div className="space-y-4">
+                        <div className="space-y-2">
                   {room.rules.map((rule: string, index: number) => (
-                    <div key={index} className="flex items-start p-4 bg-orange-50 rounded-lg border border-orange-200">
-                      <XCircleIcon className="w-5 h-5 text-orange-600 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-900 font-medium">{rule}</span>
+                            <div key={index} className="flex items-start p-2 bg-orange-50 rounded-lg border border-orange-200">
+                              <XCircleIcon className="w-4 h-4 text-orange-600 mr-2 mt-0.5 flex-shrink-0" />
+                              <span className="text-gray-900 font-medium text-sm">{rule}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <ExclamationTriangleIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-500">Chưa cập nhật nội quy.</p>
+                        <div className="text-center py-4">
+                          <ExclamationTriangleIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-gray-500 text-sm">Chưa cập nhật nội quy.</p>
                 </div>
               )}
             </div>
 
-            {/* Enhanced Nearby Places */}
-            <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                <MapPinIcon className="w-6 h-6 mr-3 text-blue-600" />
+                    {/* Nearby Places */}
+                    <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+                      <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <MapPinIcon className="w-5 h-5 mr-2 text-blue-600" />
                 Địa điểm lân cận
               </h2>
               {Array.isArray(room?.nearbyPlaces) && room.nearbyPlaces.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
                   {room.nearbyPlaces.map((place: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200 hover:shadow-md transition-shadow">
+                            <div key={index} className="flex items-center justify-between p-2 bg-blue-50 rounded-lg border border-blue-200 hover:shadow-md transition-shadow">
                       <div className="flex items-center">
-                        <div className="text-blue-600 mr-3">
+                                <div className="text-blue-600 mr-2">
                           {getPlaceIcon(place.type)}
                         </div>
-                        <span className="text-gray-900 font-medium">{place.name}</span>
+                                <span className="text-gray-900 font-medium text-sm">{place.name}</span>
                       </div>
-                      <span className="text-sm font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
+                              <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
                         {place.distance}
                       </span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <MapPinIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-500">Chưa cập nhật địa điểm lân cận.</p>
+                        <div className="text-center py-4">
+                          <MapPinIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-gray-500 text-sm">Chưa cập nhật địa điểm lân cận.</p>
                 </div>
               )}
             </div>
           </div>
-
-          {/* Enhanced Sidebar */}
-          <div className="space-y-6">
-            {/* Enhanced Contact Card */}
-            <div className="bg-white rounded-xl p-8 shadow-xl border border-gray-200 sticky top-8">
-              {/* Landlord Info */}
-              <div className="flex items-center mb-6">
-                <div className="relative">
-                  <Image
-                    src={contact?.avatar || '/placeholder-room.svg'}
-                    alt={contact?.name || 'Chủ nhà'}
-                    width={70}
-                    height={70}
-                    className="rounded-full border-4 border-blue-100"
-                  />
-                  {contact?.isVerified && (
-                    <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
-                      <ShieldCheckIcon className="w-4 h-4 text-white" />
-                    </div>
-                  )}
                 </div>
-                <div className="ml-4">
-                  <div className="flex items-center">
-                    <h3 className="font-bold text-gray-900 text-lg">{contact?.name || 'Chủ nhà'}</h3>
-                    {contact?.isVerified && (
-                      <span className="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                        Đã xác thực
-                      </span>
-                    )}
+              )}
+
+              {activeTab === 'map' && (
+                <div className="space-y-6">
+                  {/* Simple Map */}
+                  <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">Vị trí phòng</h3>
+                    <OpenStreetMap
+                      roomId={property._id || property.id || ''}
+                      height="400px"
+                    />
                   </div>
-                  {contact?.joinedDate && (
-                    <p className="text-sm text-gray-600 mt-1">
-                      Tham gia: {contact.joinedDate}
-                    </p>
-                  )}
                 </div>
-              </div>
+              )}
 
-              {/* Action Buttons */}
-              <div className="space-y-4">
-                {/* Primary Action */}
-                <button
-                  onClick={handleRequestToRent}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 px-6 rounded-xl font-bold flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-lg"
-                >
-                  <HandRaisedIcon className="w-6 h-6 mr-3" />
-                  Gửi yêu cầu thuê
-                </button>
+              {activeTab === 'analytics' && (
+                <PropertyAnalytics
+                  propertyId={property._id || property.id || ''}
+                  isOwner={false} // TODO: Check if current user is owner
+                  analytics={property.analytics ? { 
+                    views: property.analytics.views || 0,
+                    likes: property.analytics.likes || 0,
+                    calls: property.analytics.calls || 0,
+                    messages: property.analytics.messages || 0,
+                    saves: 0
+                  } : undefined}
+                />
+              )}
 
-                {/* Secondary Actions */}
-                <div className="grid grid-cols-2 gap-3">
-                  <Link
-                    href={`tel:${contact?.phone || ''}`}
-                    className="bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-all duration-200 hover:scale-105"
-                  >
-                    <PhoneIcon className="w-5 h-5 mr-2" />
-                    Gọi
-                  </Link>
-                  
-                  <Link
-                    href="/chat"
-                    className="bg-gray-900 hover:bg-black text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-all duration-200 hover:scale-105"
-                  >
-                    <ChatBubbleLeftIcon className="w-5 h-5 mr-2" />
-                    Chat
-                  </Link>
-                </div>
-
-                {/* Additional Actions */}
-                <button className="w-full border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 text-gray-700 hover:text-blue-700 py-3 px-4 rounded-lg font-medium transition-all duration-200">
-                  Xem thêm tin của {contact?.name || 'chủ nhà'}
-                </button>
-              </div>
-
-              {/* Enhanced Safety Tips */}
-              <div className="mt-8 p-6 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl">
-                <h4 className="font-bold text-yellow-800 mb-4 flex items-center">
-                  <ExclamationTriangleIcon className="w-5 h-5 mr-2" />
-                  Lưu ý an toàn
-                </h4>
-                <ul className="text-sm text-yellow-700 space-y-2">
-                  <li className="flex items-start">
-                    <span className="text-yellow-600 mr-2">•</span>
-                    <span>Không chuyển tiền trước khi xem phòng</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-yellow-600 mr-2">•</span>
-                    <span>Kiểm tra giấy tờ chủ nhà</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-yellow-600 mr-2">•</span>
-                    <span>Thỏa thuận rõ ràng về tiền cọc</span>
-                  </li>
-                </ul>
-              </div>
+              {activeTab === 'reviews' && (
+                <PropertyReviews
+                  propertyId={property._id || property.id || ''}
+                  isOwner={false} // TODO: Check if current user is owner
+                />
+              )}
             </div>
           </div>
         </div>
@@ -600,7 +610,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             
             {/* Thumbnail Grid */}
             <div className="grid grid-cols-8 gap-3">
-              {galleryImages?.map((image, index) => (
+              {galleryImages?.map((image: string, index: number) => (
                 <div key={index} className="relative">
                   <Image
                     src={image || '/placeholder-room.svg'}

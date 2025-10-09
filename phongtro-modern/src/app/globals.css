@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../styles/chat-animations.css";
+@import "../styles/leaflet.css";
 
 /* Chat page specific - no page scroll */
 .chat-page {
@@ -26,7 +27,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #f9fafb;
+    --foreground: #000000;
     --text-primary: #f9fafb;
     --text-secondary: #e5e7eb;
     --text-muted: #cbd5f5;

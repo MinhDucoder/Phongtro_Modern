@@ -98,10 +98,14 @@ export function SocketProvider({ children }: SocketProviderProps) {
 
     // Listen for notifications
     newSocket.on('notification', (notification) => {
-      console.log('🔔 Received notification:', notification);
+      console.log('🔔 Socket received notification:', notification);
+      console.log('🔔 Notification type:', notification.type);
+      console.log('🔔 Notification title:', notification.title);
+      console.log('🔔 Notification metadata:', notification.metadata);
       
       // Dispatch custom event for notification
       if (typeof window !== 'undefined') {
+        console.log('🔔 Dispatching notification-received event');
         window.dispatchEvent(new CustomEvent('notification-received', {
           detail: notification
         }));

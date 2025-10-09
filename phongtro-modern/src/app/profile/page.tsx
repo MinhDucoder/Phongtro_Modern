@@ -9,7 +9,9 @@ import RoleBadge from '@/components/ui/RoleBadge';
 import { AuthRequired } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 import { authApi, userSettingsApi, savedPropertiesApi, rentalRequestApi } from '@/lib/api';
+import axios from 'axios';
 import { toastManager } from '@/components/ui/ToastManager';
+import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
   return (
@@ -69,6 +71,59 @@ function ProfileContent() {
     setActiveTab(tab);
   }, [searchParams]);
 
+  // Listen for real-time notifications
+  useEffect(() => {
+    const handleNotification = (event: CustomEvent) => {
+      const notification = event.detail;
+      console.log('🔔 Received notification in profile:', notification);
+      console.log('🔔 Notification type:', notification.type);
+      console.log('🔔 Notification metadata:', notification.metadata);
+      
+      // Handle rental request notifications
+      if (notification.type === 'rental_request_update') {
+        const { requestId, status, propertyTitle } = notification.metadata || {};
+        console.log('🔔 Rental request notification details:', { requestId, status, propertyTitle });
+        
+        // Show toast notification
+        if (status === 'accepted') {
+          toast.success(`🎉 Yêu cầu thuê phòng "${propertyTitle}" đã được chấp nhận!`, {
+            duration: 6000,
+            style: {
+              background: '#10B981',
+              color: '#fff',
+              fontWeight: '500',
+            },
+          });
+        } else if (status === 'rejected') {
+          toast.error(`❌ Yêu cầu thuê phòng "${propertyTitle}" đã bị từ chối.`, {
+            duration: 6000,
+            style: {
+              background: '#EF4444',
+              color: '#fff',
+              fontWeight: '500',
+            },
+          });
+        }
+        
+        // Reload rental requests if we're on the requests tab
+        if (activeTab === 'requests') {
+          console.log('🔔 Reloading rental requests data...');
+          loadUserData();
+        }
+      }
+    };
+
+    console.log('🔔 Setting up notification listener in profile page');
+    // Add event listener
+    window.addEventListener('notification-received', handleNotification as EventListener);
+    
+    // Cleanup
+    return () => {
+      console.log('🔔 Cleaning up notification listener in profile page');
+      window.removeEventListener('notification-received', handleNotification as EventListener);
+    };
+  }, [activeTab]);
+
   const loadUserData = async () => {
     try {
       setLoading(true);
@@ -82,7 +137,7 @@ function ProfileContent() {
       // Load rental requests
       const requestsResponse = await rentalRequestApi.getTenantRequests();
       if (requestsResponse.success) {
-        setRentalRequests(requestsResponse.data.items || []);
+        setRentalRequests(requestsResponse.data.requests || []);
       }
 
       // Load user settings
@@ -194,6 +249,44 @@ function ProfileContent() {
       });
     }
     setIsEditing(false);
+  };
+
+  // Test notification function
+  const testNotification = async (type: 'accepted' | 'rejected') => {
+    try {
+      console.log(`🧪 Testing ${type} notification...`);
+      
+      // Get token
+      const storedTokens = localStorage.getItem('auth_tokens');
+      if (!storedTokens) {
+        toast.error('Không tìm thấy token');
+        return;
+      }
+      
+      const tokenData = JSON.parse(storedTokens);
+      const response = await axios.post(
+        'http://localhost:5000/api/v1/test-notification/test-rental-notification',
+        {
+          type,
+          propertyTitle: 'Phòng trọ test',
+          propertyId: 'test123'
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${tokenData.accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      if (response.data.success) {
+        toast.success(`🧪 Test notification sent: ${type}`);
+        console.log('🧪 Test response:', response.data);
+      }
+    } catch (error) {
+      console.error('🧪 Test notification error:', error);
+      toast.error('Lỗi khi test notification');
+    }
   };
 
   if (!authUser) {
@@ -484,9 +577,26 @@ function ProfileContent() {
                     <DocumentTextIcon className="w-5 h-5 mr-2 text-blue-600" />
                     Yêu cầu thuê phòng
                   </h3>
-                  {rentalRequests.length > 0 && (
-                    <span className="text-sm text-gray-500">{rentalRequests.length} yêu cầu</span>
-                  )}
+                  <div className="flex items-center space-x-4">
+                    {rentalRequests.length > 0 && (
+                      <span className="text-sm text-gray-500">{rentalRequests.length} yêu cầu</span>
+                    )}
+                    {/* Test buttons */}
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => testNotification('accepted')}
+                        className="px-3 py-1.5 text-xs bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+                      >
+                        🧪 Test Accepted
+                      </button>
+                      <button
+                        onClick={() => testNotification('rejected')}
+                        className="px-3 py-1.5 text-xs bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                      >
+                        🧪 Test Rejected
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 {rentalRequests.length > 0 ? (
                   <div className="space-y-4">
@@ -494,23 +604,68 @@ function ProfileContent() {
                       <div key={request._id} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-all duration-200">
                         <div className="flex justify-between items-start gap-4">
                           <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900 mb-2">{request.post?.roomId?.title || 'Không có tiêu đề'}</h4>
-                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">{request.message}</p>
-                            <div className="flex items-center text-xs text-gray-500">
-                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                              {new Date(request.createdAt).toLocaleDateString('vi-VN')}
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold text-gray-900">{request.post?.roomId?.title || 'Không có tiêu đề'}</h4>
+                              <span className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap ${
+                                request.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                                request.status === 'accepted' ? 'bg-green-100 text-green-800 border border-green-200' :
+                                'bg-red-100 text-red-800 border border-red-200'
+                              }`}>
+                                {request.status === 'pending' ? 'Chờ duyệt' :
+                                 request.status === 'accepted' ? 'Đã duyệt' : 'Từ chối'}
+                              </span>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                              <div className="text-sm">
+                                <span className="text-gray-500">Địa chỉ:</span>
+                                <p className="font-medium text-gray-900">{request.post?.roomId?.address || 'Chưa có địa chỉ'}</p>
+                              </div>
+                              <div className="text-sm">
+                                <span className="text-gray-500">Giá thuê:</span>
+                                <p className="font-medium text-blue-600">{request.post?.roomId?.price?.toLocaleString() || '0'}đ/tháng</p>
+                              </div>
+                              <div className="text-sm">
+                                <span className="text-gray-500">Số người:</span>
+                                <p className="font-medium text-gray-900">{request.tenantInfo?.numberOfPeople || 1} người</p>
+                              </div>
+                              <div className="text-sm">
+                                <span className="text-gray-500">Dự kiến chuyển vào:</span>
+                                <p className="font-medium text-gray-900">
+                                  {request.expectedMoveIn ? new Date(request.expectedMoveIn).toLocaleDateString('vi-VN') : 'Chưa xác định'}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            <div className="mb-3">
+                              <span className="text-gray-500 text-sm">Tin nhắn:</span>
+                              <p className="text-sm text-gray-700 mt-1 p-3 bg-gray-50 rounded-lg">{request.message}</p>
+                            </div>
+                            
+                            {request.responseMessage && (
+                              <div className="mb-3">
+                                <span className="text-gray-500 text-sm">Phản hồi từ chủ nhà:</span>
+                                <p className="text-sm text-gray-700 mt-1 p-3 bg-blue-50 rounded-lg border border-blue-200">{request.responseMessage}</p>
+                              </div>
+                            )}
+                            
+                            <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t">
+                              <div className="flex items-center">
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                Gửi lúc: {new Date(request.createdAt).toLocaleString('vi-VN')}
+                              </div>
+                              {request.respondedAt && (
+                                <div className="flex items-center">
+                                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  Phản hồi lúc: {new Date(request.respondedAt).toLocaleString('vi-VN')}
+                                </div>
+                              )}
                             </div>
                           </div>
-                          <span className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap ${
-                            request.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
-                            request.status === 'approved' ? 'bg-green-100 text-green-800 border border-green-200' :
-                            'bg-red-100 text-red-800 border border-red-200'
-                          }`}>
-                            {request.status === 'pending' ? 'Chờ duyệt' :
-                             request.status === 'approved' ? 'Đã duyệt' : 'Từ chối'}
-                          </span>
                         </div>
                       </div>
                     ))}

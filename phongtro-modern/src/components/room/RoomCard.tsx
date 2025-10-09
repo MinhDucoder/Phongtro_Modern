@@ -195,7 +195,7 @@ export default function RoomCard({ room, onToggleFavorite, isFavorite = false, o
       {/* Content */}
       <div className="p-4">
         {/* Title */}
-        <Link href={`/phong/${room._id}`} className="block">
+        <Link href={`/phong-tro/${room._id}`} className="block">
           <h3 className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2">
             {room.title}
           </h3>
@@ -267,7 +267,7 @@ export default function RoomCard({ room, onToggleFavorite, isFavorite = false, o
         {/* Contact Button */}
         <div className="mt-3">
           <Link
-            href={`/phong/${room._id}`}
+            href={`/phong-tro/${room._id}`}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors text-center block"
           >
             Xem chi tiết
