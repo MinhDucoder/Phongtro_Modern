@@ -1,6 +1,7 @@
 'use client';
 
 import { ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 
 interface PropertyDetailErrorProps {
   error?: string;
@@ -37,12 +38,12 @@ export default function PropertyDetailError({
         )}
         
         <div className="mt-6">
-          <a
+          <Link
             href="/"
             className="text-blue-600 hover:text-blue-500 text-sm font-medium"
           >
             ← Quay về trang chủ
-          </a>
+          </Link>
         </div>
       </div>
     </div>

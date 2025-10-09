@@ -21,7 +21,11 @@ function PostPropertyContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
+  const [subscriptionInfo, setSubscriptionInfo] = useState<{ 
+    hasActiveSubscription: boolean; 
+    subscriptionType?: string; 
+    remainingPosts?: number;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [canPost, setCanPost] = useState(true);
 
@@ -31,7 +35,6 @@ function PostPropertyContent() {
     // Kiểm tra payment status từ URL
     const paymentStatus = searchParams.get('payment');
     const vipPackage = searchParams.get('vipPackage');
-    const postId = searchParams.get('postId');
     
     if (paymentStatus === 'success' && vipPackage) {
       const packageNames: Record<string, string> = {
@@ -79,7 +82,13 @@ function PostPropertyContent() {
     try {
       setLoading(true);
       const response = await api.subscription.getSubscriptionInfo();
-      const data = response.data as any;
+      const data = response.data as { 
+        hasActiveSubscription: boolean; 
+        subscription?: { 
+          remainingPosts: number; 
+          isExpired: boolean; 
+        }; 
+      };
       
       setSubscriptionInfo(data);
       
@@ -95,7 +104,7 @@ function PostPropertyContent() {
           setShowUpgradeModal(true);
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error checking subscription:', error);
       toast.error('Không thể kiểm tra thông tin gói đăng tin');
     } finally {

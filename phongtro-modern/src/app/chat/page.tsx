@@ -2,6 +2,7 @@ import ChatLayout from '@/components/chat/ChatLayout';
 import ChatTestButton from '@/components/chat/ChatTestButton';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { AuthRequired } from '@/components/auth/ProtectedRoute';
+import Link from 'next/link';
 
 interface ChatPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -32,12 +33,12 @@ async function ChatContent({ searchParams }: ChatPageProps) {
               <h2 className="text-base font-bold text-yellow-900 flex items-center">
                 🔧 Development Test Panel
               </h2>
-              <a 
+              <Link 
                 href="/chat" 
                 className="text-sm text-yellow-800 hover:text-yellow-900 underline font-medium bg-yellow-200 hover:bg-yellow-300 px-3 py-1 rounded-full transition-colors"
               >
                 ✕ Ẩn Debug Panel
-              </a>
+              </Link>
             </div>
             <ChatTestButton />
           </div>

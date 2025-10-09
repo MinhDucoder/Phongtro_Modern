@@ -41,9 +41,9 @@ export default function TestRolesPage() {
               <p><strong>isUser():</strong> {isUser() ? '✅ Yes' : '❌ No'}</p>
               <p><strong>isLandlord():</strong> {isLandlord() ? '✅ Yes' : '❌ No'}</p>
               <p><strong>isAdmin():</strong> {isAdmin() ? '✅ Yes' : '❌ No'}</p>
-              <p><strong>hasRole(['user']):</strong> {hasRole(['user']) ? '✅ Yes' : '❌ No'}</p>
-              <p><strong>hasRole(['landlord']):</strong> {hasRole(['landlord']) ? '✅ Yes' : '❌ No'}</p>
-              <p><strong>hasRole(['admin']):</strong> {hasRole(['admin']) ? '✅ Yes' : '❌ No'}</p>
+              <p><strong>hasRole([&apos;user&apos;]):</strong> {hasRole(['user']) ? '✅ Yes' : '❌ No'}</p>
+              <p><strong>hasRole([&apos;landlord&apos;]):</strong> {hasRole(['landlord']) ? '✅ Yes' : '❌ No'}</p>
+              <p><strong>hasRole([&apos;admin&apos;]):</strong> {hasRole(['admin']) ? '✅ Yes' : '❌ No'}</p>
             </div>
           </div>
 
@@ -142,7 +142,7 @@ export default function TestRolesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Test Đăng tin button */}
               <div className="p-4 border rounded-lg">
-                <h3 className="font-medium text-gray-900 mb-2">"Đăng tin" Button</h3>
+                <h3 className="font-medium text-gray-900 mb-2">&quot;Đăng tin&quot; Button</h3>
                 {isLandlord() ? (
                   <div className="text-green-600">✅ Should be visible in header</div>
                 ) : (

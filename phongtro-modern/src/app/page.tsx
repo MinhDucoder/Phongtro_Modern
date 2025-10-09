@@ -2,15 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import SearchFilter from '@/components/ui/SearchFilter';
-import PropertyCard from '@/components/ui/PropertyCard';
 import Pagination from '@/components/ui/Pagination';
 import StructuredData from '@/components/seo/StructuredData';
-import { roomApi, Room, Post } from '@/lib/api';
+import { Post } from '@/lib/api';
 import RoomCard from '@/components/room/RoomCard';
 import { toastManager } from '@/components/ui/ToastManager';
-import StatsOverview from '@/components/stats/StatsOverview';
-import RealTimeCounter from '@/components/stats/RealTimeCounter';
-import TrendingChart from '@/components/stats/TrendingChart';
+import Link from 'next/link';
 
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -194,12 +191,12 @@ export default function Home() {
             <button className="px-4 py-2 text-gray-600 hover:text-blue-600 text-sm font-medium">
               Có video
             </button>
-            <a 
+            <Link 
               href="/phong" 
               className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
             >
               Xem tất cả
-            </a>
+            </Link>
           </div>
         </div>
 

@@ -7,7 +7,6 @@ import ClientErrorBoundary from "@/components/ui/ClientErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SocketProvider } from "@/contexts/SocketContext";
 import { ChatProvider } from "@/contexts/ChatContext";
-import ConnectionStatus from "@/components/ui/ConnectionStatus";
 import { ToastProvider } from "@/components/ui/ToastManager";
 
 const geistSans = Inter({

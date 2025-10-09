@@ -10,8 +10,7 @@ import {
   SparklesIcon,
   ClockIcon,
   DocumentTextIcon,
-  ArrowRightIcon,
-  HomeIcon
+  ArrowRightIcon
 } from '@heroicons/react/24/outline';
 
 export default function SubscriptionPaymentResultPage() {
