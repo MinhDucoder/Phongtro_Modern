@@ -16,3 +16,5 @@ export const connectDB = async () => {
     process.exit(1)
   }
 }
+
+//mongodb+srv://ducyberxdev:ducyberxdev@phongtrovn.tqxpcgt.mongodb.net/PhongTroVN?retryWrites=true&w=majority&appName=PhongTroVN

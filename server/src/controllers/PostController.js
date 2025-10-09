@@ -21,21 +21,22 @@ class PostController {
     try {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
-      const filters = {};
-      const sort = {};
 
-      // Build filters
-      if (req.query.city) filters["roomId.city"] = req.query.city;
-      if (req.query.status) filters.status = req.query.status;
+      // 🧠 Build filters
+      const filters = {
+        status: req.query.status || "active",
+      };
 
-      // Build sort
-      if (req.query.sortBy) {
-        sort[req.query.sortBy] = req.query.order === "asc" ? 1 : -1;
-      } else {
-        sort.createdAt = -1;
-      }
+      if (req.query.city) filters.city = req.query.city;
+      if (req.query.price_min) filters.price_min = Number(req.query.price_min);
+      if (req.query.price_max) filters.price_max = Number(req.query.price_max);
 
-      // 🔹 Sử dụng getOrSetCache thay vì tự get/set
+      // ⚙️ Build sort
+      const sort = req.query.sortBy
+        ? { [req.query.sortBy]: req.query.order === "asc" ? 1 : -1 }
+        : { createdAt: -1 };
+
+      // 🔹 Redis cache: tránh lặp query DB
       const result = await getOrSetCache(
         { filters, page, limit, sort },
         () => postService.listPosts({ page, limit, filters, sort }),
