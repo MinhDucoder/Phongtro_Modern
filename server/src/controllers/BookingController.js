@@ -12,7 +12,7 @@ class BookingController {
       };
 
       const bookingResult = await bookingService.create(newBooking);
-      res.success(201, "Booking created successfully", bookingResult);
+      success(res, bookingResult, 201);
     } catch (error) {
       next(error);
     }
@@ -27,7 +27,7 @@ class BookingController {
         status,
         userId,
       });
-      res.json(bookings);
+      success(res, bookings, 200);
     } catch (error) {
       next(error);
     }
@@ -51,9 +51,9 @@ class BookingController {
       if (!booking) {
         return res.status(404).json({ message: "Booking not found" });
       }
-      res.json(booking);
+      success(res, booking, 200);
     } catch (error) {
-      next(error);
+      error(res, error.message, 400);
     }
   }
 
@@ -63,7 +63,7 @@ class BookingController {
       if (!booking) {
         return res.status(404).json({ message: "Booking not found" });
       }
-      res.json({ message: "Booking cancelled successfully", booking });
+      success(res, booking, 200);
     } catch (error) {
       next(error);
     }
