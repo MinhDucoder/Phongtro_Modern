@@ -80,6 +80,7 @@ class AdminUserController {
           _id: null,
           totalUsers: { $sum: 1 },
           verifiedUsers: { $sum: { $cond: [{ $eq: ["$is_verified", true] }, 1, 0] } },
+          unverifiedUsers: { $sum: { $cond: [{ $eq: ["$is_verified", false] }, 1, 0] } },
           landlords: { $sum: { $cond: [{ $eq: ["$role", "landlord"] }, 1, 0] } },
           regularUsers: { $sum: { $cond: [{ $eq: ["$role", "user"] }, 1, 0] } }
         }
@@ -99,6 +100,7 @@ class AdminUserController {
         statistics: stats[0] || {
           totalUsers: 0,
           verifiedUsers: 0,
+          unverifiedUsers: 0,
           landlords: 0,
           regularUsers: 0
         }

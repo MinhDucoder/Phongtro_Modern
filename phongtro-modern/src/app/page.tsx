@@ -7,6 +7,7 @@ import StructuredData from '@/components/seo/StructuredData';
 import { Post } from '@/lib/api';
 import RoomCard from '@/components/room/RoomCard';
 import { toastManager } from '@/components/ui/ToastManager';
+import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 
 export default function Home() {
@@ -239,7 +240,7 @@ export default function Home() {
                   isFavorite={favorites.includes(post._id)}
                   onToggleSaved={handleToggleSaved}
                   isSaved={savedProperties.includes(post._id)}
-                  favoriteId={null} // TODO: Get from API response
+                  favoriteId={undefined} // TODO: Get from API response
                 />
               ) : (
                 <div key={post._id} className="bg-red-100 p-4 rounded">

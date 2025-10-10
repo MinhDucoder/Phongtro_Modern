@@ -9,20 +9,22 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    console.log('Next.js API route - Fetching posts with params:', searchParams.toString());
+    const range = searchParams.get('range') || '30d';
+    
+    console.log('Next.js API route - Fetching analytics with range:', range);
     
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken');
 
     if (!accessToken) {
-      console.error('Get posts failed: No access token found');
+      console.error('Get analytics failed: No access token found');
       return NextResponse.json(
         { success: false, message: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const apiUrl = `${API_BASE_URL}/api/v1/admin/posts?${searchParams.toString()}`;
+    const apiUrl = `${API_BASE_URL}/api/v1/admin/analytics?range=${range}`;
     console.log('Sending GET request to backend API:', apiUrl);
     
     const response = await fetch(apiUrl, {
@@ -34,7 +36,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    console.log('Backend API posts response status:', response.status);
+    console.log('Backend API analytics response status:', response.status);
     
     // Check if response is HTML instead of JSON
     const contentType = response.headers.get('content-type');
@@ -43,18 +45,17 @@ export async function GET(request: NextRequest) {
       console.error('Expected JSON but got HTML. First 200 chars:', text.substring(0, 200));
       console.error('Request URL was:', apiUrl);
       return NextResponse.json(
-        { success: false, message: 'Server returned invalid response format (HTML instead of JSON). Route may not exist on backend.' },
+        { success: false, message: 'Server returned invalid response format (HTML instead of JSON). Analytics route may not exist on backend.' },
         { status: 500 }
       );
     }
     
     const data = await response.json();
-    console.log('Backend API posts response data length:', 
-                data?.data?.posts?.length || 'No posts data found');
+    console.log('Backend API analytics response received');
     
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
-    console.error('Admin posts API error:', error);
+    console.error('Admin analytics API error:', error);
     return NextResponse.json(
       { success: false, message: 'Server error', error: String(error) },
       { status: 500 }

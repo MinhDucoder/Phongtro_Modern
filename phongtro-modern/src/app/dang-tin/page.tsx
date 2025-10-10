@@ -25,6 +25,13 @@ function PostPropertyContent() {
     hasActiveSubscription: boolean; 
     subscriptionType?: string; 
     remainingPosts?: number;
+    subscription?: {
+      remainingPosts: number;
+      isExpired: boolean;
+      packageName?: string;
+      usedPosts?: number;
+      postLimit?: number;
+    };
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [canPost, setCanPost] = useState(true);

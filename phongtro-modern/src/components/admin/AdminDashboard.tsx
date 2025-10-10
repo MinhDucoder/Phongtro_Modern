@@ -418,7 +418,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Top Performing Posts */}
+        {/* Top Performing Posts
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Bài đăng phổ biến nhất</h3>
           <div className="overflow-x-auto">
@@ -445,7 +445,7 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

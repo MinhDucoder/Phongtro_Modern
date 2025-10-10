@@ -1,6 +1,7 @@
 import express from 'express'
 import AdminUserController from '~/controllers/AdminUserController'
 import AdminPostController from '~/controllers/AdminPostController'
+import AdminAnalyticsController from '~/controllers/AdminAnalyticsController'
 import { getDashboardOverview } from '~/controllers/AdminDashboardController'
 import { authenticate } from '~/middlewares/checkToken'
 import checkRole from '~/middlewares/checkRole'
@@ -14,6 +15,10 @@ adminRoute.use(checkRole(['admin']))
 
 // Dashboard Routes
 adminRoute.get('/dashboard', getDashboardOverview)
+
+// Analytics Routes
+adminRoute.get('/analytics', catchAsync(AdminAnalyticsController.getAnalytics))
+adminRoute.get('/analytics/detailed', catchAsync(AdminAnalyticsController.getDetailedAnalytics))
 
 // User Management Routes
 adminRoute.get('/users', catchAsync(AdminUserController.getAllUsers))

@@ -63,7 +63,7 @@ export default function RoomCard({ room, onToggleFavorite, isFavorite = false, o
         description: 'Bạn cần đăng nhập để sử dụng tính năng này',
         action: {
           label: 'Đăng nhập',
-          onClick: () => window.location.href = '/dang-nhap'
+          onClick: () => { window.location.href = '/dang-nhap'; }
         }
       });
       return;
@@ -91,9 +91,9 @@ export default function RoomCard({ room, onToggleFavorite, isFavorite = false, o
     } catch (error) {
       console.error('❌ Error saving property:', error);
       console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        response: error.response?.data
+        message: typeof error === 'object' && error !== null && 'message' in error ? (error as any).message : String(error),
+        stack: typeof error === 'object' && error !== null && 'stack' in error ? (error as any).stack : undefined,
+        response: typeof error === 'object' && error !== null && 'response' in error ? (error as any).response?.data : undefined
       });
       toastManager.showError('Có lỗi xảy ra khi lưu tin');
     } finally {

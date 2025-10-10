@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// Use base URL without /api/v1 since it's already included in NEXT_PUBLIC_API_URL
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL 
+  ? process.env.NEXT_PUBLIC_API_URL.replace('/api/v1', '') 
+  : 'http://localhost:5000';
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,6 +22,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Now correctly construct the API URL to avoid duplication of /api/v1
     const apiUrl = `${API_BASE_URL}/api/v1/admin/users?${searchParams.toString()}`;
     console.log('Sending GET request to backend API:', apiUrl);
     

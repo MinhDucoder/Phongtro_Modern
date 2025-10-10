@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// Use base URL without /api/v1 since we'll add it later
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL 
+  ? process.env.NEXT_PUBLIC_API_URL.replace('/api/v1', '') 
+  : 'http://localhost:5000';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const postId = params.id;
+    // Await params in Next.js 15
+    const { id: postId } = await params;
     console.log('Next.js API route - Getting post with ID:', postId);
     
     const cookieStore = await cookies();
@@ -50,10 +54,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const postId = params.id;
+    // Await params in Next.js 15
+    const { id: postId } = await params;
     console.log('Next.js API route - Updating post with ID:', postId);
     
     const cookieStore = await cookies();
@@ -99,10 +104,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const postId = params.id;
+    // Await params in Next.js 15
+    const { id: postId } = await params;
     console.log('Next.js API route - Deleting post with ID:', postId);
     
     const cookieStore = await cookies();
