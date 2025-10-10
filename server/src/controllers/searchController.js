@@ -18,9 +18,7 @@ class SearchController {
       return success(res, { results: cached });
     } catch (error) {
       console.error("Search error:", error);
-      res
-        .status(500)
-        .json({ success: false, message: "Internal Server Error" });
+      error(res, 500, "Lỗi máy chủ, vui lòng thử lại sau");
     }
   }
 }
