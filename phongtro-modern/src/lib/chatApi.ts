@@ -152,8 +152,12 @@ export const chatHelpers = {
   // Find or create conversation between two users
   async findOrCreateConversation(userId1: string, userId2: string): Promise<Conversation> {
     try {
+      console.log('Finding or creating conversation between:', userId1, userId2);
+      
       // First try to find existing conversation
       const conversationsResponse = await conversationApi.getConversations();
+      console.log('Get conversations response:', conversationsResponse);
+      
       if (conversationsResponse.success && conversationsResponse.data) {
         const existingConversation = conversationsResponse.data.items.find(conv => 
           conv.participants.length === 2 &&
@@ -162,17 +166,26 @@ export const chatHelpers = {
         );
         
         if (existingConversation) {
+          console.log('Found existing conversation:', existingConversation);
           return existingConversation;
         }
       }
 
       // Create new conversation if not found
+      console.log('Creating new conversation with participants:', [userId1, userId2]);
       const createResponse = await conversationApi.createConversation([userId1, userId2]);
-      if (createResponse.success && createResponse.data) {
-        return createResponse.data;
+      console.log('Create conversation response:', createResponse);
+      
+      // Check both possible response structures
+      if (createResponse.success && (createResponse.data || createResponse.conversation)) {
+        const conversation = createResponse.data || createResponse.conversation;
+        console.log('Successfully created conversation:', conversation);
+        return conversation;
       }
       
-      throw new Error('Failed to create conversation');
+      // Log detailed error information
+      console.error('Failed to create conversation. Response:', createResponse);
+      throw new Error(`Failed to create conversation: ${createResponse.message || 'Unknown error'}`);
     } catch (error) {
       console.error('Error finding or creating conversation:', error);
       throw error;

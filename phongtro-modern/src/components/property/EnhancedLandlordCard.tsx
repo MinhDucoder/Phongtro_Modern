@@ -20,11 +20,12 @@ interface Landlord {
   full_name: string;
   phone?: string;
   email?: string;
-  avatar?: string;
+  avatar?: string | { url?: string; public_id?: string };
   role?: string;
   is_verified?: boolean;
   responseTime?: string;
   onlineStatus?: 'online' | 'away' | 'offline';
+  last_login?: string;
 }
 
 interface EnhancedLandlordCardProps {
@@ -41,8 +42,30 @@ export default function EnhancedLandlordCard({ landlord, propertyId, className =
   const [showRentalRequestForm, setShowRentalRequestForm] = useState(false);
   const [landlordStats, setLandlordStats] = useState({
     responseTime: landlord.responseTime || 'Trong vòng 1 giờ',
-    onlineStatus: landlord.onlineStatus || 'offline'
+    onlineStatus: 'offline', // Will be calculated based on last_login
+    lastActive: landlord.last_login || null
   });
+
+  // Calculate online status based on last_login
+  const getOnlineStatus = (lastActive: string | null) => {
+    if (!lastActive) return 'offline';
+    
+    const lastActiveDate = new Date(lastActive);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - lastActiveDate.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes <= 5) return 'online'; // Active within 5 minutes
+    return 'offline'; // More than 5 minutes
+  };
+
+  // Update online status when component mounts or lastActive changes
+  useEffect(() => {
+    const onlineStatus = getOnlineStatus(landlordStats.lastActive);
+    setLandlordStats(prev => ({
+      ...prev,
+      onlineStatus
+    }));
+  }, [landlordStats.lastActive]);
 
   const handleStartChat = async () => {
     if (!isAuthenticated) {
@@ -138,11 +161,29 @@ export default function EnhancedLandlordCard({ landlord, propertyId, className =
     switch (status) {
       case 'online':
         return 'Đang hoạt động';
-      case 'away':
-        return 'Không có mặt';
       default:
-        return 'Không hoạt động';
+        return ''; // Không hiển thị text khi offline, chỉ hiển thị thời gian
     }
+  };
+
+  const getAvatarUrl = (avatar: any) => {
+    if (!avatar) return '/placeholder-avatar.svg';
+    if (typeof avatar === 'string') return avatar;
+    if (avatar.url) return avatar.url;
+    return '/placeholder-avatar.svg';
+  };
+
+  const getLastActiveText = (lastActive: string | null) => {
+    if (!lastActive) return 'Chưa rõ';
+    
+    const lastActiveDate = new Date(lastActive);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - lastActiveDate.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Vừa hoạt động';
+    if (diffInMinutes < 60) return `${diffInMinutes} phút trước`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} giờ trước`;
+    return `${Math.floor(diffInMinutes / 1440)} ngày trước`;
   };
 
 
@@ -154,7 +195,7 @@ export default function EnhancedLandlordCard({ landlord, propertyId, className =
         <div className="flex items-center mb-4">
           <div className="relative">
             <Image
-              src={landlord.avatar || '/placeholder-avatar.svg'}
+              src={getAvatarUrl(landlord.avatar)}
               alt={landlord.full_name}
               width={80}
               height={80}
@@ -170,10 +211,18 @@ export default function EnhancedLandlordCard({ landlord, propertyId, className =
                 <ShieldCheckIcon className="w-5 h-5 text-blue-500 ml-2" />
               )}
             </div>
-            <div className="flex items-center text-sm text-gray-600 mt-1">
-              <span className={`w-2 h-2 rounded-full ${getOnlineStatusColor(landlordStats.onlineStatus)} mr-2`}></span>
-              <span>{getOnlineStatusText(landlordStats.onlineStatus)}</span>
-            </div>
+            {landlordStats.onlineStatus === 'online' && (
+              <div className="flex items-center text-sm text-gray-600 mt-1">
+                <span className={`w-2 h-2 rounded-full ${getOnlineStatusColor(landlordStats.onlineStatus)} mr-2`}></span>
+                <span>{getOnlineStatusText(landlordStats.onlineStatus)}</span>
+              </div>
+            )}
+            {landlordStats.lastActive && (
+              <div className="flex items-center text-xs text-gray-500 mt-1">
+                <ClockIcon className="w-3 h-3 mr-1" />
+                <span>Hoạt động cuối: {getLastActiveText(landlordStats.lastActive)}</span>
+              </div>
+            )}
             {landlord.is_verified && (
               <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium mt-1">
                 Đã xác thực
@@ -190,7 +239,7 @@ export default function EnhancedLandlordCard({ landlord, propertyId, className =
           {/* Primary Chat Button */}
           <button
             onClick={handleStartChat}
-            disabled={isStartingChat || landlordStats.onlineStatus === 'offline'}
+            disabled={isStartingChat}
             className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white py-4 px-6 rounded-xl font-bold flex items-center justify-center transition-all duration-200 hover:scale-105 disabled:hover:scale-100 disabled:cursor-not-allowed shadow-lg"
           >
             {isStartingChat ? (
@@ -201,8 +250,7 @@ export default function EnhancedLandlordCard({ landlord, propertyId, className =
             ) : (
               <>
                 <ChatBubbleLeftIcon className="w-6 h-6 mr-3" />
-                {landlordStats.onlineStatus === 'online' ? 'Chat ngay' : 
-                 landlordStats.onlineStatus === 'away' ? 'Gửi tin nhắn' : 'Chat với chủ nhà'}
+                {landlordStats.onlineStatus === 'online' ? 'Chat ngay' : 'Gửi tin nhắn'}
               </>
             )}
           </button>

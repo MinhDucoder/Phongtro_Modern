@@ -1,0 +1,223 @@
+/* MapLibre GL CSS */
+@import 'maplibre-gl/dist/maplibre-gl.css';
+
+/* Custom styles for MapLibre */
+.maplibregl-map {
+  font-family: inherit;
+}
+
+.maplibregl-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 0;
+}
+
+.maplibregl-popup-content {
+  margin: 0;
+  padding: 0;
+}
+
+.maplibregl-popup-tip {
+  background: white;
+  border: 1px solid #ccc;
+}
+
+/* Custom marker styles */
+.maplibregl-marker {
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease-in-out;
+}
+
+.maplibregl-marker:hover {
+  transform: scale(1.1);
+}
+
+/* Map controls */
+.maplibregl-ctrl-group {
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.maplibregl-ctrl-group button {
+  background-color: white;
+  border: none;
+  color: #333;
+  font-size: 18px;
+  padding: 8px;
+}
+
+.maplibregl-ctrl-group button:hover {
+  background-color: #f5f5f5;
+}
+
+.maplibregl-ctrl-group button:focus {
+  outline: none;
+  background-color: #f5f5f5;
+}
+
+/* Attribution control */
+.maplibregl-ctrl-attrib {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+/* Custom marker styles for our components */
+.custom-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.custom-marker div {
+  transition: transform 0.2s ease-in-out;
+}
+
+.custom-marker:hover div {
+  transform: scale(1.1);
+}
+
+/* Loading state */
+.map-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+}
+
+.map-loading .spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error state */
+.map-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+
+.map-error .error-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+  color: #6b7280;
+}
+
+.map-error .error-message {
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.map-error .retry-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.map-error .retry-button:hover {
+  background-color: #2563eb;
+}
+
+/* Control panel styles */
+.map-control-panel {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 12px;
+  max-width: 300px;
+}
+
+.map-control-panel .control-section {
+  margin-bottom: 8px;
+}
+
+.map-control-panel .control-section:last-child {
+  margin-bottom: 0;
+}
+
+.map-control-panel .control-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 4px;
+}
+
+.map-control-panel .control-button:last-child {
+  margin-bottom: 0;
+}
+
+.map-control-panel .control-button.active {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.map-control-panel .control-button.inactive {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.map-control-panel .control-button.inactive:hover {
+  background-color: #e5e7eb;
+}
+
+.map-control-panel .control-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.map-control-panel .loading-spinner {
+  width: 12px;
+  height: 12px;
+  border: 1px solid transparent;
+  border-top: 1px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .map-control-panel {
+    max-width: 250px;
+    padding: 8px;
+  }
+  
+  .map-control-panel .control-button {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+}

@@ -6,7 +6,7 @@ import PostLimitExceededModal from '@/components/subscription/PostLimitExceededM
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
-import { toast } from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 import { LandlordOnly } from '@/components/auth/ProtectedRoute';
 
 export default function PostPropertyPage() {
@@ -43,9 +43,7 @@ function PostPropertyContent() {
         vip3: 'VIP 3'
       };
       
-      toast.success(`🎉 Thanh toán thành công! Tin đăng ${packageNames[vipPackage]} của bạn đang chờ duyệt.`, {
-        duration: 6000,
-      });
+      toastManager.showSuccess(`Thanh toán thành công! Tin đăng ${packageNames[vipPackage]} của bạn đang chờ duyệt.`);
       
       // Remove payment params from URL
       setTimeout(() => {
@@ -65,15 +63,11 @@ function PostPropertyContent() {
         errorMessage += `Mã lỗi: ${code}`;
       }
       
-      toast.error(errorMessage, {
-        duration: 5000,
-      });
+      toastManager.showError(errorMessage);
       
       window.history.replaceState({}, '', '/dang-tin');
     } else if (paymentStatus === 'error') {
-      toast.error('⚠️ Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.', {
-        duration: 5000,
-      });
+      toastManager.showError('Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.');
       window.history.replaceState({}, '', '/dang-tin');
     }
   }, [searchParams, router]);
@@ -106,7 +100,7 @@ function PostPropertyContent() {
       }
     } catch (error: unknown) {
       console.error('Error checking subscription:', error);
-      toast.error('Không thể kiểm tra thông tin gói đăng tin');
+      toastManager.showError('Không thể kiểm tra thông tin gói đăng tin');
     } finally {
       setLoading(false);
     }

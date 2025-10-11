@@ -129,7 +129,7 @@ export default function ProfileChatLayout() {
   if (!user) return <div className="h-[600px] bg-gray-50 flex items-center justify-center rounded-lg"><div className="text-center"><ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" /><h3 className="text-lg font-medium text-gray-900 mb-2">Vui lòng đăng nhập</h3><p className="text-gray-500">Bạn cần đăng nhập để sử dụng chat</p></div></div>;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm" style={{ height: 'calc(100vh - 250px)', minHeight: '500px', maxHeight: '700px' }}>
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm h-[600px]">
       <div className="h-full flex">
         {/* Mobile Sidebar */}
         {isMobileSidebarOpen && (

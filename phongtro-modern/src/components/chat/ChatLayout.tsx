@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import ConversationList from './ConversationList';
 import ChatWindow from './ChatWindow';
@@ -22,6 +22,7 @@ interface ChatLayoutProps {
 
 export default function ChatLayout({ activeConversationId }: ChatLayoutProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const { 
     conversations, 
@@ -29,6 +30,7 @@ export default function ChatLayout({ activeConversationId }: ChatLayoutProps) {
     isLoading, 
     error,
     setActiveConversation,
+    openConversation,
     clearError 
   } = useChat();
   
@@ -42,6 +44,34 @@ export default function ChatLayout({ activeConversationId }: ChatLayoutProps) {
       }
     }
   }, [activeConversationId, conversations, setActiveConversation]);
+
+  // Handle userId and conversationId parameters from URL
+  useEffect(() => {
+    const userId = searchParams.get('userId');
+    const conversationId = searchParams.get('conversationId');
+    
+    // Handle direct conversation ID
+    if (conversationId) {
+      const conversation = conversations.find(conv => conv._id === conversationId);
+      if (conversation) {
+        setActiveConversation(conversation);
+      }
+    }
+    // Handle user ID (create or find conversation)
+    else if (userId && user && userId !== user._id) {
+      // Check if conversation already exists
+      const existingConversation = conversations.find(conv => 
+        conv.participants.some(p => p._id === userId)
+      );
+      
+      if (existingConversation) {
+        setActiveConversation(existingConversation);
+      } else {
+        // Open new conversation with the user
+        openConversation(userId);
+      }
+    }
+  }, [searchParams, user, conversations, setActiveConversation, openConversation]);
 
   const handleConversationSelect = (conversationId: string) => {
     const conversation = conversations.find(conv => conv._id === conversationId);
@@ -117,7 +147,7 @@ export default function ChatLayout({ activeConversationId }: ChatLayoutProps) {
               return partner && (
                 <div className="hidden sm:flex items-center">
                   <Image
-                    src={partner.avatar || '/placeholder-room.svg'}
+                    src={typeof partner.avatar === 'string' && partner.avatar.trim() !== '' ? partner.avatar : '/placeholder-room.svg'}
                     alt={partner.full_name || 'Unknown User'}
                     width={28}
                     height={28}

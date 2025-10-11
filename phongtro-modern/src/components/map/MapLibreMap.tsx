@@ -1,50 +1,40 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
+import { useEffect, useState, useRef } from 'react';
+import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/maplibre';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
-// Dynamic import với error handling
-const MapContainer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.MapContainer),
-  { ssr: false }
-);
-
-const TileLayer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.TileLayer),
-  { ssr: false }
-);
-
-const Marker = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Marker),
-  { ssr: false }
-);
-
-const Popup = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Popup),
-  { ssr: false }
-);
-
-const Circle = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Circle),
-  { ssr: false }
-);
-
-const CircleMarker = dynamic(
-  () => import('react-leaflet').then((mod) => mod.CircleMarker),
-  { ssr: false }
-);
-
-interface LeafletMapProps {
+interface MapLibreMapProps {
   roomId: string;
   className?: string;
   height?: string;
 }
 
-export default function LeafletMap({ 
+// OpenStreetMap style configuration for MapLibre
+const osmStyle = {
+  version: 8,
+  sources: {
+    'osm': {
+      type: 'raster',
+      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+      tileSize: 256,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }
+  },
+  layers: [
+    {
+      id: 'osm',
+      type: 'raster',
+      source: 'osm'
+    }
+  ]
+};
+
+export default function MapLibreMap({ 
   roomId, 
   className = '',
   height = '400px'
-}: LeafletMapProps) {
+}: MapLibreMapProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
@@ -55,79 +45,23 @@ export default function LeafletMap({
   const [nearbyAmenities, setNearbyAmenities] = useState<any[]>([]);
   const [showAmenities, setShowAmenities] = useState(false);
   const [isLoadingAmenities, setIsLoadingAmenities] = useState(false);
-  const [customIcons, setCustomIcons] = useState<any>(null);
-  const [leafletLoaded, setLeafletLoaded] = useState(false);
   
   // New features for rental property map
-  const [nearbyProperties, setNearbyProperties] = useState<any[]>([]);
-  const [showNearbyProperties, setShowNearbyProperties] = useState(false);
-  const [isLoadingNearbyProperties, setIsLoadingNearbyProperties] = useState(false);
   const [transportation, setTransportation] = useState<any[]>([]);
   const [showTransportation, setShowTransportation] = useState(false);
   const [isLoadingTransportation, setIsLoadingTransportation] = useState(false);
   const [mapLayers, setMapLayers] = useState({
     amenities: false,
-    properties: false,
     transportation: false,
     radius: false
   });
-  const [searchRadius, setSearchRadius] = useState(500); // meters
+  const [searchRadius, setSearchRadius] = useState(2000); // meters
+  const [viewport, setViewport] = useState({
+    longitude: 105.8342, // Default to Ho Chi Minh City
+    latitude: 21.0285,
+    zoom: 15
+  });
 
-  // Load Leaflet library
-  useEffect(() => {
-    const loadLeaflet = async () => {
-      try {
-        const L = (await import('leaflet')).default;
-        
-        // Fix for default markers in Leaflet
-        delete (L.Icon.Default.prototype as any)._getIconUrl;
-        L.Icon.Default.mergeOptions({
-          iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-          iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-        });
-
-        const createCustomIcon = (color: string, emoji: string) => {
-          return L.divIcon({
-            className: 'custom-div-icon',
-            html: `
-              <div style="
-                background-color: ${color};
-                width: 40px;
-                height: 40px;
-                border-radius: 50% 50% 50% 0;
-                border: 3px solid white;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 18px;
-                transform: rotate(-45deg);
-              ">
-                <span style="transform: rotate(45deg);">${emoji}</span>
-              </div>
-            `,
-            iconSize: [40, 40],
-            iconAnchor: [20, 40],
-            popupAnchor: [0, -40]
-          });
-        };
-
-        setCustomIcons({
-          room: createCustomIcon('#3B82F6', '🏠'),
-          user: createCustomIcon('#10B981', '📍'),
-          amenity: (emoji: string) => createCustomIcon('#8B5CF6', emoji)
-        });
-        
-        setLeafletLoaded(true);
-      } catch (error) {
-        console.error('Error loading Leaflet:', error);
-        setError('Không thể tải thư viện bản đồ. Vui lòng thử lại sau.');
-      }
-    };
-
-    loadLeaflet();
-  }, []);
 
   // Calculate distance between two points (Haversine formula)
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -142,22 +76,7 @@ export default function LeafletMap({
     return R * c;
   };
 
-  // Fetch nearby rental properties
-  const fetchNearbyProperties = async (lat: number, lng: number) => {
-    setIsLoadingNearbyProperties(true);
-    try {
-      const response = await fetch(`/api/posts/nearby?lat=${lat}&lng=${lng}&radius=${searchRadius}&limit=10`);
-      const data = await response.json();
-      
-      if (data.success && data.data) {
-        setNearbyProperties(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching nearby properties:', error);
-    } finally {
-      setIsLoadingNearbyProperties(false);
-    }
-  };
+
 
   // Fetch nearby amenities
   const fetchNearbyAmenities = async (lat: number, lng: number) => {
@@ -299,13 +218,27 @@ export default function LeafletMap({
         const post = data.post || data.data;
 
         if (post?.location?.coordinates && post.location.coordinates.length === 2) {
-          const [lng, lat] = post.location.coordinates;
-          setCoordinates({ lat: lat, lng: lng });
-          setRoomInfo(post);
+          // API format: [latitude, longitude] (not standard GeoJSON)
+          const [lat, lng] = post.location.coordinates;
+          // Validate coordinates
+          if (typeof lat === 'number' && typeof lng === 'number' && 
+              lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            setCoordinates({ lat: lat, lng: lng });
+            setRoomInfo(post);
+          } else {
+            throw new Error('Tọa độ không hợp lệ. Vui lòng liên hệ chủ nhà để cập nhật thông tin.');
+          }
         } else if (post?.roomId?.location?.coordinates && post.roomId.location.coordinates.length === 2) {
-          const [lng, lat] = post.roomId.location.coordinates;
-          setCoordinates({ lat: lat, lng: lng });
-          setRoomInfo(post);
+          // API format: [latitude, longitude] (not standard GeoJSON)
+          const [lat, lng] = post.roomId.location.coordinates;
+          // Validate coordinates
+          if (typeof lat === 'number' && typeof lng === 'number' && 
+              lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            setCoordinates({ lat: lat, lng: lng });
+            setRoomInfo(post);
+          } else {
+            throw new Error('Tọa độ không hợp lệ. Vui lòng liên hệ chủ nhà để cập nhật thông tin.');
+          }
         } else {
           throw new Error('Phòng này chưa có tọa độ. Vui lòng liên hệ chủ nhà để cập nhật thông tin.');
         }
@@ -322,10 +255,27 @@ export default function LeafletMap({
 
   // Set loading to false when coordinates are ready
   useEffect(() => {
-    if (coordinates && leafletLoaded) {
+    if (coordinates) {
       setIsLoading(false);
+      // Update viewport to center on the room location
+      setViewport({
+        longitude: coordinates.lng,
+        latitude: coordinates.lat,
+        zoom: 15
+      });
     }
-  }, [coordinates, leafletLoaded]);
+  }, [coordinates]);
+
+  // Cleanup effect để tránh memory leak
+  useEffect(() => {
+    return () => {
+      // Cleanup khi component unmount
+      setNearbyAmenities([]);
+      setTransportation([]);
+      setUserLocation(null);
+    };
+  }, []);
+
 
   // Calculate distance when both locations are available
   useEffect(() => {
@@ -361,7 +311,7 @@ export default function LeafletMap({
     );
   }
 
-  if (isLoading || !coordinates || !leafletLoaded || !customIcons) {
+  if (isLoading || !coordinates) {
     return (
       <div className={`bg-gray-100 rounded-lg flex items-center justify-center ${className}`} style={{ height }}>
         <div className="text-center">
@@ -449,31 +399,6 @@ export default function LeafletMap({
             {isLoadingAmenities && <div className="animate-spin rounded-full h-3 w-3 border-b border-purple-600"></div>}
           </button>
 
-          {/* Nearby Properties Toggle */}
-          <button
-            onClick={() => {
-              if (coordinates) {
-                if (mapLayers.properties) {
-                  setMapLayers(prev => ({ ...prev, properties: false }));
-                  setShowNearbyProperties(false);
-                  setNearbyProperties([]);
-                } else {
-                  fetchNearbyProperties(coordinates.lat, coordinates.lng);
-                  setMapLayers(prev => ({ ...prev, properties: true }));
-                  setShowNearbyProperties(true);
-                }
-              }
-            }}
-            disabled={isLoadingNearbyProperties || !coordinates}
-            className={`flex items-center justify-between w-full px-2 py-1 rounded text-xs font-medium ${
-              mapLayers.properties 
-                ? 'bg-orange-100 text-orange-800' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <span>🏠 Phòng trọ gần đây</span>
-            {isLoadingNearbyProperties && <div className="animate-spin rounded-full h-3 w-3 border-b border-orange-600"></div>}
-          </button>
 
           {/* Transportation Toggle */}
           <button
@@ -515,11 +440,10 @@ export default function LeafletMap({
         </div>
 
         {/* Results Summary */}
-        {(nearbyAmenities.length > 0 || nearbyProperties.length > 0 || transportation.length > 0) && (
+        {(nearbyAmenities.length > 0 || transportation.length > 0) && (
           <div className="px-3 py-2 bg-blue-50 text-blue-800 rounded-md text-xs">
             <div className="space-y-1">
               {nearbyAmenities.length > 0 && <div>🏪 {nearbyAmenities.length} tiện ích</div>}
-              {nearbyProperties.length > 0 && <div>🏠 {nearbyProperties.length} phòng trọ</div>}
               {transportation.length > 0 && <div>🚌 {transportation.length} trạm giao thông</div>}
             </div>
           </div>
@@ -541,107 +465,97 @@ export default function LeafletMap({
         )}
       </div>
 
-      <MapContainer
-        center={[coordinates.lat, coordinates.lng]}
-        zoom={15}
-        style={{ height: '100%', width: '100%', borderRadius: '8px' }}
-        className="z-0"
+      <Map
+        {...viewport}
+        onMove={evt => setViewport(evt.viewState)}
+        onError={(e) => {
+          // Ignore AbortError as it's expected during cleanup
+          if (e.error?.name !== 'AbortError') {
+            console.error('MapLibre GL error:', e.error);
+          }
+        }}
+        style={{ width: '100%', height: '100%', borderRadius: '8px' }}
+        mapStyle={osmStyle}
+        attributionControl={false}
+        maxZoom={18}
+        minZoom={10}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        
         {/* Room Marker */}
-        <Marker position={[coordinates.lat, coordinates.lng]} icon={customIcons?.room}>
-          <Popup>
-            <div className="p-3 min-w-[200px]">
-              <h3 className="font-bold text-gray-900 mb-2 flex items-center">
-                <span className="text-blue-600 mr-2">🏠</span>
-                Vị trí phòng trọ
-              </h3>
-              {roomInfo?.roomId?.title && (
-                <p className="text-sm text-gray-700 mb-2 font-medium">{roomInfo.roomId.title}</p>
-              )}
-              {roomInfo?.roomId?.address && (
-                <p className="text-sm text-gray-600 mb-2">{roomInfo.roomId.address}</p>
-              )}
-              <div className="space-y-1">
-                <p className="text-xs text-gray-500">📍 Tọa độ: {coordinates.lat.toFixed(6)}, {coordinates.lng.toFixed(6)}</p>
-                {distance !== null && (
-                  <p className="text-xs text-green-600 font-medium">📏 Cách bạn: {distance.toFixed(1)} km</p>
-                )}
-              </div>
+        {coordinates && (
+          <Marker longitude={coordinates.lng} latitude={coordinates.lat}>
+            <div 
+              className="w-10 h-10 bg-blue-600 rounded-full border-3 border-white shadow-lg flex items-center justify-center text-white text-lg cursor-pointer hover:scale-110 transition-transform"
+              style={{ transform: 'rotate(-45deg)' }}
+            >
+              <span style={{ transform: 'rotate(45deg)' }}>🏠</span>
             </div>
-          </Popup>
-        </Marker>
+          </Marker>
+        )}
 
         {/* User Location Marker */}
         {userLocation && (
-          <Marker position={[userLocation.lat, userLocation.lng]} icon={customIcons?.user}>
-            <Popup>
-              <div className="p-3 min-w-[180px]">
-                <h3 className="font-bold text-green-600 mb-2 flex items-center">
-                  <span className="mr-2">📍</span>
-                  Vị trí của bạn
-                </h3>
-                <p className="text-xs text-gray-500">📍 Tọa độ: {userLocation.lat.toFixed(6)}, {userLocation.lng.toFixed(6)}</p>
-              </div>
-            </Popup>
+          <Marker longitude={userLocation.lng} latitude={userLocation.lat}>
+            <div 
+              className="w-10 h-10 bg-green-600 rounded-full border-3 border-white shadow-lg flex items-center justify-center text-white text-lg cursor-pointer hover:scale-110 transition-transform"
+              style={{ transform: 'rotate(-45deg)' }}
+            >
+              <span style={{ transform: 'rotate(45deg)' }}>📍</span>
+            </div>
           </Marker>
+        )}
+
+        {/* User Location Popup */}
+        {userLocation && (
+          <Popup
+            longitude={userLocation.lng}
+            latitude={userLocation.lat}
+            closeButton={true}
+            closeOnClick={false}
+            anchor="bottom"
+          >
+            <div className="p-3 min-w-[180px]">
+              <h3 className="font-bold text-green-600 mb-2 flex items-center">
+                <span className="mr-2">📍</span>
+                Vị trí của bạn
+              </h3>
+              <p className="text-xs text-gray-500">📍 Tọa độ: {userLocation.lat.toFixed(6)}, {userLocation.lng.toFixed(6)}</p>
+            </div>
+          </Popup>
         )}
 
         {/* Search Radius Circle */}
         {mapLayers.radius && coordinates && (
-          <Circle
-            center={[coordinates.lat, coordinates.lng]}
-            radius={searchRadius}
-            pathOptions={{
-              color: '#3B82F6',
-              fillColor: '#3B82F6',
-              fillOpacity: 0.1,
-              weight: 2,
-              dashArray: '5, 5'
+          <Source
+            id="radius-circle"
+            type="geojson"
+            data={{
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: [coordinates.lng, coordinates.lat]
+              }
             }}
-          />
+          >
+            <Layer
+              id="radius-circle-layer"
+              type="circle"
+              paint={{
+                'circle-radius': {
+                  stops: [
+                    [0, 0],
+                    [20, searchRadius]
+                  ],
+                  base: 2
+                },
+                'circle-color': '#3B82F6',
+                'circle-opacity': 0.1,
+                'circle-stroke-color': '#3B82F6',
+                'circle-stroke-width': 2
+              }}
+            />
+          </Source>
         )}
 
-        {/* Nearby Properties Markers */}
-        {showNearbyProperties && nearbyProperties.map((property) => (
-          <Marker 
-            key={property._id} 
-            position={[property.location.coordinates[1], property.location.coordinates[0]]}
-            icon={customIcons?.amenity ? customIcons.amenity('🏠') : undefined}
-          >
-            <Popup>
-              <div className="p-3 min-w-[200px]">
-                <h3 className="font-bold text-orange-600 mb-2 flex items-center">
-                  <span className="mr-2">🏠</span>
-                  {property.roomId?.title || 'Phòng trọ gần đây'}
-                </h3>
-                {property.roomId?.address && (
-                  <p className="text-sm text-gray-600 mb-2">{property.roomId.address}</p>
-                )}
-                {property.roomId?.price && (
-                  <p className="text-sm text-green-600 font-medium mb-2">
-                    💰 {property.roomId.price.toLocaleString()} VNĐ/tháng
-                  </p>
-                )}
-                <div className="space-y-1">
-                  <p className="text-xs text-gray-500">
-                    📍 Tọa độ: {property.location.coordinates[1].toFixed(6)}, {property.location.coordinates[0].toFixed(6)}
-                  </p>
-                  <a 
-                    href={`/phong-tro/${property._id}`}
-                    className="inline-block text-xs bg-orange-600 text-white px-2 py-1 rounded hover:bg-orange-700"
-                  >
-                    Xem chi tiết
-                  </a>
-                </div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
 
         {/* Nearby Amenities Markers */}
         {showAmenities && nearbyAmenities.map((amenity) => {
@@ -665,25 +579,17 @@ export default function LeafletMap({
             return icons[amenityType] || '📍';
           };
 
-          const amenityIcon = customIcons?.amenity ? customIcons.amenity(getAmenityIcon(amenity.amenity)) : undefined;
-
           return (
-            <Marker key={amenity.id} position={[amenity.lat, amenity.lng]} icon={amenityIcon}>
-              <Popup>
-                <div className="p-3 min-w-[180px]">
-                  <h3 className="font-bold text-purple-600 mb-2 flex items-center">
-                    <span className="mr-2">{getAmenityIcon(amenity.amenity)}</span>
-                    {amenity.name}
-                  </h3>
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 capitalize">🏷️ Loại: {amenity.amenity}</p>
-                    <p className="text-xs text-gray-500">📍 Tọa độ: {amenity.lat.toFixed(6)}, {amenity.lng.toFixed(6)}</p>
-                  </div>
-                </div>
-              </Popup>
+            <Marker key={amenity.id} longitude={amenity.lng} latitude={amenity.lat}>
+              <div 
+                className="w-6 h-6 bg-white rounded-full border border-gray-300 shadow-md flex items-center justify-center text-lg cursor-pointer hover:scale-110 transition-transform"
+              >
+                {getAmenityIcon(amenity.amenity)}
+              </div>
             </Marker>
           );
         })}
+
 
         {/* Transportation Markers */}
         {showTransportation && transportation.map((transport) => {
@@ -701,25 +607,19 @@ export default function LeafletMap({
           return (
             <Marker 
               key={transport.id} 
-              position={[transport.lat, transport.lng]}
-              icon={customIcons?.amenity ? customIcons.amenity(getTransportIcon(transport.type)) : undefined}
+              longitude={transport.lng}
+              latitude={transport.lat}
             >
-              <Popup>
-                <div className="p-3 min-w-[180px]">
-                  <h3 className="font-bold text-green-600 mb-2 flex items-center">
-                    <span className="mr-2">{getTransportIcon(transport.type)}</span>
-                    {transport.name}
-                  </h3>
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 capitalize">🚌 Loại: {transport.type}</p>
-                    <p className="text-xs text-gray-500">📍 Tọa độ: {transport.lat.toFixed(6)}, {transport.lng.toFixed(6)}</p>
-                  </div>
-                </div>
-              </Popup>
+              <div 
+                className="w-6 h-6 bg-white rounded-full border border-gray-300 shadow-md flex items-center justify-center text-lg cursor-pointer hover:scale-110 transition-transform"
+              >
+                {getTransportIcon(transport.type)}
+              </div>
             </Marker>
           );
         })}
-      </MapContainer>
+
+      </Map>
     </div>
   );
 }

@@ -12,6 +12,7 @@ import {
   KeyIcon,
   ChatBubbleLeftRightIcon,
   Bars3Icon,
+  BellIcon,
 } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
@@ -24,6 +25,7 @@ const items = [
   { id: 'profile', name: 'Thông tin cá nhân', icon: UserIcon },
   { id: 'saved', name: 'Tin đã lưu', icon: HeartIcon },
   { id: 'requests', name: 'Yêu cầu thuê', icon: DocumentTextIcon },
+  { id: 'notifications', name: 'Thông báo', icon: BellIcon },
   { id: 'settings', name: 'Cài đặt', icon: CogIcon },
   { id: 'security', name: 'Bảo mật', icon: KeyIcon },
 ];
@@ -94,9 +96,9 @@ export default function ProfileShell({ children }: ProfileShellProps) {
         </div>
       </div>
 
-      <div className="flex h-screen lg:h-auto">
+      <div className="flex min-h-screen lg:h-auto">
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex lg:flex-col lg:w-80 bg-white border-r shadow-sm sticky top-0 h-screen">
+        <aside className="hidden lg:flex lg:flex-col lg:w-80 bg-white border-r shadow-sm sticky top-0 min-h-screen">
           {/* Sidebar Header */}
           <div className="p-6 bg-blue-600 border-b border-blue-700">
             <div className="flex items-center space-x-4">

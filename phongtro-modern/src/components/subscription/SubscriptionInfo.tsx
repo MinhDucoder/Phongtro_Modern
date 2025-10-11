@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
-import { toast } from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface SubscriptionInfo {
   hasActiveSubscription: boolean;
@@ -43,7 +43,7 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({
       setSubscriptionInfo(response.data as SubscriptionInfo);
     } catch (error: any) {
       console.error('Error fetching subscription info:', error);
-      toast.error('Không thể tải thông tin gói đăng tin');
+      toastManager.showError('Không thể tải thông tin gói đăng tin');
     } finally {
       setLoading(false);
     }

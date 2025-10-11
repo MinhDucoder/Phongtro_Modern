@@ -321,8 +321,20 @@ export function ChatProvider({ children }: ChatProviderProps) {
           senderName = partner?.full_name;
         }
 
-        // Bỏ toast đơn giản, chỉ giữ toast có nội dung chi tiết
-        // toastManager.showInfo(`Tin nhắn mới từ ${senderName || 'Người dùng'}`);
+        // Show toast notification for new message
+        toastManager.showInfo(`Tin nhắn mới từ ${senderName || 'Người dùng'}`, {
+          description: message.text?.length > 50 ? `${message.text.substring(0, 50)}...` : message.text,
+          duration: 4000,
+          action: {
+            label: 'Xem tin nhắn',
+            onClick: () => {
+              // Navigate to profile chat tab with the conversation
+              if (typeof window !== 'undefined') {
+                window.location.href = `/profile?tab=chat&conversationId=${message.conversationId}`;
+              }
+            }
+          }
+        });
       }
     };
 

@@ -38,6 +38,7 @@ export default function PropertyDetailPage({ postId }: PropertyDetailPageProps) 
                     name: d.landlord.full_name,
                     phone: d.landlord.phone,
                     email: d.landlord.email,
+                    avatar: d.landlord.avatar,
                     isVerified: d.landlord.role === 'landlord',
                   }
                 : undefined),
