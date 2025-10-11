@@ -488,6 +488,7 @@ export async function apiRequest<T>(
     return data;
   } catch (error) {
     // Xử lý lỗi timeout
+    const timeoutDuration = endpoint.includes('/auth/login') ? 30000 : 15000; // 30s for login, 15s for others
     if (error instanceof Error && error.name === 'AbortError') {
       console.warn('API request timeout:', url, 'Timeout duration:', timeoutDuration + 'ms');
       if (endpoint.includes('/auth/login')) {

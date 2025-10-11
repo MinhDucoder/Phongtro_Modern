@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// Use base URL without /api/v1 since we'll add it later
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL 
+  ? process.env.NEXT_PUBLIC_API_URL.replace('/api/v1', '') 
+  : 'http://localhost:5000';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Await params in Next.js 15
+    const { id } = await params;
+    
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken');
 
@@ -19,7 +25,7 @@ export async function GET(
     }
 
     const response = await fetch(
-      `${API_BASE_URL}/api/v1/admin/users/${params.id}`,
+      `${API_BASE_URL}/api/v1/admin/users/${id}`,
       {
         method: 'GET',
         headers: {
@@ -42,9 +48,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Await params in Next.js 15
+    const { id } = await params;
+    
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken');
 
@@ -57,24 +66,42 @@ export async function PUT(
 
     const body = await request.json();
     
+    console.log(`Updating user ${id} with data:`, body);
+    const apiUrl = `${API_BASE_URL}/api/v1/admin/users/${id}`;
+    console.log('PUT request URL:', apiUrl);
+    
     const response = await fetch(
-      `${API_BASE_URL}/api/v1/admin/users/${params.id}`,
+      apiUrl,
       {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Cookie': `accessToken=${accessToken.value}`
+          'Cookie': `accessToken=${accessToken.value}`,
+          'Authorization': `Bearer ${accessToken.value}`
         },
         body: JSON.stringify(body)
       }
     );
 
+    console.log('PUT response status:', response.status);
+    
+    // Check if response is HTML instead of JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      console.error('Expected JSON but got:', text.substring(0, 200));
+      return NextResponse.json(
+        { success: false, message: 'Server returned invalid response format' },
+        { status: 500 }
+      );
+    }
+    
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error('Admin update user API error:', error);
     return NextResponse.json(
-      { success: false, message: 'Server error' },
+      { success: false, message: 'Server error', error: String(error) },
       { status: 500 }
     );
   }
@@ -82,10 +109,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = params.id;
+    // Await params in Next.js 15
+    const { id: userId } = await params;
     console.log('Next.js API route - Deleting user with ID:', userId);
     
     const cookieStore = await cookies();
