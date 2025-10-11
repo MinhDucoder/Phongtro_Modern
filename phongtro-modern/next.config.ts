@@ -31,6 +31,10 @@ const nextConfig: NextConfig = {
     ],
   },
   transpilePackages: ['leaflet', 'react-leaflet'],
+  // Configure Turbopack with proper root directory
+  turbopack: {
+    root: __dirname,
+  },
 };
 
 export default nextConfig;

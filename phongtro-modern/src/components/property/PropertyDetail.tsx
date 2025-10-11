@@ -30,7 +30,6 @@ import {
   TruckIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon, StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
-import toast from 'react-hot-toast';
 import { toastManager } from '@/components/ui/ToastManager';
 import { useAuth } from '@/contexts/AuthContext';
 import OpenStreetMap from '@/components/map/OpenStreetMap';

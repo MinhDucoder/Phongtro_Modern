@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/maplibre';
+import { Map, Marker, Popup, Source, Layer } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 interface MapLibreMapProps {
@@ -12,10 +12,10 @@ interface MapLibreMapProps {
 
 // OpenStreetMap style configuration for MapLibre
 const osmStyle = {
-  version: 8,
+  version: 8 as const,
   sources: {
     'osm': {
-      type: 'raster',
+      type: 'raster' as const,
       tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
       tileSize: 256,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -24,7 +24,7 @@ const osmStyle = {
   layers: [
     {
       id: 'osm',
-      type: 'raster',
+      type: 'raster' as const,
       source: 'osm'
     }
   ]
@@ -217,9 +217,20 @@ export default function MapLibreMap({
         const data = await response.json();
         const post = data.post || data.data;
 
-        if (post?.location?.coordinates && post.location.coordinates.length === 2) {
-          // API format: [latitude, longitude] (not standard GeoJSON)
-          const [lat, lng] = post.location.coordinates;
+        // Debug logging to help identify coordinate issues
+        console.log('MapLibreMap: Post data structure:', {
+          hasPost: !!post,
+          hasRoomId: !!post?.roomId,
+          hasLocation: !!post?.roomId?.location,
+          hasCoordinates: !!post?.roomId?.location?.coordinates,
+          coordinates: post?.roomId?.location?.coordinates,
+          coordinatesLength: post?.roomId?.location?.coordinates?.length
+        });
+
+        // Check for coordinates in roomId.location (GeoJSON format: [longitude, latitude])
+        if (post?.roomId?.location?.coordinates && post.roomId.location.coordinates.length === 2) {
+          // GeoJSON format: [longitude, latitude]
+          const [lng, lat] = post.roomId.location.coordinates;
           // Validate coordinates
           if (typeof lat === 'number' && typeof lng === 'number' && 
               lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
@@ -228,9 +239,9 @@ export default function MapLibreMap({
           } else {
             throw new Error('Tọa độ không hợp lệ. Vui lòng liên hệ chủ nhà để cập nhật thông tin.');
           }
-        } else if (post?.roomId?.location?.coordinates && post.roomId.location.coordinates.length === 2) {
-          // API format: [latitude, longitude] (not standard GeoJSON)
-          const [lat, lng] = post.roomId.location.coordinates;
+        } else if (post?.location?.coordinates && post.location.coordinates.length === 2) {
+          // Fallback: check if coordinates are in post.location (GeoJSON format: [longitude, latitude])
+          const [lng, lat] = post.location.coordinates;
           // Validate coordinates
           if (typeof lat === 'number' && typeof lng === 'number' && 
               lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
@@ -300,7 +311,33 @@ export default function MapLibreMap({
             onClick={() => {
               setError(null);
               setIsLoading(true);
-              // Retry logic here
+              // Retry by re-fetching coordinates
+              if (roomId) {
+                fetch(`/api/posts/${roomId}`)
+                  .then(response => response.json())
+                  .then(data => {
+                    const post = data.post || data.data;
+                    if (post?.roomId?.location?.coordinates && post.roomId.location.coordinates.length === 2) {
+                      const [lng, lat] = post.roomId.location.coordinates;
+                      if (typeof lat === 'number' && typeof lng === 'number' && 
+                          lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                        setCoordinates({ lat: lat, lng: lng });
+                        setRoomInfo(post);
+                        setIsLoading(false);
+                      } else {
+                        setError('Tọa độ không hợp lệ. Vui lòng liên hệ chủ nhà để cập nhật thông tin.');
+                        setIsLoading(false);
+                      }
+                    } else {
+                      setError('Phòng này chưa có tọa độ. Vui lòng liên hệ chủ nhà để cập nhật thông tin.');
+                      setIsLoading(false);
+                    }
+                  })
+                  .catch(err => {
+                    setError(err instanceof Error ? err.message : 'Không thể tải tọa độ phòng');
+                    setIsLoading(false);
+                  });
+              }
             }}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
           >
@@ -533,20 +570,15 @@ export default function MapLibreMap({
               geometry: {
                 type: 'Point',
                 coordinates: [coordinates.lng, coordinates.lat]
-              }
+              },
+              properties: {}
             }}
           >
             <Layer
               id="radius-circle-layer"
               type="circle"
               paint={{
-                'circle-radius': {
-                  stops: [
-                    [0, 0],
-                    [20, searchRadius]
-                  ],
-                  base: 2
-                },
+                'circle-radius': searchRadius,
                 'circle-color': '#3B82F6',
                 'circle-opacity': 0.1,
                 'circle-stroke-color': '#3B82F6',

@@ -36,9 +36,10 @@ export interface Message {
 }
 
 export interface ChatApiResponse<T = any> {
-  success: boolean;
+  success?: boolean;
   message: string;
   data?: T;
+  conversation?: T; // Server sometimes returns 'conversation' instead of 'data'
   error?: string;
 }
 
@@ -142,7 +143,7 @@ export interface SocketEvents {
 
   // Server to client events
   receiveMessage: (message: Message) => void;
-  messageSeen: (data: { messageId: string; userId: string; status: string }) => void;
+  messageSeenUpdate: (data: { messageId: string; userId: string; status: string }) => void;
   conversationUpdated: (conversation: Conversation) => void;
   userOnline: (data: { userId: string; isOnline: boolean }) => void;
 }
@@ -180,6 +181,9 @@ export const chatHelpers = {
       if (createResponse.success && (createResponse.data || createResponse.conversation)) {
         const conversation = createResponse.data || createResponse.conversation;
         console.log('Successfully created conversation:', conversation);
+        if (!conversation) {
+          throw new Error('Conversation data is missing from response');
+        }
         return conversation;
       }
       

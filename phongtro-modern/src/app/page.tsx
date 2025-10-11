@@ -7,7 +7,6 @@ import StructuredData from '@/components/seo/StructuredData';
 import { Post } from '@/lib/api';
 import RoomCard from '@/components/room/RoomCard';
 import { toastManager } from '@/components/ui/ToastManager';
-import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 
 export default function Home() {
@@ -99,12 +98,12 @@ export default function Home() {
         console.error('Got - success:', data.success);
         console.error('Got - data:', data.data);
         console.error('Got - items:', data.data?.items);
-        toast.error('Dữ liệu không hợp lệ từ server');
+        toastManager.showError('Dữ liệu không hợp lệ từ server');
         setPosts([]);
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
-      toast.error('Không thể kết nối API. Vui lòng kiểm tra server.');
+      toastManager.showError('Không thể kết nối API. Vui lòng kiểm tra server.');
       setPosts([]);
     } finally {
       setLoading(false);

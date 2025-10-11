@@ -23,6 +23,7 @@ interface ChatContextType {
   markMessageSeen: (messageId: string) => Promise<void>;
   openConversation: (otherUserId: string) => Promise<void>;
   setActiveConversation: (conversation: Conversation | null) => void;
+  addConversation: (conversation: Conversation) => void;
   clearError: () => void;
 }
 
@@ -47,10 +48,21 @@ export function ChatProvider({ children }: ChatProviderProps) {
     setError(null);
   }, []);
 
+  // Add new conversation to the list
+  const addConversation = useCallback((conversation: Conversation) => {
+    setConversations(prev => {
+      // Check if conversation already exists
+      const exists = prev.some(conv => conv._id === conversation._id);
+      if (exists) return prev;
+      
+      // Add new conversation to the beginning of the list
+      return [conversation, ...prev];
+    });
+  }, []);
+
   // Load conversations from API
   const loadConversations = useCallback(async () => {
     if (!user) {
-      console.log('❌ ChatContext - No user found, skipping conversation load');
       return;
     }
 
@@ -64,11 +76,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
         const conversations = response.data?.items || response.items || [];
         setConversations(conversations);
       } else {
-        console.error('❌ ChatContext - Failed to load conversations:', response);
         setError(response.message || 'Failed to load conversations');
       }
     } catch (error) {
-      console.error('❌ ChatContext - Error loading conversations:', error);
       setError('Failed to load conversations');
     } finally {
       setIsLoading(false);
@@ -89,7 +99,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
         setError(response.message || 'Failed to load messages');
       }
     } catch (error) {
-      console.error('Error loading messages:', error);
       setError('Failed to load messages');
     } finally {
       setIsLoading(false);
@@ -98,27 +107,12 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
   // Send message via socket
   const sendMessage = useCallback(async (text: string, conversationId?: string, receiver?: string) => {
-    console.log('📤 ChatContext - sendMessage called:', {
-      text,
-      conversationId,
-      receiver,
-      socket: !!socket,
-      user: !!user,
-      socketConnected: socket?.connected
-    });
-
     if (!socket || !user || !text.trim()) {
-      console.log('❌ ChatContext - Missing requirements:', {
-        socket: !!socket,
-        user: !!user,
-        text: text.trim()
-      });
       return;
     }
 
     // Validate required fields
     if (!receiver || !receiver.trim()) {
-      console.log('❌ ChatContext - Receiver is required');
       toastManager.showError('Receiver is required');
       return;
     }
@@ -146,13 +140,10 @@ export function ChatProvider({ children }: ChatProviderProps) {
           setError(response.error || 'Failed to send message');
           toastManager.showError(response.error || 'Failed to send message');
         } else {
-          console.log('Message sent successfully:', response);
-          
           // Join conversation room if not already joined
           const finalConversationId = response.conversationId || conversationId;
           if (finalConversationId) {
             socket.emit('joinConversation', { conversationId: finalConversationId });
-            console.log('Joined conversation room:', finalConversationId);
           }
           
           // Add message to UI immediately for better UX
@@ -195,7 +186,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
       });
 
     } catch (error) {
-      console.error('Error sending message:', error);
       setError('Failed to send message');
       toastManager.showError('Failed to send message');
     }
@@ -211,11 +201,11 @@ export function ChatProvider({ children }: ChatProviderProps) {
         conversationId: activeConversation._id,
       }, (response: any) => {
         if (!response.success) {
-          console.error('Failed to mark message as seen:', response.error);
+          // Handle error silently
         }
       });
     } catch (error) {
-      console.error('Error marking message as seen:', error);
+      // Handle error silently
     }
   }, [socket, activeConversation]);
 
@@ -262,10 +252,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
     // Listen for new messages
     const handleReceiveMessage = (message: Message) => {
-      console.log('🎉 Received message via socket:', message);
-      console.log('Active conversation ID:', activeConversation?._id);
-      console.log('Message conversation ID:', message.conversationId);
-      
       // Add message to current messages if it's for active conversation
       if (activeConversation && message.conversationId === activeConversation._id) {
         setMessages(prev => {
@@ -353,19 +339,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
     };
 
     // Register event listeners
-    console.log('Registering socket event listeners...');
     socket.on('receiveMessage', handleReceiveMessage);
     socket.on('messageSeen', handleMessageSeen);
     socket.on('conversationUpdated', handleConversationUpdated);
-    
-    // Test socket connection
-    socket.on('connect', () => {
-      console.log('Socket connected:', socket.id);
-    });
-    
-    socket.on('disconnect', () => {
-      console.log('Socket disconnected');
-    });
 
     // Cleanup
     return () => {
@@ -410,6 +386,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
     markMessageSeen,
     openConversation,
     setActiveConversation,
+    addConversation,
     clearError,
   };
 

@@ -129,7 +129,7 @@ export default function RoomsPage() {
       }
     } catch (error) {
       console.error('Error fetching rooms:', error);
-      toast.error('Không thể kết nối API. Vui lòng kiểm tra server.');
+      toastManager.showError('Không thể kết nối API. Vui lòng kiểm tra server.');
       setRooms([]);
     } finally {
       setLoading(false);

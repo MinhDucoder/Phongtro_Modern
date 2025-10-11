@@ -47,7 +47,7 @@ export default function RoomDetailPage() {
       console.error('Error fetching room:', error);
       // Fallback to mock data
       setRoom(getMockRoom());
-      toast.error('Không thể tải thông tin phòng. Đang hiển thị dữ liệu mẫu.');
+      toastManager.showError('Không thể tải thông tin phòng. Đang hiển thị dữ liệu mẫu.');
     } finally {
       setLoading(false);
     }

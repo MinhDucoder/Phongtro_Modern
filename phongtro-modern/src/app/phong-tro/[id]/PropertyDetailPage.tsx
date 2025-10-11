@@ -75,11 +75,11 @@ export default function PropertyDetailPage({ postId }: PropertyDetailPageProps) 
   }
 
   if (error) {
-    return <PropertyDetailError message={error} />;
+    return <PropertyDetailError error={error} />;
   }
 
   if (!data) {
-    return <PropertyDetailError message="Không có dữ liệu tin đăng." />;
+    return <PropertyDetailError error="Không có dữ liệu tin đăng." />;
   }
 
   return <PropertyDetail property={data} />;

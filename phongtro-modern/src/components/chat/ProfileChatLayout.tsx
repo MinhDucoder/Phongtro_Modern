@@ -19,7 +19,7 @@ export default function ProfileChatLayout() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
-  const { conversations, activeConversation, messages, isLoading, setActiveConversation, sendMessage: sendMsg, markMessageSeen } = useChat();
+  const { conversations, activeConversation, messages, isLoading, setActiveConversation, sendMessage: sendMsg, markMessageSeen, addConversation } = useChat();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
@@ -30,48 +30,94 @@ export default function ProfileChatLayout() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const conversationIdFromUrl = searchParams.get('conversationId');
+  const userIdFromUrl = searchParams.get('userId');
+  const propertyIdFromUrl = searchParams.get('propertyId');
   const [conversationNotFound, setConversationNotFound] = useState(false);
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
 
   useEffect(() => {
     let didCancel = false;
 
     const ensureActiveConversation = async () => {
-      if (!conversationIdFromUrl) return;
-
-      // If we already have it in list, use it
-      if (conversations.length > 0) {
-        const conv = conversations.find(c => c._id === conversationIdFromUrl);
-        if (conv) {
-          if (!didCancel) {
-            setActiveConversation(conv);
-            setConversationNotFound(false);
-          }
-          return;
-        }
-      }
-
-      // If not loading and not found in list, try fetching by ID as fallback
-      if (!isLoading) {
-        try {
-          const res = await conversationApi.getConversationById(conversationIdFromUrl);
-          if (!didCancel && res.success && res.data) {
-            // Verify current user is a participant before opening
-            const isParticipant = res.data.participants?.some(p => p._id === user?._id);
-            if (isParticipant) {
-              setActiveConversation(res.data);
+      // Handle conversationId from URL
+      if (conversationIdFromUrl) {
+        // If we already have it in list, use it
+        if (conversations.length > 0) {
+          const conv = conversations.find(c => c._id === conversationIdFromUrl);
+          if (conv) {
+            if (!didCancel) {
+              setActiveConversation(conv);
               setConversationNotFound(false);
+            }
+            return;
+          }
+        }
+
+        // If not loading and not found in list, try fetching by ID as fallback
+        if (!isLoading) {
+          try {
+            const res = await conversationApi.getConversationById(conversationIdFromUrl);
+            if (!didCancel && res.success && res.data) {
+              // Verify current user is a participant before opening
+              const isParticipant = res.data.participants?.some(p => p._id === user?._id);
+              if (isParticipant) {
+                setActiveConversation(res.data);
+                setConversationNotFound(false);
             } else {
               setConversationNotFound(true);
-              console.error('Conversation exists but user is not a participant:', conversationIdFromUrl);
             }
           } else if (!didCancel) {
             setConversationNotFound(true);
-            console.error('Conversation fetch failed or not found:', conversationIdFromUrl, res);
           }
         } catch (e) {
           if (!didCancel) {
             setConversationNotFound(true);
-            console.error('Error fetching conversation by id:', conversationIdFromUrl, e);
+          }
+          }
+        }
+        return;
+      }
+
+      // Handle userId from URL - create conversation with specific user if not found
+      if (userIdFromUrl && user?._id && userIdFromUrl !== user._id && !isCreatingConversation) {
+        // First check if conversation already exists in the list
+        const existingConv = conversations.find(conv => {
+          const partner = chatHelpers.getConversationPartner(conv, user._id);
+          return partner && partner._id === userIdFromUrl;
+        });
+        
+        if (existingConv) {
+          // Conversation exists, set it as active
+          if (!didCancel) {
+            setActiveConversation(existingConv);
+            setConversationNotFound(false);
+            // Update URL to include conversationId
+            router.push(`/profile?tab=chat&conversationId=${existingConv._id}`, { scroll: false });
+          }
+        } else if (!isLoading) {
+          // Conversation doesn't exist, create new one
+          try {
+            setIsCreatingConversation(true);
+            const res = await conversationApi.createConversation([user._id, userIdFromUrl]);
+            if (!didCancel && res.success && (res.data || (res as any).conversation)) {
+              const conversation = res.data || (res as any).conversation;
+              setActiveConversation(conversation);
+              setConversationNotFound(false);
+              // Add new conversation to the context
+              addConversation(conversation);
+              // Update URL to include conversationId
+              router.push(`/profile?tab=chat&conversationId=${conversation._id}`, { scroll: false });
+            } else if (!didCancel) {
+              setConversationNotFound(true);
+            }
+          } catch (e) {
+            if (!didCancel) {
+              setConversationNotFound(true);
+            }
+          } finally {
+            if (!didCancel) {
+              setIsCreatingConversation(false);
+            }
           }
         }
       }
@@ -79,7 +125,8 @@ export default function ProfileChatLayout() {
 
     ensureActiveConversation();
     return () => { didCancel = true; };
-  }, [conversationIdFromUrl, conversations, setActiveConversation, isLoading, user?._id]);
+  }, [conversationIdFromUrl, userIdFromUrl, propertyIdFromUrl, isLoading, user?._id, router, addConversation, isCreatingConversation, conversations]);
+
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 

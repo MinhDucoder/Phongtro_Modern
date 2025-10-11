@@ -14,7 +14,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { authApi, userSettingsApi, savedPropertiesApi, rentalRequestApi } from '@/lib/api';
 import axios from 'axios';
 import { toastManager } from '@/components/ui/ToastManager';
-import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
   return (
@@ -104,23 +103,9 @@ function ProfileContent() {
         
         // Show toast notification
         if (status === 'accepted') {
-          toast.success(`🎉 Yêu cầu thuê phòng "${propertyTitle}" đã được chấp nhận!`, {
-            duration: 6000,
-            style: {
-              background: '#10B981',
-              color: '#fff',
-              fontWeight: '500',
-            },
-          });
+          toastManager.showSuccess(`🎉 Yêu cầu thuê phòng "${propertyTitle}" đã được chấp nhận!`);
         } else if (status === 'rejected') {
-          toast.error(`❌ Yêu cầu thuê phòng "${propertyTitle}" đã bị từ chối.`, {
-            duration: 6000,
-            style: {
-              background: '#EF4444',
-              color: '#fff',
-              fontWeight: '500',
-            },
-          });
+          toastManager.showError(`❌ Yêu cầu thuê phòng "${propertyTitle}" đã bị từ chối.`);
         }
         
         // Reload rental requests if we're on the requests tab

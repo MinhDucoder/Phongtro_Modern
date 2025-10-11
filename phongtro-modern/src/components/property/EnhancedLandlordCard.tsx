@@ -12,7 +12,7 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 import { rentalRequestApi } from '@/lib/api';
 
 interface Landlord {
@@ -69,55 +69,26 @@ export default function EnhancedLandlordCard({ landlord, propertyId, className =
 
   const handleStartChat = async () => {
     if (!isAuthenticated) {
-      toast.error('🔐 Vui lòng đăng nhập để bắt đầu chat', {
-        duration: 4000,
-        style: {
-          background: '#EF4444',
-          color: '#fff',
-          fontWeight: '500',
-        },
-      });
+      toastManager.showError('🔐 Vui lòng đăng nhập để bắt đầu chat');
       router.push('/dang-nhap?redirect=' + encodeURIComponent(window.location.pathname));
       return;
     }
 
     if (landlord._id === user?._id) {
-      toast.error('🚫 Bạn không thể chat với chính mình', {
-        duration: 4000,
-        style: {
-          background: '#EF4444',
-          color: '#fff',
-          fontWeight: '500',
-        },
-      });
+      toastManager.showError('🚫 Bạn không thể chat với chính mình');
       return;
     }
 
     try {
       setIsStartingChat(true);
       
-      toast.success('💬 Đang mở chat...', {
-        duration: 2000,
-        style: {
-          background: '#10B981',
-          color: '#fff',
-          fontWeight: '500',
-        },
-      });
+      toastManager.showSuccess('💬 Đang mở chat...');
       
-      // Navigate to chat with specific user
-      router.push(`/chat?userId=${landlord._id}&propertyId=${propertyId}`);
+      // Navigate to profile chat tab with specific user
+      router.push(`/profile?tab=chat&userId=${landlord._id}&propertyId=${propertyId}`);
       
     } catch (error) {
-      console.error('Error starting chat:', error);
-      toast.error('❌ Không thể bắt đầu chat. Vui lòng thử lại.', {
-        duration: 4000,
-        style: {
-          background: '#EF4444',
-          color: '#fff',
-          fontWeight: '500',
-        },
-      });
+      toastManager.showError('❌ Không thể bắt đầu chat. Vui lòng thử lại.');
     } finally {
       setIsStartingChat(false);
     }
@@ -125,24 +96,10 @@ export default function EnhancedLandlordCard({ landlord, propertyId, className =
 
   const handleCall = () => {
     if (landlord.phone) {
-      toast.success(`📞 Đang gọi ${landlord.phone}...`, {
-        duration: 3000,
-        style: {
-          background: '#10B981',
-          color: '#fff',
-          fontWeight: '500',
-        },
-      });
+      toastManager.showSuccess(`📞 Đang gọi ${landlord.phone}...`);
       window.open(`tel:${landlord.phone}`, '_self');
     } else {
-      toast.error('📞 Số điện thoại không khả dụng', {
-        duration: 4000,
-        style: {
-          background: '#EF4444',
-          color: '#fff',
-          fontWeight: '500',
-        },
-      });
+      toastManager.showError('📞 Số điện thoại không khả dụng');
     }
   };
 
@@ -269,20 +226,12 @@ export default function EnhancedLandlordCard({ landlord, propertyId, className =
             <button
               onClick={async () => {
                 if (!isAuthenticated) {
-                  toast.error('Vui lòng đăng nhập để gửi yêu cầu thuê');
+                  toastManager.showError('Vui lòng đăng nhập để gửi yêu cầu thuê');
                   router.push('/dang-nhap?redirect=' + encodeURIComponent(window.location.pathname));
                   return;
                 }
                 
                 // Mở form yêu cầu thuê
-                toast.success('📝 Mở form yêu cầu thuê...', {
-                  duration: 2000,
-                  style: {
-                    background: '#3B82F6',
-                    color: '#fff',
-                    fontWeight: '500',
-                  },
-                });
                 setShowRentalRequestForm(true);
               }}
               disabled={isSendingRequest}
@@ -342,14 +291,6 @@ export default function EnhancedLandlordCard({ landlord, propertyId, className =
           landlord={landlord}
           propertyId={propertyId}
           onClose={() => {
-             toast('ℹ️ Đã đóng form yêu cầu thuê', {
-              duration: 2000,
-              style: {
-                background: '#6B7280',
-                color: '#fff',
-                fontWeight: '500',
-              },
-            });
             setShowRentalRequestForm(false);
           }}
         />
@@ -389,7 +330,7 @@ function RentalRequestForm({ landlord, propertyId, onClose }: RentalRequestFormP
         // For now, we'll set this to false and let the submit handle the error
         setHasPendingRequest(false);
       } catch (error) {
-        console.error('Error checking pending request:', error);
+        // Handle error silently
       } finally {
         setIsCheckingPending(false);
       }
@@ -403,64 +344,24 @@ function RentalRequestForm({ landlord, propertyId, onClose }: RentalRequestFormP
     
     // Validation
     if (!formData.message.trim()) {
-      toast.error('⚠️ Vui lòng nhập tin nhắn cho chủ nhà', {
-        duration: 4000,
-        style: {
-          background: '#EF4444',
-          color: '#fff',
-          fontWeight: '500',
-        },
-      });
       return;
     }
     
     if (!formData.phone.trim()) {
-      toast.error('⚠️ Vui lòng nhập số điện thoại', {
-        duration: 4000,
-        style: {
-          background: '#EF4444',
-          color: '#fff',
-          fontWeight: '500',
-        },
-      });
       return;
     }
     
      if (!formData.email.trim()) {
-       toast.error('⚠️ Vui lòng nhập email', {
-         duration: 4000,
-         style: {
-           background: '#EF4444',
-           color: '#fff',
-           fontWeight: '500',
-         },
-       });
        return;
      }
      
      if (!formData.moveInDate) {
-       toast.error('⚠️ Vui lòng chọn ngày dự kiến chuyển vào', {
-         duration: 4000,
-         style: {
-           background: '#EF4444',
-           color: '#fff',
-           fontWeight: '500',
-         },
-       });
        return;
      }
     
     try {
       setIsSubmitting(true);
       
-      toast.loading('📤 Đang gửi yêu cầu thuê...', {
-        duration: 2000,
-        style: {
-          background: '#F59E0B',
-          color: '#fff',
-          fontWeight: '500',
-        },
-      });
       
       // Gửi yêu cầu thuê thông qua API
       const requestData = {
@@ -480,92 +381,42 @@ function RentalRequestForm({ landlord, propertyId, onClose }: RentalRequestFormP
       const response = await rentalRequestApi.createRequest(requestData);
       
       if (response.success) {
-        toast.success('🎉 Yêu cầu thuê đã được gửi thành công! Chủ nhà sẽ liên hệ với bạn sớm nhất có thể.', {
-          duration: 5000,
-          style: {
-            background: '#10B981',
-            color: '#fff',
-            fontWeight: '500',
-          },
-        });
+        toastManager.showSuccess('Gửi yêu cầu thuê thành công!');
         onClose();
       } else {
         throw new Error(response.message || 'Không thể gửi yêu cầu thuê');
       }
       
     } catch (error: any) {
-      console.error('Error submitting rental request:', error);
-      console.log('Error message:', error.message);
-      console.log('Error type:', typeof error.message);
-      console.log('Full error object:', error);
       
-      // Xử lý các loại lỗi khác nhau
-      let errorMessage = 'Không thể gửi yêu cầu thuê. Vui lòng thử lại.';
+      // Xử lý các loại lỗi khác nhau với thông báo rõ ràng
+      let errorMessage = '';
       
       if (error.message) {
-        console.log('Checking error message patterns...');
-        // Check for the specific error pattern first
-        if (error.message.includes('You already have a pending request for this property')) {
-          console.log('Matched: You already have a pending request for this property');
-          errorMessage = '⏳ Bạn đã có yêu cầu thuê đang chờ xử lý cho phòng này rồi. Vui lòng chờ chủ nhà phản hồi hoặc hủy yêu cầu cũ trước khi gửi yêu cầu mới.';
-          setHasPendingRequest(true);
-          
-          // Show additional info about viewing existing requests
-          setTimeout(() => {
-            toast('💡 Bạn có thể xem yêu cầu đã gửi trong phần "Yêu cầu đã gửi" của profile', {
-              duration: 8000,
-              style: {
-                background: '#3B82F6',
-                color: '#fff',
-                fontWeight: '500',
-              },
-            });
-          }, 2000);
-        } else if (error.message.includes('already have a pending request')) {
-          console.log('Matched: already have a pending request');
-          errorMessage = '⏳ Bạn đã có yêu cầu thuê đang chờ xử lý cho phòng này rồi. Vui lòng chờ chủ nhà phản hồi hoặc hủy yêu cầu cũ trước khi gửi yêu cầu mới.';
+        if (error.message.includes('You already have a pending request for this property') || 
+            error.message.includes('already have a pending request')) {
+          errorMessage = 'Bạn đã có yêu cầu thuê đang chờ xử lý cho phòng này';
           setHasPendingRequest(true);
         } else if (error.message.includes('not found')) {
-          errorMessage = '❌ Không tìm thấy thông tin phòng trọ. Vui lòng thử lại.';
+          errorMessage = 'Không tìm thấy thông tin phòng trọ';
         } else if (error.message.includes('validation')) {
-          errorMessage = '⚠️ Thông tin không hợp lệ. Vui lòng kiểm tra lại các trường bắt buộc.';
+          errorMessage = 'Thông tin không hợp lệ';
         } else if (error.message.includes('Error creating rental request')) {
-          // Extract the actual error message from the nested error
           const actualError = error.message.replace('Error creating rental request: ', '');
           if (actualError.includes('already have a pending request')) {
-            errorMessage = '⏳ Bạn đã có yêu cầu thuê đang chờ xử lý cho phòng này rồi. Vui lòng chờ chủ nhà phản hồi hoặc hủy yêu cầu cũ trước khi gửi yêu cầu mới.';
+            errorMessage = 'Bạn đã có yêu cầu thuê đang chờ xử lý cho phòng này';
             setHasPendingRequest(true);
-            
-            // Show additional info about viewing existing requests
-            setTimeout(() => {
-              toast('💡 Bạn có thể xem yêu cầu đã gửi trong phần "Yêu cầu đã gửi" của profile', {
-                duration: 8000,
-                style: {
-                  background: '#3B82F6',
-                  color: '#fff',
-                  fontWeight: '500',
-                },
-              });
-            }, 2000);
           } else {
-            errorMessage = `❌ ${actualError}`;
+            errorMessage = actualError;
           }
         } else {
-          console.log('No specific pattern matched, using generic error message');
-          errorMessage = `❌ ${error.message}`;
+          errorMessage = error.message;
         }
       } else {
-        console.log('No error message found');
+        errorMessage = 'Không thể kết nối đến server';
       }
       
-      toast.error(errorMessage, {
-        duration: 6000,
-        style: {
-          background: '#EF4444',
-          color: '#fff',
-          fontWeight: '500',
-        },
-      });
+      toastManager.showError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -699,14 +550,6 @@ function RentalRequestForm({ landlord, propertyId, onClose }: RentalRequestFormP
                 <button
                   type="button"
                   onClick={() => {
-                    toast.success('📋 Chuyển đến trang yêu cầu đã gửi...', {
-                      duration: 2000,
-                      style: {
-                        background: '#10B981',
-                        color: '#fff',
-                        fontWeight: '500',
-                      },
-                    });
                     window.location.href = '/profile?tab=requests';
                   }}
                   className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center"
