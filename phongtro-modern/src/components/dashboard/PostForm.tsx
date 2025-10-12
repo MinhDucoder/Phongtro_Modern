@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { dashboardApi, subscriptionApi } from '@/lib/api';
 import { uploadImages, validateImageFile, deleteImage } from '@/lib/imageUtils';
 import PackageSelector from './PackageSelector';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface PostFormProps {
   postId?: string; // If provided, we're editing; otherwise creating
@@ -110,7 +110,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
         
         if (!data.canPost) {
           setShowPackageSelector(true);
-          toast.error(`Bạn đã hết lượt đăng tin. Vui lòng nâng cấp gói để tiếp tục.`);
+          toastManager.showError(`Bạn đã hết lượt đăng tin. Vui lòng nâng cấp gói để tiếp tục.`);
         }
       } else {
         // User chưa có subscription
@@ -125,7 +125,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
       // Fallback: coi như chưa có gói
       setCanPost(false);
       setShowPackageSelector(true);
-      toast.error('Có lỗi khi kiểm tra quyền đăng tin. Vui lòng thử lại.');
+      toastManager.showError('Có lỗi khi kiểm tra quyền đăng tin. Vui lòng thử lại.');
     } finally {
       setCheckingPermission(false);
     }
@@ -193,7 +193,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
       }
     } catch (error) {
       console.error('Error loading post:', error);
-      toast.error('Không thể tải thông tin tin đăng');
+      toastManager.showError('Không thể tải thông tin tin đăng');
     } finally {
       setIsLoading(false);
     }
@@ -271,7 +271,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
 
     const maxImages = 10;
     if (formData.images.length + files.length > maxImages) {
-      toast.error(`Chỉ được tải lên tối đa ${maxImages} ảnh`);
+      toastManager.showError(`Chỉ được tải lên tối đa ${maxImages} ảnh`);
       return;
     }
 
@@ -287,7 +287,7 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
     });
 
     if (invalidFiles.length > 0) {
-      toast.error(`Một số file không hợp lệ:\n${invalidFiles.join('\n')}`);
+      toastManager.showError(`Một số file không hợp lệ:\n${invalidFiles.join('\n')}`);
     }
 
     if (validFiles.length === 0) return;
@@ -299,10 +299,10 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
         ...prev,
         images: [...prev.images, ...uploadedUrls]
       }));
-      toast.success(`Đã tải lên ${uploadedUrls.length} ảnh thành công`);
+      toastManager.showSuccess(`Đã tải lên ${uploadedUrls.length} ảnh thành công`);
     } catch (error) {
       console.error('Error uploading images:', error);
-      toast.error('Có lỗi xảy ra khi tải ảnh lên. Vui lòng thử lại.');
+      toastManager.showError('Có lỗi xảy ra khi tải ảnh lên. Vui lòng thử lại.');
     } finally {
       setUploadingImages(false);
       // Reset input
@@ -344,13 +344,13 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
     e.preventDefault();
     
     if (!formData.title || !formData.price || !formData.address) {
-      toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
+      toastManager.showError('Vui lòng điền đầy đủ thông tin bắt buộc');
       return;
     }
 
     // Kiểm tra quyền đăng tin nếu là post mới
     if (!isEditing && !canPost) {
-      toast.error('Bạn không có quyền đăng tin. Vui lòng nâng cấp gói.');
+      toastManager.showError('Bạn không có quyền đăng tin. Vui lòng nâng cấp gói.');
       setShowPackageSelector(true);
       return;
     }
@@ -401,12 +401,12 @@ export default function PostForm({ postId, onSuccess, onCancel }: PostFormProps)
       }
 
       if (response) {
-        toast.success(isEditing ? 'Cập nhật tin đăng thành công' : 'Tạo tin đăng thành công');
+        toastManager.showSuccess(isEditing ? 'Cập nhật tin đăng thành công' : 'Tạo tin đăng thành công');
         onSuccess?.();
       }
     } catch (error) {
       console.error('Error saving post:', error);
-      toast.error(isEditing ? 'Có lỗi xảy ra khi cập nhật tin đăng' : 'Có lỗi xảy ra khi tạo tin đăng');
+      toastManager.showError(isEditing ? 'Có lỗi xảy ra khi cập nhật tin đăng' : 'Có lỗi xảy ra khi tạo tin đăng');
     } finally {
       setIsLoading(false);
     }

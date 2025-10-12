@@ -384,7 +384,9 @@ export default function NotificationCenter() {
                     {notification.relatedProperty && (
                       <div className="flex items-center space-x-2 mt-2 p-2 bg-gray-50 rounded">
                         <Image
-                          src={notification.relatedProperty.image || '/placeholder-room.svg'}
+                          src={typeof notification.relatedProperty.image === 'string' && notification.relatedProperty.image.trim() !== '' 
+                            ? notification.relatedProperty.image 
+                            : '/placeholder-room.svg'}
                           alt={notification.relatedProperty.title}
                           width={40}
                           height={40}
@@ -397,7 +399,9 @@ export default function NotificationCenter() {
                     {notification.relatedUser && (
                       <div className="flex items-center space-x-2 mt-2">
                         <Image
-                          src={notification.relatedUser.avatar || '/placeholder-room.svg'}
+                          src={typeof notification.relatedUser.avatar === 'string' && notification.relatedUser.avatar.trim() !== '' 
+                            ? notification.relatedUser.avatar 
+                            : '/placeholder-room.svg'}
                           alt={notification.relatedUser.name}
                           width={24}
                           height={24}

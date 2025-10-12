@@ -1,6 +1,6 @@
 'use client';
 
-import LeafletWrapper from './LeafletWrapper';
+import MapLibreWrapper from './MapLibreWrapper';
 
 interface OpenStreetMapProps {
   roomId: string; // Thực chất là Post ID
@@ -14,7 +14,7 @@ export default function OpenStreetMap({
   height = '400px'
 }: OpenStreetMapProps) {
   return (
-    <LeafletWrapper 
+    <MapLibreWrapper 
       roomId={roomId}
       className={className}
       height={height}

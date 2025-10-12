@@ -250,8 +250,8 @@ const variantStyles: Record<ToastVariant, { ring: string; bg: string; icon: Reac
     label: 'Thành công',
   },
   error: {
-    ring: 'ring-rose-400/40',
-    bg: 'bg-rose-600/90 dark:bg-rose-600/90',
+    ring: 'ring-red-300/40',
+    bg: 'bg-[#dc3545] dark:bg-[#dc3545]',
     icon: <XCircle className="h-5 w-5" aria-hidden />,
     label: 'Có lỗi',
   },

@@ -38,6 +38,7 @@ export default function PropertyDetailPage({ postId }: PropertyDetailPageProps) 
                     name: d.landlord.full_name,
                     phone: d.landlord.phone,
                     email: d.landlord.email,
+                    avatar: d.landlord.avatar,
                     isVerified: d.landlord.role === 'landlord',
                   }
                 : undefined),
@@ -74,11 +75,11 @@ export default function PropertyDetailPage({ postId }: PropertyDetailPageProps) 
   }
 
   if (error) {
-    return <PropertyDetailError message={error} />;
+    return <PropertyDetailError error={error} />;
   }
 
   if (!data) {
-    return <PropertyDetailError message="Không có dữ liệu tin đăng." />;
+    return <PropertyDetailError error="Không có dữ liệu tin đăng." />;
   }
 
   return <PropertyDetail property={data} />;

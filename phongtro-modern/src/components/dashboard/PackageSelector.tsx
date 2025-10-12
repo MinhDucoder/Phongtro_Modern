@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { CheckCircleIcon, StarIcon } from '@heroicons/react/24/solid';
 import { subscriptionApi } from '@/lib/api';
-import toast from 'react-hot-toast';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface PackagePlan {
   _id: string;
@@ -56,7 +56,7 @@ export default function PackageSelector({ onPackageSelect, showCurrentPackage = 
       }
     } catch (error) {
       console.error('Error loading packages:', error);
-      toast.error('Không thể tải danh sách gói đăng tin');
+      toastManager.showError('Không thể tải danh sách gói đăng tin');
       setPackages([]); // Set empty array on error
     } finally {
       setLoading(false);
@@ -87,12 +87,12 @@ export default function PackageSelector({ onPackageSelect, showCurrentPackage = 
 
   const handlePurchase = async (packageType: string) => {
     if (packageType === 'free') {
-      toast.error('Gói miễn phí không cần thanh toán');
+      toastManager.showError('Gói miễn phí không cần thanh toán');
       return;
     }
 
     if (currentSubscription?.packageType === packageType) {
-      toast.error('Bạn đã đăng ký gói này rồi');
+      toastManager.showError('Bạn đã đăng ký gói này rồi');
       return;
     }
 
@@ -101,7 +101,7 @@ export default function PackageSelector({ onPackageSelect, showCurrentPackage = 
       // Find the selected package object to get its _id
       const selectedPkg = packages.find((pkg) => pkg.type === packageType);
       if (!selectedPkg) {
-        toast.error('Không tìm thấy gói đăng tin');
+        toastManager.showError('Không tìm thấy gói đăng tin');
         setPurchasing(false);
         return;
       }
@@ -116,14 +116,14 @@ export default function PackageSelector({ onPackageSelect, showCurrentPackage = 
           // Chuyển hướng đến trang thanh toán
           window.location.href = data.paymentUrl;
         } else {
-          toast.error('Không thể tạo đơn hàng thanh toán');
+          toastManager.showError('Không thể tạo đơn hàng thanh toán');
         }
       } else {
-        toast.error('Không thể tạo đơn hàng thanh toán');
+        toastManager.showError('Không thể tạo đơn hàng thanh toán');
       }
     } catch (error: any) {
       console.error('Purchase error:', error);
-      toast.error(error.message || 'Có lỗi xảy ra khi tạo đơn hàng');
+      toastManager.showError(error.message || 'Có lỗi xảy ra khi tạo đơn hàng');
     } finally {
       setPurchasing(false);
     }

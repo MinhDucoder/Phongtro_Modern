@@ -119,7 +119,32 @@ export default function NotificationBell() {
           action: {
             label: actionLabel,
             onClick: () => {
-              if (notification.link) {
+              // Handle message notifications specially - redirect to profile chat tab
+              if (notification.type === 'message') {
+                // Extract conversationId from link if available
+                let conversationId = null;
+                if (notification.link) {
+                  // Handle different link formats
+                  if (notification.link.includes('conversationId=')) {
+                    // Extract from query parameter
+                    const url = new URL(notification.link, window.location.origin);
+                    conversationId = url.searchParams.get('conversationId');
+                  } else if (notification.link.includes('conversation=')) {
+                    // Extract from query parameter with 'conversation' key
+                    const url = new URL(notification.link, window.location.origin);
+                    conversationId = url.searchParams.get('conversation');
+                  } else {
+                    // Extract from path
+                    conversationId = notification.link.split('/').pop();
+                  }
+                }
+                
+                if (conversationId && conversationId !== 'chat') {
+                  window.location.href = `/profile?tab=chat&conversationId=${conversationId}`;
+                } else {
+                  window.location.href = '/profile?tab=chat';
+                }
+              } else if (notification.link) {
                 window.location.href = notification.link;
               }
             }
@@ -152,11 +177,37 @@ export default function NotificationBell() {
 
   const recentNotifications = notifications.slice(0, 5);
 
-  const handleNotificationClick = (notificationId: string, link?: string) => {
+  const handleNotificationClick = (notificationId: string, notification: any) => {
     markAsRead(notificationId);
     setIsOpen(false);
-    if (link) {
-      window.location.href = link;
+    
+    // Handle message notifications specially - redirect to profile chat tab
+    if (notification.type === 'message') {
+      // Extract conversationId from link if available
+      let conversationId = null;
+      if (notification.link) {
+        // Handle different link formats
+        if (notification.link.includes('conversationId=')) {
+          // Extract from query parameter
+          const url = new URL(notification.link, window.location.origin);
+          conversationId = url.searchParams.get('conversationId');
+        } else if (notification.link.includes('conversation=')) {
+          // Extract from query parameter with 'conversation' key
+          const url = new URL(notification.link, window.location.origin);
+          conversationId = url.searchParams.get('conversation');
+        } else {
+          // Extract from path
+          conversationId = notification.link.split('/').pop();
+        }
+      }
+      
+      if (conversationId && conversationId !== 'chat') {
+        window.location.href = `/profile?tab=chat&conversationId=${conversationId}`;
+      } else {
+        window.location.href = '/profile?tab=chat';
+      }
+    } else if (notification.link) {
+      window.location.href = notification.link;
     }
   };
 
@@ -198,7 +249,7 @@ export default function NotificationBell() {
               )}
             </h3>
             <Link
-              href="/thong-bao"
+              href="/profile?tab=notifications"
               onClick={() => setIsOpen(false)}
               className="text-xs text-blue-600 hover:text-blue-700 font-medium"
             >
@@ -217,7 +268,7 @@ export default function NotificationBell() {
               recentNotifications.map((notification) => (
                 <button
                   key={notification._id}
-                  onClick={() => handleNotificationClick(notification._id, notification.link)}
+                  onClick={() => handleNotificationClick(notification._id, notification)}
                   className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
                     !notification.isRead ? 'bg-blue-50' : ''
                   }`}
@@ -255,7 +306,7 @@ export default function NotificationBell() {
           {recentNotifications.length > 0 && (
             <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
               <Link
-                href="/thong-bao"
+                href="/profile?tab=notifications"
                 onClick={() => setIsOpen(false)}
                 className="block text-center text-sm text-blue-600 hover:text-blue-700 font-medium py-1"
               >

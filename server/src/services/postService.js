@@ -253,6 +253,8 @@ class PostService {
             phone: landlord.phone,
             email: landlord.email,
             role: landlord.role,
+            avatar: landlord.avatar,
+            last_login: landlord.last_login,
           }
         : null,
       contact: landlord
@@ -260,6 +262,7 @@ class PostService {
             name: landlord.full_name,
             phone: landlord.phone,
             email: landlord.email,
+            avatar: landlord.avatar,
             isVerified: landlord.role === 'landlord',
           }
         : null,

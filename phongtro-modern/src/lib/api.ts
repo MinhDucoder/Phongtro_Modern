@@ -609,13 +609,13 @@ export const authApi = {
   },
 
   // Lấy thông tin user cơ bản (bao gồm avatar) từ /user/me
-  // async getMe(): Promise<ApiResponse> {
-  //   console.log('getMe: API_BASE_URL =', API_BASE_URL);
-  //   console.log('getMe: Full URL =', `${API_BASE_URL}/user/me`);
-  //   return apiRequest('/user/me', {
-  //     method: 'GET',
-  //   });
-  // },
+  async getMe(): Promise<ApiResponse> {
+    console.log('getMe: API_BASE_URL =', API_BASE_URL);
+    console.log('getMe: Full URL =', `${API_BASE_URL}/user/me`);
+    return apiRequest('/user/me', {
+      method: 'GET',
+    });
+  },
 
   // Cập nhật thông tin profile
   async updateProfile(profileData: {

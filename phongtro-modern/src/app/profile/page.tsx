@@ -1,17 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { UserIcon, PencilIcon, CheckIcon, XMarkIcon, CameraIcon, KeyIcon, CogIcon, HeartIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { UserIcon, PencilIcon, CheckIcon, XMarkIcon, CameraIcon, KeyIcon, CogIcon, HeartIcon, DocumentTextIcon, BellIcon } from '@heroicons/react/24/outline';
 import ProfileShell from '@/components/profile/ProfileShell';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import ProfileChatLayout from '@/components/chat/ProfileChatLayout';
+import NotificationCenter from '@/components/notifications/NotificationCenter';
 import RoleBadge from '@/components/ui/RoleBadge';
+import SafeImage from '@/components/ui/SafeImage';
 import { AuthRequired } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 import { authApi, userSettingsApi, savedPropertiesApi, rentalRequestApi } from '@/lib/api';
 import axios from 'axios';
 import { toastManager } from '@/components/ui/ToastManager';
-import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
   return (
@@ -32,8 +34,18 @@ function ProfileContent() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(initialTab);
   const [savedProperties, setSavedProperties] = useState([]);
+  const [filteredSavedProperties, setFilteredSavedProperties] = useState([]);
   const [rentalRequests, setRentalRequests] = useState([]);
   const [userSettings, setUserSettings] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
+  
+  // Rental requests filters
+  const [requestSearchTerm, setRequestSearchTerm] = useState('');
+  const [requestStatusFilter, setRequestStatusFilter] = useState('');
+  const [requestSortBy, setRequestSortBy] = useState('newest');
+  const [filteredRentalRequests, setFilteredRentalRequests] = useState([]);
   
   const [editData, setEditData] = useState({
     full_name: '',
@@ -69,7 +81,12 @@ function ProfileContent() {
   useEffect(() => {
     const tab = searchParams.get('tab') || 'profile';
     setActiveTab(tab);
-  }, [searchParams]);
+    
+    // Load data when switching to saved tab
+    if (tab === 'saved' && authUser) {
+      loadUserData();
+    }
+  }, [searchParams, authUser]);
 
   // Listen for real-time notifications
   useEffect(() => {
@@ -86,23 +103,9 @@ function ProfileContent() {
         
         // Show toast notification
         if (status === 'accepted') {
-          toast.success(`🎉 Yêu cầu thuê phòng "${propertyTitle}" đã được chấp nhận!`, {
-            duration: 6000,
-            style: {
-              background: '#10B981',
-              color: '#fff',
-              fontWeight: '500',
-            },
-          });
+          toastManager.showSuccess(`🎉 Yêu cầu thuê phòng "${propertyTitle}" đã được chấp nhận!`);
         } else if (status === 'rejected') {
-          toast.error(`❌ Yêu cầu thuê phòng "${propertyTitle}" đã bị từ chối.`, {
-            duration: 6000,
-            style: {
-              background: '#EF4444',
-              color: '#fff',
-              fontWeight: '500',
-            },
-          });
+          toastManager.showError(`❌ Yêu cầu thuê phòng "${propertyTitle}" đã bị từ chối.`);
         }
         
         // Reload rental requests if we're on the requests tab
@@ -131,13 +134,17 @@ function ProfileContent() {
       // Load saved properties
       const savedResponse = await savedPropertiesApi.getSavedProperties();
       if (savedResponse.success) {
-        setSavedProperties(savedResponse.data.items || []);
+        const properties = savedResponse.data.properties || [];
+        setSavedProperties(properties);
+        setFilteredSavedProperties(properties);
       }
 
       // Load rental requests
       const requestsResponse = await rentalRequestApi.getTenantRequests();
       if (requestsResponse.success) {
-        setRentalRequests(requestsResponse.data.requests || []);
+        const requests = requestsResponse.data.requests || [];
+        setRentalRequests(requests);
+        setFilteredRentalRequests(requests);
       }
 
       // Load user settings
@@ -237,6 +244,120 @@ function ProfileContent() {
     }
   };
 
+  const handleViewProperty = (property: any) => {
+    if (property.postId) {
+      router.push(`/phong-tro/${property.postId}`);
+    } else {
+      toastManager.showError('Không thể xem chi tiết tin đăng này');
+    }
+  };
+
+  const handleViewPostDetails = (post: any) => {
+    const postId = post?.roomId?._id || post?._id;
+    if (postId) {
+      router.push(`/phong-tro/${postId}`);
+    } else {
+      toastManager.showError('Không thể xem chi tiết tin đăng này');
+    }
+  };
+
+  const handleMessageLandlord = (landlordId: string) => {
+    if (landlordId) {
+      // Navigate to chat page with the landlord
+      router.push(`/chat?userId=${landlordId}`);
+    } else {
+      toastManager.showError('Không tìm thấy thông tin chủ nhà để nhắn tin');
+    }
+  };
+
+
+  const handleRemoveSaved = async (property: any) => {
+    try {
+      const response = await savedPropertiesApi.removeProperty(property.id || property._id);
+      if (response.success) {
+        toastManager.showSuccess('Đã bỏ lưu tin đăng');
+        // Reload saved properties
+        loadUserData();
+      } else {
+        toastManager.showError(response.message || 'Có lỗi xảy ra');
+      }
+    } catch (error) {
+      console.error('Error removing saved property:', error);
+      toastManager.showError('Có lỗi xảy ra khi bỏ lưu tin đăng');
+    }
+  };
+
+  // Filter and search saved properties
+  useEffect(() => {
+    let filtered = [...savedProperties];
+
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(property => 
+        property.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        property.address?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Apply status filter
+    if (statusFilter) {
+      filtered = filtered.filter(property => property.status === statusFilter);
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.savedDate || 0).getTime() - new Date(a.savedDate || 0).getTime();
+        case 'oldest':
+          return new Date(a.savedDate || 0).getTime() - new Date(b.savedDate || 0).getTime();
+        case 'price_low':
+          return (a.price || 0) - (b.price || 0);
+        case 'price_high':
+          return (b.price || 0) - (a.price || 0);
+        default:
+          return 0;
+      }
+    });
+
+    setFilteredSavedProperties(filtered);
+  }, [savedProperties, searchTerm, statusFilter, sortBy]);
+
+  // Filter and search rental requests
+  useEffect(() => {
+    let filtered = [...rentalRequests];
+
+    // Apply search filter
+    if (requestSearchTerm) {
+      filtered = filtered.filter(request => 
+        request.post?.roomId?.title?.toLowerCase().includes(requestSearchTerm.toLowerCase()) ||
+        request.post?.roomId?.address?.toLowerCase().includes(requestSearchTerm.toLowerCase()) ||
+        request.message?.toLowerCase().includes(requestSearchTerm.toLowerCase())
+      );
+    }
+
+    // Apply status filter
+    if (requestStatusFilter) {
+      filtered = filtered.filter(request => request.status === requestStatusFilter);
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      switch (requestSortBy) {
+        case 'newest':
+          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+        case 'oldest':
+          return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+        case 'status':
+          return a.status.localeCompare(b.status);
+        default:
+          return 0;
+      }
+    });
+
+    setFilteredRentalRequests(filtered);
+  }, [rentalRequests, requestSearchTerm, requestStatusFilter, requestSortBy]);
+
   const handleCancel = () => {
     if (authUser) {
       setEditData({
@@ -251,43 +372,6 @@ function ProfileContent() {
     setIsEditing(false);
   };
 
-  // Test notification function
-  const testNotification = async (type: 'accepted' | 'rejected') => {
-    try {
-      console.log(`🧪 Testing ${type} notification...`);
-      
-      // Get token
-      const storedTokens = localStorage.getItem('auth_tokens');
-      if (!storedTokens) {
-        toast.error('Không tìm thấy token');
-        return;
-      }
-      
-      const tokenData = JSON.parse(storedTokens);
-      const response = await axios.post(
-        'http://localhost:5000/api/v1/test-notification/test-rental-notification',
-        {
-          type,
-          propertyTitle: 'Phòng trọ test',
-          propertyId: 'test123'
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${tokenData.accessToken}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
-      if (response.data.success) {
-        toast.success(`🧪 Test notification sent: ${type}`);
-        console.log('🧪 Test response:', response.data);
-      }
-    } catch (error) {
-      console.error('🧪 Test notification error:', error);
-      toast.error('Lỗi khi test notification');
-    }
-  };
 
   if (!authUser) {
     return (
@@ -310,7 +394,7 @@ function ProfileContent() {
               <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
                 <div className="relative group">
                   <div className="h-28 w-28 bg-gray-100 rounded-full flex items-center justify-center ring-4 ring-gray-50 shadow-md">
-                    {authUser.avatar ? (
+                    {authUser.avatar && (typeof authUser.avatar === 'string' ? authUser.avatar.trim() !== '' : authUser.avatar.url && authUser.avatar.url.trim() !== '') ? (
                       <img
                         src={typeof authUser.avatar === 'string' ? authUser.avatar : authUser.avatar.url}
                         alt="Avatar"
@@ -530,26 +614,149 @@ function ProfileContent() {
             {activeTab === 'saved' && (
               <div>
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <HeartIcon className="w-5 h-5 mr-2 text-red-500" />
-                    Tin đã lưu
-                  </h3>
+                  <div className="flex items-center">
+                    <div className="p-2 bg-red-50 rounded-lg mr-3">
+                      <HeartIcon className="w-6 h-6 text-red-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">Tin đã lưu</h3>
+                      <p className="text-sm text-gray-500">Danh sách các tin đăng bạn đã lưu</p>
+                    </div>
+                  </div>
                   {savedProperties.length > 0 && (
-                    <span className="text-sm text-gray-500">{savedProperties.length} tin đăng</span>
+                    <div className="flex items-center space-x-2">
+                      <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                        {filteredSavedProperties.length} / {savedProperties.length} tin đăng
+                      </span>
+                    </div>
                   )}
                 </div>
+                
                 {savedProperties.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {savedProperties.map((property: any) => (
-                      <div key={property._id} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-all duration-200 hover:border-blue-300">
-                        <div className="flex items-start justify-between mb-3">
-                          <h4 className="font-semibold text-gray-900 line-clamp-2 flex-1">{property.post?.roomId?.title || 'Không có tiêu đề'}</h4>
-                          <HeartIcon className="w-5 h-5 text-red-500 fill-red-500 flex-shrink-0 ml-2" />
+                  <div className="space-y-4">
+                    {/* Search and Filter Bar */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            placeholder="Tìm kiếm trong tin đã lưu..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
                         </div>
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-1">{property.post?.roomId?.address || 'Chưa có địa chỉ'}</p>
-                        <div className="flex items-center justify-between pt-3 border-t">
-                          <p className="text-lg font-bold text-blue-600">{property.post?.roomId?.price?.toLocaleString() || '0'}đ</p>
-                          <span className="text-xs text-gray-500">/tháng</span>
+                        <div className="flex gap-2">
+                          <select 
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">Tất cả</option>
+                            <option value="active">Đang cho thuê</option>
+                            <option value="rented">Đã cho thuê</option>
+                          </select>
+                          <select 
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="newest">Mới nhất</option>
+                            <option value="oldest">Cũ nhất</option>
+                            <option value="price_low">Giá thấp</option>
+                            <option value="price_high">Giá cao</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Properties Grid */}
+                    {filteredSavedProperties.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {filteredSavedProperties.map((property: any) => (
+                        <div key={property.id || property._id} className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-blue-300 group property-card">
+                          {/* Property Image */}
+                          <div className="relative h-48 bg-gray-100 overflow-hidden">
+                            <SafeImage
+                              src={property.images}
+                              alt={property.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300 property-image"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            />
+                            
+                            {/* Status Badge */}
+                            <div className="absolute top-3 left-3">
+                              <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                property.status === 'active' 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {property.status === 'active' ? 'Đang cho thuê' : 'Không khả dụng'}
+                              </span>
+                            </div>
+                            
+                            {/* Favorite Button */}
+                            <button className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors">
+                              <HeartIcon className="w-5 h-5 text-red-500 fill-red-500" />
+                            </button>
+                          </div>
+
+                          {/* Property Details */}
+                          <div className="p-5">
+                            <div className="mb-3">
+                              <Link href={`/phong-tro/${property.postId || property.post || property.id || property._id}`}>
+                                <h4 className="font-bold text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors cursor-pointer hover:underline">
+                                  {property.title || 'Không có tiêu đề'}
+                                </h4>
+                              </Link>
+                              <div className="flex items-center text-sm text-gray-500 mb-2">
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span className="line-clamp-1">{property.address || 'Chưa có địa chỉ'}</span>
+                              </div>
+                            </div>
+
+                            {/* Price and Area */}
+                            <div className="flex items-center justify-between mb-4">
+                              <div>
+                                <p className="text-xl font-bold text-blue-600">
+                                  {property.price?.toLocaleString() || '0'}₫
+                                </p>
+                                <p className="text-xs text-gray-500">/tháng</p>
+                              </div>
+                              {property.area && (
+                                <div className="text-right">
+                                  <p className="text-sm font-medium text-gray-900">{property.area}m²</p>
+                                  <p className="text-xs text-gray-500">Diện tích</p>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-2">
+                              <button 
+                                onClick={() => handleViewProperty(property)}
+                                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                              >
+                                Xem chi tiết
+                              </button>
+                              <button 
+                                onClick={() => handleRemoveSaved(property)}
+                                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                              >
+                                Bỏ lưu
+                              </button>
+                            </div>
+
+                            {/* Saved Date */}
+                            <div className="mt-3 pt-3 border-t border-gray-100">
+                              <p className="text-xs text-gray-500">
+                                Đã lưu: {property.savedDate ? new Date(property.savedDate).toLocaleDateString('vi-VN') : 'Không xác định'}
+                              </p>
+                            </div>
                         </div>
                       </div>
                     ))}
@@ -557,13 +764,60 @@ function ProfileContent() {
                 ) : (
                   <div className="text-center py-12">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                      <HeartIcon className="w-8 h-8 text-gray-400" />
+                          <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
                     </div>
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">Chưa có tin nào được lưu</h4>
-                    <p className="text-gray-500 mb-6">Bạn chưa lưu tin đăng nào. Hãy tìm kiếm và lưu những tin đăng yêu thích!</p>
-                    <a href="/tim-kiem" className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                        <h4 className="text-lg font-medium text-gray-900 mb-2">Không tìm thấy kết quả</h4>
+                        <p className="text-gray-500 mb-4">Không có tin đăng nào phù hợp với bộ lọc của bạn.</p>
+                        <button 
+                          onClick={() => {
+                            setSearchTerm('');
+                            setStatusFilter('');
+                            setSortBy('newest');
+                          }}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                        >
+                          Xóa bộ lọc
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Load More Button */}
+                    {filteredSavedProperties.length > 0 && (
+                      <div className="text-center pt-6">
+                        <button className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+                          Xem thêm tin đã lưu
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-16">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-red-50 rounded-full mb-6">
+                      <HeartIcon className="w-10 h-10 text-red-400" />
+                    </div>
+                    <h4 className="text-xl font-semibold text-gray-900 mb-3">Chưa có tin nào được lưu</h4>
+                    <p className="text-gray-500 mb-8 max-w-md mx-auto">
+                      Bạn chưa lưu tin đăng nào. Hãy khám phá và lưu những tin đăng phù hợp với nhu cầu của bạn!
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <a 
+                        href="/tim-kiem" 
+                        className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                      >
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
                       Tìm kiếm phòng trọ
                     </a>
+                      <a 
+                        href="/phong-tro" 
+                        className="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                      >
+                        Xem tất cả tin đăng
+                      </a>
+                    </div>
                   </div>
                 )}
               </div>
@@ -573,40 +827,83 @@ function ProfileContent() {
             {activeTab === 'requests' && (
               <div>
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <DocumentTextIcon className="w-5 h-5 mr-2 text-blue-600" />
-                    Yêu cầu thuê phòng
-                  </h3>
-                  <div className="flex items-center space-x-4">
-                    {rentalRequests.length > 0 && (
-                      <span className="text-sm text-gray-500">{rentalRequests.length} yêu cầu</span>
-                    )}
-                    {/* Test buttons */}
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => testNotification('accepted')}
-                        className="px-3 py-1.5 text-xs bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-                      >
-                        🧪 Test Accepted
-                      </button>
-                      <button
-                        onClick={() => testNotification('rejected')}
-                        className="px-3 py-1.5 text-xs bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
-                      >
-                        🧪 Test Rejected
-                      </button>
+                  <div className="flex items-center">
+                    <div className="p-2 bg-blue-50 rounded-lg mr-3">
+                      <DocumentTextIcon className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">Yêu cầu thuê phòng</h3>
+                      <p className="text-sm text-gray-500">Danh sách các yêu cầu thuê phòng bạn đã gửi</p>
                     </div>
                   </div>
+                    {rentalRequests.length > 0 && (
+                    <div className="flex items-center space-x-2">
+                      <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                        {filteredRentalRequests.length} / {rentalRequests.length} yêu cầu
+                      </span>
+                    </div>
+                  )}
                 </div>
                 {rentalRequests.length > 0 ? (
                   <div className="space-y-4">
-                    {rentalRequests.map((request: any) => (
-                      <div key={request._id} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-all duration-200">
-                        <div className="flex justify-between items-start gap-4">
+                    {/* Search and Filter Bar */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            placeholder="Tìm kiếm yêu cầu thuê..."
+                            value={requestSearchTerm}
+                            onChange={(e) => setRequestSearchTerm(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <select 
+                            value={requestStatusFilter}
+                            onChange={(e) => setRequestStatusFilter(e.target.value)}
+                            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="pending">Chờ duyệt</option>
+                            <option value="accepted">Đã duyệt</option>
+                            <option value="rejected">Từ chối</option>
+                          </select>
+                          <select 
+                            value={requestSortBy}
+                            onChange={(e) => setRequestSortBy(e.target.value)}
+                            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="newest">Mới nhất</option>
+                            <option value="oldest">Cũ nhất</option>
+                            <option value="status">Theo trạng thái</option>
+                          </select>
+                    </div>
+                  </div>
+                </div>
+
+                    {/* Requests List */}
+                    {filteredRentalRequests.length > 0 ? (
+                  <div className="space-y-4">
+                        {filteredRentalRequests.map((request: any) => (
+                          <div key={request._id || request.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-blue-300 property-card">
+                            <div className="p-6">
+                              {/* Header with title and status */}
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                           <div className="flex-1">
-                            <div className="flex items-center justify-between mb-2">
-                              <h4 className="font-semibold text-gray-900">{request.post?.roomId?.title || 'Không có tiêu đề'}</h4>
-                              <span className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap ${
+                                  <h4 className="text-lg font-bold text-gray-900 mb-2">
+                                    {request.post?.roomId?.title || 'Không có tiêu đề'}
+                                  </h4>
+                                  <div className="flex items-center text-sm text-gray-500 mb-2">
+                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <span>{request.post?.roomId?.address || 'Chưa có địa chỉ'}</span>
+                                  </div>
+                                </div>
+                                <div className="flex flex-col sm:items-end gap-2">
+                                  <span className={`px-3 py-1 text-xs font-medium rounded-full ${
                                 request.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
                                 request.status === 'accepted' ? 'bg-green-100 text-green-800 border border-green-200' :
                                 'bg-red-100 text-red-800 border border-red-200'
@@ -614,57 +911,107 @@ function ProfileContent() {
                                 {request.status === 'pending' ? 'Chờ duyệt' :
                                  request.status === 'accepted' ? 'Đã duyệt' : 'Từ chối'}
                               </span>
+                                  <div className="text-right">
+                                    <p className="text-xl font-bold text-blue-600">
+                                      {request.post?.roomId?.price?.toLocaleString() || '0'}₫
+                                    </p>
+                                    <p className="text-sm text-gray-500">/tháng</p>
+                                  </div>
+                                </div>
                             </div>
                             
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                              <div className="text-sm">
-                                <span className="text-gray-500">Địa chỉ:</span>
-                                <p className="font-medium text-gray-900">{request.post?.roomId?.address || 'Chưa có địa chỉ'}</p>
+                              {/* Request Info Grid */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                <div className="bg-gray-50 rounded-lg p-3">
+                                  <div className="flex items-center mb-1">
+                                    <svg className="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                    <span className="text-sm font-medium text-gray-700">Số người</span>
                               </div>
-                              <div className="text-sm">
-                                <span className="text-gray-500">Giá thuê:</span>
-                                <p className="font-medium text-blue-600">{request.post?.roomId?.price?.toLocaleString() || '0'}đ/tháng</p>
+                                  <p className="text-sm text-gray-900">{request.tenantInfo?.numberOfPeople || 1} người</p>
                               </div>
-                              <div className="text-sm">
-                                <span className="text-gray-500">Số người:</span>
-                                <p className="font-medium text-gray-900">{request.tenantInfo?.numberOfPeople || 1} người</p>
+                                
+                                <div className="bg-gray-50 rounded-lg p-3">
+                                  <div className="flex items-center mb-1">
+                                    <svg className="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span className="text-sm font-medium text-gray-700">Dự kiến chuyển vào</span>
                               </div>
-                              <div className="text-sm">
-                                <span className="text-gray-500">Dự kiến chuyển vào:</span>
-                                <p className="font-medium text-gray-900">
+                                  <p className="text-sm text-gray-900">
                                   {request.expectedMoveIn ? new Date(request.expectedMoveIn).toLocaleDateString('vi-VN') : 'Chưa xác định'}
                                 </p>
                               </div>
                             </div>
                             
-                            <div className="mb-3">
-                              <span className="text-gray-500 text-sm">Tin nhắn:</span>
-                              <p className="text-sm text-gray-700 mt-1 p-3 bg-gray-50 rounded-lg">{request.message}</p>
+                              {/* Message */}
+                              <div className="mb-4">
+                                <div className="flex items-center mb-2">
+                                  <svg className="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                  </svg>
+                                  <span className="text-sm font-medium text-gray-700">Tin nhắn của bạn</span>
+                                </div>
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                  <p className="text-sm text-gray-700">{request.message}</p>
+                                </div>
                             </div>
                             
+                              {/* Response Message */}
                             {request.responseMessage && (
-                              <div className="mb-3">
-                                <span className="text-gray-500 text-sm">Phản hồi từ chủ nhà:</span>
-                                <p className="text-sm text-gray-700 mt-1 p-3 bg-blue-50 rounded-lg border border-blue-200">{request.responseMessage}</p>
+                                <div className="mb-4">
+                                  <div className="flex items-center mb-2">
+                                    <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span className="text-sm font-medium text-gray-700">Phản hồi từ chủ nhà</span>
+                                  </div>
+                                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                                    <p className="text-sm text-gray-700">{request.responseMessage}</p>
+                                  </div>
                               </div>
                             )}
                             
-                            <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t">
-                              <div className="flex items-center">
+                              {/* Action Buttons */}
+                              <div className="flex gap-3 mb-4">
+                                <button
+                                  onClick={() => handleViewPostDetails(request.post)}
+                                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
+                                >
+                                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                  </svg>
+                                  Xem chi tiết phòng
+                                </button>
+                                <button
+                                  onClick={() => handleMessageLandlord(request.post?.landlord?._id || request.post?.landlord)}
+                                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center"
+                                >
+                                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                  </svg>
+                                  Nhắn tin với chủ phòng
+                                </button>
+                              </div>
+
+                              {/* Timestamps */}
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-4 border-t border-gray-100">
+                                <div className="flex items-center text-xs text-gray-500">
                                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 Gửi lúc: {new Date(request.createdAt).toLocaleString('vi-VN')}
                               </div>
                               {request.respondedAt && (
-                                <div className="flex items-center">
+                                  <div className="flex items-center text-xs text-gray-500">
                                   <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                   </svg>
                                   Phản hồi lúc: {new Date(request.respondedAt).toLocaleString('vi-VN')}
                                 </div>
                               )}
-                            </div>
                           </div>
                         </div>
                       </div>
@@ -673,15 +1020,71 @@ function ProfileContent() {
                 ) : (
                   <div className="text-center py-12">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                      <DocumentTextIcon className="w-8 h-8 text-gray-400" />
+                          <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
                     </div>
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">Chưa có yêu cầu nào</h4>
-                    <p className="text-gray-500 mb-6">Bạn chưa gửi yêu cầu thuê phòng nào. Hãy tìm kiếm phòng trọ phù hợp!</p>
-                    <a href="/tim-kiem" className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                        <h4 className="text-lg font-medium text-gray-900 mb-2">Không tìm thấy yêu cầu</h4>
+                        <p className="text-gray-500 mb-4">Không có yêu cầu nào phù hợp với bộ lọc của bạn.</p>
+                        <button 
+                          onClick={() => {
+                            setRequestSearchTerm('');
+                            setRequestStatusFilter('');
+                            setRequestSortBy('newest');
+                          }}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                        >
+                          Xóa bộ lọc
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-16">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-50 rounded-full mb-6">
+                      <DocumentTextIcon className="w-10 h-10 text-blue-400" />
+                    </div>
+                    <h4 className="text-xl font-semibold text-gray-900 mb-3">Chưa có yêu cầu nào</h4>
+                    <p className="text-gray-500 mb-8 max-w-md mx-auto">
+                      Bạn chưa gửi yêu cầu thuê phòng nào. Hãy khám phá và gửi yêu cầu cho những phòng trọ phù hợp!
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <a 
+                        href="/tim-kiem" 
+                        className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                      >
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
                       Tìm kiếm phòng trọ
                     </a>
+                      <a 
+                        href="/phong-tro" 
+                        className="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                      >
+                        Xem tất cả tin đăng
+                      </a>
+                    </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Notifications Tab */}
+            {activeTab === 'notifications' && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center">
+                    <div className="p-2 bg-blue-50 rounded-lg mr-3">
+                      <BellIcon className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">Thông báo</h3>
+                      <p className="text-sm text-gray-500">Trung tâm thông báo - theo dõi tất cả hoạt động và cập nhật</p>
+                    </div>
+                  </div>
+                </div>
+                <NotificationCenter />
               </div>
             )}
 

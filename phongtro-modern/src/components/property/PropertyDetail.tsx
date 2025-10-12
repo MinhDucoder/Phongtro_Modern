@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -26,15 +26,16 @@ import {
   ExclamationTriangleIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  TruckIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon, StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
-import toast from 'react-hot-toast';
 import { toastManager } from '@/components/ui/ToastManager';
+import { useAuth } from '@/contexts/AuthContext';
 import OpenStreetMap from '@/components/map/OpenStreetMap';
-import PropertyAnalytics from '@/components/analytics/PropertyAnalytics';
 import PropertyReviews from '@/components/review/PropertyReviews';
 import EnhancedLandlordCard from '@/components/property/EnhancedLandlordCard';
+import { savedPropertiesApi } from '@/lib/api';
 
 interface PropertyDetailProps {
   property: {
@@ -92,63 +93,159 @@ interface PropertyDetailProps {
   };
 }
 
+const getAmenityLabel = (amenity: string): string => {
+  const amenityMap: Record<string, string> = {
+    'wifi': 'Wifi miễn phí',
+    'aircon': 'Điều hòa',
+    'private_wc': 'WC riêng',
+    'washing_machine': 'Máy giặt',
+    'fridge': 'Tủ lạnh',
+    'balcony': 'Ban công',
+    'window': 'Cửa sổ',
+    'kitchen': 'Bếp riêng'
+  };
+  return amenityMap[amenity] || amenity;
+};
+
 const getPlaceIcon = (type: string) => {
-  switch (type) {
-    case 'university': return <AcademicCapIcon className="w-5 h-5" />;
-    case 'market': 
-    case 'supermarket': return <BuildingStorefrontIcon className="w-5 h-5" />;
-    default: return <HomeIcon className="w-5 h-5" />;
-  }
+  const iconMap: Record<string, React.ReactElement> = {
+    'university': <AcademicCapIcon className="w-5 h-5" />,
+    'school': <AcademicCapIcon className="w-5 h-5" />,
+    'market': <BuildingStorefrontIcon className="w-5 h-5" />,
+    'supermarket': <BuildingStorefrontIcon className="w-5 h-5" />,
+    'hospital': <HeartIcon className="w-5 h-5" />,
+    'park': <MapPinIcon className="w-5 h-5" />,
+    'bus_station': <TruckIcon className="w-5 h-5" />
+  };
+  return iconMap[type] || <MapPinIcon className="w-5 h-5" />;
+};
+
+const getPlaceTypeLabel = (type: string): string => {
+  const labelMap: Record<string, string> = {
+    'university': 'Trường học',
+    'school': 'Trường học',
+    'market': 'Chợ',
+    'supermarket': 'Siêu thị',
+    'hospital': 'Bệnh viện',
+    'park': 'Công viên',
+    'bus_station': 'Bến xe',
+    'nearby': 'Địa điểm lân cận'
+  };
+  return labelMap[type] || 'Địa điểm';
 };
 
 export default function PropertyDetail({ property }: PropertyDetailProps) {
   const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [showAllImages, setShowAllImages] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Mock auth state
-  const [activeTab, setActiveTab] = useState<'overview' | 'map' | 'analytics' | 'reviews'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'map' | 'reviews'>('overview');
+  const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const room = (property as any).room || (property as any).roomId || property;
-  const images = Array.isArray(room?.images)
+  // PropertyDetailPage đã normalize data, tin tưởng nó
+  const room = property.room || {};
+  const images = Array.isArray(room.images)
     ? room.images.flatMap((img: any) => (typeof img === 'string' ? img : img?.url || img))
-    : Array.isArray((property as any).images)
-      ? (property as any).images
-      : [];
+    : [];
   const primaryImage = images[currentImageIndex] || '/placeholder-room.svg';
   const galleryImages = images.length > 0 ? images : ['/placeholder-room.svg'];
-  const contact = property.contact || {
-    name: property.landlord?.full_name || 'Chủ nhà',
-    phone: property.landlord?.phone,
-    email: property.landlord?.email,
-    isVerified: property.landlord?.role === 'landlord',
-    avatar: (property as any)?.landlord?.avatar && (property as any).landlord.avatar !== '/placeholder-room.svg'
-      ? (property as any).landlord.avatar
-      : undefined,
-  };
+  const contact = property.contact || { name: 'Chủ nhà' };
 
   const price = room?.price ? `${room.price.toLocaleString()} VNĐ/tháng` : 'Giá liên hệ';
   const area = room?.area ? `${room.area} m²` : '—';
   const location = room?.city || property.location || '';
+  
+  // Check if current user is owner
+  const isOwner = user?._id && (property.landlord as any)?._id && user._id === (property.landlord as any)._id;
 
-  useEffect(() => {
-    setMounted(true);
-    // TODO: replace with real authentication check
-    setIsAuthenticated(true);
-  }, []);
+  // Share functionality
+  const handleShare = async () => {
+    const shareData = {
+      title: room?.title || property.title || 'Phòng trọ',
+      text: `Xem phòng trọ này: ${room?.title || property.title || 'Phòng trọ'}`,
+      url: window.location.href,
+    };
 
-  const handleRequestToRent = () => {
+    try {
+      if (navigator.share && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        toastManager.showSuccess('Đã chia sẻ thành công!');
+      } else {
+        // Fallback: Copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toastManager.showSuccess('Đã sao chép link vào clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      toastManager.showError('Không thể chia sẻ. Vui lòng thử lại.');
+    }
+  };
+
+  // Save functionality
+  const handleSave = async () => {
     if (!isAuthenticated) {
-      // Show login modal or redirect to login
-      toastManager.showError('Vui lòng đăng nhập để gửi yêu cầu thuê');
-      router.push('/dang-nhap?redirect=' + encodeURIComponent(`/phong-tro/${property.id}`));
+      toastManager.showError('🔐 Vui lòng đăng nhập để lưu tin đăng');
+      router.push('/dang-nhap?redirect=' + encodeURIComponent(window.location.pathname));
       return;
     }
 
-    // Navigate to request sent page
-    router.push(`/yeu-cau-da-gui?propertyId=${property.id}`);
+    if (isOwner) {
+      toastManager.showError('🚫 Bạn không thể lưu tin đăng của chính mình');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      const postId = property._id || property.id;
+      
+      if (!postId) {
+        toastManager.showError('Không tìm thấy ID tin đăng');
+        return;
+      }
+      
+      if (isSaved) {
+        // Remove from saved
+        await savedPropertiesApi.removeProperty(postId);
+        setIsSaved(false);
+        toastManager.showSuccess('💔 Đã bỏ lưu tin đăng');
+      } else {
+        // Save property
+        await savedPropertiesApi.saveProperty(postId);
+        setIsSaved(true);
+        toastManager.showSuccess('❤️ Đã lưu tin đăng vào danh sách yêu thích');
+      }
+    } catch (error: any) {
+      console.error('Error saving property:', error);
+      toastManager.showError(error.message || 'Không thể lưu tin đăng. Vui lòng thử lại.');
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Keyboard navigation for image modal
+  useEffect(() => {
+    if (!showAllImages) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowAllImages(false);
+      } else if (e.key === 'ArrowLeft') {
+        setCurrentImageIndex((prev) => prev > 0 ? prev - 1 : galleryImages.length - 1);
+      } else if (e.key === 'ArrowRight') {
+        setCurrentImageIndex((prev) => prev < galleryImages.length - 1 ? prev + 1 : 0);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showAllImages, galleryImages.length]);
 
 
   if (!mounted) {
@@ -213,6 +310,8 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   src={primaryImage}
                   alt={room?.title || 'Hình ảnh phòng'}
                   fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
                 
@@ -227,16 +326,24 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 {/* Enhanced Action Buttons */}
                 <div className="absolute top-4 right-4 flex space-x-2">
                   <button
-                    onClick={() => setIsLiked(!isLiked)}
-                    className="bg-white/90 hover:bg-white p-3 rounded-full transition-all duration-200 hover:scale-110 shadow-lg"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="bg-white/90 hover:bg-white p-3 rounded-full transition-all duration-200 hover:scale-110 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label={isSaved ? "Bỏ lưu tin đăng" : "Lưu tin đăng"}
                   >
-                    {isLiked ? (
+                    {isSaving ? (
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-700"></div>
+                    ) : isSaved ? (
                       <HeartSolidIcon className="w-6 h-6 text-red-500" />
                     ) : (
                       <HeartIcon className="w-6 h-6 text-gray-700" />
                     )}
                   </button>
-                  <button className="bg-white/90 hover:bg-white p-3 rounded-full transition-all duration-200 hover:scale-110 shadow-lg">
+                  <button 
+                    onClick={handleShare}
+                    className="bg-white/90 hover:bg-white p-3 rounded-full transition-all duration-200 hover:scale-110 shadow-lg"
+                    aria-label="Chia sẻ phòng trọ"
+                  >
                     <ShareIcon className="w-6 h-6 text-gray-700" />
                   </button>
                 </div>
@@ -247,12 +354,14 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                     <button
                       onClick={() => setCurrentImageIndex((prev) => prev > 0 ? prev - 1 : galleryImages.length - 1)}
                       className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full transition-all duration-200 hover:scale-110 shadow-lg opacity-0 group-hover:opacity-100"
+                      aria-label="Ảnh trước"
                     >
                       <ChevronLeftIcon className="w-6 h-6 text-gray-700" />
                     </button>
                     <button
                       onClick={() => setCurrentImageIndex((prev) => prev < galleryImages.length - 1 ? prev + 1 : 0)}
                       className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full transition-all duration-200 hover:scale-110 shadow-lg opacity-0 group-hover:opacity-100"
+                      aria-label="Ảnh tiếp"
                     >
                       <ChevronRightIcon className="w-6 h-6 text-gray-700" />
                     </button>
@@ -274,9 +383,10 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                     <div key={index} className="relative group">
                       <Image
                         src={image || '/placeholder-room.svg'}
-                        alt={`Ảnh ${index + 1}`}
+                        alt={`Ảnh ${index + 1} - ${room?.title || 'Phòng trọ'}`}
                         width={120}
                         height={90}
+                        sizes="120px"
                         className={`object-cover rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 ${
                           currentImageIndex === index 
                             ? 'ring-2 ring-blue-500 shadow-lg' 
@@ -314,16 +424,12 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 full_name: contact?.name || 'Chủ nhà',
                 phone: contact?.phone,
                 email: contact?.email,
-                avatar: contact?.avatar,
+                avatar: (property.landlord as any)?.avatar || contact?.avatar,
                 role: property.landlord?.role || 'landlord',
                 is_verified: contact?.isVerified || false,
-                joinedDate: (contact as any)?.joinedDate || new Date().toISOString(),
-                totalProperties: 5, // Mock data
-                averageRating: 4.5, // Mock data
-                totalReviews: 23, // Mock data
                 responseTime: 'Trong vòng 1 giờ',
                 onlineStatus: 'online' as const,
-                lastActive: new Date().toISOString()
+                last_login: (property.landlord as any)?.last_login
               }}
               propertyId={property._id || property.id || ''}
             />
@@ -338,7 +444,6 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 {[
                   { id: 'overview', label: 'Tổng quan', icon: HomeIcon },
                   { id: 'map', label: 'Bản đồ', icon: MapPinIcon },
-                  { id: 'analytics', label: 'Thống kê', icon: EyeIcon },
                   { id: 'reviews', label: 'Đánh giá', icon: StarIcon }
                 ].map((tab) => (
                   <button
@@ -439,7 +544,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   Mô tả chi tiết
                 </h2>
                 <div className="prose max-w-none">
-                  {(room?.description || property.description || '')
+                  {((room as any)?.description || property.description || '')
                     .split('\n')
                     .filter(Boolean)
                           .map((paragraph: string, index: number) => (
@@ -463,7 +568,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                         {(room?.amenities || property.amenities || []).map((amenity: string, index: number) => (
                           <div key={index} className="flex items-center p-2 bg-green-50 rounded-lg border border-green-200">
                             <CheckCircleIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
-                            <span className="text-gray-900 font-medium text-sm">{amenity}</span>
+                            <span className="text-gray-900 font-medium text-sm">{getAmenityLabel(amenity)}</span>
                   </div>
                 ))}
               </div>
@@ -475,9 +580,9 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                         <ExclamationTriangleIcon className="w-5 h-5 mr-2 text-orange-600" />
                         Nội quy
               </h2>
-              {Array.isArray(room?.rules) && room.rules.length > 0 ? (
+              {Array.isArray((room as any)?.rules) && (room as any).rules.length > 0 ? (
                         <div className="space-y-2">
-                  {room.rules.map((rule: string, index: number) => (
+                  {(room as any).rules.map((rule: string, index: number) => (
                             <div key={index} className="flex items-start p-2 bg-orange-50 rounded-lg border border-orange-200">
                               <XCircleIcon className="w-4 h-4 text-orange-600 mr-2 mt-0.5 flex-shrink-0" />
                               <span className="text-gray-900 font-medium text-sm">{rule}</span>
@@ -498,28 +603,60 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                         <MapPinIcon className="w-5 h-5 mr-2 text-blue-600" />
                 Địa điểm lân cận
               </h2>
-              {Array.isArray(room?.nearbyPlaces) && room.nearbyPlaces.length > 0 ? (
-                        <div className="space-y-2">
-                  {room.nearbyPlaces.map((place: any, index: number) => (
-                            <div key={index} className="flex items-center justify-between p-2 bg-blue-50 rounded-lg border border-blue-200 hover:shadow-md transition-shadow">
-                      <div className="flex items-center">
-                                <div className="text-blue-600 mr-2">
-                          {getPlaceIcon(place.type)}
+              {(() => {
+                const nearbyPlaces = (room as any)?.nearbyPlaces || property.nearbyPlaces || [];
+                return Array.isArray(nearbyPlaces) && nearbyPlaces.length > 0 ? (
+                  <div className="space-y-2">
+                    {nearbyPlaces.map((place: any, index: number) => {
+                      // Xử lý dữ liệu bị lỗi format (string bị split thành object với keys là số)
+                      let placeName = '';
+                      let placeType = '';
+                      let placeDistance = '';
+                      
+                      if (place.name && typeof place.name === 'string') {
+                        // Dữ liệu đúng format
+                        placeName = place.name;
+                        placeType = place.type || '';
+                        placeDistance = place.distance || '';
+                      } else if (typeof place === 'object' && place !== null) {
+                        // Dữ liệu bị lỗi format - string bị split thành object
+                        const keys = Object.keys(place).filter(key => !isNaN(Number(key))).sort((a, b) => Number(a) - Number(b));
+                        if (keys.length > 0) {
+                          placeName = keys.map(key => place[key]).join('');
+                          placeType = 'nearby'; // Default type
+                          placeDistance = 'Gần đây';
+                        }
+                      }
+                      
+                      return (
+                      <div key={index} className="flex items-center justify-between p-2 bg-blue-50 rounded-lg border border-blue-200 hover:shadow-md transition-shadow">
+                        <div className="flex items-center">
+                          <div className="text-blue-600 mr-2">
+                            {getPlaceIcon(placeType)}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-gray-900 font-medium text-sm">
+                              {placeName || getPlaceTypeLabel(placeType) || 'Địa điểm'}
+                            </span>
+                            {placeName && placeType && placeName !== getPlaceTypeLabel(placeType) && (
+                              <span className="text-xs text-blue-600">{getPlaceTypeLabel(placeType)}</span>
+                            )}
+                          </div>
                         </div>
-                                <span className="text-gray-900 font-medium text-sm">{place.name}</span>
+                        <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                          {placeDistance}
+                        </span>
                       </div>
-                              <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                        {place.distance}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                        <div className="text-center py-4">
-                          <MapPinIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                          <p className="text-gray-500 text-sm">Chưa cập nhật địa điểm lân cận.</p>
-                </div>
-              )}
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <MapPinIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500 text-sm">Chưa cập nhật địa điểm lân cận.</p>
+                  </div>
+                );
+              })()}
             </div>
           </div>
                 </div>
@@ -538,24 +675,11 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 </div>
               )}
 
-              {activeTab === 'analytics' && (
-                <PropertyAnalytics
-                  propertyId={property._id || property.id || ''}
-                  isOwner={false} // TODO: Check if current user is owner
-                  analytics={property.analytics ? { 
-                    views: property.analytics.views || 0,
-                    likes: property.analytics.likes || 0,
-                    calls: property.analytics.calls || 0,
-                    messages: property.analytics.messages || 0,
-                    saves: 0
-                  } : undefined}
-                />
-              )}
 
               {activeTab === 'reviews' && (
                 <PropertyReviews
                   propertyId={property._id || property.id || ''}
-                  isOwner={false} // TODO: Check if current user is owner
+                  isOwner={isOwner}
                 />
               )}
             </div>
@@ -565,16 +689,22 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
 
       {/* Enhanced Image Modal */}
       {showAllImages && (
-        <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+        >
           <div className="max-w-6xl w-full max-h-[90vh]">
             {/* Modal Header */}
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-white text-xl font-bold">
+              <h3 id="modal-title" className="text-white text-xl font-bold">
                 Ảnh {currentImageIndex + 1} / {galleryImages.length}
               </h3>
               <button
                 onClick={() => setShowAllImages(false)}
                 className="text-white hover:text-gray-300 text-3xl font-bold bg-black/50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-black/70 transition-colors"
+                aria-label="Đóng modal"
               >
                 ×
               </button>
@@ -584,8 +714,9 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             <div className="relative h-[60vh] mb-6 rounded-xl overflow-hidden">
               <Image
                 src={galleryImages[currentImageIndex] || '/placeholder-room.svg'}
-                alt={`Ảnh ${currentImageIndex + 1}`}
+                alt={`Ảnh ${currentImageIndex + 1} - ${room?.title || 'Phòng trọ'}`}
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
                 className="object-contain"
               />
               
@@ -595,12 +726,14 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   <button
                     onClick={() => setCurrentImageIndex((prev) => prev > 0 ? prev - 1 : galleryImages.length - 1)}
                     className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-200"
+                    aria-label="Ảnh trước"
                   >
                     <ChevronLeftIcon className="w-6 h-6" />
                   </button>
                   <button
                     onClick={() => setCurrentImageIndex((prev) => prev < galleryImages.length - 1 ? prev + 1 : 0)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-200"
+                    aria-label="Ảnh tiếp"
                   >
                     <ChevronRightIcon className="w-6 h-6" />
                   </button>
@@ -614,9 +747,10 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 <div key={index} className="relative">
                   <Image
                     src={image || '/placeholder-room.svg'}
-                    alt={`Thumbnail ${index + 1}`}
+                    alt={`Thumbnail ${index + 1} - ${room?.title || 'Phòng trọ'}`}
                     width={100}
                     height={75}
+                    sizes="100px"
                     className={`object-cover rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 ${
                       currentImageIndex === index 
                         ? 'ring-2 ring-white shadow-lg' 

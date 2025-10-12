@@ -11,6 +11,43 @@ export function getSafeImageUrl(imageUrl: string | undefined | null): string {
 }
 
 /**
+ * Get a safe image URL from any type of input (string, object, array, etc.)
+ * This is the most robust function for handling various image data formats
+ */
+export function getSafeImageSrc(src: any): string {
+  // Handle null, undefined
+  if (!src) {
+    return '/placeholder-room.svg';
+  }
+  
+  // Handle string
+  if (typeof src === 'string') {
+    return src.trim() !== '' ? src : '/placeholder-room.svg';
+  }
+  
+  // Handle object
+  if (typeof src === 'object' && !Array.isArray(src)) {
+    // Check for common image URL properties
+    const possibleProps = ['url', 'src', 'image', 'avatar', 'photo'];
+    for (const prop of possibleProps) {
+      if (src[prop] && typeof src[prop] === 'string' && src[prop].trim() !== '') {
+        return src[prop];
+      }
+    }
+    // If it's an empty object or doesn't have image properties
+    return '/placeholder-room.svg';
+  }
+  
+  // Handle array
+  if (Array.isArray(src)) {
+    return getFirstImage(src);
+  }
+  
+  // For any other type, return placeholder
+  return '/placeholder-room.svg';
+}
+
+/**
  * Get the first image from an array, with fallback
  */
 export function getFirstImage(images: any): string {

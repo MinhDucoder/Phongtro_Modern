@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Bars3Icon, XMarkIcon, UserIcon, PlusIcon, HomeIcon, BuildingOfficeIcon, ChatBubbleLeftRightIcon, ChartBarIcon, CogIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, UserIcon, PlusIcon, HomeIcon, BuildingOfficeIcon, ChatBubbleLeftRightIcon, ChartBarIcon, CogIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { toastManager } from '@/components/ui/ToastManager';
 import { useRoleCheck } from '@/components/auth/RoleGuard';
@@ -15,6 +15,13 @@ const mainNavigation = [
   { name: 'Nhà nguyên căn', href: '/nha-nguyen-can' },
   { name: 'Căn hộ', href: '/can-ho' },
   { name: 'Tìm kiếm', href: '/tim-kiem' },
+];
+
+const secondaryNavigation = [
+  { name: 'Tin đã lưu', href: '/profile?tab=saved' },
+  { name: 'Thông báo', href: '/profile?tab=notifications' },
+  { name: 'Tin nhắn', href: '/profile?tab=chat' },
+  { name: 'Cài đặt', href: '/profile?tab=settings' },
 ];
 
 export default function Header() {
@@ -104,6 +111,15 @@ export default function Header() {
                 <CogIcon className="h-5 w-5" />
               </Link>
             )}
+
+            {/* Saved Properties - Icon only */}
+            <Link
+              href="/profile?tab=saved"
+              className="hidden md:flex items-center justify-center p-2 rounded-lg text-gray-700 hover:text-red-600 hover:bg-red-50 transition-colors"
+              title="Tin đã lưu"
+            >
+              <HeartIcon className="h-5 w-5" />
+            </Link>
 
             {/* Chat Dropdown */}
             <div className="hidden md:block">

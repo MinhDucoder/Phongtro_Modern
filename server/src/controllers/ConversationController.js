@@ -13,10 +13,13 @@ class ConversationController {
       // Tìm conversation có sẵn
       let conversation = await Conversation.findOne({
         participants: { $all: participants, $size: participants.length }
-      });
+      }).populate('participants', 'full_name avatar role');
 
       if (!conversation) {
         conversation = await Conversation.create({ participants });
+        // Populate participants after creation
+        conversation = await Conversation.findById(conversation._id)
+          .populate('participants', 'full_name avatar role');
       }
 
       res.status(201).json({ success: true, conversation });
