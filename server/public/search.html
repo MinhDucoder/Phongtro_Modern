@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Test Meilisearch Suggest</title>
+    <title>Tìm kiếm phòng trọ</title>
     <style>
       body {
         font-family: sans-serif;
@@ -16,13 +16,52 @@
         color: #2f54eb;
       }
 
+      .search-container {
+        position: relative;
+        margin-bottom: 20px;
+      }
+
       input {
         width: 100%;
         padding: 12px;
         font-size: 16px;
         border: 1px solid #ccc;
         border-radius: 8px;
-        margin-bottom: 20px;
+        box-sizing: border-box;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #2f54eb;
+      }
+
+      .suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 10;
+        margin-top: 4px;
+      }
+
+      .suggestion-item {
+        padding: 10px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #f5f5f5;
+      }
+
+      .suggestion-item:last-child {
+        border-bottom: none;
+      }
+
+      .suggestion-item:hover {
+        background: #f0f0f0;
       }
 
       .results {
@@ -47,73 +86,183 @@
       .price {
         color: #1677ff;
         font-size: 14px;
+        margin-top: 4px;
       }
 
       mark {
         background: #fffa90;
+        padding: 0 2px;
+      }
+
+      .no-results {
+        text-align: center;
+        color: #999;
+        padding: 20px;
+      }
+
+      .error {
+        color: red;
+        text-align: center;
+        padding: 20px;
       }
     </style>
   </head>
 
   <body>
     <h1>Tìm kiếm phòng trọ 🏠</h1>
-    <input
-      id="searchInput"
-      type="text"
-      placeholder="Nhập từ khóa (VD: Cầu Giấy, Tân Mai...)"
-      autofocus
-    />
+    
+    <div class="search-container">
+      <input
+        id="searchInput"
+        type="text"
+        placeholder="Nhập từ khóa (VD: Cầu Giấy, Tân Mai...)"
+        autofocus
+        autocomplete="off"
+      />
+      <div id="suggestions" class="suggestions"></div>
+    </div>
+
     <div id="results" class="results"></div>
 
     <script>
       const input = document.getElementById("searchInput");
       const resultsDiv = document.getElementById("results");
+      const suggestionsDiv = document.getElementById("suggestions");
 
       let debounceTimer;
+      let currentSuggestions = [];
 
+      // Xử lý tìm kiếm
       input.addEventListener("input", (e) => {
         const keyword = e.target.value.trim();
 
         clearTimeout(debounceTimer);
 
+        if (keyword.length === 0) {
+          resultsDiv.innerHTML = "";
+          suggestionsDiv.innerHTML = "";
+          suggestionsDiv.style.display = "none";
+          return;
+        }
+
         debounceTimer = setTimeout(async () => {
-          if (keyword.length === 0) {
-            resultsDiv.innerHTML = "";
-            return;
-          }
-
           try {
-            const res = await fetch(`/search/suggest?q=${encodeURIComponent(keyword)}`);
-            const data = await res.json();
+            // Gọi API gợi ý
+            const suggestRes = await fetch(
+              `http://localhost:5000/api/v1/search/suggest?q=${encodeURIComponent(keyword)}`
+            );
+            const suggestData = await suggestRes.json();
 
-            if (!data.success) {
-              resultsDiv.innerHTML = `<p style="color:red">${data.message}</p>`;
-              return;
+            if (suggestData.success && suggestData.suggestions?.length > 0) {
+              currentSuggestions = suggestData.suggestions;
+              suggestionsDiv.innerHTML = currentSuggestions
+                .map(
+                  (s) => `<div class="suggestion-item" data-value="${s}">${s}</div>`
+                )
+                .join("");
+              suggestionsDiv.style.display = "block";
+
+              // Thêm sự kiện click cho gợi ý
+              document.querySelectorAll(".suggestion-item").forEach((item) => {
+                item.addEventListener("click", () => {
+                  selectSuggestion(item.dataset.value);
+                });
+              });
+            } else {
+              suggestionsDiv.innerHTML = "";
+              suggestionsDiv.style.display = "none";
             }
 
-            const hits = data.results || [];
+            // Gọi API tìm kiếm kết quả
+            const res = await fetch(
+              `http://localhost:5000/api/v1/search?q=${encodeURIComponent(keyword)}`
+            );
+            const data = await res.json();
+
+            const hits = data.data?.results?.hits || [];
+            
             if (hits.length === 0) {
-              resultsDiv.innerHTML = `<p>Không tìm thấy kết quả</p>`;
+              resultsDiv.innerHTML = `<div class="no-results">Không tìm thấy kết quả</div>`;
               return;
             }
 
             resultsDiv.innerHTML = hits
-              .map(
-                (item) => `
-                <div class="card">
-                  <div class="title">${item._formatted?.title || item.title}</div>
-                  <div class="price">${item.price?.toLocaleString()} VND</div>
-                </div>
-              `
-              )
+              .map((item) => {
+                const title = item._formatted?.title || item.title;
+                const price = Number(item.price).toLocaleString();
+                
+                return `
+                  <div class="card">
+                    <div class="title">${title}</div>
+                    <div class="price">${price} VND</div>
+                  </div>
+                `;
+              })
               .join("");
           } catch (err) {
             console.error(err);
-            resultsDiv.innerHTML = `<p style="color:red">Lỗi khi tìm kiếm</p>`;
+            resultsDiv.innerHTML = `<div class="error">Lỗi khi tìm kiếm. Vui lòng thử lại.</div>`;
+            suggestionsDiv.innerHTML = "";
+            suggestionsDiv.style.display = "none";
           }
         }, 300);
+      });
+
+      // Chọn gợi ý
+      function selectSuggestion(text) {
+        input.value = text;
+        suggestionsDiv.innerHTML = "";
+        suggestionsDiv.style.display = "none";
+        
+        // Trigger tìm kiếm
+        const event = new Event("input");
+        input.dispatchEvent(event);
+      }
+
+      // Đóng gợi ý khi click bên ngoài
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".search-container")) {
+          suggestionsDiv.innerHTML = "";
+          suggestionsDiv.style.display = "none";
+        }
+      });
+
+      // Xử lý phím mũi tên và Enter
+      input.addEventListener("keydown", (e) => {
+        const items = suggestionsDiv.querySelectorAll(".suggestion-item");
+        if (items.length === 0) return;
+
+        let currentIndex = Array.from(items).findIndex((item) =>
+          item.classList.contains("active")
+        );
+
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          if (currentIndex < items.length - 1) {
+            if (currentIndex >= 0) items[currentIndex].classList.remove("active");
+            currentIndex++;
+            items[currentIndex].classList.add("active");
+            items[currentIndex].style.background = "#e6f7ff";
+          }
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          if (currentIndex > 0) {
+            items[currentIndex].classList.remove("active");
+            items[currentIndex].style.background = "";
+            currentIndex--;
+            items[currentIndex].classList.add("active");
+            items[currentIndex].style.background = "#e6f7ff";
+          }
+        } else if (e.key === "Enter") {
+          e.preventDefault();
+          if (currentIndex >= 0) {
+            selectSuggestion(items[currentIndex].dataset.value);
+          }
+        } else if (e.key === "Escape") {
+          suggestionsDiv.innerHTML = "";
+          suggestionsDiv.style.display = "none";
+        }
       });
     </script>
   </body>
 </html>
-    

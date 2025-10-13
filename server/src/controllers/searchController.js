@@ -1,30 +1,41 @@
-import { getOrSetCache, getOrSetCacheSearch } from "~/services/redisService";
-import { searchPosts } from "~/services/meiliSearchService";
+import { index } from "~/services/meiliSearchService";
 import { success, error } from "~/utils/responeHandler";
+import { searchPosts } from "~/services/meiliSearchService";
+
 class SearchController {
+  // 🔹 API GỢI Ý (autocomplete)
   async suggest(req, res, next) {
     try {
       const keyword = req.query.q?.trim();
-      if (!keyword || keyword.length === 0) {
-        return error(res, 400, "Thiếu từ khóa tìm kiếm");
-      }
+      if (!keyword) return error(res, 400, "Thiếu từ khóa tìm kiếm");
 
-      const cacheKey = `suggest:${keyword.toLowerCase()}`;
-      console.log(cacheKey);
-      const cached = await getOrSetCacheSearch( 
-        //dang loi cache o day
-        cacheKey,
-        () => searchPosts(keyword),
-        300
-      );
+      const { hits } = await index.search(keyword, {
+        limit: 5,
+        attributesToRetrieve: ["title"],
+      });
+      const suggestions = [...new Set(hits.map((h) => h.title))];
 
-      // const result = await searchPosts(keyword);
-      return success(res, { results: cached }); 
-    } catch (error) {
-      console.error("Search error:", error);
-      error(res, 500, "Lỗi máy chủ, vui lòng thử lại sau");
+      return success(res, { suggestions });
+    } catch (err) {
+      console.error("❌ Suggest error:", err);
+      return error(res, 500, "Lỗi máy chủ khi gợi ý tìm kiếm");
+    }
+  }
+
+  // 🔹 API TÌM KIẾM CHÍNH (search)
+  async search(req, res, next) {
+    try {
+      const keyword = req.query.q?.trim();
+      if (!keyword) return error(res, 400, "Thiếu từ khóa tìm kiếm");
+
+      const result = await searchPosts(keyword);
+
+      return success(res, { results: result });
+    } catch (err) {
+      console.error("❌ Search error:", err);
+      return error(res, 500, "Lỗi máy chủ khi tìm kiếm");
     }
   }
 }
 
-export default new SearchController(); 
+export default new SearchController();

@@ -6,24 +6,28 @@ import path from "path";
 dotenv.config();
 
 const indexName = process.env.MEILISEARCH_INDEX || "posts";
-const index = meiliClient.index(indexName);
+export const index = meiliClient.index(indexName);
 
 /**
  * ✅ Khởi tạo cấu hình chỉ chạy 1 lần khi start app
  */
 export async function initSearchConfig() {
   try {
-    const synonymsPath = path.resolve("E:/Learn_On_Drive/project1/server/src/config/meilisearch.synonyms.json");
+    const synonymsPath = path.join(
+      __dirname,
+      "../config/meilisearch.synonyms.json"
+    );
     const synonyms = JSON.parse(fs.readFileSync(synonymsPath, "utf-8"));
-
+    console.log("Synonyms loaded:", synonyms);
     await index.updateSettings({
       typoTolerance: { enabled: true },
       searchableAttributes: ["title", "description", "location"],
       filterableAttributes: ["price", "location", "type", "area"],
       sortableAttributes: ["price", "area"],
       stopWords: ["và", "có", "ở", "tại", "phòng"],
-      synonyms,
     });
+
+    await index.updateSynonyms(synonyms);
 
     console.log("✅ Meilisearch index configured successfully with synonyms!");
   } catch (err) {
