@@ -1,4 +1,4 @@
-import { getOrSetCache } from "~/services/redisService";
+import { getOrSetCache, getOrSetCacheSearch } from "~/services/redisService";
 import { searchPosts } from "~/services/meiliSearchService";
 import { success, error } from "~/utils/responeHandler";
 class SearchController {
@@ -10,17 +10,19 @@ class SearchController {
       }
 
       const cacheKey = `suggest:${keyword.toLowerCase()}`;
-      const cached = await getOrSetCache(
+      console.log(cacheKey);
+      const cached = await getOrSetCacheSearch( 
+        //dang loi cache o day
         cacheKey,
         () => searchPosts(keyword),
         300
       );
-      return success(res, { results: cached });
+
+      // const result = await searchPosts(keyword);
+      return success(res, { results: cached }); 
     } catch (error) {
       console.error("Search error:", error);
-      res
-        .status(500)
-        .json({ success: false, message: "Internal Server Error" });
+      error(res, 500, "Lỗi máy chủ, vui lòng thử lại sau");
     }
   }
 }

@@ -1,6 +1,6 @@
 // Test script để kiểm tra API
-const express = require('express');
-const mongoose = require('mongoose');
+import express from 'express';
+import mongoose from 'mongoose';
 
 // Kết nối MongoDB
 mongoose.connect('mongodb://localhost:27017/phongtro_modern')

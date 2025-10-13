@@ -1,34 +1,45 @@
 import { meiliClient } from "~/config/meilisearch.config.mjs";
-import { PostModel } from "~/models/postSchema.js"; 
-import dotenv from "dotenv";   
+import PostModel from "~/models/postSchema.js";
+import dotenv from "dotenv";
 dotenv.config();
 
 const index = meiliClient.index(process.env.MEILISEARCH_INDEX || "posts");
 
-/**
- * Đồng bộ toàn bộ dữ liệu từ DB vào Meilisearch
- */
 export async function syncPostsToMeili() {
   console.time("Sync Meilisearch");
 
-  // 1️⃣ Lấy tất cả bài đăng trong DB
-  const posts = await PostModel.find(
-    {}
-  ).lean();
+  // 1️⃣ Lấy dữ liệu cần thiết: populate room để lấy title, price, area, city
+  const posts = await PostModel.find({ status: "active" }) // chỉ lấy bài đang hoạt động
+    .populate({
+      path: "roomId",
+      select: "title price area city",
+    })
+    .lean();
 
-  // 2️⃣ Chuyển _id thành id (Meilisearch yêu cầu trường id là duy nhất)
-  const formatted = posts.map((p) => ({
-    id: p._id.toString(),
-    title: p.title,
-    price: p.price,
-    location: p.location,
-    area: p.area,
-    description: p.description,
-  }));
+  // 2️⃣ Format dữ liệu cho MeiliSearch
+  const formatted = posts
+    .filter((p) => p.roomId)
+    .map((p) => ({
+      id: p._id.toString(),
+      title: p.roomId.title || "",
+      price: p.roomId.price || 0,
+      area: p.roomId.area || 0,
+      city: p.roomId.city || "",
+      status: p.status,
+      favouriteLevel: p.favouriteLevel,
+      createdAt: p.createdAt,
+    }));
 
-  // 3️⃣ Đẩy dữ liệu lên Meilisearch
+  // 3️⃣ Gửi lên MeiliSearch
   const task = await index.addDocuments(formatted);
   console.log("🚀 Sync task queued:", task);
+
+  // 4️⃣ Cấu hình chỉ 1 lần (khi tạo index)
+  await index.updateSettings({
+    searchableAttributes: ["title"],
+    filterableAttributes: ["city", "price", "area", "status", "favouriteLevel"],
+    sortableAttributes: ["price", "area", "createdAt"],
+  });
 
   console.timeEnd("Sync Meilisearch");
   return task;

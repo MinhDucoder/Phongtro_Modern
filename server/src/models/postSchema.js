@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { meiliSyncPlugin } from "~/plugin/meiliSync.plugin";
 
 const postSchema = new mongoose.Schema(
   {
@@ -31,5 +32,26 @@ const postSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Hàm format dữ liệu post → document Meili
+async function formatPostToMeili(doc) {
+  const populated = await doc.populate("roomId", "title price area city");
+  return {
+    id: doc._id.toString(),
+    title: populated.roomId?.title || "",
+    price: populated.roomId?.price || 0,
+    area: populated.roomId?.area || 0,
+    city: populated.roomId?.city || "",
+    status: doc.status,
+    favouriteLevel: doc.favouriteLevel,
+    createdAt: doc.createdAt,
+  };
+}
+
+// Gắn plugin
+postSchema.plugin(meiliSyncPlugin, {
+  indexName: process.env.MEILISEARCH_INDEX || "posts",
+  formatFn: formatPostToMeili,
+});
 
 export default mongoose.model("Post", postSchema);

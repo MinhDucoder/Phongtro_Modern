@@ -14,6 +14,7 @@ import errorHandler from "./middlewares/errorhandle.js";
 import { socketAuth } from "./middlewares/checkToken.js";
 import chatHandler from "./sockets/chatHandler.js";
 
+import { syncPostsToMeili } from "./seed/seedPostsToMeili.js";
 import { initSearchConfig } from "~/services/meiliSearchService.js";
 
 const initSearch = async () => {
@@ -21,6 +22,8 @@ const initSearch = async () => {
 };
 
 initSearch();
+
+// syncPostsToMeili();
 
 const app = express();
 const hostname = "localhost";

@@ -104,6 +104,25 @@ export async function getOrSetCache(keyParams, fetchFn, ttl = 600) {
   }
 }
 
+export async function getOrSetCacheSearch(keyParams, fetchFn, ttl = 600) {
+  try {
+    const cached = await redis.get(keyParams);
+    if (cached) {
+      console.log("✅ Cache hit:", keyParams);
+      return JSON.parse(cached);
+    }
+
+    console.log("❌ Cache miss:", keyParams);
+    const data = await fetchFn();
+    await redis.setEx(keyParams, ttl, JSON.stringify(data));
+    return data;
+  } catch (err) {
+    console.error("Redis getOrSetCache error:", err);
+    // fallback → gọi DB trực tiếp
+    return fetchFn();
+  }
+}
+
 /**
  * Preload cache cho các query phổ biến
  */
