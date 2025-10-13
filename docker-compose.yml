@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: meilisearch
+    ports:
+      - "7700:7700"
+    environment:
+      - MEILI_MASTER_KEY=masterKey
+      - MEILI_ENV=development
+      - MEILI_LOG_LEVEL=INFO
+    volumes:
+      - meilisearch_data:/meili_data
+    restart: unless-stopped
+    networks:
+      - phongtro_network
+
+volumes:
+  meilisearch_data:
+
+networks:
+  phongtro_network:
+    driver: bridge

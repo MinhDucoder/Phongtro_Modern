@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import "../styles/toast-animations.css";
+import 'maplibre-gl/dist/maplibre-gl.css';
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import ClientErrorBoundary from "@/components/ui/ClientErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";

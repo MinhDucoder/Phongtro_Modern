@@ -1,14 +1,13 @@
-﻿'use client';
+'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import {
   MagnifyingGlassIcon,
   MapPinIcon,
-  HomeIcon,
-  ChevronDownIcon,
   AdjustmentsHorizontalIcon,
-  XMarkIcon
+  XMarkIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline';
 
 const propertyTypes = [
@@ -25,8 +24,6 @@ const provinces = [
   'Toàn quốc',
   'Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ',
   'An Giang', 'Bà Rịa - Vũng Tàu', 'Bắc Giang', 'Bắc Kạn', 'Bạc Liêu',
-  'Bắc Ninh', 'Bến Tre', 'Bình Định', 'Bình Dương', 'Bình Phước',
-  'Bình Thuận', 'Cà Mau', 'Cao Bằng', 'Đắk Lắk', 'Đắk Nông',
 ];
 
 const priceRanges = [
@@ -41,19 +38,25 @@ const priceRanges = [
   { value: 'tren-15-trieu', label: 'Trên 15 triệu' },
 ];
 
-interface AdvancedSearchProps {
-  initialParams: { [key: string]: string | string[] | undefined };
-}
-
-export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
+export default function SearchSection() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const filterModalRef = useRef<HTMLDivElement>(null);
   
+  // Chỉ hiển thị thanh tìm kiếm trên một số trang
+  const showSearchSection = pathname === '/' || 
+                           pathname.startsWith('/tim-kiem') ||
+                           pathname.startsWith('/phong') ||
+                           pathname.startsWith('/can-ho') ||
+                           pathname.startsWith('/nha-nguyen-can') ||
+                           pathname.startsWith('/phong-tro');
+
   const [filters, setFilters] = useState({
-    keyword: (initialParams.keyword as string) || '',
-    propertyType: (initialParams.propertyType as string) || '',
-    province: (initialParams.province as string) || '',
-    priceRange: (initialParams.priceRange as string) || '',
+    keyword: searchParams?.get('keyword') || '',
+    province: searchParams?.get('province') || '',
+    propertyType: searchParams?.get('propertyType') || '',
+    priceRange: searchParams?.get('priceRange') || '',
   });
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -87,7 +90,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
       if (prev.includes(type)) {
         return prev.filter(t => t !== type);
       } else {
-        return [type]; // Chỉ cho phép chọn một loại
+        return [type]; // Only allow single selection
       }
     });
   };
@@ -128,13 +131,18 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
     }
   };
 
+  if (!showSearchSection) {
+    return null;
+  }
+
   return (
-    <div className="w-full max-w-4xl mx-auto px-4">
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-        <div className="p-4">
+    <>
+      {/* Search Section - giống phongtro123.com */}
+      <div className="bg-white border-b border-gray-200 py-4">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row gap-3 items-stretch">
             {/* Search Input */}
-            <div className="flex-1 min-w-0">
+            <div className="flex-1">
               <div className="relative">
                 <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
@@ -143,7 +151,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
                   value={filters.keyword}
                   onChange={(e) => handleFilterChange('keyword', e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="w-full pl-12 pr-4 py-3 text-base border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 placeholder-gray-500 transition-all"
+                  className="w-full pl-12 pr-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 placeholder-gray-500"
                 />
               </div>
             </div>
@@ -155,14 +163,10 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
                 <select
                   value={filters.province}
                   onChange={(e) => handleFilterChange('province', e.target.value)}
-                  className="w-full pl-12 pr-10 py-3 text-base border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 appearance-none cursor-pointer transition-all bg-white"
+                  className="w-full pl-12 pr-10 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 appearance-none cursor-pointer bg-white"
                 >
                   {provinces.map((province, index) => (
-                    <option 
-                      key={index} 
-                      value={index === 0 ? '' : province}
-                      className="text-gray-900"
-                    >
+                    <option key={index} value={index === 0 ? '' : province}>
                       {province}
                     </option>
                   ))}
@@ -172,30 +176,22 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
             </div>
 
             {/* Filter Button */}
-            <div className="w-full sm:w-auto">
-              <button
-                onClick={() => setIsFilterOpen(true)}
-                className="w-full sm:w-auto px-6 py-3 bg-white border border-gray-200 text-gray-700 text-base font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 min-w-[120px]"
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <AdjustmentsHorizontalIcon className="h-5 w-5" />
-                  <span>Bộ lọc</span>
-                </span>
-              </button>
-            </div>
+            <button
+              onClick={() => setIsFilterOpen(true)}
+              className="w-full sm:w-auto px-6 py-3 bg-white border border-gray-300 text-gray-700 text-base font-medium rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:outline-none flex items-center justify-center gap-2"
+            >
+              <AdjustmentsHorizontalIcon className="h-5 w-5" />
+              <span>Bộ lọc</span>
+            </button>
 
             {/* Search Button */}
-            <div className="w-full sm:w-auto">
-              <button
-                onClick={handleSearch}
-                className="w-full sm:w-auto px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white text-base font-medium rounded-lg transition-all duration-200 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 min-w-[120px] shadow-lg hover:shadow-xl"
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <MagnifyingGlassIcon className="h-5 w-5" />
-                  <span>Tìm nhà</span>
-                </span>
-              </button>
-            </div>
+            <button
+              onClick={handleSearch}
+              className="w-full sm:w-auto px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white text-base font-medium rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none flex items-center justify-center gap-2 shadow-lg"
+            >
+              <MagnifyingGlassIcon className="h-5 w-5" />
+              <span>Tìm nhà</span>
+            </button>
           </div>
         </div>
       </div>
@@ -249,7 +245,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
                     <select
                       value={filters.province}
                       onChange={(e) => handleFilterChange('province', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
                     >
                       {provinces.map((province, index) => (
                         <option key={index} value={index === 0 ? '' : province}>
@@ -260,13 +256,13 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Quận huyện</label>
-                    <select className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm">
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm">
                       <option>Tất cả</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Phường xã</label>
-                    <select className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm">
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm">
                       <option>Tất cả</option>
                     </select>
                   </div>
@@ -284,7 +280,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
                       className={`px-3 py-2 text-sm rounded-lg border transition-all ${
                         filters.priceRange === range.value
                           ? 'border-orange-500 bg-orange-50 text-orange-700'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                          : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50'
                       }`}
                     >
                       {range.label}
@@ -312,6 +308,6 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

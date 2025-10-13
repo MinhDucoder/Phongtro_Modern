@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import SearchFilter from '@/components/ui/SearchFilter';
 import Pagination from '@/components/ui/Pagination';
 import StructuredData from '@/components/seo/StructuredData';
 import { Post } from '@/lib/api';
@@ -139,74 +138,66 @@ export default function Home() {
         data={null} 
       />
       <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl font-bold mb-4">
-            Kênh thông tin Phòng Trọ số 1 Việt Nam
-          </h1>
-          <p className="text-xl mb-8 opacity-90">
-            Có <span className="font-bold">75.839</span> tin đăng cho thuê
-          </p>
-          
-          {/* Statistics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
-            <div>
-              <div className="text-3xl font-bold">130.000+</div>
-              <div className="text-sm opacity-90">Chủ nhà & Môi giới</div>
+        {/* Main Content */}
+        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          {/* Statistics Bar */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <div className="text-center mb-6">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                Kênh thông tin Phòng Trọ số 1 Việt Nam
+              </h1>
+              <p className="text-gray-600">
+                Có <span className="font-bold text-orange-600">76.731</span> tin đăng cho thuê
+              </p>
             </div>
-            <div>
-              <div className="text-3xl font-bold">200.000+</div>
-              <div className="text-sm opacity-90">Tin đăng</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold">1.000+</div>
-              <div className="text-sm opacity-90">Tin đăng/ngày</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold">3.000.000+</div>
-              <div className="text-sm opacity-90">Lượt xem/tháng</div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">130.000+</div>
+                <div className="text-sm text-gray-500">Chủ nhà & Môi giới</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">200.000+</div>
+                <div className="text-sm text-gray-500">Tin đăng</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">1.000+</div>
+                <div className="text-sm text-gray-500">Tin đăng/ngày</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">3.000.000+</div>
+                <div className="text-sm text-gray-500">Lượt xem/tháng</div>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Search Filter */}
-      <SearchFilter />
-
-
-      {/* Property Listings */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-darker">
-            Tin đăng cho thuê đã được duyệt
-          </h2>
-          <div className="flex items-center space-x-4">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">
-              Đề xuất
-            </button>
-            <button className="px-4 py-2 text-gray-600 hover:text-blue-600 text-sm font-medium">
-              Mới đăng
-            </button>
-            <button className="px-4 py-2 text-gray-600 hover:text-blue-600 text-sm font-medium">
-              Có video
-            </button>
-            <Link 
-              href="/phong" 
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
-            >
-              Xem tất cả
-            </Link>
+          {/* Filter Tabs */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">
+                Tin đăng cho thuê
+              </h2>
+              <div className="flex items-center space-x-2">
+                <button className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium">
+                  Đề xuất
+                </button>
+                <button className="px-4 py-2 text-gray-600 hover:text-orange-600 text-sm font-medium">
+                  Mới đăng
+                </button>
+                <button className="px-4 py-2 text-gray-600 hover:text-orange-600 text-sm font-medium">
+                  Có video
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Property Grid */}
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Property Grid */}
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {(() => {
               console.log('Rendering posts. Total posts:', posts.length);
               return null;
@@ -247,21 +238,22 @@ export default function Home() {
                 </div>
               )
             })}
-          </div>
-        )}
-
-        {/* Pagination */}
-        <div className="mt-12">
-          {!loading && totalPages > 1 && (
-            <Pagination 
-              currentPage={currentPage} 
-              totalPages={totalPages} 
-              baseUrl="/" 
-              onPageChange={(page) => setCurrentPage(page)}
-            />
+            </div>
           )}
-        </div>
-      </section>
+
+          {/* Pagination */}
+          <div className="mt-12">
+            {!loading && totalPages > 1 && (
+              <Pagination 
+                currentPage={currentPage} 
+                totalPages={totalPages} 
+                baseUrl="/" 
+                onPageChange={(page) => setCurrentPage(page)}
+              />
+            )}
+          </div>
+        </section>
+      </div>
 
       {/* Why Choose Us Section */}
       <section className="bg-white py-16">
@@ -328,8 +320,11 @@ export default function Home() {
             </div>
           </div>
         </div>
-        </section>
-      </div>
+      </section>
     </>
   );
+}
+
+function toast(arg0: string, arg1: { icon: string; style: { background: string; color: string; }; }) {
+  throw new Error('Function not implemented.');
 }

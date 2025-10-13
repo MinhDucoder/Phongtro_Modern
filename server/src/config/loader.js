@@ -1,5 +1,5 @@
 import { pathToFileURL } from 'url';
-import { resolve as pathResolve } from 'path';
+import { resolve as pathResolve, extname as pathExtname } from 'path';
 
 export async function resolve(specifier, context, nextResolve) {
   // Handle ~ alias
@@ -7,9 +7,9 @@ export async function resolve(specifier, context, nextResolve) {
     const aliasPath = specifier.replace('~/', './src/');
     const resolvedPath = pathResolve(process.cwd(), aliasPath);
     
-    // Add .js extension if not present
+    // If no extension provided, default to .js; otherwise respect existing extension (.mjs, .cjs, .json, etc.)
     let finalPath = resolvedPath;
-    if (!finalPath.endsWith('.js') && !finalPath.endsWith('.json')) {
+    if (!pathExtname(finalPath)) {
       finalPath += '.js';
     }
     
