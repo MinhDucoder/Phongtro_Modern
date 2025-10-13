@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import ConversationList from './ConversationList';
 import ChatWindow from './ChatWindow';
 import SocketStatusIndicator from './SocketStatusIndicator';
 import { useChat } from '@/contexts/ChatContext';
+import { conversationApi } from '@/lib/chatApi';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   ChatBubbleLeftRightIcon,
@@ -35,26 +36,74 @@ export default function ChatLayout({ activeConversationId }: ChatLayoutProps) {
   } = useChat();
   
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const hasOpenedForUserRef = useRef<string | null>(null);
+  const targetConversationIdRef = useRef<string | null>(null);
+  const hasFetchedConversationByIdRef = useRef<string | null>(null);
+  
+  // Track if we're currently switching conversations to prevent race conditions
+  const [isSwitchingConversation, setIsSwitchingConversation] = useState(false);
 
-  useEffect(() => {
-    if (activeConversationId) {
-      const conversation = conversations.find(conv => conv._id === activeConversationId);
-      if (conversation) {
-        setActiveConversation(conversation);
-      }
-    }
-  }, [activeConversationId, conversations, setActiveConversation]);
+  // Snapshot primitive values from URL params to use as stable deps
+  const spUserId = searchParams.get('userId');
+  const spConversationId = searchParams.get('conversationId');
+  const spPropertyId = searchParams.get('propertyId');
+  const spFromProperty = searchParams.get('from') === 'property';
 
   // Handle userId and conversationId parameters from URL
   useEffect(() => {
-    const userId = searchParams.get('userId');
-    const conversationId = searchParams.get('conversationId');
+    // Skip if we're currently switching conversations to prevent race conditions
+    if (isSwitchingConversation) {
+      // Allow effect to proceed only when URL matches the intended target
+      const currentSpId = spConversationId;
+      if (targetConversationIdRef.current && currentSpId !== targetConversationIdRef.current) {
+        return;
+      }
+    }
+    
+    const userId = spUserId;
+    const conversationId = spConversationId;
+    const propertyId = spPropertyId;
     
     // Handle direct conversation ID
     if (conversationId) {
       const conversation = conversations.find(conv => conv._id === conversationId);
-      if (conversation) {
+      if (conversation && activeConversation?._id !== conversationId) {
+        console.log('🔄 URL triggered conversation switch:', conversationId);
         setActiveConversation(conversation);
+        // Normalize URL to only conversationId, preserve propertyId if from property page
+        const normalizedUrl = spFromProperty && propertyId 
+          ? `/chat?conversationId=${conversationId}&propertyId=${propertyId}&from=property`
+          : `/chat?conversationId=${conversationId}`;
+        router.push(normalizedUrl, { scroll: false });
+
+        // Clear switching state if this was the intended target
+        if (targetConversationIdRef.current === conversationId) {
+          targetConversationIdRef.current = null;
+          setIsSwitchingConversation(false);
+        }
+      } else if (!conversation && conversationId && hasFetchedConversationByIdRef.current !== conversationId) {
+        // Fallback: fetch conversation by ID when not present in list (e.g., deep link)
+        hasFetchedConversationByIdRef.current = conversationId;
+        (async () => {
+          try {
+            const res = await conversationApi.getConversationById(conversationId);
+            if (res && (res.success || res.data)) {
+              const conv = res.data as any;
+              // Validate current user is participant before opening
+              const isParticipant = conv?.participants?.some((p: any) => p?._id === user?._id);
+              if (isParticipant) {
+                setActiveConversation(conv);
+                // Keep URL normalized with property context if provided
+                const normalizedUrl = spFromProperty && propertyId 
+                  ? `/chat?conversationId=${conversationId}&propertyId=${propertyId}&from=property`
+                  : `/chat?conversationId=${conversationId}`;
+                router.push(normalizedUrl, { scroll: false });
+              }
+            }
+          } catch (e) {
+            // swallow; UI will show empty state if not accessible
+          }
+        })();
       }
     }
     // Handle user ID (create or find conversation)
@@ -64,26 +113,81 @@ export default function ChatLayout({ activeConversationId }: ChatLayoutProps) {
         conv.participants.some(p => p._id === userId)
       );
       
-      if (existingConversation) {
+      if (existingConversation && activeConversation?._id !== existingConversation._id) {
+        console.log('🔄 URL triggered existing conversation switch:', existingConversation._id);
         setActiveConversation(existingConversation);
-      } else {
-        // Open new conversation with the user
-        openConversation(userId);
+        // Replace userId with conversationId to stop re-triggering
+        const normalizedUrl = spFromProperty && propertyId 
+          ? `/chat?conversationId=${existingConversation._id}&propertyId=${propertyId}&from=property`
+          : `/chat?conversationId=${existingConversation._id}`;
+        router.push(normalizedUrl, { scroll: false });
+      } else if (!existingConversation) {
+        // Guard against repeated opens while URL still has userId
+        if (hasOpenedForUserRef.current !== userId) {
+          hasOpenedForUserRef.current = userId;
+          console.log('🔍 Opening conversation for user:', userId, 'from property:', spFromProperty);
+          openConversation(userId);
+        }
       }
     }
-  }, [searchParams, user, conversations, setActiveConversation, openConversation]);
+  // IMPORTANT: Do not depend on the unstable searchParams object; read specific values
+  }, [
+    user?._id,
+    conversations,
+    setActiveConversation,
+    openConversation,
+    activeConversation?._id,
+    spUserId,
+    spConversationId,
+    spPropertyId,
+    spFromProperty,
+    router,
+    isSwitchingConversation
+  ]);
+
+  // When a conversation becomes active while URL still contains userId, normalize URL
+  useEffect(() => {
+    if (!activeConversation) return;
+    const hasUserIdOnly = searchParams.get('userId') && !searchParams.get('conversationId');
+    if (hasUserIdOnly) {
+      const propertyId = searchParams.get('propertyId');
+      const fromProperty = searchParams.get('from') === 'property';
+      const normalizedUrl = fromProperty && propertyId 
+        ? `/chat?conversationId=${activeConversation._id}&propertyId=${propertyId}&from=property`
+        : `/chat?conversationId=${activeConversation._id}`;
+      router.push(normalizedUrl, { scroll: false });
+    }
+  }, [activeConversation?._id, router, searchParams]);
 
   const handleConversationSelect = (conversationId: string) => {
-    const conversation = conversations.find(conv => conv._id === conversationId);
-    if (conversation) {
-      setActiveConversation(conversation);
-      setIsMobileSidebarOpen(false);
-      router.push(`/chat/${conversationId}`);
+    // Prevent rapid switching
+    if (isSwitchingConversation) {
+      return;
     }
+    
+    const conversation = conversations.find(conv => String(conv._id) === String(conversationId));
+    if (!conversation) {
+      return;
+    }
+    
+    // Prevent switching to the same conversation
+    if (activeConversation?._id === conversationId) {
+      setIsMobileSidebarOpen(false);
+      return;
+    }
+    
+    setIsSwitchingConversation(true);
+    targetConversationIdRef.current = conversationId;
+
+    // Push URL; the URL-driven effect will set active conversation once it matches target
+    router.push(`/chat?conversationId=${String(conversationId)}`, { scroll: false });
+
+    setIsMobileSidebarOpen(false);
   };
 
   const totalUnreadCount = conversations.reduce((sum, conv) => {
-    return sum + (conv.unread[user?._id || ''] || 0);
+    const unreadMap = conv.unread || {} as Record<string, number>;
+    return sum + (unreadMap[user?._id || ''] || 0);
   }, 0);
 
   if (!user) {

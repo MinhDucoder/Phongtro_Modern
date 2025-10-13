@@ -20,7 +20,7 @@ const mainNavigation = [
 const secondaryNavigation = [
   { name: 'Tin đã lưu', href: '/profile?tab=saved' },
   { name: 'Thông báo', href: '/profile?tab=notifications' },
-  { name: 'Tin nhắn', href: '/profile?tab=chat' },
+  { name: 'Tin nhắn', href: '/chat' },
   { name: 'Cài đặt', href: '/profile?tab=settings' },
 ];
 

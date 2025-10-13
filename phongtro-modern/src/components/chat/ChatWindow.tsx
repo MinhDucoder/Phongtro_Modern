@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import {
   PaperAirplaneIcon,
@@ -13,6 +13,7 @@ import {
 import { CheckIcon } from '@heroicons/react/24/solid';
 import { toastManager } from '@/components/ui/ToastManager';
 import { useChat } from '@/contexts/ChatContext';
+import { useSocket } from '@/contexts/SocketContext';
 import { Conversation, Message } from '@/lib/chatApi';
 import { chatHelpers } from '@/lib/chatApi';
 import OnlineStatusIndicator from './OnlineStatusIndicator';
@@ -27,10 +28,13 @@ interface ChatWindowProps {
   };
 }
 
-export default function ChatWindow({ conversation, currentUser }: ChatWindowProps) {
-  const { messages, sendMessage, markMessageSeen, isLoading } = useChat();
+const ChatWindow = memo(function ChatWindow({ conversation, currentUser }: ChatWindowProps) {
+  const { messages, sendMessage, markMessageSeen, isLoading, onlineUsers, typingUsers, retryMessage } = useChat();
+  const { socket } = useSocket();
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   // Emoji picker removed for simplified UI
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -38,20 +42,41 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   const partner = chatHelpers.getConversationPartner(conversation, currentUser._id);
-
-  // Auto scroll to bottom
+  const isPartnerOnline = partner ? onlineUsers.has(partner._id) : false;
+  
+  // Get propertyId from URL for context
+  const [propertyIdFromUrl, setPropertyIdFromUrl] = useState<string | null>(null);
+  const [isFromProperty, setIsFromProperty] = useState(false);
+  
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      setPropertyIdFromUrl(urlParams.get('propertyId'));
+      setIsFromProperty(urlParams.get('from') === 'property');
+    }
+  }, []);
 
-  // Track scroll to toggle FAB visibility
+  // Track if user is at bottom
+  const [isAtBottom, setIsAtBottom] = useState(true);
+
+  // Auto scroll to bottom only if user is already at bottom
+  useEffect(() => {
+    if (isAtBottom) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isAtBottom]);
+
+  // Track scroll to toggle FAB visibility and detect if at bottom
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
 
     const handleScroll = () => {
+      const scrollThreshold = 100; // Increased threshold for better UX
       const isNearBottom =
-        container.scrollHeight - container.scrollTop - container.clientHeight < 64;
+        container.scrollHeight - container.scrollTop - container.clientHeight < scrollThreshold;
+      
+      setIsAtBottom(isNearBottom);
       setShowScrollToBottom(!isNearBottom);
     };
 
@@ -62,6 +87,7 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
   }, []);
 
   const scrollToBottom = () => {
+    setIsAtBottom(true);
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -75,24 +101,40 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
     }
   }, [messages, currentUser._id, markMessageSeen]);
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || isSending) return;
 
     if (!partner) {
       toastManager.showError('Không tìm thấy người nhận tin nhắn');
       return;
     }
 
-    console.log('📤 ChatWindow - Sending message:', {
-      text: newMessage,
-      conversationId: conversation._id,
-      partnerId: partner._id,
-      partner: partner,
-      currentMessages: messages.length
-    });
+    setIsSending(true);
+    
+    try {
+      console.log('📤 ChatWindow - Sending message:', {
+        text: newMessage,
+        conversationId: conversation._id,
+        partnerId: partner._id,
+        partner: partner,
+        currentMessages: messages.length
+      });
 
-    sendMessage(newMessage, conversation._id, partner._id);
-    setNewMessage('');
+      await sendMessage(newMessage, conversation._id, partner._id);
+      setNewMessage('');
+      
+      // Clear typing indicator when message is sent
+      if (socket && partner) {
+        socket.emit('typingStop', {
+          conversationId: conversation._id,
+          receiver: partner._id
+        });
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -100,6 +142,48 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  // Add keyboard navigation for accessibility
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Escape to clear message
+    if (e.key === 'Escape') {
+      setNewMessage('');
+    }
+    // Ctrl/Cmd + Enter to send (alternative to Enter)
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  // Handle typing indicators
+  const handleTyping = () => {
+    if (!socket || !partner) return;
+
+    // Emit typing start
+    if (!isTyping) {
+      setIsTyping(true);
+      socket.emit('typingStart', {
+        conversationId: conversation._id,
+        receiver: partner._id,
+        userName: currentUser.full_name
+      });
+    }
+
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Set timeout to stop typing
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+      socket.emit('typingStop', {
+        conversationId: conversation._id,
+        receiver: partner._id
+      });
+    }, 2000);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,15 +194,28 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
     }
   };
 
-  // Auto-resize textarea
+  // Auto-resize textarea - memoized to avoid unnecessary re-renders
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => {
+  const resizeTextarea = useCallback(() => {
     if (!textareaRef.current) return;
     const ta = textareaRef.current;
     const maxHeight = 120;
     ta.style.height = 'auto';
     ta.style.height = Math.min(ta.scrollHeight, maxHeight) + 'px';
-  }, [newMessage]);
+  }, []);
+
+  useEffect(() => {
+    resizeTextarea();
+  }, [newMessage, resizeTextarea]);
+
+  // Cleanup typing timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const formatTime = (dateString: string) => {
     if (!dateString) return '--:--';
@@ -151,7 +248,21 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
     }
   };
 
-  const MessageStatusIcon = ({ status }: { status: string }) => {
+  const MessageStatusIcon = ({ status, messageId }: { status: string; messageId: string }) => {
+    if (status === 'failed') {
+      return (
+        <button
+          onClick={() => retryMessage(messageId)}
+          className="inline-flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors"
+          title="Gửi lại"
+        >
+          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span className="text-xs">Gửi lại</span>
+        </button>
+      );
+    }
     if (status === 'seen') {
       return (
         <span className="inline-flex items-center gap-0.5 text-blue-500">
@@ -178,17 +289,21 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
     return null;
   };
 
-  // Group messages by date and ensure chronological order
-  const groupedMessages = messages
-    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) // Sort messages chronologically
-    .reduce((groups, message) => {
-      const date = new Date(message.createdAt).toDateString();
-      if (!groups[date]) {
-        groups[date] = [];
-      }
-      groups[date].push(message);
-      return groups;
-    }, {} as Record<string, Message[]>);
+  // Group messages by date and ensure chronological order (immutable + memoized)
+  const groupedMessages = useMemo(() => {
+    if (messages.length === 0) return {};
+    
+    return [...messages]
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      .reduce((groups, message) => {
+        const date = new Date(message.createdAt).toDateString();
+        if (!groups[date]) {
+          groups[date] = [];
+        }
+        groups[date].push(message);
+        return groups;
+      }, {} as Record<string, Message[]>);
+  }, [messages.length, messages.map(m => `${m._id}-${m.createdAt}`).join(',')]);
 
   if (!partner) {
     return (
@@ -217,7 +332,7 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
                 <div>
                   <div className="flex items-center space-x-2">
                     <h3 className="font-medium text-gray-900">{partner.full_name || 'Unknown User'}</h3>
-                    <OnlineStatusIndicator isOnline={true} size="sm" />
+                    <OnlineStatusIndicator isOnline={isPartnerOnline} size="sm" />
                   </div>
                   <p className="text-sm text-gray-500">
                     <span className="text-gray-600">{partner.role}</span>
@@ -226,16 +341,28 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
         </div>
 
         <div className="flex items-center space-x-2">
-          <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+          <button 
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors min-h-[44px] min-w-[44px]"
+            aria-label="Gọi điện"
+          >
             <PhoneIcon className="h-5 w-5" />
           </button>
-          <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+          <button 
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors min-h-[44px] min-w-[44px]"
+            aria-label="Gọi video"
+          >
             <VideoCameraIcon className="h-5 w-5" />
           </button>
-          <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+          <button 
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors min-h-[44px] min-w-[44px]"
+            aria-label="Thông tin cuộc trò chuyện"
+          >
             <InformationCircleIcon className="h-5 w-5" />
           </button>
-          <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+          <button 
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors min-h-[44px] min-w-[44px]"
+            aria-label="Tùy chọn khác"
+          >
             <EllipsisVerticalIcon className="h-5 w-5" />
           </button>
         </div>
@@ -248,6 +375,10 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
         ref={messagesContainerRef}
         className="relative flex-1 overflow-y-auto p-4 bg-gray-50"
         style={{ maxHeight: 'calc(100vh - 200px)' }}
+        role="log"
+        aria-label="Tin nhắn cuộc trò chuyện"
+        aria-live="polite"
+        aria-atomic="false"
       >
         {/* Loading state */}
         {isLoading && (
@@ -297,17 +428,7 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
               const isFirstOfGroup = index === 0 || dayMessages[index - 1].sender !== message.sender;
               const isLastOfGroup = index === dayMessages.length - 1 || dayMessages[index + 1].sender !== message.sender;
               
-              // Debug logging
-              if (index === 0) {
-                console.log('Message sender debug:', {
-                  messageSender: message.sender,
-                  currentUserId: currentUser._id,
-                  senderType: typeof message.sender,
-                  userIdType: typeof currentUser._id,
-                  isCurrentUser: isCurrentUser,
-                  messageText: message.text
-                });
-              }
+              
               
               const showAvatar = isFirstOfGroup;
 
@@ -317,6 +438,8 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
                   className={`flex items-end space-x-2 ${isFirstOfGroup ? 'mt-2' : 'mt-0.5'} mb-0.5 ${
                     isCurrentUser ? 'justify-end' : 'justify-start'
                   }`}
+                  role="listitem"
+                  aria-label={`Tin nhắn từ ${isCurrentUser ? 'bạn' : partner?.full_name}: ${message.text}`}
                 >
                   {!isCurrentUser && (
                     <div className="w-8 h-8 flex-shrink-0">
@@ -355,7 +478,7 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
                              </p>
                               {isCurrentUser && (
                                 <span className="ml-2">
-                                  <MessageStatusIcon status={message.status} />
+                                  <MessageStatusIcon status={message.status} messageId={message._id} />
                                 </span>
                               )}
                            </div>
@@ -381,8 +504,8 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
         ))}
 
               {/* Typing indicator */}
-              {isTyping && (
-                <TypingIndicator userName={partner?.full_name} />
+              {typingUsers.size > 0 && (
+                <TypingIndicator userName={Array.from(typingUsers.values()).join(', ')} />
               )}
 
         <div ref={messagesEndRef} />
@@ -391,7 +514,7 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
         {showScrollToBottom && (
           <button
             onClick={scrollToBottom}
-            className="absolute bottom-4 right-4 p-3 rounded-full bg-blue-600 text-white shadow hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="absolute bottom-4 right-4 p-3 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-300 min-h-[48px] min-w-[48px] sm:min-h-[44px] sm:min-w-[44px]"
             aria-label="Cuộn xuống cuối"
           >
             <PaperAirplaneIcon className="h-5 w-5 rotate-90" />
@@ -400,8 +523,22 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
       </div>
 
       {/* Enhanced Message Input */}
-      <div className="p-4 bg-white border-t border-gray-200">
-        <div className="flex items-center space-x-2.5">
+      <div className="p-3 sm:p-4 bg-white border-t border-gray-200">
+        {/* Character counter */}
+        {newMessage.length > 100 && (
+          <div className="mb-2 text-right">
+            <span className={`text-xs ${newMessage.length > 500 ? 'text-red-500' : 'text-gray-500'}`}>
+              {newMessage.length}/1000
+            </span>
+          </div>
+        )}
+        
+        {/* Screen reader help text */}
+        <div id="message-help" className="sr-only">
+          Nhập tin nhắn của bạn. Sử dụng Enter để gửi, Shift+Enter để xuống dòng, Escape để xóa.
+        </div>
+        
+        <div className="flex items-center space-x-2 sm:space-x-2.5">
           {/* Hidden file input */}
           <input
             ref={fileInputRef}
@@ -415,7 +552,8 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
             {/* Attachment inside input */}
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
+              disabled={isSending}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px]"
               aria-label="Đính kèm"
             >
               <PaperClipIcon className="h-5 w-5" />
@@ -423,11 +561,23 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
             <textarea
               ref={textareaRef}
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={(e) => {
+                if (e.target.value.length <= 1000) {
+                  setNewMessage(e.target.value);
+                  handleTyping();
+                }
+              }}
               onKeyPress={handleKeyPress}
-              placeholder="Nhập tin nhắn... (Enter để gửi, Shift+Enter để xuống dòng)"
+              onKeyDown={handleKeyDown}
+              placeholder={isSending ? "Đang gửi..." : "Nhập tin nhắn... (Enter để gửi, Shift+Enter để xuống dòng)"}
               rows={1}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-2xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all duration-200 no-scrollbar"
+              maxLength={1000}
+              disabled={isSending}
+              aria-label="Nhập tin nhắn"
+              aria-describedby="message-help"
+              className={`w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-2xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 no-scrollbar ${
+                isSending ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'
+              }`}
               style={{ minHeight: '44px', maxHeight: '120px', overflowY: 'auto' }}
             />
           </div>
@@ -435,21 +585,39 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
           {/* Enhanced Send button */}
           <button
             onClick={handleSendMessage}
-            disabled={!newMessage.trim()}
-            className="h-[46px] w-[46px] flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow"
-            aria-label="Gửi"
+            disabled={!newMessage.trim() || isSending}
+            className={`h-[46px] w-[46px] flex items-center justify-center rounded-full transition-all duration-200 shadow ${
+              isSending 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
+            }`}
+            aria-label={isSending ? "Đang gửi..." : "Gửi"}
           >
-            <PaperAirplaneIcon className="h-5 w-5" />
+            {isSending ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <PaperAirplaneIcon className="h-5 w-5 text-white" />
+            )}
           </button>
         </div>
 
-        {/* Enhanced Quick replies */}
-        <div className="flex flex-wrap gap-2 mt-4">
-          {['Phòng còn trống không?', 'Giá có thương lượng được không?', 'Khi nào có thể xem phòng?'].map((reply) => (
+        {/* Enhanced Quick replies - Hidden on mobile to save space */}
+        <div className="hidden sm:flex flex-wrap gap-2 mt-4">
+          {(isFromProperty && propertyIdFromUrl) ? [
+            'Xin chào! Tôi quan tâm đến phòng trọ này',
+            'Phòng còn trống không?',
+            'Khi nào có thể xem phòng?',
+            'Giá có thương lượng được không?'
+          ] : [
+            'Xin chào!',
+            'Bạn có rảnh nói chuyện không?',
+            'Cho mình hỏi về phòng ạ'
+          ].map((reply) => (
             <button
               key={reply}
               onClick={() => setNewMessage(reply)}
-              className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition border border-gray-200"
+              disabled={isSending}
+              className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px]"
             >
               {reply}
             </button>
@@ -458,4 +626,6 @@ export default function ChatWindow({ conversation, currentUser }: ChatWindowProp
       </div>
     </div>
   );
-}
+});
+
+export default ChatWindow;

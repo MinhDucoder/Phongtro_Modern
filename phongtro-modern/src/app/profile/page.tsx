@@ -5,7 +5,6 @@ import { UserIcon, PencilIcon, CheckIcon, XMarkIcon, CameraIcon, KeyIcon, CogIco
 import ProfileShell from '@/components/profile/ProfileShell';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import ProfileChatLayout from '@/components/chat/ProfileChatLayout';
 import NotificationCenter from '@/components/notifications/NotificationCenter';
 import RoleBadge from '@/components/ui/RoleBadge';
 import SafeImage from '@/components/ui/SafeImage';
@@ -443,16 +442,7 @@ function ProfileContent() {
         )}
 
         {/* Content */}
-        <div className={`bg-white shadow-sm rounded-xl border border-gray-200 ${activeTab === 'chat' ? '' : 'p-6 lg:p-8'}`}>
-          {/* Chat Tab */}
-          {activeTab === 'chat' && (
-            <div className="p-6">
-              <ProfileChatLayout />
-            </div>
-          )}
-          
-          {activeTab !== 'chat' && (
-            <div>
+        <div className="bg-white shadow-sm rounded-xl border border-gray-200 p-6 lg:p-8">
             {/* Profile Tab */}
             {activeTab === 'profile' && (
               <div className="space-y-8">
@@ -1211,8 +1201,6 @@ function ProfileContent() {
                 </div>
               </div>
             )}
-            </div>
-          )}
         </div>
       </div>
     </div>

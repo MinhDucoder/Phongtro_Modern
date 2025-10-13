@@ -68,7 +68,7 @@ export default function ChatDropdown() {
 
   const handleConversationClick = (conversationId: string) => {
     setIsOpen(false);
-    router.push(`/profile?tab=chat&conversationId=${conversationId}`);
+    router.push(`/chat?conversationId=${conversationId}`);
   };
 
   return (
@@ -108,7 +108,7 @@ export default function ChatDropdown() {
               )}
             </h3>
             <Link
-              href="/profile?tab=chat"
+              href="/chat"
               onClick={() => setIsOpen(false)}
               className="text-xs text-blue-600 hover:text-blue-700 font-medium"
             >
@@ -126,7 +126,7 @@ export default function ChatDropdown() {
             ) : (
               recentConversations.map((conv) => {
                 const otherUser = conv.participants.find((p: any) => p._id !== user?._id);
-                const unreadCount = conv.unread?.[user?._id || ''] || 0;
+                const unreadCount = (conv.unread || ({} as Record<string, number>))[user?._id || ''] || 0;
                 const isUnread = unreadCount > 0;
 
                 return (
@@ -193,7 +193,7 @@ export default function ChatDropdown() {
           {recentConversations.length > 0 && (
             <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
               <Link
-                href="/profile?tab=chat"
+                href="/chat"
                 onClick={() => setIsOpen(false)}
                 className="block text-center text-sm text-blue-600 hover:text-blue-700 font-medium py-1"
               >

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import Image from 'next/image';
 import {
   MagnifyingGlassIcon,
@@ -24,7 +24,7 @@ interface ConversationListProps {
   };
 }
 
-export default function ConversationList({
+const ConversationList = memo(function ConversationList({
   conversations,
   selectedConversation,
   onConversationSelect,
@@ -154,7 +154,7 @@ export default function ConversationList({
               return (
             <div
               key={conversation._id}
-              onClick={() => onConversationSelect(conversation._id)}
+              onClick={() => onConversationSelect(String(conversation._id))}
               className={`p-3 hover:bg-white cursor-pointer transition-all duration-200 ${
                 isSelected ? 'bg-white border-r-4 border-blue-500 shadow-sm' : ''
               }`}
@@ -252,4 +252,6 @@ export default function ConversationList({
       </div>
     </div>
   );
-}
+});
+
+export default ConversationList;
