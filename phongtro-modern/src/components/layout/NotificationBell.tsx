@@ -140,9 +140,9 @@ export default function NotificationBell() {
                 }
                 
                 if (conversationId && conversationId !== 'chat') {
-                  window.location.href = `/profile?tab=chat&conversationId=${conversationId}`;
+                  window.location.href = `/chat?conversationId=${conversationId}`;
                 } else {
-                  window.location.href = '/profile?tab=chat';
+                  window.location.href = '/chat';
                 }
               } else if (notification.link) {
                 window.location.href = notification.link;
@@ -202,9 +202,9 @@ export default function NotificationBell() {
       }
       
       if (conversationId && conversationId !== 'chat') {
-        window.location.href = `/profile?tab=chat&conversationId=${conversationId}`;
+        window.location.href = `/chat?conversationId=${conversationId}`;
       } else {
-        window.location.href = '/profile?tab=chat';
+        window.location.href = '/chat';
       }
     } else if (notification.link) {
       window.location.href = notification.link;

@@ -82,12 +82,15 @@ export default function EnhancedLandlordCard({ landlord, propertyId, className =
     try {
       setIsStartingChat(true);
       
+      // Show loading message
       toastManager.showSuccess('💬 Đang mở chat...');
       
-      // Navigate to profile chat tab with specific user
-      router.push(`/profile?tab=chat&userId=${landlord._id}&propertyId=${propertyId}`);
+      // Navigate to chat with both userId and propertyId for context
+      const chatUrl = `/chat?userId=${landlord._id}&propertyId=${propertyId}&from=property`;
+      router.push(chatUrl);
       
     } catch (error) {
+      console.error('Error starting chat:', error);
       toastManager.showError('❌ Không thể bắt đầu chat. Vui lòng thử lại.');
     } finally {
       setIsStartingChat(false);

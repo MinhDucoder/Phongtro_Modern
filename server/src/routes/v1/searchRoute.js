@@ -3,6 +3,6 @@ import searchController from '~/controllers/searchController.js';
 
 const searchRoute = express.Router();
 
-searchRoute.get('/', searchController.searchPosts);
+searchRoute.get('/', searchController.suggest);
 
 export default searchRoute;

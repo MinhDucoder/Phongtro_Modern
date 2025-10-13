@@ -15,16 +15,20 @@ interface ChatContextType {
   isLoading: boolean;
   error: string | null;
   totalUnread: number;
+  onlineUsers: Set<string>; // Track online users
+  typingUsers: Map<string, string>; // Track typing users
+  pendingMessages: Map<string, Message>; // Track pending messages
   
   // Actions
   loadConversations: () => Promise<void>;
-  loadMessages: (conversationId: string) => Promise<void>;
+  loadMessages: (conversationId: string, forceRefresh?: boolean) => Promise<void>;
   sendMessage: (text: string, conversationId?: string, receiver?: string) => Promise<void>;
   markMessageSeen: (messageId: string) => Promise<void>;
   openConversation: (otherUserId: string) => Promise<void>;
   setActiveConversation: (conversation: Conversation | null) => void;
   addConversation: (conversation: Conversation) => void;
   clearError: () => void;
+  retryMessage: (messageId: string) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -42,6 +46,10 @@ export function ChatProvider({ children }: ChatProviderProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
+  const [typingUsers, setTypingUsers] = useState<Map<string, string>>(new Map()); // userId -> userName
+  const [pendingMessages, setPendingMessages] = useState<Map<string, Message>>(new Map()); // messageId -> message
+  const [messageCache, setMessageCache] = useState<Map<string, Message[]>>(new Map()); // conversationId -> messages
 
   // Clear error
   const clearError = useCallback(() => {
@@ -59,6 +67,25 @@ export function ChatProvider({ children }: ChatProviderProps) {
       return [conversation, ...prev];
     });
   }, []);
+
+  // Enhanced setActiveConversation with logging and room management
+  const setActiveConversationEnhanced = useCallback((conversation: Conversation | null) => {
+    // Leave previous conversation room if exists
+    if (activeConversation && socket && activeConversation._id !== conversation?._id) {
+      socket.emit('leaveConversation', { conversationId: activeConversation._id });
+    }
+    
+    // Clear messages and typing indicators immediately to prevent showing old data
+    setMessages([]);
+    setTypingUsers(new Map());
+    
+    setActiveConversation(conversation);
+    
+    // Join new conversation room if exists
+    if (conversation && socket) {
+      socket.emit('joinConversation', { conversationId: conversation._id });
+    }
+  }, [activeConversation, socket]);
 
   // Load conversations from API
   const loadConversations = useCallback(async () => {
@@ -85,25 +112,62 @@ export function ChatProvider({ children }: ChatProviderProps) {
     }
   }, [user]);
 
-  // Load messages for a conversation
-  const loadMessages = useCallback(async (conversationId: string) => {
+  // Track loading state per conversation to prevent race conditions
+  const [loadingConversations, setLoadingConversations] = useState<Set<string>>(new Set());
+  
+  // Load messages for a conversation with race condition protection and caching
+  const loadMessages = useCallback(async (conversationId: string, forceRefresh = false) => {
+    // Prevent duplicate loading for the same conversation
+    if (loadingConversations.has(conversationId)) {
+      console.log('⏳ Already loading messages for conversation:', conversationId);
+      return;
+    }
+    
+    // Check cache first (unless force refresh)
+    const cachedMessages = messageCache.get(conversationId);
+    if (cachedMessages && !forceRefresh) {
+      console.log('💾 Using cached messages for conversation:', conversationId);
+      setMessages(cachedMessages);
+      return;
+    }
+    
     try {
+      setLoadingConversations(prev => new Set(prev).add(conversationId));
       setIsLoading(true);
+      
+      console.log('📨 Loading messages for conversation:', conversationId, forceRefresh ? '(force refresh)' : '');
       const response = await messageApi.getMessages(conversationId, { limit: 50 });
       
       if (response.success) {
         // Backend returns { success: true, items, total } directly
         const messages = response.data?.items || response.items || [];
-        setMessages(messages);
+        
+        // Only update messages if this is still the active conversation
+        if (activeConversation?._id === conversationId) {
+          setMessages(messages);
+          console.log('✅ Loaded and set', messages.length, 'messages for active conversation:', conversationId);
+        } else {
+          console.log('⚠️ Conversation changed while loading, not setting messages for:', conversationId);
+        }
+        
+        // Cache the messages regardless
+        setMessageCache(prev => new Map(prev).set(conversationId, messages));
+        
       } else {
         setError(response.message || 'Failed to load messages');
       }
     } catch (error) {
+      console.error('❌ Error loading messages:', error);
       setError('Failed to load messages');
     } finally {
+      setLoadingConversations(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(conversationId);
+        return newSet;
+      });
       setIsLoading(false);
     }
-  }, []);
+  }, [loadingConversations, messageCache, activeConversation?._id]);
 
   // Send message via socket
   const sendMessage = useCallback(async (text: string, conversationId?: string, receiver?: string) => {
@@ -117,12 +181,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
       return;
     }
 
-    // ConversationId is optional - if not provided, backend will create/find conversation
-    // if (!conversationId || !conversationId.trim()) {
-    //   toastManager.showError('Conversation ID is required');
-    //   return;
-    // }
-
     try {
       const messageData = {
         conversationId: conversationId ? conversationId.trim() : undefined,
@@ -134,11 +192,45 @@ export function ChatProvider({ children }: ChatProviderProps) {
       console.log('Socket connected:', socket.connected);
       console.log('Socket ID:', socket.id);
 
+      // Create optimistic message with unique temp ID
+      const tempMessageId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const tempMessage: Message = {
+        _id: tempMessageId,
+        conversationId: conversationId || '',
+        sender: user._id,
+        receiver: receiver,
+        text: text,
+        status: 'sent',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Add optimistic message to UI immediately
+      if (activeConversation && (conversationId === activeConversation._id || !conversationId)) {
+        setMessages(prev => {
+          // Double check for duplicates
+          if (prev.some(m => m._id === tempMessageId || (m.text === text && m.sender === user._id && Math.abs(new Date(m.createdAt).getTime() - new Date().getTime()) < 1000))) {
+            return prev;
+          }
+          return [...prev, tempMessage];
+        });
+        
+        // Track as pending message
+        setPendingMessages(prev => new Map(prev).set(tempMessageId, tempMessage));
+      }
+
       // Use socket to send message
       socket.emit('sendMessage', messageData, (response: any) => {
         if (!response.success) {
           setError(response.error || 'Failed to send message');
           toastManager.showError(response.error || 'Failed to send message');
+          
+          // Mark message as failed instead of removing
+          setMessages(prev => prev.map(m => 
+            m._id === tempMessageId 
+              ? { ...m, status: 'failed' as any }
+              : m
+          ));
         } else {
           // Join conversation room if not already joined
           const finalConversationId = response.conversationId || conversationId;
@@ -146,28 +238,23 @@ export function ChatProvider({ children }: ChatProviderProps) {
             socket.emit('joinConversation', { conversationId: finalConversationId });
           }
           
-          // Add message to UI immediately for better UX
-          const tempMessage: Message = {
-            _id: response.messageId || `temp_${Date.now()}`,
-            conversationId: finalConversationId || '',
-            sender: user._id,
-            receiver: receiver,
-            text: text,
-            status: 'sent',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-          
-          // Add to messages if it's for active conversation
-          if (activeConversation && (conversationId === activeConversation._id || !conversationId)) {
-            setMessages(prev => {
-              // Check if message already exists
-              if (prev.some(m => m._id === tempMessage._id)) return prev;
-              return [...prev, tempMessage];
-            });
+          // Update optimistic message with real ID
+          if (response.messageId && response.messageId !== tempMessageId) {
+            setMessages(prev => prev.map(m => 
+              m._id === tempMessageId 
+                ? { ...m, _id: response.messageId, status: 'delivered' as any }
+                : m
+            ));
           }
           
-          // Update conversations list
+          // Remove from pending messages
+          setPendingMessages(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(tempMessageId);
+            return newMap;
+          });
+          
+          // Update conversations list only after server confirmation
           setConversations(prev => prev.map(conv => {
             if (conv._id === finalConversationId || (!finalConversationId && conv.participants.some(p => p._id === receiver))) {
               return {
@@ -189,7 +276,56 @@ export function ChatProvider({ children }: ChatProviderProps) {
       setError('Failed to send message');
       toastManager.showError('Failed to send message');
     }
-  }, [socket, user]);
+  }, [socket, user, activeConversation]);
+
+  // Retry failed message
+  const retryMessage = useCallback(async (messageId: string) => {
+    const pendingMessage = pendingMessages.get(messageId);
+    if (!pendingMessage || !socket || !user) return;
+
+    try {
+      const messageData = {
+        conversationId: pendingMessage.conversationId || undefined,
+        receiver: pendingMessage.receiver,
+        text: pendingMessage.text,
+      };
+
+      // Mark as sending
+      setMessages(prev => prev.map(m => 
+        m._id === messageId 
+          ? { ...m, status: 'sent' as any }
+          : m
+      ));
+
+      socket.emit('sendMessage', messageData, (response: any) => {
+        if (!response.success) {
+          // Mark as failed again
+          setMessages(prev => prev.map(m => 
+            m._id === messageId 
+              ? { ...m, status: 'failed' as any }
+              : m
+          ));
+          toastManager.showError(response.error || 'Failed to retry message');
+        } else {
+          // Update with real ID and mark as delivered
+          setMessages(prev => prev.map(m => 
+            m._id === messageId 
+              ? { ...m, _id: response.messageId, status: 'delivered' as any }
+              : m
+          ));
+          
+          // Remove from pending
+          setPendingMessages(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(messageId);
+            return newMap;
+          });
+        }
+      });
+    } catch (error) {
+      toastManager.showError('Failed to retry message');
+    }
+  }, [socket, user, pendingMessages]);
 
   // Mark message as seen
   const markMessageSeen = useCallback(async (messageId: string) => {
@@ -213,10 +349,17 @@ export function ChatProvider({ children }: ChatProviderProps) {
   const openConversation = useCallback(async (otherUserId: string) => {
     if (!socket || !user) return;
 
+    console.log('🔍 ChatContext - Opening conversation with user:', otherUserId);
+
     try {
       socket.emit('openConversation', { otherUserId }, (response: any) => {
         if (response.success) {
           const { conversation, messages } = response;
+          
+          console.log('✅ ChatContext - Conversation opened successfully:', {
+            conversationId: conversation._id,
+            messagesCount: messages?.length || 0
+          });
           
           // Update conversations list
           setConversations(prev => {
@@ -237,12 +380,15 @@ export function ChatProvider({ children }: ChatProviderProps) {
           // Join the conversation room
           socket.emit('joinConversation', { conversationId: conversation._id });
         } else {
+          console.error('❌ ChatContext - Failed to open conversation:', response.error);
           setError(response.error || 'Failed to open conversation');
+          toastManager.showError(response.error || 'Không thể mở cuộc trò chuyện');
         }
       });
     } catch (error) {
-      console.error('Error opening conversation:', error);
+      console.error('❌ ChatContext - Error opening conversation:', error);
       setError('Failed to open conversation');
+      toastManager.showError('Không thể mở cuộc trò chuyện');
     }
   }, [socket, user]);
 
@@ -252,18 +398,35 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
     // Listen for new messages
     const handleReceiveMessage = (message: Message) => {
-      // Add message to current messages if it's for active conversation
-      if (activeConversation && message.conversationId === activeConversation._id) {
+      // Add message to current messages if it's for active conversation (normalize IDs)
+      const isForActiveConversation = activeConversation && String(message.conversationId) === String(activeConversation._id);
+      if (isForActiveConversation) {
         setMessages(prev => {
-          // Check if message already exists
-          if (prev.some(m => m._id === message._id)) return prev;
-          return [...prev, message];
+          // Enhanced duplicate checking
+          const isDuplicate = prev.some(m => 
+            m._id === message._id || 
+            (m.text === message.text && 
+             m.sender === message.sender && 
+             Math.abs(new Date(m.createdAt).getTime() - new Date(message.createdAt).getTime()) < 1000)
+          );
+          if (isDuplicate) return prev;
+          
+          // Update status to delivered for received messages
+          const updatedMessage = { ...message, status: 'delivered' as any };
+          const newMessages = [...prev, updatedMessage];
+          
+          // Update cache
+          if (activeConversation?._id) {
+            setMessageCache(prevCache => new Map(prevCache).set(activeConversation._id, newMessages));
+          }
+          
+          return newMessages;
         });
       }
 
       // Update conversations list with new last message
       setConversations(prev => prev.map(conv => {
-        if (conv._id === message.conversationId) {
+        if (String(conv._id) === String(message.conversationId)) {
           return {
             ...conv,
             lastMessage: {
@@ -274,7 +437,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
             updatedAt: message.createdAt,
             unread: {
               ...conv.unread,
-              [message.receiver]: (conv.unread[message.receiver] || 0) + 1,
+              [message.receiver]: ((conv.unread || {})[message.receiver] || 0) + 1,
             },
           };
         }
@@ -316,7 +479,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
             onClick: () => {
               // Navigate to profile chat tab with the conversation
               if (typeof window !== 'undefined') {
-                window.location.href = `/profile?tab=chat&conversationId=${message.conversationId}`;
+                window.location.href = `/chat?conversationId=${message.conversationId}`;
               }
             }
           }
@@ -329,6 +492,20 @@ export function ChatProvider({ children }: ChatProviderProps) {
       setMessages(prev => prev.map(msg => 
         msg._id === data.messageId ? { ...msg, status: data.status as any } : msg
       ));
+      
+      // Also update conversation's last message status if it matches
+      setConversations(prev => prev.map(conv => {
+        if (conv.lastMessage && conv.lastMessage.sender === data.userId) {
+          return {
+            ...conv,
+            lastMessage: {
+              ...conv.lastMessage,
+              status: data.status
+            }
+          };
+        }
+        return conv;
+      }));
     };
 
     // Listen for conversation updates
@@ -338,18 +515,55 @@ export function ChatProvider({ children }: ChatProviderProps) {
       ));
     };
 
+    // Listen for user online status
+    const handleUserOnline = (data: { userId: string; isOnline: boolean }) => {
+      setOnlineUsers(prev => {
+        const newSet = new Set(prev);
+        if (data.isOnline) {
+          newSet.add(data.userId);
+        } else {
+          newSet.delete(data.userId);
+        }
+        return newSet;
+      });
+    };
+
+    // Listen for typing status
+    const handleTypingStart = (data: { userId: string; userName: string; conversationId: string }) => {
+      // Only show typing for current conversation
+      if (activeConversation && data.conversationId === activeConversation._id && data.userId !== user?._id) {
+        setTypingUsers(prev => new Map(prev).set(data.userId, data.userName));
+      }
+    };
+
+    const handleTypingStop = (data: { userId: string; conversationId: string }) => {
+      if (activeConversation && data.conversationId === activeConversation._id) {
+        setTypingUsers(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(data.userId);
+          return newMap;
+        });
+      }
+    };
+
     // Register event listeners
     socket.on('receiveMessage', handleReceiveMessage);
     socket.on('messageSeen', handleMessageSeen);
     socket.on('conversationUpdated', handleConversationUpdated);
+    socket.on('userOnline', handleUserOnline);
+    socket.on('typingStart', handleTypingStart);
+    socket.on('typingStop', handleTypingStop);
 
     // Cleanup
     return () => {
       socket.off('receiveMessage', handleReceiveMessage);
       socket.off('messageSeen', handleMessageSeen);
       socket.off('conversationUpdated', handleConversationUpdated);
+      socket.off('userOnline', handleUserOnline);
+      socket.off('typingStart', handleTypingStart);
+      socket.off('typingStop', handleTypingStop);
     };
-  }, [socket, isConnected, activeConversation, user]);
+  }, [socket, isConnected, activeConversation?._id, user?._id]);
 
   // Load conversations when user changes
   useEffect(() => {
@@ -361,11 +575,13 @@ export function ChatProvider({ children }: ChatProviderProps) {
   // Load messages when active conversation changes
   useEffect(() => {
     if (activeConversation) {
+      console.log('🔄 Active conversation changed, loading messages for:', activeConversation._id);
       loadMessages(activeConversation._id);
     } else {
+      console.log('🔄 No active conversation, clearing messages');
       setMessages([]);
     }
-  }, [activeConversation, loadMessages]);
+  }, [activeConversation?._id, loadMessages]); // Use _id for more precise dependency
 
   // Calculate total unread messages
   const totalUnread = conversations.reduce((sum, conv) => {
@@ -380,14 +596,18 @@ export function ChatProvider({ children }: ChatProviderProps) {
     isLoading,
     error,
     totalUnread,
+    onlineUsers,
+    typingUsers,
+    pendingMessages,
     loadConversations,
     loadMessages,
     sendMessage,
     markMessageSeen,
     openConversation,
-    setActiveConversation,
+    setActiveConversation: setActiveConversationEnhanced,
     addConversation,
     clearError,
+    retryMessage,
   };
 
   return (

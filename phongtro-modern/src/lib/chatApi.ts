@@ -235,18 +235,6 @@ export const chatHelpers = {
     const userIdStr = String(currentUserId);
     const isFromCurrentUser = senderId === userIdStr;
     
-    // Debug logging
-    if (typeof window !== 'undefined') {
-      console.log('isMessageFromCurrentUser debug:', {
-        messageSender: message.sender,
-        currentUserId: currentUserId,
-        senderId: senderId, // Log the actual ID being compared
-        userIdStr: userIdStr,
-        isFromCurrentUser: isFromCurrentUser,
-        messageText: message.text
-      });
-    }
-    
     return isFromCurrentUser;
   },
 

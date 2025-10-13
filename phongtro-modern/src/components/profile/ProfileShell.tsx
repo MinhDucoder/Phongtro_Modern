@@ -10,7 +10,6 @@ import {
   DocumentTextIcon, 
   CogIcon, 
   KeyIcon,
-  ChatBubbleLeftRightIcon,
   Bars3Icon,
   BellIcon,
 } from '@heroicons/react/24/outline';
@@ -21,7 +20,6 @@ interface ProfileShellProps {
 }
 
 const items = [
-  { id: 'chat', name: 'Tin nhắn', icon: ChatBubbleLeftRightIcon },
   { id: 'profile', name: 'Thông tin cá nhân', icon: UserIcon },
   { id: 'saved', name: 'Tin đã lưu', icon: HeartIcon },
   { id: 'requests', name: 'Yêu cầu thuê', icon: DocumentTextIcon },

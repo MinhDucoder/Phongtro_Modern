@@ -6,6 +6,31 @@ import { sendNotification } from "../utils/notificationHelper.js";
 import User from "../models/userSchema.js";
 
 export default function chatHandler(io, socket) {
+  // Track online users
+  const onlineUsers = new Map(); // userId -> socketId
+
+  // 👉 User goes online
+  socket.on("userOnline", (callback) => {
+    const userId = socket.user.id.toString();
+    onlineUsers.set(userId, socket.id);
+    
+    // Broadcast to all clients that this user is online
+    socket.broadcast.emit("userOnline", { userId, isOnline: true });
+    
+    if (callback) callback({ success: true });
+  });
+
+  // 👉 User goes offline
+  socket.on("userOffline", (callback) => {
+    const userId = socket.user.id.toString();
+    onlineUsers.delete(userId);
+    
+    // Broadcast to all clients that this user is offline
+    socket.broadcast.emit("userOnline", { userId, isOnline: false });
+    
+    if (callback) callback({ success: true });
+  });
+
   // 👉 Join conversation room
   socket.on("joinConversation", ({ conversationId }, callback) => {
     try {
@@ -13,6 +38,20 @@ export default function chatHandler(io, socket) {
 
       socket.join(conversationId.toString());
       console.log(`✅ ${socket.id} joined conversation ${conversationId}`);
+
+      if (callback) callback({ success: true, conversationId });
+    } catch (err) {
+      if (callback) callback({ success: false, error: err.message });
+    }
+  });
+
+  // 👉 Leave conversation room
+  socket.on("leaveConversation", ({ conversationId }, callback) => {
+    try {
+      if (!conversationId) throw new Error("conversationId is required");
+
+      socket.leave(conversationId.toString());
+      console.log(`🚪 ${socket.id} left conversation ${conversationId}`);
 
       if (callback) callback({ success: true, conversationId });
     } catch (err) {
@@ -90,6 +129,23 @@ export default function chatHandler(io, socket) {
         // 3. Emit cho room
         io.to(convId.toString()).emit("receiveMessage", message);
 
+        // 3.5. Invalidate message cache for this conversation
+        try {
+          const redis = await import('redis');
+          const client = redis.createClient();
+          await client.connect();
+          
+          const keys = await client.keys(`messages:${convId}:*`);
+          if (keys.length > 0) {
+            await client.del(keys);
+            console.log('🗑️ Socket: Invalidated message cache for conversation:', convId);
+          }
+          
+          await client.disconnect();
+        } catch (cacheError) {
+          console.error('⚠️ Failed to invalidate cache:', cacheError.message);
+        }
+
         // 4. Tạo thông báo cho người nhận (nếu không phải là tin nhắn tự gửi)
         if (sender !== receiver) {
           try {
@@ -102,7 +158,7 @@ export default function chatHandler(io, socket) {
                 type: "message",
                 title: "Tin nhắn mới",
                 content: `${senderUser.full_name}: ${text || '[Hình ảnh]'}`,
-                link: `/chat?conversation=${convId}`,
+                link: `/chat?conversationId=${convId}`,
                 priority: "high",
                 relatedUser: {
                   id: sender,
@@ -138,6 +194,41 @@ export default function chatHandler(io, socket) {
     }
   );
 
+  // 👉 Typing start
+  socket.on("typingStart", ({ conversationId, receiver, userName }, callback) => {
+    try {
+      const userId = socket.user.id.toString();
+      
+      // Broadcast typing to conversation participants
+      socket.to(conversationId.toString()).emit("typingStart", {
+        userId,
+        userName,
+        conversationId
+      });
+      
+      if (callback) callback({ success: true });
+    } catch (err) {
+      if (callback) callback({ success: false, error: err.message });
+    }
+  });
+
+  // 👉 Typing stop
+  socket.on("typingStop", ({ conversationId, receiver }, callback) => {
+    try {
+      const userId = socket.user.id.toString();
+      
+      // Broadcast typing stop to conversation participants
+      socket.to(conversationId.toString()).emit("typingStop", {
+        userId,
+        conversationId
+      });
+      
+      if (callback) callback({ success: true });
+    } catch (err) {
+      if (callback) callback({ success: false, error: err.message });
+    }
+  });
+
   // 👉 Message seen
   socket.on("messageSeen", async ({ messageId, conversationId }, callback) => {
     try {
@@ -169,5 +260,16 @@ export default function chatHandler(io, socket) {
       console.error("❌ messageSeen error:", err.message);
       if (callback) callback({ success: false, error: err.message });
     }
+  });
+
+  // 👉 Handle disconnect - mark user offline
+  socket.on("disconnect", () => {
+    const userId = socket.user.id.toString();
+    onlineUsers.delete(userId);
+    
+    // Broadcast to all clients that this user is offline
+    socket.broadcast.emit("userOnline", { userId, isOnline: false });
+    
+    console.log(`👋 User ${userId} disconnected`);
   });
 }

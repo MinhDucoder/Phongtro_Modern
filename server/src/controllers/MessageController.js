@@ -1,9 +1,10 @@
 // controllers/messageController.js
 import Message from "../models/message.js";
 import Conversation from "../models/conversation.js";
+import { getOrSetCache } from "../services/redisService.js";
 
 class MessageController {
-  // Lấy danh sách message trong conversation
+  // Lấy danh sách message trong conversation với caching
   async list(req, res, next) {
     try {
       const { conversationId } = req.params;
@@ -11,18 +12,37 @@ class MessageController {
       const limit = parseInt(req.query.limit) || 20;
       const skip = (page - 1) * limit;
 
-      const [items, total] = await Promise.all([
-        Message.find({ conversationId })
-          .populate("sender", "full_name avatar role")
-          .populate("receiver", "full_name avatar role")
-          .sort({ createdAt: 1 })
-          .skip(skip)
-          .limit(limit),
-        Message.countDocuments({ conversationId })
-      ]);
+      // Cache key includes conversation ID, page, and limit
+      const cacheKey = `messages:${conversationId}:page:${page}:limit:${limit}`;
+      
+      const result = await getOrSetCache(
+        cacheKey,
+        async () => {
+          console.log('📨 Loading messages from DB for conversation:', conversationId);
+          const [items, total] = await Promise.all([
+            Message.find({ conversationId })
+              .populate("sender", "full_name avatar role")
+              .populate("receiver", "full_name avatar role")
+              .sort({ createdAt: 1 })
+              .skip(skip)
+              .limit(limit)
+              .lean(),
+            Message.countDocuments({ conversationId })
+          ]);
+          return { items, total };
+        },
+        300 // Cache for 5 minutes
+      );
 
-      res.json({ success: true, items, total });
+      // Add cache headers
+      res.set({
+        'Cache-Control': 'private, max-age=300',
+        'ETag': `"${conversationId}-${page}-${limit}"`
+      });
+
+      res.json({ success: true, ...result });
     } catch (error) {
+      console.error('❌ MessageController.list error:', error);
       next(error);
     }
   }
@@ -49,8 +69,23 @@ class MessageController {
         },
       });
 
+      // Invalidate message cache for this conversation
+      const redis = await import('redis');
+      const client = redis.createClient();
+      await client.connect();
+      
+      // Delete all cached messages for this conversation
+      const keys = await client.keys(`messages:${conversationId}:*`);
+      if (keys.length > 0) {
+        await client.del(keys);
+        console.log('🗑️ Invalidated message cache for conversation:', conversationId);
+      }
+      
+      await client.disconnect();
+
       res.status(201).json({ success: true, message });
     } catch (error) {
+      console.error('❌ MessageController.create error:', error);
       next(error);
     }
   }

@@ -1,72 +1,75 @@
-﻿import removeAccents from "remove-accents";
+import removeAccents from "remove-accents";
 import dotenv from "dotenv";
-import { meiliClient } from "~/config/meilisearch.config.mjs";
-
+import { meiliClient } from "../config/meilisearch.config.mjs";
+import fs from "fs";
+import path from "path";
 dotenv.config();
 
-class MeiliSearchService {
-    constructor() {
-        this.client = meiliClient;
-        this.indexName = process.env.MEILISEARCH_INDEX || "posts";
-        this.index = null;
-        this.isInitialized = false;
-    }
+const indexName = process.env.MEILISEARCH_INDEX || "posts";
+const index = meiliClient.index(indexName);
 
-    async init() {
-        try {
-            if (this.isInitialized) return;
-            this.index = this.client.index(this.indexName);
-            this.isInitialized = true;
-            console.log("MeiliSearch service initialized");
-        } catch (error) {
-            console.error("Failed to initialize MeiliSearch:", error);
-            throw error;
-        }
-    }
+/**
+ * Khởi tạo cấu hình chỉ chạy 1 lần khi start app
+ */
+export async function initSearchConfig() {
+  try {
+    const synonymsPath = path.resolve("src/config/meilisearch.synonyms.json");
+    const synonyms = JSON.parse(fs.readFileSync(synonymsPath, "utf-8"));
 
-    async searchPosts(searchParams) {
-        await this.init();
-        
-        const { query, filters, pagination } = searchParams;
-        const { page = 1, limit = 20 } = pagination;
+    await index.updateSettings({
+      typoTolerance: { enabled: true },
+      searchableAttributes: ["title", "description", "location"],
+      filterableAttributes: ["price", "location", "type", "area"],
+      sortableAttributes: ["price", "area"],
+      stopWords: ["và", "có", "ở", "tại", "phòng"],
+      synonyms,
+    });
 
-        try {
-            let filterArray = [];
-            
-            if (filters.type) {
-                filterArray.push(`type = "${filters.type}"`);
-            }
-            if (filters.province) {
-                filterArray.push(`province = "${filters.province}"`);
-            }
-
-            const searchOptions = {
-                filter: filterArray.length > 0 ? filterArray : undefined,
-                limit,
-                offset: (page - 1) * limit
-            };
-
-            const results = await this.index.search(query, searchOptions);
-            return results;
-            
-        } catch (error) {
-            console.error("Search error:", error);
-            throw error;
-        }
-    }
-
-    async addDocuments(documents) {
-        await this.init();
-        
-        try {
-            const result = await this.index.addDocuments(documents);
-            return result;
-        } catch (error) {
-            console.error("Error adding documents:", error);
-            throw error;
-        }
-    }
+    console.log("✅ Meilisearch index configured successfully with synonyms!");
+  } catch (err) {
+    console.error("❌ Meilisearch config failed:", err.message);
+  }
 }
 
-export const meiliSearchService = new MeiliSearchService();
-export default meiliSearchService;
+/**
+ * 🔍 Hàm tìm kiếm chính
+ * @param {string} keyword - Từ khóa người dùng nhập
+ * @param {object} options - Bộ lọc & sắp xếp tùy chọn
+ */
+export async function searchPosts(keyword, options = {}) {
+  if (!keyword || keyword.trim().length === 0) {
+    return { hits: [], query: keyword };
+  }
+
+  const normalized = removeAccents(keyword.trim().toLowerCase());
+
+  const params = {
+    limit: options.limit || 10,
+    attributesToRetrieve: ["id", "title", "price", "location"],
+    attributesToHighlight: ["title"],
+    sort: options.sort || ["price:asc"],
+    filter: options.filter || [],
+  };
+
+  let result = await index.search(normalized, params);
+
+  // 🔄 Nếu không có kết quả → thử tìm lại bằng keyword gốc
+  if (result.hits.length === 0 && normalized !== keyword) {
+    result = await index.search(keyword, params);
+    if (result.hits.length > 0) {
+      return {
+        hits: result.hits,
+        suggestion: keyword,
+      };
+    }
+  }
+
+  // 📤 Trả kết quả highlight + gợi ý nếu có
+  return {
+    hits: result.hits.map((item) => ({
+      ...item,
+      highlight: item._formatted?.title || item.title,
+    })),
+    suggestion: result.estimatedTotalHits === 0 ? null : null,
+  };
+}

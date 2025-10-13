@@ -61,7 +61,8 @@ export function SocketProvider({ children }: SocketProviderProps) {
     console.log('🔌 Creating socket connection for user:', user.full_name);
 
     // Create socket connection with error handling
-    const newSocket = io('http://localhost:5000', {
+    const baseUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000';
+    const newSocket = io(baseUrl, {
       auth: {
         token: token
       },
@@ -74,25 +75,40 @@ export function SocketProvider({ children }: SocketProviderProps) {
 
     // Connection event handlers
     newSocket.on('connect', () => {
-      console.log('✅ Socket connected:', newSocket.id);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('✅ Socket connected:', newSocket.id);
+      }
       setIsConnected(true);
       setConnectionError(null);
+      
+      // Emit user online status
+      newSocket.emit('userOnline', (response: any) => {
+        if (!response.success) {
+          console.warn('Failed to set user online status');
+        }
+      });
     });
 
     newSocket.on('disconnect', (reason) => {
-      console.log('❌ Socket disconnected:', reason);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('❌ Socket disconnected:', reason);
+      }
       setIsConnected(false);
     });
 
     newSocket.on('connect_error', (error) => {
-      console.warn('⚠️ Socket connection error (will retry):', error.message);
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('⚠️ Socket connection error (will retry):', error.message);
+      }
       setConnectionError(error.message);
       setIsConnected(false);
       // Don't spam console with full error details
     });
 
     newSocket.on('reconnect_failed', () => {
-      console.error('❌ Socket reconnection failed after all attempts');
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('❌ Socket reconnection failed after all attempts');
+      }
       setConnectionError('Cannot connect to server');
     });
 

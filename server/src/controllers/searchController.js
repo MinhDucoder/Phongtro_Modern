@@ -1,133 +1,27 @@
-﻿import { meiliSearchService } from '../services/meiliSearchService.js';
-import Post from '../models/postSchema.js';
+import { getOrSetCache } from "~/services/redisService";
+import { searchPosts } from "~/services/meiliSearchService";
+import { success, error } from "~/utils/responeHandler";
 
-export const searchController = {
-    async searchPosts(req, res) {
-        try {
-            const { 
-                q, 
-                type, 
-                province, 
-                district, 
-                ward,
-                minPrice, 
-                maxPrice, 
-                minArea, 
-                maxArea,
-                page = 1, 
-                limit = 20 
-            } = req.query;
+class SearchController {
+  async suggest(req, res, next) {
+    try {
+      const keyword = req.query.q?.trim();
+      if (!keyword || keyword.length === 0) {
+        return error(res, 400, "Thiếu từ khóa tìm kiếm");
+      }
 
-            if (!q || q.trim() === '') {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Từ khóa tìm kiếm không được để trống'
-                });
-            }
-
-            const searchResults = await meiliSearchService.searchPosts({
-                query: q.trim(),
-                filters: {
-                    type,
-                    province,
-                    district,
-                    ward,
-                    minPrice: minPrice ? parseFloat(minPrice) : null,
-                    maxPrice: maxPrice ? parseFloat(maxPrice) : null,
-                    minArea: minArea ? parseFloat(minArea) : null,
-                    maxArea: maxArea ? parseFloat(maxArea) : null
-                },
-                pagination: {
-                    page: parseInt(page),
-                    limit: parseInt(limit)
-                }
-            });
-
-            res.json({
-                success: true,
-                data: {
-                    posts: searchResults.hits,
-                    totalHits: searchResults.estimatedTotalHits,
-                    page: parseInt(page),
-                    limit: parseInt(limit),
-                    totalPages: Math.ceil(searchResults.estimatedTotalHits / parseInt(limit)),
-                    processingTime: searchResults.processingTimeMs,
-                    query: q.trim()
-                }
-            });
-
-        } catch (error) {
-            console.error('Lỗi tìm kiếm:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Lỗi server khi tìm kiếm',
-                error: process.env.NODE_ENV === 'development' ? error.message : undefined
-            });
-        }
-    },
-
-    async syncPosts(req, res) {
-        try {
-            console.log('Bắt đầu đồng bộ posts vào MeiliSearch...');
-
-            const posts = await Post.find({ status: 'approved' })
-                .populate('user', 'username email phone')
-                .select('title description price area location type amenities images status createdAt updatedAt user')
-                .lean();
-
-            if (posts.length === 0) {
-                return res.json({
-                    success: true,
-                    message: 'Không có bài viết nào để đồng bộ',
-                    data: { synced: 0 }
-                });
-            }
-
-            const documents = posts.map(post => ({
-                id: post._id.toString(),
-                title: post.title,
-                description: post.description,
-                price: post.price,
-                area: post.area,
-                province: post.location?.province || '',
-                district: post.location?.district || '',
-                ward: post.location?.ward || '',
-                address: post.location?.address || '',
-                type: post.type,
-                amenities: post.amenities || [],
-                images: post.images || [],
-                landlord: {
-                    username: post.user?.username || '',
-                    email: post.user?.email || '',
-                    phone: post.user?.phone || ''
-                },
-                status: post.status,
-                createdAt: post.createdAt,
-                updatedAt: post.updatedAt
-            }));
-
-            const result = await meiliSearchService.addDocuments(documents);
-
-            console.log(`Đã đồng bộ ${documents.length} bài viết vào MeiliSearch`);
-
-            res.json({
-                success: true,
-                message: `Đã đồng bộ ${documents.length} bài viết thành công`,
-                data: {
-                    synced: documents.length,
-                    taskUid: result.taskUid
-                }
-            });
-
-        } catch (error) {
-            console.error('Lỗi đồng bộ posts:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Lỗi server khi đồng bộ dữ liệu',
-                error: process.env.NODE_ENV === 'development' ? error.message : undefined
-            });
-        }
+      const cacheKey = `suggest:${keyword.toLowerCase()}`;
+      const cached = await getOrSetCache(
+        cacheKey,
+        () => searchPosts(keyword),
+        300
+      );
+      return success(res, { results: cached });
+    } catch (error) {
+      console.error("Search error:", error);
+      error(res, 500, "Lỗi máy chủ, vui lòng thử lại sau");
     }
-};
+  }
+}
 
-export default searchController;
+export default new SearchController();

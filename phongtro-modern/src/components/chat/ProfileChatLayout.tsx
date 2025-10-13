@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useChat } from '@/contexts/ChatContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -92,7 +92,7 @@ export default function ProfileChatLayout() {
             setActiveConversation(existingConv);
             setConversationNotFound(false);
             // Update URL to include conversationId
-            router.push(`/profile?tab=chat&conversationId=${existingConv._id}`, { scroll: false });
+            router.push(`/chat?conversationId=${existingConv._id}`, { scroll: false });
           }
         } else if (!isLoading) {
           // Conversation doesn't exist, create new one
@@ -100,13 +100,21 @@ export default function ProfileChatLayout() {
             setIsCreatingConversation(true);
             const res = await conversationApi.createConversation([user._id, userIdFromUrl]);
             if (!didCancel && res.success && (res.data || (res as any).conversation)) {
-              const conversation = res.data || (res as any).conversation;
-              setActiveConversation(conversation);
+              const createdConversation = res.data || (res as any).conversation;
+              // Fetch populated conversation so participant info (full_name/avatar/role) is available
+              let populatedConv = createdConversation;
+              try {
+                const byId = await conversationApi.getConversationById(createdConversation._id);
+                if (byId?.success && byId.data) {
+                  populatedConv = byId.data;
+                }
+              } catch {}
+              setActiveConversation(populatedConv);
               setConversationNotFound(false);
-              // Add new conversation to the context
-              addConversation(conversation);
+              // Add new conversation (populated) to the context
+              addConversation(populatedConv);
               // Update URL to include conversationId
-              router.push(`/profile?tab=chat&conversationId=${conversation._id}`, { scroll: false });
+              router.push(`/chat?conversationId=${populatedConv._id}`, { scroll: false });
             } else if (!didCancel) {
               setConversationNotFound(true);
             }
@@ -140,9 +148,16 @@ export default function ProfileChatLayout() {
   const selectConv = (id: string) => {
     const conv = conversations.find(c => c._id === id);
     if (conv) {
+      console.log('🔄 ProfileChatLayout - Switching to conversation:', id);
+      
+      // Update URL first for immediate feedback
+      router.push(`/chat?conversationId=${id}`, { scroll: false });
+      
+      // Then update active conversation (this will trigger loadMessages in ChatContext)
       setActiveConversation(conv);
       setIsMobileSidebarOpen(false);
-      router.push(`/profile?tab=chat&conversationId=${id}`, { scroll: false });
+    } else {
+      console.error('❌ ProfileChatLayout - Conversation not found:', id);
     }
   };
 
@@ -164,12 +179,16 @@ export default function ProfileChatLayout() {
 
   const totalUnread = conversations.reduce((sum, c) => sum + chatHelpers.getUnreadCount(c, user?._id || ''), 0);
 
-  const groupedMsgs = messages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()).reduce((g, m) => {
-    const d = new Date(m.createdAt).toDateString();
-    if (!g[d]) g[d] = [];
-    g[d].push(m);
-    return g;
-  }, {} as Record<string, Message[]>);
+  const groupedMsgs = useMemo(() => {
+    return [...messages]
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      .reduce((g, m) => {
+        const d = new Date(m.createdAt).toDateString();
+        if (!g[d]) g[d] = [];
+        g[d].push(m);
+        return g;
+      }, {} as Record<string, Message[]>);
+  }, [messages]);
 
   const partner = activeConversation ? chatHelpers.getConversationPartner(activeConversation, user?._id || '') : null;
 
@@ -241,7 +260,7 @@ export default function ProfileChatLayout() {
                   <>
                     <h3 className="text-xl font-semibold text-red-600 mb-2">Không tìm thấy cuộc trò chuyện</h3>
                     <p className="text-gray-600 mb-6">Cuộc trò chuyện với ID "{conversationIdFromUrl}" không tồn tại hoặc bạn không có quyền truy cập.</p>
-                    <button onClick={() => router.push('/profile?tab=chat')} className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                    <button onClick={() => router.push('/chat')} className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
                       Quay lại danh sách
                     </button>
                   </>

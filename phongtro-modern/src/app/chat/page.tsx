@@ -1,6 +1,5 @@
 import ChatLayout from '@/components/chat/ChatLayout';
 import ChatTestButton from '@/components/chat/ChatTestButton';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { AuthRequired } from '@/components/auth/ProtectedRoute';
 import Link from 'next/link';
 
@@ -24,7 +23,6 @@ async function ChatContent({ searchParams }: ChatPageProps) {
 
   return (
     <div className="chat-page">
-      <DashboardLayout>
       {/* Debug Panel - Only show when ?debug=true */}
       {showDebugPanel && (
         <div className="bg-yellow-50 border-b-2 border-yellow-300 p-4 shadow-sm">
@@ -47,7 +45,6 @@ async function ChatContent({ searchParams }: ChatPageProps) {
       
       {/* Main Chat Layout */}
       <ChatLayout />
-      </DashboardLayout>
     </div>
   );
 }
