@@ -17,6 +17,8 @@ import chatHandler from "./sockets/chatHandler.js";
 import { syncPostsToMeili } from "./seed/seedPostsToMeili.js";
 import { initSearchConfig } from "~/services/meiliSearchService.js";
 
+import { limiter } from "~/utils/rateLimit.js";
+
 // ===== Kết nối DB =====
 connectDB();
 
@@ -57,6 +59,8 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(limiter()); // áp dụng rate limit cho tất cả các route
 
 // routes
 Route(app);
