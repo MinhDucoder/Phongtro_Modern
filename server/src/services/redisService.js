@@ -104,6 +104,25 @@ export function clearAllCache() {
 }
 
 /**
+ * Delete all cache keys matching a prefix (helper for NodeCache)
+ * @param {string} prefix - Key prefix like `messages:<conversationId>:`
+ */
+export function deleteCacheByPrefix(prefix) {
+  try {
+    const keys = cache.keys();
+    const toDelete = keys.filter((k) => k.startsWith(prefix));
+    if (toDelete.length > 0) {
+      cache.del(toDelete);
+      console.log(`Deleted ${toDelete.length} cache keys by prefix: ${prefix}`);
+    }
+    return toDelete.length;
+  } catch (error) {
+    console.error(`Error deleting cache by prefix ${prefix}:`, error);
+    return 0;
+  }
+}
+
+/**
  * Get cache statistics
  * @returns {object} - Cache stats
  */
@@ -134,5 +153,6 @@ export default {
   getCache,
   deleteCache,
   clearAllCache,
-  getCacheStats
+  getCacheStats,
+  deleteCacheByPrefix
 };

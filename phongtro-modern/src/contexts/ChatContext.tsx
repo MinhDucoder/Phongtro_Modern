@@ -123,6 +123,15 @@ export function ChatProvider({ children }: ChatProviderProps) {
       return;
     }
     
+    // Debounce rapid requests
+    const now = Date.now();
+    const lastLoadTime = (window as any).lastMessageLoadTime || 0;
+    if (now - lastLoadTime < 1000) { // 1 second debounce
+      console.log('⏳ Debouncing message load request');
+      return;
+    }
+    (window as any).lastMessageLoadTime = now;
+    
     // Check cache first (unless force refresh)
     const cachedMessages = messageCache.get(conversationId);
     if (cachedMessages && !forceRefresh) {

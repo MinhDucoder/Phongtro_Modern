@@ -1,12 +1,33 @@
 // controllers/messageController.js
 import Message from "../models/message.js";
 import Conversation from "../models/conversation.js";
-import { getOrSetCache } from "../services/redisService.js";
+import { getOrSetCache, deleteCacheByPrefix } from "../services/redisService.js";
 
 class MessageController {
+  // Rate limiting map
+  static requestCounts = new Map();
+  
   // Lấy danh sách message trong conversation với caching
   async list(req, res, next) {
     try {
+      // Rate limiting: max 10 requests per minute per user
+      const userId = req.user?.id;
+      if (userId) {
+        const now = Date.now();
+        const userRequests = MessageController.requestCounts.get(userId) || [];
+        const recentRequests = userRequests.filter(time => now - time < 60000); // Last minute
+        
+        if (recentRequests.length >= 10) {
+          return res.status(429).json({ 
+            success: false, 
+            message: 'Too many requests. Please wait a moment.' 
+          });
+        }
+        
+        recentRequests.push(now);
+        MessageController.requestCounts.set(userId, recentRequests);
+      }
+      
       const { conversationId } = req.params;
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 20;
@@ -15,29 +36,28 @@ class MessageController {
       // Cache key includes conversation ID, page, and limit
       const cacheKey = `messages:${conversationId}:page:${page}:limit:${limit}`;
       
-      const result = await getOrSetCache(
-        cacheKey,
-        async () => {
-          console.log('📨 Loading messages from DB for conversation:', conversationId);
-          const [items, total] = await Promise.all([
-            Message.find({ conversationId })
-              .populate("sender", "full_name avatar role")
-              .populate("receiver", "full_name avatar role")
-              .sort({ createdAt: 1 })
-              .skip(skip)
-              .limit(limit)
-              .lean(),
-            Message.countDocuments({ conversationId })
-          ]);
-          return { items, total };
-        },
-        300 // Cache for 5 minutes
-      );
+      // Disable server-side caching for messages to ensure fresh data
+      console.log('📨 Loading messages from DB for conversation:', conversationId);
+      const [rawItems, total] = await Promise.all([
+        Message.find({ conversationId })
+          .populate("sender", "full_name avatar role")
+          .populate("receiver", "full_name avatar role")
+          .sort({ createdAt: -1 }) // newest first to get latest page window
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+        Message.countDocuments({ conversationId })
+      ]);
 
-      // Add cache headers
+      // Return items in ascending order for chronological UI
+      const items = rawItems.reverse();
+      const result = { items, total };
+
+      // Disable browser caching for message lists to avoid stale data after refresh
       res.set({
-        'Cache-Control': 'private, max-age=300',
-        'ETag': `"${conversationId}-${page}-${limit}"`
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       });
 
       res.json({ success: true, ...result });
@@ -69,19 +89,9 @@ class MessageController {
         },
       });
 
-      // Invalidate message cache for this conversation
-      const redis = await import('redis');
-      const client = redis.createClient();
-      await client.connect();
-      
-      // Delete all cached messages for this conversation
-      const keys = await client.keys(`messages:${conversationId}:*`);
-      if (keys.length > 0) {
-        await client.del(keys);
-        console.log('🗑️ Invalidated message cache for conversation:', conversationId);
-      }
-      
-      await client.disconnect();
+      // Invalidate message cache for this conversation (NodeCache helper)
+      deleteCacheByPrefix(`messages:${conversationId}:`);
+      console.log('🗑️ Invalidated message cache for conversation:', conversationId);
 
       res.status(201).json({ success: true, message });
     } catch (error) {
