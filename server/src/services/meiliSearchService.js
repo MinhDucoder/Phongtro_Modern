@@ -11,29 +11,47 @@ export const index = meiliClient.index(indexName);
 /**
  * ✅ Khởi tạo cấu hình chỉ chạy 1 lần khi start app
  */
+
 export async function initSearchConfig() {
   try {
-    const synonymsPath = path.join(
-      __dirname,
-      "../config/meilisearch.synonyms.json"
-    );
+    const synonymsPath = path.join(__dirname, "../config/meilisearch.synonyms.json");
     const synonyms = JSON.parse(fs.readFileSync(synonymsPath, "utf-8"));
-    console.log("Synonyms loaded:", synonyms);
+    console.log("📚 Synonyms loaded:", Object.keys(synonyms).length, "entries");
+
     await index.updateSettings({
       typoTolerance: { enabled: true },
-      searchableAttributes: ["title", "description", "location"],
-      filterableAttributes: ["price", "location", "type", "area"],
-      sortableAttributes: ["price", "area"],
+
+      searchableAttributes: ["title", "city"],
+      filterableAttributes: ["price", "area", "city", "favouriteLevel", "status"],
+      sortableAttributes: ["price", "area", "createdAt", "favouriteLevel"],
+
       stopWords: ["và", "có", "ở", "tại", "phòng"],
+
+      rankingRules: [
+        "words",
+        "typo",
+        "proximity",
+        "attribute",
+        "sort",
+        // "custom:desc(favouriteLevel)", // ✅ prefix bắt buộc
+        // "custom:desc(createdAt)",
+        // "custom:asc(price)",
+        "exactness"
+      ],
     });
+
 
     await index.updateSynonyms(synonyms);
 
-    console.log("✅ Meilisearch index configured successfully with synonyms!");
+    console.log("✅ Meilisearch index configured successfully with synonyms & ranking!");
   } catch (err) {
     console.error("⚠️ Meilisearch config failed:", err.message);
   }
 }
+
+
+
+
 /**
  * 🔍 Hàm tìm kiếm chính
  * @param {string} keyword - Từ khóa người dùng nhập

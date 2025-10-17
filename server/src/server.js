@@ -60,7 +60,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(limiter()); // áp dụng rate limit cho tất cả các route
+app.use(limiter); // áp dụng rate limit cho tất cả các route
 
 // routes
 Route(app);
