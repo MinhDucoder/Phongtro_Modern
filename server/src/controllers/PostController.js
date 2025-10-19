@@ -1,5 +1,6 @@
 // src/controllers/postController.js
 import postService from "../services/postService.js";
+import { searchPosts } from "../services/meiliSearchService.js";
 import { success, error } from "../utils/responeHandler.js";
 
 class PostController {
@@ -48,14 +49,62 @@ class PostController {
     try {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 20;
+      const keyword = req.query.q?.trim();
+      
+      // Nếu có keyword → dùng MeiliSearch
+      if (keyword && keyword.length > 0) {
+        const filters = {};
+        
+        // Add filters cho MeiliSearch
+        if (req.query.propertyType) {
+          filters.type = req.query.propertyType;
+        }
+        if (req.query.province) {
+          filters.province = req.query.province;
+        }
+        if (req.query.district) {
+          filters.district = req.query.district;
+        }
+        
+        const options = {
+          page,
+          limit,
+          sortBy: req.query.sortBy || 'relevance',
+          filters,
+        };
+        
+        const meiliResults = await searchPosts(keyword, options);
+        
+        return success(res, {
+          total: meiliResults.totalHits,
+          items: meiliResults.hits,
+          page: meiliResults.page,
+          limit: meiliResults.limit,
+          totalPages: meiliResults.totalPages,
+        });
+      }
+      
+      // Nếu không có keyword → dùng MongoDB như cũ
       const filters = {};
       const sort = {};
 
       // Mặc định chỉ lấy posts đã được duyệt (active) cho trang chủ
       filters.status = "active";
 
-      // Ví dụ filter khác
-      if (req.query.city) filters["roomId.city"] = req.query.city;
+      // Filter theo propertyType
+      if (req.query.propertyType) {
+        filters["roomId.propertyType"] = req.query.propertyType;
+      }
+      
+      // Filter theo province/city
+      if (req.query.province) {
+        filters["roomId.city"] = req.query.province;
+      }
+      
+      // Filter theo district/huyện
+      if (req.query.district) {
+        filters["roomId.district"] = req.query.district;
+      }
 
       if (req.query.sortBy) {
         sort[req.query.sortBy] = req.query.order === "asc" ? 1 : -1;
@@ -126,6 +175,65 @@ class PostController {
     try {
       await postService.deletePost(req.params.id, req.user.id);
       return success(res, null, 204);
+    } catch (err) {
+      return error(res, err.message, 400);
+    }
+  }
+
+  // Lấy 6 phòng trọ mới nhất được đăng (suggestions real-time)
+  async suggestions(req, res, next) {
+    try {
+      const limit = parseInt(req.query.limit) || 6;
+      const filters = {};
+      
+      // Lấy từ MeiliSearch hoặc MongoDB
+      // Nếu có keyword → dùng MeiliSearch
+      const keyword = req.query.q?.trim();
+      
+      if (keyword && keyword.length > 0) {
+        // Tìm kiếm real-time với keyword và sắp xếp theo mới nhất
+        const options = {
+          page: 1,
+          limit,
+          sortBy: 'createdAt:desc',
+          filters: {},
+        };
+        
+        const meiliResults = await searchPosts(keyword, options);
+        
+        return success(res, {
+          items: meiliResults.hits,
+          total: meiliResults.totalHits,
+          limit,
+        });
+      }
+      
+      // Nếu không có keyword → lấy phòng trọ mới nhất
+      filters.status = "active";
+      
+      // Filter theo propertyType nếu có
+      if (req.query.propertyType) {
+        filters["roomId.propertyType"] = req.query.propertyType;
+      }
+      
+      // Filter theo province nếu có
+      if (req.query.province) {
+        filters["roomId.city"] = req.query.province;
+      }
+      
+      // Filter theo district nếu có
+      if (req.query.district) {
+        filters["roomId.district"] = req.query.district;
+      }
+      
+      const sort = { createdAt: -1 };
+      const result = await postService.listPosts({ page: 1, limit, filters, sort });
+      
+      return success(res, {
+        items: result.items,
+        total: result.total,
+        limit,
+      });
     } catch (err) {
       return error(res, err.message, 400);
     }

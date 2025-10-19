@@ -1,4 +1,4 @@
-# 🏠 Homepage Features Roadmap - NhaTroVN
+ 🏠 Homepage Features Roadmap - NhaTroVN
 
 ## 📋 Tổng quan
 Tài liệu này liệt kê chi tiết các tính năng còn thiếu để hoàn thiện trang chính của hệ thống cho thuê phòng trọ NhaTroVN.

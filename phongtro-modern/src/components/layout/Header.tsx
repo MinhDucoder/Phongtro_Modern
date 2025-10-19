@@ -14,7 +14,6 @@ const categoryNavigation = [
   { name: 'Nhà nguyên căn', href: '/nha-nguyen-can', color: 'text-gray-700' },
   { name: 'Căn hộ chung cư', href: '/can-ho', color: 'text-gray-700' },
   { name: 'Căn hộ mini', href: '/can-ho-mini', color: 'text-gray-700' },
-  { name: 'Căn hộ dịch vụ', href: '/can-ho-dich-vu', color: 'text-gray-700' },
   { name: 'Ở ghép', href: '/o-ghep', color: 'text-gray-700' },
   { name: 'Mặt bằng', href: '/mat-bang', color: 'text-gray-700' },
   { name: 'Blog', href: '/blog', color: 'text-gray-700' },
@@ -41,6 +40,17 @@ export default function Header() {
   const { isAuthenticated, user, logout } = useAuth();
   const { isLandlord, isAdmin } = useRoleCheck();
   const router = useRouter();
+  // Get current pathname for active tab highlighting
+  // Use next/navigation for app directory
+  // If not available, fallback to window.location.pathname
+  let pathname = '';
+  try {
+    // next/navigation usePathname
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    pathname = require('next/navigation').usePathname?.() || '';
+  } catch {
+    if (typeof window !== 'undefined') pathname = window.location.pathname;
+  }
 
   const getAvatarUrl = (avatar: any): string | undefined => {
     if (!avatar) return undefined;
@@ -168,15 +178,20 @@ export default function Header() {
       <nav className="bg-gray-50 border-b border-gray-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-8 overflow-x-auto py-3">
-            {categoryNavigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`whitespace-nowrap text-sm font-medium hover:text-orange-600 transition-colors ${item.color}`}
-              >
-                {item.name}
-              </Link>
-            ))}
+            {categoryNavigation.map((item) => {
+              const isActive = pathname === item.href;
+              // Set 'Phòng trọ' to black when not active
+              const defaultColor = item.name === 'Phòng trọ' ? 'text-black' : item.color;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`whitespace-nowrap text-sm font-medium transition-colors ${isActive ? 'text-red-600' : defaultColor} hover:text-orange-600`}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </nav>

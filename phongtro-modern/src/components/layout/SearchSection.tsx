@@ -9,6 +9,7 @@ import {
   XMarkIcon,
   ChevronDownIcon
 } from '@heroicons/react/24/outline';
+import SearchSuggestions from '../search/SearchSuggestions';
 
 const propertyTypes = [
   { value: 'phong-tro', label: 'Phòng trọ', icon: '🏠' },
@@ -25,6 +26,13 @@ const provinces = [
   'Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ',
   'An Giang', 'Bà Rịa - Vũng Tàu', 'Bắc Giang', 'Bắc Kạn', 'Bạc Liêu',
 ];
+
+// Map quận/huyện theo tỉnh
+const districtsByProvince: { [key: string]: string[] } = {
+  'Hà Nội': ['Cầu Giấy', 'Đống Đa', 'Ba Đình', 'Hai Bà Trưng', 'Hoàn Kiếm', 'Thanh Xuân', 'Tây Hồ', 'Bắc Từ Liêm', 'Nam Từ Liêm', 'Hoàng Mai', 'Long Biên', 'Gia Lâm', 'Thường Tín', 'Thanh Trì'],
+  'TP. Hồ Chí Minh': ['Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận 6', 'Quận 7', 'Quận 8', 'Quận 9', 'Quận 10', 'Quận 11', 'Quận 12', 'Tân Bình', 'Tân Phú', 'Phú Nhuận', 'Bình Thạnh', 'Gò Vấp', 'Thủ Đức', 'Bình Tân'],
+  'Đà Nẵng': ['Hải Châu', 'Thanh Khê', 'Sơn Trà', 'Ngũ Hành Sơn', 'Liên Chiểu', 'Cẩm Lệ'],
+};
 
 const priceRanges = [
   { value: '', label: 'Tất cả' },
@@ -55,11 +63,13 @@ export default function SearchSection() {
   const [filters, setFilters] = useState({
     keyword: searchParams?.get('keyword') || '',
     province: searchParams?.get('province') || '',
+    district: searchParams?.get('district') || '',
     propertyType: searchParams?.get('propertyType') || '',
     priceRange: searchParams?.get('priceRange') || '',
   });
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
   const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<string[]>(
     filters.propertyType ? [filters.propertyType] : []
   );
@@ -116,18 +126,29 @@ export default function SearchSection() {
   const handleSearch = () => {
     const params = new URLSearchParams();
     
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value && value !== '') {
-        params.set(key, value);
-      }
-    });
-
-    router.push(`/tim-kiem?${params.toString()}`);
+    // Add keyword if present
+    if (filters.keyword.trim()) {
+      params.set('keyword', filters.keyword.trim());
+    }
+    
+    // Add province if present (and not "Toàn quốc")
+    if (filters.province && filters.province !== '') {
+      params.set('province', filters.province);
+    }
+    
+    // Add district if present
+    if (filters.district && filters.district !== '') {
+      params.set('district', filters.district);
+    }
+    
+    // Luôn quay về trang chủ để hiển thị kết quả tìm kiếm (YouTube style)
+    router.push(`/?${params.toString()}`);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch();
+      setIsSuggestionsOpen(false); // Đóng suggestions khi nhấn Enter
     }
   };
 
@@ -141,17 +162,26 @@ export default function SearchSection() {
       <div className="bg-white border-b border-gray-200 py-4">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row gap-3 items-stretch">
-            {/* Search Input */}
+            {/* Search Input with Suggestions */}
             <div className="flex-1">
               <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 z-10" />
                 <input
                   type="text"
                   placeholder="Tìm bất động sản..."
                   value={filters.keyword}
-                  onChange={(e) => handleFilterChange('keyword', e.target.value)}
+                  onChange={(e) => {
+                    handleFilterChange('keyword', e.target.value);
+                    setIsSuggestionsOpen(true);
+                  }}
+                  onFocus={() => setIsSuggestionsOpen(true)}
                   onKeyPress={handleKeyPress}
                   className="w-full pl-12 pr-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 placeholder-gray-500"
+                />
+                <SearchSuggestions 
+                  keyword={filters.keyword} 
+                  isOpen={isSuggestionsOpen}
+                  onClose={() => setIsSuggestionsOpen(false)}
                 />
               </div>
             </div>
@@ -162,7 +192,13 @@ export default function SearchSection() {
                 <MapPinIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <select
                   value={filters.province}
-                  onChange={(e) => handleFilterChange('province', e.target.value)}
+                  onChange={(e) => {
+                    handleFilterChange('province', e.target.value);
+                    // Reset district when province changes
+                    if (e.target.value !== filters.province) {
+                      handleFilterChange('district', '');
+                    }
+                  }}
                   className="w-full pl-12 pr-10 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 appearance-none cursor-pointer bg-white"
                 >
                   {provinces.map((province, index) => (
@@ -174,6 +210,28 @@ export default function SearchSection() {
                 <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
               </div>
             </div>
+
+            {/* District Dropdown - Show only if province is selected */}
+            {filters.province && filters.province !== '' && districtsByProvince[filters.province] && (
+              <div className="w-full sm:w-48">
+                <div className="relative">
+                  <MapPinIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <select
+                    value={filters.district}
+                    onChange={(e) => handleFilterChange('district', e.target.value)}
+                    className="w-full pl-12 pr-10 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 appearance-none cursor-pointer bg-white"
+                  >
+                    <option value="">Tất cả quận/huyện</option>
+                    {districtsByProvince[filters.province]?.map((district) => (
+                      <option key={district} value={district}>
+                        {district}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+            )}
 
             {/* Filter Button */}
             <button
@@ -190,16 +248,16 @@ export default function SearchSection() {
               className="w-full sm:w-auto px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white text-base font-medium rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none flex items-center justify-center gap-2 shadow-lg"
             >
               <MagnifyingGlassIcon className="h-5 w-5" />
-              <span>Tìm nhà</span>
+              <span>Tìm phòng trọ</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Filter Modal */}
+      {/* Filter Panel (light overlay without dark backdrop) */}
       {isFilterOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div ref={filterModalRef} className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pointer-events-none">
+          <div ref={filterModalRef} className="pointer-events-auto bg-white rounded-xl shadow-2xl border border-gray-200 w-full max-w-xl md:max-w-2xl max-h-[80vh] overflow-y-auto mt-6">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h3 className="text-xl font-semibold text-gray-900">Bộ lọc</h3>
@@ -212,67 +270,11 @@ export default function SearchSection() {
             </div>
 
             {/* Modal Content */}
-            <div className="p-6 space-y-6">
-              {/* Property Types */}
-              <div>
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Danh mục cho thuê</h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {propertyTypes.map((type) => (
-                    <button
-                      key={type.value}
-                      onClick={() => handlePropertyTypeToggle(type.value)}
-                      className={`p-3 rounded-lg border-2 text-left transition-all ${
-                        selectedPropertyTypes.includes(type.value)
-                          ? 'border-orange-500 bg-orange-50 text-orange-700'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{type.icon}</span>
-                        <span className="text-sm font-medium">{type.label}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Location Filter */}
-              <div>
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Lọc theo khu vực</h4>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Tỉnh thành</label>
-                    <select
-                      value={filters.province}
-                      onChange={(e) => handleFilterChange('province', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
-                    >
-                      {provinces.map((province, index) => (
-                        <option key={index} value={index === 0 ? '' : province}>
-                          {province}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Quận huyện</label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm">
-                      <option>Tất cả</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Phường xã</label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm">
-                      <option>Tất cả</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Price Range */}
+            <div className="p-5 md:p-6 space-y-6">
+              {/* Price Range Only */}
               <div>
                 <h4 className="text-lg font-medium text-gray-900 mb-4">Khoảng giá</h4>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                   {priceRanges.map((range) => (
                     <button
                       key={range.value}
@@ -291,7 +293,7 @@ export default function SearchSection() {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+            <div className="flex items-center justify-end gap-3 p-5 md:p-6 border-t border-gray-200 bg-gray-50">
               <button
                 onClick={() => setIsFilterOpen(false)}
                 className="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors"

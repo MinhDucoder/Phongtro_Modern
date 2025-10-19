@@ -119,14 +119,108 @@ class PostService {
   async listPosts({ page = 1, limit = 20, filters = {}, sort = { createdAt: -1 } }) {
     const skip = (page - 1) * limit;
 
-    const posts = await Post.find(filters)
-      .populate({ path: "roomId", select: ROOM_PROJECTION })
-      .populate("landlord", LANDLORD_PROJECTION)
-      .skip(skip)
-      .limit(limit)
-      .sort(sort);
-
-    const total = await Post.countDocuments(filters);
+    // Nếu có filter propertyType, lọc bằng aggregation pipeline
+    let pipeline = [];
+    let propertyTypeFilter = null;
+    let provinceFilter = null;
+    let districtFilter = null;
+    let keywordFilter = null;
+    
+    // Extract special filters
+    if (filters["roomId.propertyType"]) {
+      propertyTypeFilter = filters["roomId.propertyType"];
+      delete filters["roomId.propertyType"];
+    }
+    
+    if (filters["roomId.city"]) {
+      provinceFilter = filters["roomId.city"];
+      delete filters["roomId.city"];
+    }
+    
+    if (filters["roomId.district"]) {
+      districtFilter = filters["roomId.district"];
+      delete filters["roomId.district"];
+    }
+    
+    if (filters["roomId.title"]) {
+      keywordFilter = filters["roomId.title"];
+      delete filters["roomId.title"];
+    }
+    
+    // Match stage - filter theo Post fields
+    const matchStage = { $match: filters };
+    pipeline.push(matchStage);
+    
+    // Lookup (populate) roomId
+    pipeline.push({
+      $lookup: {
+        from: "rooms",
+        localField: "roomId",
+        foreignField: "_id",
+        as: "roomId"
+      }
+    });
+    
+    // Unwind roomId (convert array to single object)
+    pipeline.push({ $unwind: "$roomId" });
+    
+    // Filter by propertyType if specified
+    if (propertyTypeFilter) {
+      pipeline.push({
+        $match: { "roomId.propertyType": propertyTypeFilter }
+      });
+    }
+    
+    // Filter by province/city if specified
+    if (provinceFilter) {
+      pipeline.push({
+        $match: { "roomId.city": provinceFilter }
+      });
+    }
+    
+    // Filter by district if specified
+    if (districtFilter) {
+      pipeline.push({
+        $match: { "roomId.district": districtFilter }
+      });
+    }
+    
+    // Filter by keyword if specified
+    if (keywordFilter) {
+      pipeline.push({
+        $match: { "roomId.title": keywordFilter }
+      });
+    }
+    
+    // Lookup landlord
+    pipeline.push({
+      $lookup: {
+        from: "users",
+        localField: "landlord",
+        foreignField: "_id",
+        as: "landlord"
+      }
+    });
+    
+    // Unwind landlord
+    pipeline.push({ $unwind: { path: "$landlord", preserveNullAndEmptyArrays: true } });
+    
+    // Sort stage
+    const sortStage = { $sort: sort };
+    pipeline.push(sortStage);
+    
+    // Facet to get both total count and paginated results
+    pipeline.push({
+      $facet: {
+        totalCount: [{ $count: "count" }],
+        items: [{ $skip: skip }, { $limit: limit }]
+      }
+    });
+    
+    const result = await Post.aggregate(pipeline);
+    
+    const total = result[0]?.totalCount[0]?.count || 0;
+    const posts = result[0]?.items || [];
 
     // Transform data để có cấu trúc rõ ràng hơn
     const transformedPosts = posts.map(post => {

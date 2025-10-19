@@ -13,7 +13,7 @@ export default function OGhepPage() {
         </div>
         
         <SearchResults
-          searchParams={{}}
+          initialFilters={{ propertyType: 'o-ghep' }}
         />
       </div>
     </div>

@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import RoomCard from '@/components/room/RoomCard';
 import Pagination from '@/components/ui/Pagination';
 import { toastManager } from '@/components/ui/ToastManager';
+import { toBackendPropertyType } from '@/lib/propertyTypeMapping';
 import { 
   MagnifyingGlassIcon,
   AdjustmentsHorizontalIcon,
@@ -43,6 +44,7 @@ interface SearchResultsProps {
 
 export default function SearchResults({ initialQuery = '', initialFilters = {} }: SearchResultsProps) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalResults, setTotalResults] = useState(0);
@@ -55,70 +57,81 @@ export default function SearchResults({ initialQuery = '', initialFilters = {} }
   const query = searchParams.get('keyword') || initialQuery;
   const propertyType = searchParams.get('propertyType') || initialFilters.propertyType || '';
   const province = searchParams.get('province') || initialFilters.province || '';
+  const district = searchParams.get('district') || initialFilters.district || '';
   const priceRange = searchParams.get('priceRange') || initialFilters.priceRange || '';
   const areaRange = searchParams.get('areaRange') || initialFilters.areaRange || '';
   const amenities = searchParams.get('amenities') || initialFilters.amenities || '';
   const sortBy = searchParams.get('sortBy') || 'newest';
   const page = parseInt(searchParams.get('page') || '1');
 
+  // Determine if we're on a category page (phong-tro, nha-nguyen-can, etc.)
+  const getCategoryBaseUrl = () => {
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+    if (pathname.includes('/phong-tro')) return '/phong-tro';
+    if (pathname.includes('/nha-nguyen-can')) return '/nha-nguyen-can';
+    if (pathname.includes('/can-ho')) return '/can-ho';
+    if (pathname.includes('/can-ho-mini')) return '/can-ho-mini';
+    if (pathname.includes('/can-ho-dich-vu')) return '/can-ho-dich-vu';
+    if (pathname.includes('/o-ghep')) return '/o-ghep';
+    if (pathname.includes('/mat-bang')) return '/mat-bang';
+    if (pathname.includes('/tim-kiem')) return '/tim-kiem';
+    return '/phong-tro'; // Default to phong-tro
+  };
+
   useEffect(() => {
     setCurrentPage(page);
     performSearch();
-  }, [searchParams]);
+  }, [searchParams, page]);
 
   const performSearch = async () => {
     try {
       setLoading(true);
       
-      // Build search parameters
-      const searchUrl = new URL('http://localhost:5000/api/v1/search');
-      
-      if (query) searchUrl.searchParams.set('q', query);
-      if (propertyType) searchUrl.searchParams.set('type', propertyType);
-      if (province) searchUrl.searchParams.set('province', province);
-      if (priceRange) {
-        const [min, max] = priceRange.split('-');
-        if (min) searchUrl.searchParams.set('minPrice', min === '10+' ? '10000000' : (parseInt(min) * 1000000).toString());
-        if (max && max !== '+') searchUrl.searchParams.set('maxPrice', (parseInt(max) * 1000000).toString());
+      // Fallback: lấy dữ liệu trực tiếp từ database theo propertyType (nếu có)
+      const queryParams = new URLSearchParams();
+      queryParams.set('page', String(page));
+      queryParams.set('limit', '12');
+      // Convert frontend propertyType format to backend format for fallback API
+      if (propertyType) {
+        const backendType = toBackendPropertyType(propertyType);
+        queryParams.set('propertyType', backendType);
       }
-      if (areaRange) {
-        const [min, max] = areaRange.split('-');
-        if (min) searchUrl.searchParams.set('minArea', min === '100+' ? '100' : min);
-        if (max && max !== '+') searchUrl.searchParams.set('maxArea', max);
-      }
-      if (amenities) searchUrl.searchParams.set('amenities', amenities);
+      if (query) queryParams.set('q', query);
+      if (province) queryParams.set('province', province);
+      if (district) queryParams.set('district', district);
       
-      searchUrl.searchParams.set('page', page.toString());
-      searchUrl.searchParams.set('limit', '12');
-      searchUrl.searchParams.set('sortBy', sortBy);
+      const fallbackUrl = `http://localhost:5000/api/v1/posts?${queryParams.toString()}`;
 
-      console.log('Search URL:', searchUrl.toString());
+      const fallbackResponse = await fetch(fallbackUrl);
+      const fallbackData = await fallbackResponse.json();
 
-      const response = await fetch(searchUrl.toString());
-      const data = await response.json();
+      if (fallbackData.success) {
+        // Map dữ liệu roomId -> structure SearchResult
+        const items = (fallbackData.data.items || []).map((p: any) => ({
+          _id: p.roomId?._id || p._id,
+          title: p.roomId?.title,
+          description: p.roomId?.description,
+          price: p.roomId?.price,
+          area: p.roomId?.area,
+          location: p.roomId?.location ? p.roomId.location : { province: p.roomId?.city || '', district: '', ward: '', address: p.roomId?.address || '' },
+          type: p.roomId?.propertyType,
+          amenities: p.roomId?.amenities || [],
+          images: p.roomId?.images || [],
+          user: { username: '', email: '', phone: '' },
+          createdAt: p.createdAt,
+          updatedAt: p.updatedAt
+        }));
 
-      if (data.success) {
-        setResults(data.data.posts || []);
-        setTotalResults(data.data.totalHits || 0);
-        setTotalPages(data.data.totalPages || 1);
+        setResults(items);
+        setTotalResults(fallbackData.data.total || 0);
+        setTotalPages(Math.ceil((fallbackData.data.total || 0) / 12));
         
-        if (data.data.posts.length === 0) {
+        if (items.length === 0) {
           toastManager.showInfo('Không tìm thấy kết quả phù hợp với tìm kiếm của bạn');
         }
       } else {
-        // Fallback to regular posts API if search fails
-        const fallbackResponse = await fetch(`http://localhost:5000/api/v1/posts?page=${page}&limit=12`);
-        const fallbackData = await fallbackResponse.json();
-        
-        if (fallbackData.success) {
-          setResults(fallbackData.data.items || []);
-          setTotalResults(fallbackData.data.total || 0);
-          setTotalPages(Math.ceil(fallbackData.data.total / 12));
-          toastManager.showWarning('Tìm kiếm không khả dụng, hiển thị tất cả tin đăng');
-        } else {
-          setResults([]);
-          toastManager.showError('Không thể tải dữ liệu');
-        }
+        toastManager.showError('Lỗi khi tải dữ liệu');
+        setResults([]);
       }
     } catch (error) {
       console.error('Search error:', error);
@@ -150,6 +163,7 @@ export default function SearchResults({ initialQuery = '', initialFilters = {} }
     if (query) filters.push(`"${query}"`);
     if (propertyType) filters.push(`loại: ${propertyType}`);
     if (province) filters.push(`tại: ${province}`);
+    if (district) filters.push(`${district}`);
     if (priceRange) filters.push(`giá: ${priceRange} triệu`);
     if (areaRange) filters.push(`diện tích: ${areaRange}m²`);
     
@@ -261,12 +275,26 @@ export default function SearchResults({ initialQuery = '', initialFilters = {} }
                 <Pagination 
                   currentPage={currentPage}
                   totalPages={totalPages}
-                  baseUrl="/tim-kiem"
+                  baseUrl={getCategoryBaseUrl()}
                   onPageChange={(newPage) => {
-                    const newSearchParams = new URLSearchParams(searchParams.toString());
-                    newSearchParams.set('page', newPage.toString());
-                    window.history.pushState(null, '', `?${newSearchParams.toString()}`);
-                    setCurrentPage(newPage);
+                    // Build query string with all current filters
+                    const params = new URLSearchParams();
+                    
+                    // Copy all existing params
+                    searchParams.forEach((value, key) => {
+                      if (key !== 'page') {
+                        params.set(key, value);
+                      }
+                    });
+                    
+                    // Set new page
+                    params.set('page', newPage.toString());
+                    
+                    // Get the correct base URL (category page or search page)
+                    const baseUrl = getCategoryBaseUrl();
+                    
+                    // Navigate with updated URL
+                    router.push(`${baseUrl}?${params.toString()}`);
                   }}
                 />
               </div>

@@ -13,7 +13,7 @@ export default function NhaNguyenCanPage() {
         </div>
         
         <SearchResults
-          searchParams={{}}
+          initialFilters={{ propertyType: 'nha-nguyen-can' }}
         />
       </div>
     </div>
