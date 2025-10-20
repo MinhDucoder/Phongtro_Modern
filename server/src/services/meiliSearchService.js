@@ -20,7 +20,7 @@ export async function initSearchConfig() {
 
     await index.updateSettings({
       typoTolerance: { enabled: true },
-
+      displayedAttributes: ["title", "price", "area", "city", "options", "favouriteLevel", "createdAt"],
       searchableAttributes: ["title", "city"],
       filterableAttributes: ["price", "area", "city", "favouriteLevel", "status"],
       sortableAttributes: ["price", "area", "createdAt", "favouriteLevel"],
