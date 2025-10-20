@@ -38,7 +38,7 @@ async function handleExpirePosts() {
   }
 }
 
-cron.schedule("*/1 * * * * ", async () => {
+cron.schedule("*/15 * * * * ", async () => {
     console.log("[CRON] Running expire posts job...");
     await handleExpirePosts();
 })
