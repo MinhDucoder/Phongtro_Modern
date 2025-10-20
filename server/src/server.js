@@ -17,6 +17,8 @@ import chatHandler from "./sockets/chatHandler.js";
 import { syncPostsToMeili } from "./seed/seedPostsToMeili.js";
 import { initSearchConfig } from "~/services/meiliSearchService.js";
 
+import "~/jobs/expirePost.job.js";
+
 import { limiter } from "~/utils/rateLimit.js";
 
 // ===== Kết nối DB =====
@@ -27,6 +29,8 @@ const initSearch = async () => {
 };
 
 initSearch();
+
+// syncPostsToMeili();
 
 // syncPostsToMeili();
 
