@@ -29,6 +29,10 @@ const postSchema = new mongoose.Schema(
       enum: ["pending", "active", "expired"],
       default: "pending",
     },
+    expiredAt: {
+      type: Date,
+      required: true,
+    }
   },
   { timestamps: true }
 );
@@ -53,5 +57,22 @@ postSchema.plugin(meiliSyncPlugin, {
   indexName: process.env.MEILISEARCH_INDEX || "posts",
   formatFn: formatPostToMeili,
 });
+
+postSchema.pre("save", function (next) {
+  if (!this.isModified("favouriteLevel") && this.expiredAt) return next();
+
+  const now = new Date();
+  const durationMap = {
+    free: 7,
+    silver: 15,
+    gold: 30,
+    platinum: 60,
+  };
+
+  const days = durationMap[this.favouriteLevel] || 7;
+  this.expiredAt = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+  next();
+});
+
 
 export default mongoose.model("Post", postSchema);
