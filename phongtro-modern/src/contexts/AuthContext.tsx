@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authApi, User, ApiResponse } from '@/lib/api';
 import { toastManager } from '@/components/ui/ToastManager';
+import { useRouter } from 'next/navigation';
 import { useTokenRefresh } from '@/hooks/useTokenRefresh';
 
 interface AuthContextType {
@@ -34,6 +35,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isFetching, setIsFetching] = useState(false); // Prevent duplicate calls
 
   const isAuthenticated = !!user;
+  const router = useRouter();
   
   // Debug logging
   useEffect(() => {
@@ -158,26 +160,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setIsFetching(true);
       setIsLoading(true);
-      
-      // Check if we have valid tokens before making the request
-      const tokenStatus = authApi.getTokenStatus();
-      if (!tokenStatus.hasToken) {
-        console.log('No token available, skipping silent fetch');
-        setUser(null);
-        return;
-      }
-      
-      if (tokenStatus.isExpired) {
-        console.log('Token expired, attempting refresh before fetch...');
-        try {
-          await refreshToken();
-        } catch (refreshError) {
-          console.log('Token refresh failed in silent fetch:', refreshError);
-          setUser(null);
-          return;
-        }
-      }
-      
+      // Với HttpOnly cookie, không thể kiểm tra token từ client – gọi thẳng /user/me
       console.log('Fetching user profile silently...');
       const response = await authApi.getMe();
       console.log('Profile response:', response);
@@ -194,35 +177,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const checkAuthStatus = async () => {
     try {
       console.log('🔐 Checking auth status...');
-      
-      // Check token status first
-      const tokenStatus = authApi.getTokenStatus();
-      console.log('Token status:', tokenStatus);
-      
-      if (!tokenStatus.hasToken) {
-        console.log('No token found, user not authenticated');
-        setUser(null);
-        setIsLoading(false);
-        return;
-      }
-      
-      if (tokenStatus.isExpired) {
-        console.log('Token expired, attempting refresh...');
-        try {
-          await refreshToken();
-          // After refresh, try to get user profile
-          await fetchUserProfileSilent();
-        } catch (refreshError) {
-          console.log('Token refresh failed:', refreshError);
-          setUser(null);
-          setIsLoading(false);
-          return;
-        }
-      } else {
-        console.log('Token valid, fetching user profile...');
-        // Try to get user info from server
-        await fetchUserProfileSilent();
-      }
+      // Không thể xác định token từ client (HttpOnly) – gọi thẳng /user/me
+      await fetchUserProfileSilent();
     } catch (error) {
       console.log('Auth check failed:', error);
       // Clear user state if authentication fails
@@ -247,6 +203,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setTimeout(() => {
           fetchUserProfileSilent();
         }, 100);
+        
+        // Redirect theo redirect param hoặc theo role
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const redirectParam = params.get('redirect');
+          if (redirectParam) {
+            router.push(redirectParam);
+          } else {
+            const role = response.user.role;
+            if (role === 'admin') {
+              router.push('/admin');
+            } else if (role === 'landlord') {
+              router.push('/dashboard');
+            } else {
+              router.push('/profile');
+            }
+          }
+        } catch {}
         
         return { success: true, user: response.user };
       }

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
+import { getSafeImageSrc } from '@/lib/imageUtils';
 import {
   BellIcon,
   EyeIcon,
@@ -384,9 +385,7 @@ export default function NotificationCenter() {
                     {notification.relatedProperty && (
                       <div className="flex items-center space-x-2 mt-2 p-2 bg-gray-50 rounded">
                         <Image
-                          src={typeof notification.relatedProperty.image === 'string' && notification.relatedProperty.image.trim() !== '' 
-                            ? notification.relatedProperty.image 
-                            : '/placeholder-room.svg'}
+                          src={getSafeImageSrc(notification.relatedProperty.image)}
                           alt={notification.relatedProperty.title}
                           width={40}
                           height={40}
@@ -399,9 +398,7 @@ export default function NotificationCenter() {
                     {notification.relatedUser && (
                       <div className="flex items-center space-x-2 mt-2">
                         <Image
-                          src={typeof notification.relatedUser.avatar === 'string' && notification.relatedUser.avatar.trim() !== '' 
-                            ? notification.relatedUser.avatar 
-                            : '/placeholder-room.svg'}
+                          src={getSafeImageSrc(notification.relatedUser.avatar)}
                           alt={notification.relatedUser.name}
                           width={24}
                           height={24}

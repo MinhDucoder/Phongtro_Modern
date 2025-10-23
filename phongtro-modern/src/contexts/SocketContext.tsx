@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import { authApi } from '@/lib/api';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -41,31 +42,12 @@ export function SocketProvider({ children }: SocketProviderProps) {
       return;
     }
 
-    // Get token safely
-    let token = null;
-    try {
-      const storedTokens = localStorage.getItem('auth_tokens');
-      if (storedTokens) {
-        const tokenData = JSON.parse(storedTokens);
-        token = tokenData.accessToken;
-      }
-    } catch (error) {
-      console.error('Error parsing auth tokens:', error);
-    }
-
-    if (!token) {
-      console.warn('⚠️ No auth token found, skipping socket connection');
-      return;
-    }
-
     console.log('🔌 Creating socket connection for user:', user.full_name);
 
     // Create socket connection with error handling
     const baseUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000';
     const newSocket = io(baseUrl, {
-      auth: {
-        token: token
-      },
+      withCredentials: true,
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 5,
@@ -130,6 +112,17 @@ export function SocketProvider({ children }: SocketProviderProps) {
 
     setSocket(newSocket);
 
+    // Định kỳ làm mới access token để cookie luôn hợp lệ cho Socket
+    // 13 phút (dưới 15m) để làm mới trước khi hết hạn
+    const refreshInterval = setInterval(async () => {
+      try {
+        await authApi.refreshToken();
+        // Không cần xử lý gì thêm: cookie HttpOnly sẽ được cập nhật bởi server
+      } catch {
+        // Bỏ qua lỗi; lần kế tiếp sẽ thử lại
+      }
+    }, 13 * 60 * 1000);
+
     // Cleanup
     return () => {
       console.log('🔌 Cleaning up socket connection');
@@ -138,6 +131,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
       newSocket.off('connect_error');
       newSocket.off('reconnect_failed');
       newSocket.disconnect();
+      clearInterval(refreshInterval);
     };
   }, [user?._id]); // Only depend on user ID, not the whole user object
 

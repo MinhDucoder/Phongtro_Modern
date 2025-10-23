@@ -1,6 +1,28 @@
 // API cấu hình và service layer
 export const API_BASE_URL = 'http://localhost:5000/api/v1';
 
+// CSRF token (lazy-initialized)
+let csrfToken: string | null = null;
+
+async function ensureCsrfToken(): Promise<string> {
+  if (typeof window === 'undefined') return '';
+  if (csrfToken) return csrfToken;
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/csrf-token`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    const data = await res.json();
+    if (data && data.success && data.csrfToken) {
+      csrfToken = data.csrfToken as string;
+      return csrfToken;
+    }
+  } catch (_) {
+    // ignore
+  }
+  return '';
+}
+
 // Token management
 interface TokenData {
   accessToken: string;
@@ -28,17 +50,10 @@ class TokenManager {
     if (typeof window === 'undefined') return;
     
     try {
-      const stored = localStorage.getItem('auth_tokens');
-      if (stored) {
-        this.tokenData = JSON.parse(stored);
-        // Check if token is expired
-        if (this.tokenData && this.tokenData.expiresAt < Date.now()) {
-          this.clearTokens();
-        }
-      }
+      // Cookie-based auth: không tải token từ localStorage
+      this.tokenData = null;
     } catch (error) {
-      console.error('Error loading tokens from storage:', error);
-      this.clearTokens();
+      this.tokenData = null;
     }
   }
 
@@ -46,42 +61,38 @@ class TokenManager {
     if (typeof window === 'undefined') return;
     
     try {
-      localStorage.setItem('auth_tokens', JSON.stringify(tokenData));
+      // Cookie-based auth: không lưu token vào localStorage
       this.tokenData = tokenData;
     } catch (error) {
-      console.error('Error saving tokens to storage:', error);
+      // ignore
     }
   }
 
   setTokens(accessToken: string, refreshToken: string, expiresIn: number = 3600): void {
-    const expiresAt = Date.now() + (expiresIn * 1000); // Convert to milliseconds
-    const tokenData: TokenData = {
-      accessToken,
-      refreshToken,
-      expiresAt
-    };
-    this.saveTokenToStorage(tokenData);
+    // Cookie-based auth: token do server set qua HttpOnly cookie; không lưu client-side
+    this.tokenData = null;
   }
 
   getAccessToken(): string | null {
-    return this.tokenData?.accessToken || null;
+    // Không dùng Authorization header, để server đọc từ cookie
+    return null;
   }
 
   getRefreshToken(): string | null {
-    return this.tokenData?.refreshToken || null;
+    // Refresh token chỉ ở HttpOnly cookie
+    return null;
   }
 
   isTokenExpired(): boolean {
-    if (!this.tokenData) return true;
-    // Add 5 minute buffer before actual expiry
-    return this.tokenData.expiresAt - (5 * 60 * 1000) < Date.now();
+    // Không kiểm tra client-side, để server xử lý
+    return false;
   }
 
   clearTokens(): void {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('auth_tokens');
-      // Also clear cookie as backup
+      // Clear cookies fallback (client-side)
       document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     }
     this.tokenData = null;
     this.refreshPromise = null;
@@ -93,14 +104,8 @@ class TokenManager {
       return this.refreshPromise;
     }
 
-    const refreshToken = this.getRefreshToken();
-    if (!refreshToken) {
-      console.warn('No refresh token available - user needs to login again');
-      this.clearTokens();
-      throw new Error('No refresh token available');
-    }
-
-    this.refreshPromise = this.performTokenRefresh(refreshToken);
+    // Cookie-based refresh: không cần truyền refreshToken trong body
+    this.refreshPromise = this.performTokenRefresh();
     
     try {
       const newAccessToken = await this.refreshPromise;
@@ -110,15 +115,16 @@ class TokenManager {
     }
   }
 
-  private async performTokenRefresh(refreshToken: string): Promise<string> {
+  private async performTokenRefresh(): Promise<string> {
     try {
+      // Lấy CSRF token và gửi kèm trong header để vượt verifyCsrf ở BE
+      const csrf = await ensureCsrfToken();
       const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        // Không đặt Content-Type để tránh preflight không cần thiết
         credentials: 'include',
-        body: JSON.stringify({ refreshToken })
+        headers: csrf ? { 'X-CSRF-Token': csrf } : undefined,
+        // Refresh token ở HttpOnly cookie, không gửi body
       });
 
       if (!response.ok) {
@@ -139,12 +145,6 @@ class TokenManager {
       const data = await response.json();
       
       if (data.success && data.accessToken) {
-        // Update stored tokens
-        this.setTokens(
-          data.accessToken, 
-          data.refreshToken || refreshToken, 
-          data.expiresIn || 3600
-        );
         return data.accessToken;
       } else {
         throw new Error('Invalid refresh response');
@@ -288,7 +288,10 @@ export async function apiRequest<T>(
   options: RequestInit = {},
   retryCount: number = 0
 ): Promise<ApiResponse<T>> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  // Loại bỏ tham số _t nếu có (tránh tạo URL khác nhau vô ích)
+  const normEndpoint = endpoint.replace(/([?&])_t=\d+(&|$)/, (m, p1, p2) => (p2 ? p1 : ''))
+                               .replace(/[?&]$/, '');
+  const url = `${API_BASE_URL}${normEndpoint}`;
   
   // Get access token
   let accessToken = tokenManager.getAccessToken();
@@ -339,10 +342,34 @@ export async function apiRequest<T>(
     },
   };
 
+  // Dedupe requests: tránh gửi trùng cùng URL+method trong thời gian ngắn
+  // (đơn giản: Abort nếu đã có request y hệt đang pending)
+  const dedupeKey = `${(config.method || 'GET').toString().toUpperCase()} ${url}`;
+  const globalAny = globalThis as any;
+  globalAny.__pendingRequests = globalAny.__pendingRequests || new Map<string, AbortController>();
+  let controller = new AbortController();
+  if (globalAny.__pendingRequests.has(dedupeKey)) {
+    // Huỷ request cũ và thay bằng request mới
+    try { globalAny.__pendingRequests.get(dedupeKey)!.abort(); } catch {}
+    globalAny.__pendingRequests.delete(dedupeKey);
+  }
+  globalAny.__pendingRequests.set(dedupeKey, controller);
+
   try {
+    // CSRF header for state-changing requests
+    const method = (config.method || 'GET').toString().toUpperCase();
+    const isStateChanging = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
+    const isAuthMutation = endpoint.startsWith('/auth/') || isStateChanging;
+    if (isAuthMutation && !isFormData) {
+      const token = await ensureCsrfToken();
+      if (token) {
+        (config.headers as Record<string, string>)['X-CSRF-Token'] = token;
+      }
+    }
+
     // Add timeout - increased to 30 seconds for login requests
-    const controller = new AbortController();
-    const timeoutDuration = endpoint.includes('/auth/login') ? 30000 : 15000; // 30s for login, 15s for others
+    const isDashboard = endpoint.startsWith('/dashboard/');
+    const timeoutDuration = endpoint.includes('/auth/login') ? 30000 : (isDashboard ? 30000 : 20000);
     const timeoutId = setTimeout(() => controller.abort(), timeoutDuration);
     
     const response = await fetch(url, {
@@ -351,6 +378,8 @@ export async function apiRequest<T>(
     });
     
     clearTimeout(timeoutId);
+    // Remove from pending map
+    globalAny.__pendingRequests.delete(dedupeKey);
     
     if (!response.ok) {
       let errorData;
@@ -487,10 +516,21 @@ export async function apiRequest<T>(
     const data = await response.json();
     return data;
   } catch (error) {
-    // Xử lý lỗi timeout
-    const timeoutDuration = endpoint.includes('/auth/login') ? 30000 : 15000; // 30s for login, 15s for others
+    // Remove from pending map on error
+    const globalAny = globalThis as any;
+    if (globalAny.__pendingRequests) {
+      globalAny.__pendingRequests.delete(dedupeKey);
+    }
+    // Xử lý lỗi timeout: retry 1 lần cho GET/idempotent
+    const isGet = (options.method || defaultOptions.method || 'GET').toString().toUpperCase() === 'GET';
+    const timeoutDuration = endpoint.includes('/auth/login') ? 30000 : (endpoint.startsWith('/dashboard/') ? 30000 : 20000);
     if (error instanceof Error && error.name === 'AbortError') {
       console.warn('API request timeout:', url, 'Timeout duration:', timeoutDuration + 'ms');
+      if (!endpoint.includes('/auth/login') && isGet && retryCount === 0) {
+        // small backoff then retry once
+        await new Promise((r) => setTimeout(r, 250));
+        return apiRequest<T>(endpoint, options, retryCount + 1);
+      }
       if (endpoint.includes('/auth/login')) {
         throw new Error('Đăng nhập mất quá nhiều thời gian. Vui lòng kiểm tra kết nối mạng và thử lại');
       }
@@ -650,31 +690,19 @@ export const authApi = {
     });
   },
 
-  // Lấy thông tin user từ JWT token (API /me)
-  async getMe(): Promise<ApiResponse> {
-    try {
-      return await apiRequest('/user/me', {
-        method: 'GET',
-      });
-    } catch (error) {
-      if (error instanceof Error &&
-        (error.message.includes('Phiên làm việc đã hết hạn') ||
-          error.message.includes('đăng nhập lại'))) {
-        // Clear tokens on session expiry
-        tokenManager.clearTokens();
-        return {
-          success: false,
-          message: 'Phiên làm việc đã hết hạn',
-        };
-      }
-      throw error;
-    }
-  },
+  // (removed duplicate getMe)
   
   // Get current token status
   getTokenStatus(): { hasToken: boolean; isExpired: boolean; expiresIn?: number } {
-    const hasToken = !!tokenManager.getAccessToken();
-    const isExpired = tokenManager.isTokenExpired();
+    if (typeof document !== 'undefined') {
+      const hasCookieToken = document.cookie.split('; ').some((c) => c.startsWith('accessToken='));
+      return {
+        hasToken: hasCookieToken,
+        isExpired: false,
+      };
+    }
+    const hasToken = false;
+    const isExpired = false;
     
     return {
       hasToken,

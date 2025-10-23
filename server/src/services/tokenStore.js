@@ -1,6 +1,7 @@
 import { setCache, getCache, deleteCache } from './redisService.js';
 
 const USER_REFRESH_JTI_PREFIX = 'auth:refreshJti:user:';
+const USER_REFRESH_SET_PREFIX = 'auth:user:'; // auth:user:<userId>:refreshJtis -> Set
 const REVOKED_REFRESH_PREFIX = 'auth:revoked:refresh:';
 
 // Fallback in-memory store for development
@@ -19,6 +20,41 @@ export async function setUserRefreshJti(userId, jti, ttlSeconds) {
     // Fallback to memory store
     tokenStore.set(key, jti);
     setTimeout(() => tokenStore.delete(key), ttlSeconds * 1000);
+  }
+}
+
+// Multi-session: support adding/removing JTIs per user (Redis Set preferred)
+export async function addUserRefreshJti(userId, jti, ttlSeconds) {
+  const setKey = `${USER_REFRESH_SET_PREFIX}${String(userId)}:refreshJtis`;
+  try {
+    // Prefer Redis commands if available via setCache wrapper (fallback: store as JSON array)
+    const existing = await getCache(setKey);
+    let setArr = [];
+    try { setArr = existing ? JSON.parse(existing) : []; } catch { setArr = Array.isArray(existing) ? existing : []; }
+    if (!setArr.includes(jti)) setArr.push(jti);
+    await setCache(setKey, JSON.stringify(setArr), ttlSeconds);
+  } catch (e) {
+    // Fallback memory: reuse tokenStore map
+    const memKey = setKey;
+    const arr = tokenStore.get(memKey) || [];
+    if (!arr.includes(jti)) arr.push(jti);
+    tokenStore.set(memKey, arr);
+    setTimeout(() => tokenStore.delete(memKey), ttlSeconds * 1000);
+  }
+}
+
+export async function removeUserRefreshJti(userId, jti) {
+  const setKey = `${USER_REFRESH_SET_PREFIX}${String(userId)}:refreshJtis`;
+  try {
+    const existing = await getCache(setKey);
+    let setArr = [];
+    try { setArr = existing ? JSON.parse(existing) : []; } catch { setArr = Array.isArray(existing) ? existing : []; }
+    const filtered = setArr.filter((x) => x !== jti);
+    await setCache(setKey, JSON.stringify(filtered), 30 * 24 * 60 * 60);
+  } catch (e) {
+    const memKey = setKey;
+    const arr = tokenStore.get(memKey) || [];
+    tokenStore.set(memKey, arr.filter((x) => x !== jti));
   }
 }
 

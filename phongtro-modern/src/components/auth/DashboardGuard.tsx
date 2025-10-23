@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { authApi } from '@/lib/api';
-import { useTokenRefresh } from '@/hooks/useTokenRefresh';
 
 interface DashboardGuardProps {
   children: React.ReactNode;
@@ -13,65 +12,52 @@ interface DashboardGuardProps {
 export default function DashboardGuard({ children }: DashboardGuardProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const [tokenCheck, setTokenCheck] = useState<'checking' | 'valid' | 'invalid'>('checking');
+  const [status, setStatus] = useState<'checking' | 'allowed' | 'redirect'>('checking');
 
-  // Handle session expiry specifically for dashboard
-  const { refreshToken } = useTokenRefresh({
-    redirectTo: '/dang-nhap',
-    showToast: true
-  });
-
-  // Check token status on mount and periodically
+  // Xác thực bằng cookie HttpOnly: gọi thẳng /user/me khi cần
   useEffect(() => {
-    const checkTokenAndRedirect = async () => {
-      const tokenStatus = authApi.getTokenStatus();
-      
-      if (!tokenStatus.hasToken) {
-        setTokenCheck('invalid');
-        return;
-      }
-      
-      if (tokenStatus.isExpired) {
-        try {
-          const refreshed = await refreshToken();
-          setTokenCheck(refreshed ? 'valid' : 'invalid');
-        } catch {
-          setTokenCheck('invalid');
+    let cancelled = false;
+    const run = async () => {
+      try {
+        // Nếu AuthContext đã có user và đúng role, cho phép ngay
+        if (user && (user.role === 'landlord' || user.role === 'admin')) {
+          if (!cancelled) setStatus('allowed');
+          return;
         }
-      } else {
-        setTokenCheck('valid');
+        // Nếu đang loading, chờ
+        if (isLoading) return;
+        // Thử gọi /user/me để lấy user từ cookie
+        const res = await authApi.getMe();
+        const u = (res as any)?.user;
+        if (u && (u.role === 'landlord' || u.role === 'admin')) {
+          if (!cancelled) setStatus('allowed');
+        } else {
+          if (!cancelled) setStatus('redirect');
+        }
+      } catch (_) {
+        if (!cancelled) setStatus('redirect');
       }
     };
-
-    checkTokenAndRedirect();
-  }, [refreshToken]);
+    run();
+    return () => { cancelled = true; };
+  }, [user?._id, user?.role, isLoading]);
 
   useEffect(() => {
-    // Wait for both auth loading and token check
-    if (isLoading || tokenCheck === 'checking') return;
-
-    // If token is invalid, redirect to login
-    if (tokenCheck === 'invalid' || !isAuthenticated) {
+    if (isLoading || status === 'checking') return;
+    if (status === 'redirect') {
       const currentPath = window.location.pathname + window.location.search;
       router.push(`/dang-nhap?redirect=${encodeURIComponent(currentPath)}`);
-      return;
     }
-
-    // If authenticated but wrong role, redirect home
-    if (user?.role !== 'landlord' && user?.role !== 'admin') {
-      router.push('/');
-      return;
-    }
-  }, [isAuthenticated, user, isLoading, router, tokenCheck]);
+  }, [status, isLoading, router]);
 
   // Show loading while checking auth and tokens
-  if (isLoading || tokenCheck === 'checking') {
+  if (isLoading || status === 'checking') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">
-            {tokenCheck === 'checking' ? 'Đang xác thực...' : 'Đang kiểm tra quyền truy cập...'}
+            {status === 'checking' ? 'Đang xác thực...' : 'Đang kiểm tra quyền truy cập...'}
           </p>
         </div>
       </div>
@@ -79,7 +65,7 @@ export default function DashboardGuard({ children }: DashboardGuardProps) {
   }
 
   // Don't render if token invalid or wrong role
-  if (tokenCheck === 'invalid' || !isAuthenticated || (user?.role !== 'landlord' && user?.role !== 'admin')) {
+  if (status !== 'allowed') {
     return null;
   }
 

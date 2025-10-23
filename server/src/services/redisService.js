@@ -1,5 +1,23 @@
 import cache from '~/middlewares/cacheMiddleware.js';
 
+// Optional Redis via ioredis
+let redis = null;
+try {
+  // eslint-disable-next-line global-require, import/no-extraneous-dependencies
+  const { default: IORedis } = await import('ioredis');
+  redis = new IORedis({
+    host: process.env.REDIS_HOST || '127.0.0.1',
+    port: Number(process.env.REDIS_PORT || 6379),
+    password: process.env.REDIS_PASSWORD || undefined,
+    maxRetriesPerRequest: 2,
+  });
+  // Light ping to ensure connectivity (non-blocking)
+  redis.ping().catch(() => {});
+} catch (e) {
+  // Redis not available, fallback to in-memory cache
+  redis = null;
+}
+
 /**
  * Simple cache service that mimics Redis functionality using NodeCache
  * This provides a consistent interface for caching operations
@@ -14,20 +32,62 @@ import cache from '~/middlewares/cacheMiddleware.js';
  */
 export async function getOrSetCache(key, fetchFn, ttl = 300) {
   try {
-    // Try to get from cache first
-    const cached = cache.get(key);
-    if (cached !== undefined) {
-      console.log(`Cache hit for key: ${key}`);
-      return cached;
+    if (redis) {
+      const cached = await redis.get(key);
+      if (cached !== null) {
+        if (!String(key).startsWith('blacklist:')) {
+          const safe = typeof key === 'string' ? `${key.slice(0, 16)}...(${key.length})` : 'unknown';
+          console.log(`Cache hit (redis) for key: ${safe}`);
+        }
+        try { return JSON.parse(cached); } catch { return cached; }
+      }
+    } else {
+      const cached = cache.get(key);
+      if (cached !== undefined) {
+        if (!String(key).startsWith('blacklist:')) {
+          const safe = typeof key === 'string' ? `${key.slice(0, 16)}...(${key.length})` : 'unknown';
+          console.log(`Cache hit for key: ${safe}`);
+        }
+        return cached;
+      }
     }
 
-    // Cache miss - fetch data and cache it
-    console.log(`Cache miss for key: ${key}, fetching data...`);
+    // Cache miss - optional anti-stampede lock (Redis only)
+    if (redis) {
+      try {
+        const lockKey = `${key}:lock`;
+        const locked = await redis.set(lockKey, '1', 'NX', 'EX', 10);
+        if (!locked) {
+          await new Promise((r) => setTimeout(r, 120));
+          const retry = await redis.get(key);
+          if (retry !== null) {
+            try { return JSON.parse(retry); } catch { return retry; }
+          }
+        }
+      } catch {}
+    }
+    if (!String(key).startsWith('blacklist:')) {
+      const safe = typeof key === 'string' ? `${key.slice(0, 16)}...(${key.length})` : 'unknown';
+      console.log(`Cache miss for key: ${safe}, fetching data...`);
+    }
     const data = await fetchFn();
     
     // Cache the data
-    cache.set(key, data, ttl);
-    console.log(`Cached data for key: ${key}, TTL: ${ttl}s`);
+    if (redis) {
+      const value = typeof data === 'string' ? data : JSON.stringify(data);
+      await redis.set(key, value, 'EX', ttl);
+      if (!String(key).startsWith('blacklist:')) {
+        const safe = typeof key === 'string' ? `${key.slice(0, 16)}...(${key.length})` : 'unknown';
+        console.log(`Cached (redis) data for key: ${safe}, TTL: ${ttl}s`);
+      }
+      try { await redis.del(`${key}:lock`); } catch {}
+    } else {
+      cache.set(key, data, ttl);
+      if (!String(key).startsWith('blacklist:')) {
+        const safe = typeof key === 'string' ? `${key.slice(0, 16)}...(${key.length})` : 'unknown';
+        console.log(`Cached data for key: ${safe}, TTL: ${ttl}s`);
+      }
+    }
     
     return data;
   } catch (error) {
@@ -46,9 +106,18 @@ export async function getOrSetCache(key, fetchFn, ttl = 300) {
  */
 export function setCache(key, value, ttl = 300) {
   try {
-    cache.set(key, value, ttl);
-    console.log(`Set cache for key: ${key}, TTL: ${ttl}s`);
-    return true;
+    if (redis) {
+      const val = typeof value === 'string' ? value : JSON.stringify(value);
+      redis.set(key, val, 'EX', ttl);
+      const safe = typeof key === 'string' ? `${key.slice(0, 16)}...(${key.length})` : 'unknown';
+      console.log(`Set cache (redis) for key: ${safe}, TTL: ${ttl}s`);
+      return true;
+    } else {
+      cache.set(key, value, ttl);
+      const safe = typeof key === 'string' ? `${key.slice(0, 16)}...(${key.length})` : 'unknown';
+      console.log(`Set cache for key: ${safe}, TTL: ${ttl}s`);
+      return true;
+    }
   } catch (error) {
     console.error(`Error setting cache for key ${key}:`, error);
     return false;
@@ -62,16 +131,38 @@ export function setCache(key, value, ttl = 300) {
  */
 export function getCache(key) {
   try {
+    if (redis) {
+      return redis.get(key);
+    }
     const value = cache.get(key);
     if (value !== undefined) {
-      console.log(`Cache hit for key: ${key}`);
+      const safe = typeof key === 'string' ? `${key.slice(0, 16)}...(${key.length})` : 'unknown';
+      console.log(`Cache hit for key: ${safe}`);
     } else {
-      console.log(`Cache miss for key: ${key}`);
+      const safe = typeof key === 'string' ? `${key.slice(0, 16)}...(${key.length})` : 'unknown';
+      console.log(`Cache miss for key: ${safe}`);
     }
     return value;
   } catch (error) {
     console.error(`Error getting cache for key ${key}:`, error);
     return undefined;
+  }
+}
+
+/**
+ * Check if a cache key exists (fast path for Redis), no logging
+ * @param {string} key
+ * @returns {Promise<boolean>}
+ */
+export async function existsCache(key) {
+  try {
+    if (redis) {
+      const exists = await redis.exists(key);
+      return exists === 1;
+    }
+    return cache.get(key) !== undefined;
+  } catch (error) {
+    return false;
   }
 }
 
@@ -82,6 +173,9 @@ export function getCache(key) {
  */
 export function deleteCache(key) {
   try {
+    if (redis) {
+      return redis.del(key);
+    }
     const deleted = cache.del(key);
     console.log(`Deleted cache for key: ${key}`);
     return deleted;
@@ -96,8 +190,14 @@ export function deleteCache(key) {
  */
 export function clearAllCache() {
   try {
-    cache.flushAll();
-    console.log('Cleared all cache');
+    if (redis) {
+      // Warning: FLUSHALL clears entire Redis; avoid in shared envs
+      redis.flushall();
+      console.log('Cleared all redis cache');
+    } else {
+      cache.flushAll();
+      console.log('Cleared all cache');
+    }
   } catch (error) {
     console.error('Error clearing cache:', error);
   }
@@ -109,6 +209,29 @@ export function clearAllCache() {
  */
 export function deleteCacheByPrefix(prefix) {
   try {
+    if (redis) {
+      // Use SCAN to iterate keys by prefix
+      const pattern = `${prefix}*`;
+      let cursor = '0';
+      let total = 0;
+      const pipeline = redis.pipeline();
+      const keysToDelete = [];
+      const loop = async () => {
+        const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+        cursor = nextCursor;
+        if (keys && keys.length) {
+          keys.forEach((k) => { keysToDelete.push(k); pipeline.del(k); });
+        }
+        if (cursor !== '0') {
+          await loop();
+        }
+      };
+      return loop().then(() => pipeline.exec()).then((results) => {
+        total = keysToDelete.length;
+        console.log(`Deleted ${total} redis cache keys by prefix: ${prefix}`);
+        return total;
+      });
+    }
     const keys = cache.keys();
     const toDelete = keys.filter((k) => k.startsWith(prefix));
     if (toDelete.length > 0) {
@@ -128,6 +251,9 @@ export function deleteCacheByPrefix(prefix) {
  */
 export function getCacheStats() {
   try {
+    if (redis) {
+      return { engine: 'redis' };
+    }
     return {
       keys: cache.keys().length,
       hits: cache.getStats().hits,
@@ -151,6 +277,7 @@ export default {
   getOrSetCache,
   setCache,
   getCache,
+  existsCache,
   deleteCache,
   clearAllCache,
   getCacheStats,

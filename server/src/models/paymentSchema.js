@@ -55,7 +55,7 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      index: true,
+      // Tránh double index: giữ unique, bỏ index riêng lẻ (đã có schema.index phía dưới)
     },
     
     // Mã tham chiếu nội bộ
@@ -129,10 +129,10 @@ const paymentSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for better performance
+// Indexes for better performance (tránh trùng lặp với field index)
 paymentSchema.index({ user: 1, createdAt: -1 });
 paymentSchema.index({ status: 1 });
-paymentSchema.index({ transactionId: 1 });
+paymentSchema.index({ transactionId: 1 }, { unique: true });
 paymentSchema.index({ packageType: 1 });
 
 export default mongoose.model("Payment", paymentSchema);

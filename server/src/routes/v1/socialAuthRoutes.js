@@ -1,6 +1,8 @@
 import express from 'express';
 import passport from '../../config/passportConfig.js';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import { setUserRefreshJti } from '../../services/tokenStore.js';
 
 const router = express.Router();
 
@@ -11,7 +13,7 @@ router.get('/google',
 
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
-  (req, res) => {
+  async (req, res) => {
     console.log('=== GOOGLE OAUTH LOGIN ===');
     console.log('Full user object from Google:', JSON.stringify(req.user, null, 2));
     console.log('User details:', {
@@ -27,6 +29,10 @@ router.get('/google/callback',
     });
 
     // Tạo JWT token với thông tin user đầy đủ
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('Missing JWT_SECRET env');
+    }
     const token = jwt.sign(
       { 
         id: req.user._id, 
@@ -34,8 +40,8 @@ router.get('/google/callback',
         full_name: req.user.full_name,
         email: req.user.email
       },
-      process.env.JWT_SECRET || 'asdfsadfsadf',
-      { expiresIn: "7d" }
+      jwtSecret,
+      { expiresIn: "15m" }
     );
 
     // Set cookie với thông tin user
@@ -43,11 +49,30 @@ router.get('/google/callback',
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: 'lax',
-      maxAge: 7*24*60*60*1000 // 7 days
+      maxAge: 15 * 60 * 1000 // 15 minutes
     });
 
+    // Also set refresh token (30d) with JTI and persist to store for rotation
+    const refreshSecret = process.env.JWT_REFRESH_SECRET;
+    if (!refreshSecret) {
+      throw new Error('Missing JWT_REFRESH_SECRET env');
+    }
+    const refreshJti = crypto.randomUUID();
+    const refreshToken = jwt.sign({ id: req.user._id, jti: refreshJti }, refreshSecret, { expiresIn: '30d' });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000
+    });
+
+    // Persist current refresh JTI
+    try {
+      await setUserRefreshJti(String(req.user._id), refreshJti, 30 * 24 * 60 * 60);
+    } catch (_) {}
+
     // Redirect về frontend với thông báo đăng nhập thành công
-    res.redirect('http://localhost:3000?login=success');
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}?login=success`);
   }
 );
 
@@ -58,7 +83,7 @@ router.get('/facebook',
 
 router.get('/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/login' }),
-  (req, res) => {
+  async (req, res) => {
     console.log('=== FACEBOOK OAUTH LOGIN ===');
     console.log('Full user object from Facebook:', JSON.stringify(req.user, null, 2));
     console.log('User details:', {
@@ -74,6 +99,10 @@ router.get('/facebook/callback',
     });
 
     // Tạo JWT token với thông tin user đầy đủ
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('Missing JWT_SECRET env');
+    }
     const token = jwt.sign(
       { 
         id: req.user._id, 
@@ -81,20 +110,38 @@ router.get('/facebook/callback',
         full_name: req.user.full_name,
         email: req.user.email
       },
-      process.env.JWT_SECRET || 'asdfsadfsadf',
-      { expiresIn: "7d" }
+      jwtSecret,
+      { expiresIn: "15m" }
     );
 
     // Set cookie với thông tin user
     res.cookie("accessToken", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV,
+      secure: process.env.NODE_ENV === "production",
       sameSite: 'lax',
-      maxAge: 7*24*60*60*1000 // 7 days
+      maxAge: 15 * 60 * 1000
     });
 
+    // Also set refresh token (30d) with JTI and persist
+    const refreshSecret = process.env.JWT_REFRESH_SECRET;
+    if (!refreshSecret) {
+      throw new Error('Missing JWT_REFRESH_SECRET env');
+    }
+    const fbRefreshJti = crypto.randomUUID();
+    const refreshToken = jwt.sign({ id: req.user._id, jti: fbRefreshJti }, refreshSecret, { expiresIn: '30d' });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000
+    });
+
+    try {
+      await setUserRefreshJti(String(req.user._id), fbRefreshJti, 30 * 24 * 60 * 60);
+    } catch (_) {}
+
     // Redirect về frontend với thông báo đăng nhập thành công
-    res.redirect('http://localhost:3000?login=success');
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}?login=success`);
   }
 );
 

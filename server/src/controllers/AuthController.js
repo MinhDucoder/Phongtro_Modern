@@ -6,11 +6,19 @@ import PackagePlan from "../models/packagePlanSchema.js";
 import dotenv from "dotenv";
 import fs from "fs/promises";
 import { generateVerificationToken, sendVerificationEmail, generatePasswordResetToken, sendPasswordResetEmail } from '../services/emailService.js';
+import { setCache } from '../services/redisService.js';
+import { createHash } from 'crypto';
+import { setUserRefreshJti, getUserRefreshJti, clearUserRefreshJti, revokeRefreshJti, isRefreshJtiRevoked } from '../services/tokenStore.js';
+import { randomUUID } from 'crypto';
 
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'asdfsadfsadf';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'asdfkljhasdfsadf';
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+
+if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
+  throw new Error('Missing JWT secrets: please set JWT_SECRET and JWT_REFRESH_SECRET in environment variables');
+}
 
 class AuthController {
   // REGISTER
@@ -221,12 +229,22 @@ class AuthController {
         errorType: "invalid_credentials" 
       });
 
+      // Issue short-lived access token (15 minutes) with jti for revoke EXISTS
+      const accessJti = randomUUID();
       const token = jwt.sign({ 
         id: user._id, 
         role: user.role,
         email: user.email,
         full_name: user.full_name
-      }, JWT_SECRET, { expiresIn: "30d" }); // Extended to 30 days
+      }, JWT_SECRET, { expiresIn: "15m", jwtid: accessJti });
+
+      // Issue long-lived refresh token (30 days) with JTI for rotation
+      const refreshJti = randomUUID();
+      const refreshToken = jwt.sign(
+        { id: user._id, jti: refreshJti },
+        JWT_REFRESH_SECRET,
+        { expiresIn: "30d" }
+      );
 
       user.last_login = new Date();
       await user.save();
@@ -242,15 +260,31 @@ class AuthController {
         last_login: user.last_login
       };
 
-      // Set cookie with proper options for better persistence
+      // Set cookies
       res.cookie("accessToken", token, { 
         httpOnly: true, 
         secure: process.env.NODE_ENV === "production", 
         sameSite: 'lax',
         path: '/',
-        maxAge: 30*24*60*60*1000, // 30 days instead of 7 days
-        domain: process.env.NODE_ENV === "production" ? '.yourdomain.com' : undefined // Only set domain in production
+        maxAge: 15 * 60 * 1000, // 15 minutes
+        domain: process.env.NODE_ENV === "production" ? '.yourdomain.com' : undefined
       });
+
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        domain: process.env.NODE_ENV === "production" ? '.yourdomain.com' : undefined
+      });
+
+      // Store current refresh JTI per user for rotation/reuse detection
+      try {
+        await setUserRefreshJti(String(user._id), refreshJti, 30 * 24 * 60 * 60);
+      } catch (e) {
+        // Non-fatal: login still succeeds even if Redis unavailable
+      }
 
       res.status(200).json({ 
         success: true,
@@ -264,27 +298,156 @@ class AuthController {
     }
   }
 
-  // ====== REFRESH TOKEN (chưa dùng) ======
-  // async refreshToken(req, res) {
-  //   const { refreshToken } = req.cookies;
-  //   if (!refreshToken) return res.status(401).json({ message: "Vui lòng đăng nhập lại" });
+  // ====== REFRESH TOKEN ======
+  async refreshToken(req, res) {
+    try {
+      const { refreshToken } = req.cookies || {};
 
-  //   try {
-  //     const payload = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
-  //     const user = await User.findById(payload.id);
-  //     if (!user || user.refresh_token !== refreshToken) throw new Error();
+      if (!refreshToken) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Vui lòng đăng nhập lại" 
+        });
+      }
 
-  //     const newToken = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "15m" });
-  //     res.json({ token: newToken });
-  //   } catch {
-  //     res.status(401).json({ message: "Token không hợp lệ, vui lòng đăng nhập lại" });
-  //   }
-  // }
+      // Verify refresh token
+      const payload = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
+      const user = await User.findById(payload.id);
+
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Token không hợp lệ, vui lòng đăng nhập lại" 
+        });
+      }
+
+      // Check revoked JTI (reuse or manually revoked)
+      if (payload.jti && (await isRefreshJtiRevoked(payload.jti))) {
+        return res.status(401).json({ success: false, message: "Refresh token đã bị thu hồi" });
+      }
+
+      // Enforce rotation: payload.jti must match current stored JTI
+      try {
+        const currentJti = await getUserRefreshJti(String(user._id));
+        if (!currentJti || payload.jti !== currentJti) {
+          // Token reuse detected: revoke presented JTI (if any) and clear current session
+          if (payload.jti) {
+            const nowSec = Math.floor(Date.now() / 1000);
+            const ttlSec = payload.exp ? Math.max(0, payload.exp - nowSec) : 0;
+            if (ttlSec > 0) {
+              await revokeRefreshJti(payload.jti, ttlSec);
+            }
+          }
+          await clearUserRefreshJti(String(user._id));
+          return res.status(401).json({ success: false, message: "Phát hiện reuse refresh token, vui lòng đăng nhập lại" });
+        }
+      } catch (e) {
+        // If store unavailable, continue with best-effort rotation
+      }
+
+      // Issue new short-lived access token
+      const newAccessJti = randomUUID();
+      const newAccessToken = jwt.sign(
+        { id: user._id, role: user.role, email: user.email, full_name: user.full_name },
+        JWT_SECRET,
+        { expiresIn: "15m" , jwtid: newAccessJti}
+      );
+
+      // Update access token cookie
+      res.cookie("accessToken", newAccessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 15 * 60 * 1000
+      });
+
+      // Rotate refresh token: issue new RT with new JTI
+      const newRefreshJti = randomUUID();
+      const newRefreshToken = jwt.sign(
+        { id: user._id, jti: newRefreshJti },
+        JWT_REFRESH_SECRET,
+        { expiresIn: "30d" }
+      );
+
+      // Persist new JTI for the user and revoke old presented JTI
+      try {
+        await setUserRefreshJti(String(user._id), newRefreshJti, 30 * 24 * 60 * 60);
+        if (payload.jti) {
+          const nowSec = Math.floor(Date.now() / 1000);
+          const ttlSec = payload.exp ? Math.max(0, payload.exp - nowSec) : 0;
+          if (ttlSec > 0) {
+            await revokeRefreshJti(payload.jti, ttlSec);
+          }
+        }
+      } catch (e) {
+        // Best-effort; if fail, still set new cookie but rotation guarantees weaken
+      }
+
+      // Update refresh cookie
+      res.cookie("refreshToken", newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60 * 1000
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Làm mới phiên thành công",
+        accessToken: newAccessToken,
+        expiresIn: 15 * 60
+      });
+    } catch (error) {
+      console.error('Refresh token error:', error);
+      return res.status(401).json({ 
+        success: false, 
+        message: "Token không hợp lệ hoặc đã hết hạn" 
+      });
+    }
+  }
 
   // ====== LOGOUT ======
   async logout(req, res) {
     try {
-      // Clear access token cookie
+      // Blacklist current access token until it expires (dùng hash key)
+      const token = req.cookies?.accessToken;
+      if (token) {
+        try {
+          const decoded = jwt.decode(token);
+          const nowSec = Math.floor(Date.now() / 1000);
+          const ttl = decoded && decoded.exp ? Math.max(0, decoded.exp - nowSec) : 0;
+          if (ttl > 0) {
+            const tokenHash = createHash('sha256').update(token).digest('hex');
+            await setCache(`blacklist:${tokenHash}`, 'revoked', ttl);
+          }
+        } catch (e) {
+          // ignore blacklist errors
+        }
+      }
+
+      // Revoke and clear current refresh token/session
+      const rt = req.cookies?.refreshToken;
+      if (rt) {
+        try {
+          const payload = jwt.decode(rt);
+          if (payload && payload.jti) {
+            const nowSec = Math.floor(Date.now() / 1000);
+            const ttl = payload.exp ? Math.max(0, payload.exp - nowSec) : 0;
+            if (ttl > 0) {
+              await revokeRefreshJti(payload.jti, ttl);
+            }
+          }
+          if (payload && payload.id) {
+            await clearUserRefreshJti(String(payload.id));
+          }
+        } catch (e) {
+          // ignore errors
+        }
+      }
+
+      // Clear access token cookie and revoke by jti if possible
       res.clearCookie("accessToken", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",

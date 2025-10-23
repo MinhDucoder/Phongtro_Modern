@@ -5,6 +5,7 @@ import RentalRequest from "../models/rentalRequestSchema.js";
 import PostAnalytics from "../models/postAnalyticsSchema.js";
 import User from "../models/userSchema.js";
 import { ROOM_PROJECTION } from "../utils/constants.js";
+import { getOrSetCache } from "../services/redisService.js";
 
 class DashboardService {
   // Get admin dashboard overview statistics
@@ -297,6 +298,8 @@ class DashboardService {
   // Get dashboard overview statistics
   async getDashboardOverview(userId) {
     try {
+      const cacheKey = `dash:overview:${String(userId)}`;
+      return await getOrSetCache(cacheKey, async () => {
       // Get user's posts
       const userPosts = await Post.find({ landlord: userId })
         .populate('roomId')
@@ -360,6 +363,7 @@ class DashboardService {
           .filter(req => req.status === 'pending')
           .slice(0, 3)
       };
+      }, 60);
     } catch (error) {
       throw new Error(`Error getting dashboard overview: ${error.message}`);
     }
@@ -887,6 +891,8 @@ class DashboardService {
   async getPostAnalytics(userId, options = {}) {
     try {
       const { timeRange = '7d', postId } = options;
+      const cacheKey = `dash:analytics:${String(userId)}:${timeRange}:${postId || 'all'}`;
+      return await getOrSetCache(cacheKey, async () => {
       
       // Calculate date range
       let startDate = new Date();
@@ -964,6 +970,7 @@ class DashboardService {
         topPerformingPosts,
         analytics: analytics.slice(0, 20) // Latest 20 records
       };
+      }, 60);
     } catch (error) {
       throw new Error(`Error getting post analytics: ${error.message}`);
     }

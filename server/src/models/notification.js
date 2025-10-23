@@ -6,7 +6,7 @@ const notificationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
+      // Tránh double index: để index ở schema.index phía dưới
     },
     type: {
       type: String,
@@ -73,7 +73,7 @@ const notificationSchema = new mongoose.Schema(
   }
 );
 
-// Index for efficient queries
+// Index for efficient queries (tối ưu truy vấn phổ biến)
 notificationSchema.index({ userId: 1, createdAt: -1 });
 notificationSchema.index({ userId: 1, isRead: 1 });
 

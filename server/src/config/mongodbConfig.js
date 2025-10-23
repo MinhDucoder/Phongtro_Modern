@@ -18,6 +18,13 @@ export const connectDB = async () => {
     });
     await mongoose.connection.db.admin().command({ ping: 1 });
     console.log('✅ Successfully connected to MongoDB Atlas!');
+    // Đồng bộ index để loại bỏ cảnh báo trùng lặp
+    try {
+      const models = Object.values(mongoose.connection.models || {});
+      await Promise.allSettled(models.map((m) => m.syncIndexes && m.syncIndexes()));
+    } catch (e) {
+      console.warn('⚠️ syncIndexes warning:', e?.message || e);
+    }
     return true;
   } catch (error) {
     console.error('❌ MongoDB connection error:', error.message);

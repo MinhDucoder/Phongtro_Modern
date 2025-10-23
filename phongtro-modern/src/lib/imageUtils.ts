@@ -22,7 +22,15 @@ export function getSafeImageSrc(src: any): string {
   
   // Handle string
   if (typeof src === 'string') {
-    return src.trim() !== '' ? src : '/placeholder-room.svg';
+    const trimmed = src.trim();
+    if (trimmed === '' || trimmed === 'null' || trimmed === 'undefined' || trimmed === '{}' || trimmed === '[]') {
+      return '/placeholder-room.svg';
+    }
+    // Accept only absolute URLs, data URLs, or root-relative paths
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:') || trimmed.startsWith('/')) {
+      return trimmed;
+    }
+    return '/placeholder-room.svg';
   }
   
   // Handle object
