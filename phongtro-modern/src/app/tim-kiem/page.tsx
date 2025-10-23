@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import AdvancedSearch from '@/components/search/AdvancedSearch';
 import SearchResults from '@/components/search/SearchResults';
 import SearchMap from '@/components/search/SearchMap';
 
@@ -16,23 +15,13 @@ export default async function SearchPage({ searchParams }: PageProps) {
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Tìm kiếm nâng cao</h1>
-              <p className="text-gray-600 mt-1">
-                Tìm kiếm phòng trọ với bộ lọc chi tiết và bản đồ
-              </p>
-            </div>
+            
           </div>
         </div>
       </div>
 
-      {/* Advanced Search Filters */}
+      {/* Results Layout */}
       <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        <Suspense fallback={<div className="animate-pulse bg-white rounded-lg h-32"></div>}>
-          <AdvancedSearch initialParams={params} />
-        </Suspense>
-
-        {/* Results Layout */}
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Search Results */}
           <div className="lg:col-span-2">
@@ -43,7 +32,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
                 ))}
               </div>
             }>
-              <SearchResults searchParams={params} />
+              <SearchResults />
             </Suspense>
           </div>
 
@@ -53,7 +42,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
               <Suspense fallback={
                 <div className="animate-pulse bg-white rounded-lg h-96"></div>
               }>
-                <SearchMap searchParams={params} />
+                <SearchMap searchParams={{}} />
               </Suspense>
             </div>
           </div>

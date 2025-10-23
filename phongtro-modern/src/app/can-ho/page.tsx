@@ -13,7 +13,7 @@ export default function CanHoPage() {
         </div>
         
         <SearchResults
-          searchParams={{}}
+          initialFilters={{ propertyType: 'can-ho-chung-cu' }}
         />
       </div>
     </div>

@@ -344,3 +344,7 @@ export default function RoomsPage() {
     </div>
   );
 }
+
+function toast(arg0: string, arg1: { icon: string; style: { background: string; color: string; }; }) {
+  throw new Error('Function not implemented.');
+}

@@ -20,6 +20,9 @@ postRoute.post("/",
 // Public route - chỉ trả về posts active
 postRoute.get("/", catchAsync(PostController.list));
 
+// Get suggestions - 5 phòng trọ mới nhất
+postRoute.get("/suggestions/latest", catchAsync(PostController.suggestions));
+
 // Admin route - xem tất cả posts với query params
 postRoute.get("/admin/all", authenticate(), authorize("admin"), catchAsync(PostController.listAll));
 

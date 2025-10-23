@@ -1,14 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Pagination from '@/components/ui/Pagination';
 import StructuredData from '@/components/seo/StructuredData';
+import SearchResults from '@/components/search/SearchResults';
 import { Post } from '@/lib/api';
 import RoomCard from '@/components/room/RoomCard';
 import { toastManager } from '@/components/ui/ToastManager';
 import Link from 'next/link';
 
 export default function Home() {
+  const searchParams = useSearchParams();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -22,6 +25,9 @@ export default function Home() {
     return false;
   });
   const ITEMS_PER_PAGE = 6;
+
+  // Check if we have search params (keyword or province)
+  const hasSearchParams = searchParams?.has('keyword') || searchParams?.has('province');
 
   useEffect(() => {
     // Reset toast flag khi F5 (reload trang)
@@ -39,8 +45,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    fetchFeaturedPosts(currentPage);
-  }, [currentPage]);
+    if (!hasSearchParams) {
+      fetchFeaturedPosts(currentPage);
+    }
+  }, [currentPage, hasSearchParams]);
 
   const fetchFeaturedPosts = async (page: number = 1) => {
     try {
@@ -138,8 +146,16 @@ export default function Home() {
         data={null} 
       />
       <div className="min-h-screen bg-gray-50">
-        {/* Main Content */}
-        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* If user searched, show search results */}
+        {hasSearchParams && (
+          <SearchResults />
+        )}
+        
+        {/* Otherwise show featured posts */}
+        {!hasSearchParams && (
+          <>
+          {/* Main Content */}
+          <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Statistics Bar */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
             <div className="text-center mb-6">
@@ -253,9 +269,12 @@ export default function Home() {
             )}
           </div>
         </section>
+          </>
+        )}
       </div>
 
-      {/* Why Choose Us Section */}
+      {/* Why Choose Us Section - Only show when not searching */}
+      {!hasSearchParams && (
       <section className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -321,6 +340,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      )}
     </>
   );
 }

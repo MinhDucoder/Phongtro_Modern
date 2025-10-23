@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import SearchSuggestions from '@/components/search/SearchSuggestions';
 import { 
   MagnifyingGlassIcon, 
   AdjustmentsHorizontalIcon,
@@ -63,6 +64,7 @@ export default function SearchFilter() {
   const [selectedArea, setSelectedArea] = useState('Tất cả diện tích');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -75,15 +77,18 @@ export default function SearchFilter() {
     
     // Build search params
     const params = new URLSearchParams();
-    if (searchKeyword.trim()) params.set('q', searchKeyword.trim());
+    if (searchKeyword.trim()) params.set('keyword', searchKeyword.trim());
     if (selectedProvince !== 'Tất cả') params.set('province', selectedProvince);
     if (selectedCategory !== 'all') params.set('category', selectedCategory);
     if (selectedPrice !== 'Tất cả mức giá') params.set('price', selectedPrice);
     if (selectedArea !== 'Tất cả diện tích') params.set('area', selectedArea);
+    params.set('page', '1'); // Reset to page 1 when searching
     
-    // Navigate to search results
-    const searchUrl = `/tim-kiem?${params.toString()}`;
-    router.push(searchUrl);
+    // Get current pathname
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '/phong-tro';
+    
+    // Navigate to current page with search params (stay on same page)
+    router.push(`${pathname}?${params.toString()}`);
     
     // Reset loading state after navigation
     setTimeout(() => setIsSearching(false), 1000);
@@ -116,7 +121,7 @@ export default function SearchFilter() {
         <div className="mb-6">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search input */}
-            <div className="flex-1">
+            <div className="flex-1 relative">
               <div className="relative">
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
                 <input
@@ -125,6 +130,8 @@ export default function SearchFilter() {
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
                   onKeyPress={handleKeyPress}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)} // Delay để user có thể click suggestion
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
                 {searchKeyword && (
@@ -136,6 +143,13 @@ export default function SearchFilter() {
                   </button>
                 )}
               </div>
+              
+              {/* Search Suggestions */}
+              <SearchSuggestions 
+                keyword={searchKeyword}
+                isOpen={showSuggestions}
+                onClose={() => setShowSuggestions(false)}
+              />
             </div>
 
             {/* Province selector */}
@@ -184,11 +198,11 @@ export default function SearchFilter() {
                   : 'border-gray-300 hover:bg-gray-50 text-blue-800'
               }`}
             >
-              <FunnelIcon className="h-5 w-5 mr-2" />
-              <span className="hidden sm:inline">Bộ lọc</span>
-              {hasActiveFilters && (
+              <CurrencyDollarIcon className="h-5 w-5 mr-2" />
+              <span className="hidden sm:inline">Lọc giá</span>
+              {selectedPrice !== 'Tất cả mức giá' && (
                 <span className="ml-2 bg-blue-600 text-white text-xs rounded-full px-2 py-0.5">
-                  {[selectedProvince !== 'Tất cả', selectedCategory !== 'all', selectedPrice !== 'Tất cả mức giá', selectedArea !== 'Tất cả diện tích', searchKeyword.trim() !== ''].filter(Boolean).length}
+                  1
                 </span>
               )}
             </button>
@@ -223,21 +237,21 @@ export default function SearchFilter() {
           <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-blue-800 flex items-center">
-                <FunnelIcon className="w-5 h-5 mr-2" />
-                Bộ lọc nâng cao
+                <CurrencyDollarIcon className="w-5 h-5 mr-2" />
+                Lọc giá
               </h3>
-              {hasActiveFilters && (
+              {selectedPrice !== 'Tất cả mức giá' && (
                 <button
-                  onClick={clearFilters}
+                  onClick={() => setSelectedPrice('Tất cả mức giá')}
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center"
                 >
                   <XMarkIcon className="w-4 h-4 mr-1" />
-                  Xóa tất cả
+                  Xóa bộ lọc
                 </button>
               )}
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                   <CurrencyDollarIcon className="w-4 h-4 mr-1" />
@@ -256,44 +270,13 @@ export default function SearchFilter() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                  <HomeIcon className="w-4 h-4 mr-1" />
-                  Diện tích
-                </label>
-                <select
-                  value={selectedArea}
-                  onChange={(e) => setSelectedArea(e.target.value)}
-                  className="w-full py-2 px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                >
-                  {areaRanges.map((range) => (
-                    <option key={range} value={range}>
-                      {range}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sắp xếp theo
-                </label>
-                <select className="w-full py-2 px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
-                  <option>Tin mới nhất</option>
-                  <option>Giá thấp đến cao</option>
-                  <option>Giá cao đến thấp</option>
-                  <option>Diện tích nhỏ đến lớn</option>
-                  <option>Diện tích lớn đến nhỏ</option>
-                </select>
-              </div>
-
               <div className="flex items-end">
                 <button
                   onClick={handleSearch}
                   disabled={isSearching}
                   className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors text-sm font-medium"
                 >
-                  Áp dụng bộ lọc
+                  Áp dụng lọc
                 </button>
               </div>
             </div>

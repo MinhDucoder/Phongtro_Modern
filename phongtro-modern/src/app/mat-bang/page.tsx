@@ -13,7 +13,7 @@ export default function MatBangPage() {
         </div>
         
         <SearchResults
-          searchParams={{}}
+          initialFilters={{ propertyType: 'mat-bang' }}
         />
       </div>
     </div>

@@ -16,6 +16,7 @@ import chatHandler from "./sockets/chatHandler.js";
 import notificationHandler from "./sockets/notificationHandler.js";
 import { initNotificationHelper } from "./utils/notificationHelper.js";
 import postExpirationService from "./services/postExpirationService.js";
+import { initSearchConfig, syncDataToMeiliSearch } from "./services/meiliSearchService.js";
 
 const app = express();
 
@@ -127,11 +128,26 @@ io.on("connection", (socket) => {
 });
 
 // ===== Start server (API + Socket.IO) =====
-httpServer.listen(apiPort, '0.0.0.0', () => {
+httpServer.listen(apiPort, '0.0.0.0', async () => {
   console.log(`🚀 Server (API + Socket.IO) running at:`);
   console.log(`   - http://localhost:${apiPort}/`);
   console.log(`   - http://127.0.0.1:${apiPort}/`);
   
   // Khởi động cron job để auto-expire posts
   postExpirationService.startExpirationCronJob();
+  
+  // Khởi tạo MeiliSearch config
+  try {
+    console.log("📚 Initializing MeiliSearch...");
+    await initSearchConfig();
+    console.log("✅ MeiliSearch initialized successfully!");
+    
+    // Đồng bộ dữ liệu vào MeiliSearch
+    console.log("🔄 Syncing data to MeiliSearch...");
+    await syncDataToMeiliSearch();
+    console.log("✅ Data synced to MeiliSearch!");
+  } catch (err) {
+    console.error("❌ MeiliSearch initialization failed:", err.message);
+    console.log("   Tìm kiếm MeiliSearch sẽ không khả dụng.");
+  }
 });
