@@ -88,12 +88,17 @@ export default function RoomCard({ room, onToggleFavorite, isFavorite = false, o
         onToggleSaved?.(room._id);
         toastManager.showSuccess('Đã lưu tin thành công');
       }
-    } catch (error) {
-      console.error('❌ Error saving property:', error);
+    } catch (err: unknown) {
+      console.error('❌ Error saving property:', err);
+      const anyLike = err as {
+        message?: string;
+        stack?: string;
+        response?: { data?: unknown };
+      } | null | undefined;
       console.error('Error details:', {
-        message: typeof error === 'object' && error !== null && 'message' in error ? (error as any).message : String(error),
-        stack: typeof error === 'object' && error !== null && 'stack' in error ? (error as any).stack : undefined,
-        response: typeof error === 'object' && error !== null && 'response' in error ? (error as any).response?.data : undefined
+        message: typeof anyLike?.message === 'string' ? anyLike?.message : String(err),
+        stack: anyLike?.stack,
+        response: anyLike?.response?.data
       });
       toastManager.showError('Có lỗi xảy ra khi lưu tin');
     } finally {
@@ -132,9 +137,9 @@ export default function RoomCard({ room, onToggleFavorite, isFavorite = false, o
   const validImageUrl = getFirstValidImage();
 
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden h-full flex flex-col">
       {/* Image */}
-      <div className="relative h-48 w-full">
+      <div className="relative h-48 w-full flex-shrink-0">
         {validImageUrl && !imageError ? (
           <Image
             src={validImageUrl}
@@ -193,7 +198,7 @@ export default function RoomCard({ room, onToggleFavorite, isFavorite = false, o
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-grow">
         {/* Title */}
         <Link href={`/phong-tro/${room._id}`} className="block">
           <h3 className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2">
@@ -229,7 +234,7 @@ export default function RoomCard({ room, onToggleFavorite, isFavorite = false, o
         </div>
 
         {/* Description */}
-        <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+        <p className="mt-2 text-sm text-gray-600 line-clamp-2 flex-grow">
           {room.description}
         </p>
 
@@ -265,7 +270,7 @@ export default function RoomCard({ room, onToggleFavorite, isFavorite = false, o
         </div>
 
         {/* Contact Button */}
-        <div className="mt-3">
+        <div className="mt-3 mt-auto">
           <Link
             href={`/phong-tro/${room._id}`}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors text-center block"

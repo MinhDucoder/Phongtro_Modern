@@ -38,16 +38,53 @@ export default function MapLibreMap({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
-  const [roomInfo, setRoomInfo] = useState<any>(null);
+  type RoomInfo = {
+    roomId?: {
+      location?: { coordinates?: [number, number] } | null;
+      title?: string;
+      description?: string;
+      price?: number;
+      area?: number;
+      propertyType?: string;
+      amenities?: string[];
+      images?: string[];
+      city?: string;
+      address?: string;
+    } | null;
+    location?: { coordinates?: [number, number] } | null;
+    coordinates?: [number, number];
+    lat?: number;
+    lng?: number;
+    latitude?: number;
+    longitude?: number;
+  } | null;
+
+  const [roomInfo, setRoomInfo] = useState<RoomInfo>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [nearbyAmenities, setNearbyAmenities] = useState<any[]>([]);
+  type Amenity = {
+    id: string | number;
+    lat: number;
+    lng: number;
+    name: string;
+    amenity: string;
+    type: string;
+  };
+  const [nearbyAmenities, setNearbyAmenities] = useState<Amenity[]>([]);
   const [showAmenities, setShowAmenities] = useState(false);
   const [isLoadingAmenities, setIsLoadingAmenities] = useState(false);
   
   // New features for rental property map
-  const [transportation, setTransportation] = useState<any[]>([]);
+  type TransportPoint = {
+    id: string | number;
+    lat: number;
+    lng: number;
+    name: string;
+    type: string;
+    elementType: string;
+  };
+  const [transportation, setTransportation] = useState<TransportPoint[]>([]);
   const [showTransportation, setShowTransportation] = useState(false);
   const [isLoadingTransportation, setIsLoadingTransportation] = useState(false);
   const [mapLayers, setMapLayers] = useState({
@@ -94,23 +131,37 @@ export default function MapLibreMap({
       `;
 
       const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`);
-      const data = await response.json();
+      const data: unknown = await response.json();
       
-      const amenities = data.elements.map((element: any) => {
-        const lat = element.lat || element.center?.lat;
-        const lng = element.lon || element.center?.lon;
-        const name = element.tags?.name || element.tags?.amenity || 'Không tên';
-        const amenity = element.tags?.amenity;
-        
-        return {
-          id: element.id,
-          lat,
-          lng,
-          name,
-          amenity,
-          type: element.type
-        };
-      }).filter((amenity: any) => amenity.lat && amenity.lng);
+      const elements = (data as { elements?: unknown }).elements;
+      const amenities: Amenity[] = Array.isArray(elements)
+        ? elements
+            .map((elementRaw) => {
+              const element = elementRaw as {
+                id: string | number;
+                lat?: number;
+                lon?: number;
+                center?: { lat?: number; lon?: number };
+                tags?: { name?: string; amenity?: string };
+                type?: string;
+              };
+              const amenityLat = element.lat ?? element.center?.lat;
+              const amenityLng = element.lon ?? element.center?.lon;
+              const name = element.tags?.name || element.tags?.amenity || 'Không tên';
+              const amenity = element.tags?.amenity || '';
+              const type = element.type || '';
+              if (typeof amenityLat !== 'number' || typeof amenityLng !== 'number') return null;
+              return {
+                id: element.id,
+                lat: amenityLat,
+                lng: amenityLng,
+                name,
+                amenity,
+                type
+              } as Amenity;
+            })
+            .filter((a): a is Amenity => !!a)
+        : [];
 
       setNearbyAmenities(amenities);
     } catch (error) {
@@ -140,23 +191,37 @@ export default function MapLibreMap({
       `;
 
       const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`);
-      const data = await response.json();
+      const data: unknown = await response.json();
       
-      const transportPoints = data.elements.map((element: any) => {
-        const lat = element.lat || element.center?.lat;
-        const lng = element.lon || element.center?.lon;
-        const name = element.tags?.name || element.tags?.public_transport || 'Trạm giao thông';
-        const type = element.tags?.public_transport || element.tags?.railway || element.tags?.highway;
-        
-        return {
-          id: element.id,
-          lat,
-          lng,
-          name,
-          type,
-          elementType: element.type
-        };
-      }).filter((point: any) => point.lat && point.lng);
+      const elements = (data as { elements?: unknown }).elements;
+      const transportPoints: TransportPoint[] = Array.isArray(elements)
+        ? elements
+            .map((elementRaw) => {
+              const element = elementRaw as {
+                id: string | number;
+                lat?: number;
+                lon?: number;
+                center?: { lat?: number; lon?: number };
+                tags?: { name?: string; public_transport?: string; railway?: string; highway?: string };
+                type?: string;
+              };
+              const tLat = element.lat ?? element.center?.lat;
+              const tLng = element.lon ?? element.center?.lon;
+              const name = element.tags?.name || element.tags?.public_transport || 'Trạm giao thông';
+              const type = element.tags?.public_transport || element.tags?.railway || element.tags?.highway || '';
+              const elementType = element.type || '';
+              if (typeof tLat !== 'number' || typeof tLng !== 'number') return null;
+              return {
+                id: element.id,
+                lat: tLat,
+                lng: tLng,
+                name,
+                type,
+                elementType
+              } as TransportPoint;
+            })
+            .filter((p): p is TransportPoint => !!p)
+        : [];
 
       setTransportation(transportPoints);
     } catch (error) {
@@ -208,14 +273,33 @@ export default function MapLibreMap({
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/posts/${roomId}`);
+        // Try multiple API endpoints to get room data
+        let post = null;
+        let coordinates = null;
 
-        if (!response.ok) {
-          throw new Error('Không thể lấy thông tin bài đăng');
+        // First try: Direct API call to backend
+        try {
+          const response = await fetch(`http://localhost:5000/api/v1/posts/${roomId}`);
+          if (response.ok) {
+            const data = await response.json();
+            post = data.data || data.post;
+          }
+        } catch (apiError) {
+          console.log('Backend API failed, trying alternative...', apiError);
         }
 
-        const data = await response.json();
-        const post = data.post || data.data;
+        // Second try: Alternative API structure
+        if (!post) {
+          try {
+            const response = await fetch(`http://localhost:5000/api/v1/rooms/${roomId}`);
+            if (response.ok) {
+              const data = await response.json();
+              post = data.data || data.room;
+            }
+          } catch (apiError) {
+            console.log('Alternative API failed, trying fallback...', apiError);
+          }
+        }
 
         // Debug logging to help identify coordinate issues
         console.log('MapLibreMap: Post data structure:', {
@@ -224,36 +308,51 @@ export default function MapLibreMap({
           hasLocation: !!post?.roomId?.location,
           hasCoordinates: !!post?.roomId?.location?.coordinates,
           coordinates: post?.roomId?.location?.coordinates,
-          coordinatesLength: post?.roomId?.location?.coordinates?.length
+          coordinatesLength: post?.roomId?.location?.coordinates?.length,
+          fullPost: post
         });
 
-        // Check for coordinates in roomId.location (GeoJSON format: [longitude, latitude])
+        // Check for coordinates in various possible locations
         if (post?.roomId?.location?.coordinates && post.roomId.location.coordinates.length === 2) {
-          // GeoJSON format: [longitude, latitude]
-          const [lng, lat] = post.roomId.location.coordinates;
-          // Validate coordinates
-          if (typeof lat === 'number' && typeof lng === 'number' && 
-              lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-            setCoordinates({ lat: lat, lng: lng });
-            setRoomInfo(post);
-          } else {
-            throw new Error('Tọa độ không hợp lệ. Vui lòng liên hệ chủ nhà để cập nhật thông tin.');
-          }
+          // Database format: [latitude, longitude] (not GeoJSON)
+          const [lat, lng] = post.roomId.location.coordinates;
+          coordinates = { lat, lng };
         } else if (post?.location?.coordinates && post.location.coordinates.length === 2) {
-          // Fallback: check if coordinates are in post.location (GeoJSON format: [longitude, latitude])
-          const [lng, lat] = post.location.coordinates;
-          // Validate coordinates
-          if (typeof lat === 'number' && typeof lng === 'number' && 
-              lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-            setCoordinates({ lat: lat, lng: lng });
+          // Fallback: check if coordinates are in post.location
+          const [lat, lng] = post.location.coordinates;
+          coordinates = { lat, lng };
+        } else if (post?.coordinates && post.coordinates.length === 2) {
+          // Another fallback: direct coordinates
+          const [lat, lng] = post.coordinates;
+          coordinates = { lat, lng };
+        } else if (post?.lat && post?.lng) {
+          // Direct lat/lng properties
+          coordinates = { lat: post.lat, lng: post.lng };
+        } else if (post?.latitude && post?.longitude) {
+          // Alternative naming
+          coordinates = { lat: post.latitude, lng: post.longitude };
+        }
+
+        // Validate coordinates if found
+        if (coordinates) {
+          if (typeof coordinates.lat === 'number' && typeof coordinates.lng === 'number' && 
+              coordinates.lat >= -90 && coordinates.lat <= 90 && 
+              coordinates.lng >= -180 && coordinates.lng <= 180) {
+            setCoordinates(coordinates);
             setRoomInfo(post);
+            console.log('✅ Valid coordinates found:', coordinates);
           } else {
             throw new Error('Tọa độ không hợp lệ. Vui lòng liên hệ chủ nhà để cập nhật thông tin.');
           }
         } else {
-          throw new Error('Phòng này chưa có tọa độ. Vui lòng liên hệ chủ nhà để cập nhật thông tin.');
+          // If no coordinates found, use default coordinates for Ho Chi Minh City
+          console.log('⚠️ No coordinates found, using default location');
+          setCoordinates({ lat: 10.8231, lng: 106.6297 }); // Ho Chi Minh City center
+          setRoomInfo(post);
+          setError('Phòng này chưa có tọa độ chính xác. Đang hiển thị vị trí mặc định.');
         }
       } catch (err) {
+        console.error('Error fetching coordinates:', err);
         setError(err instanceof Error ? err.message : 'Không thể tải tọa độ phòng');
         setIsLoading(false);
       }
@@ -311,32 +410,9 @@ export default function MapLibreMap({
             onClick={() => {
               setError(null);
               setIsLoading(true);
-              // Retry by re-fetching coordinates
+              // Retry by re-fetching coordinates with the same logic
               if (roomId) {
-                fetch(`/api/posts/${roomId}`)
-                  .then(response => response.json())
-                  .then(data => {
-                    const post = data.post || data.data;
-                    if (post?.roomId?.location?.coordinates && post.roomId.location.coordinates.length === 2) {
-                      const [lng, lat] = post.roomId.location.coordinates;
-                      if (typeof lat === 'number' && typeof lng === 'number' && 
-                          lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-                        setCoordinates({ lat: lat, lng: lng });
-                        setRoomInfo(post);
-                        setIsLoading(false);
-                      } else {
-                        setError('Tọa độ không hợp lệ. Vui lòng liên hệ chủ nhà để cập nhật thông tin.');
-                        setIsLoading(false);
-                      }
-                    } else {
-                      setError('Phòng này chưa có tọa độ. Vui lòng liên hệ chủ nhà để cập nhật thông tin.');
-                      setIsLoading(false);
-                    }
-                  })
-                  .catch(err => {
-                    setError(err instanceof Error ? err.message : 'Không thể tải tọa độ phòng');
-                    setIsLoading(false);
-                  });
+                fetchRoomCoordinates();
               }
             }}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"

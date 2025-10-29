@@ -103,28 +103,63 @@ export default function SearchResults({ initialQuery = '', initialFilters = {} }
       const fallbackUrl = `http://localhost:5000/api/v1/posts?${queryParams.toString()}`;
 
       const fallbackResponse = await fetch(fallbackUrl);
-      const fallbackData = await fallbackResponse.json();
+      const fallbackData: unknown = await fallbackResponse.json();
 
-      if (fallbackData.success) {
+      if ((fallbackData as { success?: boolean })?.success) {
         // Map dữ liệu roomId -> structure SearchResult
-        const items = (fallbackData.data.items || []).map((p: any) => ({
-          _id: p.roomId?._id || p._id,
-          title: p.roomId?.title,
-          description: p.roomId?.description,
-          price: p.roomId?.price,
-          area: p.roomId?.area,
-          location: p.roomId?.location ? p.roomId.location : { province: p.roomId?.city || '', district: '', ward: '', address: p.roomId?.address || '' },
-          type: p.roomId?.propertyType,
-          amenities: p.roomId?.amenities || [],
-          images: p.roomId?.images || [],
-          user: { username: '', email: '', phone: '' },
-          createdAt: p.createdAt,
-          updatedAt: p.updatedAt
-        }));
+        type FallbackItem = {
+          _id?: string;
+          createdAt?: string;
+          updatedAt?: string;
+          roomId?: {
+            _id?: string;
+            title?: string;
+            description?: string;
+            price?: number;
+            area?: number;
+            location?: { province?: string; district?: string; ward?: string; address?: string };
+            propertyType?: string;
+            amenities?: string[];
+            images?: string[];
+            city?: string;
+            address?: string;
+          };
+        };
+
+        const itemsSource = (fallbackData as { data?: { items?: unknown; total?: number } })?.data?.items;
+        const items: SearchResult[] = Array.isArray(itemsSource)
+          ? itemsSource.map((pRaw) => {
+              const p = pRaw as FallbackItem;
+              const rid = p.roomId ?? {};
+              const location = rid.location
+                ? {
+                    province: rid.location.province ?? (rid.city ?? ''),
+                    district: rid.location.district ?? '',
+                    ward: rid.location.ward ?? '',
+                    address: rid.location.address ?? (rid.address ?? '')
+                  }
+                : { province: rid.city ?? '', district: '', ward: '', address: rid.address ?? '' };
+              return {
+                _id: rid._id || p._id || '',
+                title: rid.title || '',
+                description: rid.description || '',
+                price: typeof rid.price === 'number' ? rid.price : 0,
+                area: typeof rid.area === 'number' ? rid.area : 0,
+                location,
+                type: rid.propertyType || '',
+                amenities: Array.isArray(rid.amenities) ? rid.amenities : [],
+                images: Array.isArray(rid.images) ? rid.images : [],
+                user: { username: '', email: '', phone: '' },
+                createdAt: p.createdAt || '',
+                updatedAt: p.updatedAt || ''
+              } as SearchResult;
+            })
+          : [];
 
         setResults(items);
-        setTotalResults(fallbackData.data.total || 0);
-        setTotalPages(Math.ceil((fallbackData.data.total || 0) / 12));
+        const total = (fallbackData as { data?: { total?: number } })?.data?.total ?? 0;
+        setTotalResults(total);
+        setTotalPages(Math.ceil(total / 12));
         
         if (items.length === 0) {
           toastManager.showInfo('Không tìm thấy kết quả phù hợp với tìm kiếm của bạn');
@@ -232,7 +267,7 @@ export default function SearchResults({ initialQuery = '', initialFilters = {} }
         ) : viewMode === 'list' ? (
           <>
             {/* Results Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
               {results.map((result) => (
                 <RoomCard
                   key={result._id}
