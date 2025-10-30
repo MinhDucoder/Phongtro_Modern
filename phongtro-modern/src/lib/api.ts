@@ -1,3 +1,14 @@
+import api from './axios';
+
+export const dashboardPostsApi = {
+  list: (params: { page?: number; limit?: number; status?: string; search?: string } = {}) =>
+    api.get('/api/v1/dashboard/posts', { params }),
+  get: (id: string) => api.get(`/api/v1/dashboard/posts/${id}`),
+  create: (payload: any) => api.post('/api/v1/dashboard/posts', payload),
+  update: (id: string, payload: any) => api.put(`/api/v1/dashboard/posts/${id}`, payload),
+  remove: (id: string) => api.delete(`/api/v1/dashboard/posts/${id}`),
+};
+
 // API cấu hình và service layer
 export const API_BASE_URL = 'http://localhost:5000/api/v1';
 

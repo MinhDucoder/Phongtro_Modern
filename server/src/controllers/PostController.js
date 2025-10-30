@@ -2,6 +2,7 @@
 import postService from "../services/postService.js";
 import { searchPosts } from "../services/meiliSearchService.js";
 import { success, error } from "../utils/responeHandler.js";
+import viewTrackingService from "../services/viewTrackingService.js";
 
 class PostController {
   async create(req, res, next) {
@@ -156,6 +157,13 @@ class PostController {
   async detail(req, res, next) {
     try {
       const post = await postService.getPostById(req.params.id);
+      // Ghi nhận view/visit (không chặn response nếu có lỗi nhỏ)
+      try {
+        await viewTrackingService.incrementPostView(req, req.params.id);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn("View tracking failed:", e?.message || e);
+      }
       return success(res, post);
     } catch (err) {
       return error(res, err.message, 404);

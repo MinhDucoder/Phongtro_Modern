@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { toastManager } from '@/components/ui/ToastManager';
-import SuppressHydrationWarning from '@/components/ui/SuppressHydrationWarning';
 
 interface AuthFormProps {
   type: 'login' | 'register';
@@ -174,8 +173,7 @@ export default function AuthForm({ type }: AuthFormProps) {
 
   return (
     <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-      <SuppressHydrationWarning>
-        <form className="space-y-6" onSubmit={handleSubmit}>
+      <form className="space-y-6" onSubmit={handleSubmit}>
         {type === 'register' && (
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-dark">
@@ -479,8 +477,7 @@ export default function AuthForm({ type }: AuthFormProps) {
             )}
           </button>
         </div>
-        </form>
-      </SuppressHydrationWarning>
+      </form>
 
       {/* Social Login */}
       <div className="mt-6">

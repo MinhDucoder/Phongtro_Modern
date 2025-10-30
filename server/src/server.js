@@ -151,3 +151,5 @@ httpServer.listen(apiPort, '0.0.0.0', async () => {
     console.log("   Tìm kiếm MeiliSearch sẽ không khả dụng.");
   }
 });
+
+export default app;

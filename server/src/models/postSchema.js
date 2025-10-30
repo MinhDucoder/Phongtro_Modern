@@ -137,6 +137,13 @@ const postSchema = new mongoose.Schema(
         type: Date
       }
     },
+    // Basic analytics counters
+    views: {
+      total: { type: Number, default: 0 }
+    },
+    visits: {
+      total: { type: Number, default: 0 }
+    },
     // When rejected, expiry date for resubmission
     resubmissionEligibleDate: {
       type: Date

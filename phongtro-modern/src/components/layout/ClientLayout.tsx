@@ -2,6 +2,7 @@
 
 import Header from './Header';
 import SearchSection from './SearchSection';
+import Footer from './Footer';
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -15,6 +16,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
       <main>
         {children}
       </main>
+      <Footer />
     </>
   );
 }
