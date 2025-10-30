@@ -16,25 +16,69 @@ Mục tiêu của hệ thống:
 
 ## 🧩 2. Kiến trúc hệ thống
 
-+-----------------+ +---------------------+
-| MongoDB | <--> | Node.js Backend |
-| (Post, Room...)| | Express + Mongoose |
-+-----------------+ +---------------------+
-|
-| REST API (recommend/:postId)
-v
-+---------------------+
-| Python Engine (RS) |
-| pandas + sklearn |
-+---------------------+
-bash
-python3 -m venv env
-source env/bin/activate        # macOS / Linux
-pip install pandas numpy scikit-learn flask
-cd RS_Posts
++-----------------+         +---------------------+
+|    MongoDB      |  <-->   |   Node.js Backend   |
+| (Post, Room...) |        |  Express + Mongoose |
++-----------------+         +---------------------+
+         |                         |
+         |  HTTP (fetch posts)     |
+         v                         |
+    +---------------------+        |
+    | Python Engine (RS)  | <------+
+    | pandas + sklearn    |
+    +---------------------+
 
-# env\Scripts\activate         # Windows (PowerShell: .\env\Scripts\Activate.ps1)
+## ⚙️ 3. Cài đặt & chạy
 
+```bash
+# Tạo venv
+python -m venv env
+
+# Kích hoạt venv
+# macOS/Linux
+source env/bin/activate
+# Windows PowerShell
+./env/Scripts/Activate.ps1
+
+# Cài dependencies
+cd RS/RS_Posts
 pip install -r requirements.txt
-python3 init.py
-python3 main.py
+
+# Khởi tạo model (gọi API Node để lấy posts và build vector)
+python initModel.py
+
+# Chạy service Flask (port 5001)
+python main.py
+```
+
+Yêu cầu: Backend Node.js phải đang chạy và cung cấp endpoint `GET /api/v1/posts` trả về `{ data: { items: [...] } }`.
+
+## 🔌 4. API cho FE tích hợp
+
+- Endpoint: `GET http://localhost:5001/recommendPosts?postId=<id>&topK=5`
+- Response:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "65f...",
+      "room": {
+        "title": "...",
+        "price": 3500000,
+        "area": 25,
+        "address": "...",
+        "images": ["..."]
+      }
+    }
+  ],
+  "meta": { "topK": 5 }
+}
+```
+
+- Healthcheck: `GET http://localhost:5001/health` -> `{ "status": "ok" }`
+
+Ghi chú:
+- `topK` mặc định 5, tối đa 20.
+- Nếu `postId` không tồn tại: trả `404` với `{ success: false, error: "Post not found" }`.
