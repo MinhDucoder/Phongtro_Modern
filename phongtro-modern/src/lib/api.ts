@@ -1213,6 +1213,16 @@ export const postPublicApi = {
   },
 };
 
+// RS (Recommendation Service) - gọi Flask service bên ngoài BE chính
+export const rsApi = {
+  async recommendPosts(postId: string, topK: number = 5): Promise<any> {
+    // Gọi qua proxy nội bộ để tránh CORS/mixed content
+    const url = `/api/rs/recommendPosts?postId=${encodeURIComponent(postId)}&topK=${topK}`;
+    const res = await fetch(url, { method: 'GET' });
+    return res.json();
+  },
+};
+
 // Statistics API
 export const statsApi = {
   // Lấy tổng quan thống kê

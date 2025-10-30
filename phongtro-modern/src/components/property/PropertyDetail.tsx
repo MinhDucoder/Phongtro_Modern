@@ -35,7 +35,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import OpenStreetMap from '@/components/map/OpenStreetMap';
 import PropertyReviews from '@/components/review/PropertyReviews';
 import EnhancedLandlordCard from '@/components/property/EnhancedLandlordCard';
-import { savedPropertiesApi } from '@/lib/api';
+import { savedPropertiesApi, rsApi } from '@/lib/api';
 
 interface PropertyDetailProps {
   property: {
@@ -144,6 +144,9 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'map' | 'reviews'>('overview');
   const [isSaved, setIsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [recs, setRecs] = useState<any[]>([]);
+  const [recsLoading, setRecsLoading] = useState<boolean>(false);
+  const [recsError, setRecsError] = useState<string | null>(null);
 
   // PropertyDetailPage đã normalize data, tin tưởng nó
   const room = property.room || {};
@@ -229,6 +232,35 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
     setMounted(true);
   }, []);
 
+  // Fetch recommendations
+  useEffect(() => {
+    const postId = property._id || property.id;
+    if (!postId) return;
+
+    let isActive = true;
+    (async () => {
+      try {
+        setRecsLoading(true);
+        setRecsError(null);
+        const resp = await rsApi.recommendPosts(postId as string, 6);
+        if (!isActive) return;
+        if (resp?.success && Array.isArray(resp.data)) {
+          setRecs(resp.data as any[]);
+        } else {
+          setRecs([]);
+        }
+      } catch (e: any) {
+        if (isActive) setRecsError(e?.message || 'Không thể tải gợi ý.');
+      } finally {
+        if (isActive) setRecsLoading(false);
+      }
+    })();
+
+    return () => {
+      isActive = false;
+    };
+  }, [property._id, property.id]);
+
   // Keyboard navigation for image modal
   useEffect(() => {
     if (!showAllImages) return;
@@ -277,8 +309,8 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100">
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Enhanced Breadcrumb */}
         <nav className="mb-8">
           <ol className="flex items-center space-x-2 text-sm">
@@ -300,12 +332,12 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
           </ol>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-6">
             {/* Enhanced Image Gallery */}
-            <div className="bg-white rounded-xl overflow-hidden shadow-lg border border-gray-200">
-              <div className="relative h-[28rem] group">
+            <div className="bg-white rounded-xl overflow-hidden shadow-md border border-gray-200">
+              <div className="relative h-[28rem] group bg-gradient-to-br from-gray-900 to-gray-800">
                 <Image
                   src={primaryImage}
                   alt={room?.title || 'Hình ảnh phòng'}
@@ -324,11 +356,11 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 )}
                 
                 {/* Enhanced Action Buttons */}
-                <div className="absolute top-4 right-4 flex space-x-2">
+                <div className="absolute top-6 right-6 flex space-x-3">
                   <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="bg-white/90 hover:bg-white p-3 rounded-full transition-all duration-200 hover:scale-110 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="backdrop-blur-sm bg-white/85 hover:bg-white p-3 rounded-xl transition-all duration-200 hover:scale-105 shadow-sm border border-white/40 disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label={isSaved ? "Bỏ lưu tin đăng" : "Lưu tin đăng"}
                   >
                     {isSaving ? (
@@ -341,7 +373,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   </button>
                   <button 
                     onClick={handleShare}
-                    className="bg-white/90 hover:bg-white p-3 rounded-full transition-all duration-200 hover:scale-110 shadow-lg"
+                    className="backdrop-blur-sm bg-white/85 hover:bg-white p-3 rounded-xl transition-all duration-200 hover:scale-105 shadow-sm border border-white/40"
                     aria-label="Chia sẻ phòng trọ"
                   >
                     <ShareIcon className="w-6 h-6 text-gray-700" />
@@ -353,48 +385,48 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   <>
                     <button
                       onClick={() => setCurrentImageIndex((prev) => prev > 0 ? prev - 1 : galleryImages.length - 1)}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full transition-all duration-200 hover:scale-110 shadow-lg opacity-0 group-hover:opacity-100"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 backdrop-blur-sm bg-white/90 hover:bg-white p-2.5 rounded-xl transition-all duration-200 hover:scale-105 shadow-md border border-white/40 opacity-0 group-hover:opacity-100"
                       aria-label="Ảnh trước"
                     >
-                      <ChevronLeftIcon className="w-6 h-6 text-gray-700" />
+                      <ChevronLeftIcon className="w-6 h-6 text-gray-800" />
                     </button>
                     <button
                       onClick={() => setCurrentImageIndex((prev) => prev < galleryImages.length - 1 ? prev + 1 : 0)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full transition-all duration-200 hover:scale-110 shadow-lg opacity-0 group-hover:opacity-100"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 backdrop-blur-sm bg-white/90 hover:bg-white p-2.5 rounded-xl transition-all duration-200 hover:scale-105 shadow-md border border-white/40 opacity-0 group-hover:opacity-100"
                       aria-label="Ảnh tiếp"
                     >
-                      <ChevronRightIcon className="w-6 h-6 text-gray-700" />
+                      <ChevronRightIcon className="w-6 h-6 text-gray-800" />
                     </button>
                   </>
                 )}
 
                 {/* Image Counter */}
                 {galleryImages.length > 1 && (
-                  <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  <div className="absolute bottom-4 right-4 backdrop-blur-sm bg-black/70 text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow-sm border border-white/10">
                     {currentImageIndex + 1} / {galleryImages.length}
                   </div>
                 )}
               </div>
               
               {/* Enhanced Image Thumbnails */}
-              <div className="p-6 bg-gray-50">
-                <div className="grid grid-cols-4 gap-3">
-                  {galleryImages.slice(0, 4).map((image: string, index: number) => (
+              <div className="p-4 bg-gray-50">
+                <div className="grid grid-cols-5 gap-2">
+                  {galleryImages.slice(0, 5).map((image: string, index: number) => (
                     <div key={index} className="relative group">
                       <Image
                         src={image || '/placeholder-room.svg'}
                         alt={`Ảnh ${index + 1} - ${room?.title || 'Phòng trọ'}`}
-                        width={120}
-                        height={90}
-                        sizes="120px"
+                        width={140}
+                        height={100}
+                        sizes="140px"
                         className={`object-cover rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 ${
                           currentImageIndex === index 
-                            ? 'ring-2 ring-blue-500 shadow-lg' 
-                            : 'hover:shadow-md'
+                            ? 'ring-2 ring-blue-500 shadow-md scale-105' 
+                            : 'hover:shadow-sm'
                         }`}
                         onClick={() => setCurrentImageIndex(index)}
                       />
-                      {index === 3 && galleryImages.length > 4 && (
+                      {index === 4 && galleryImages.length > 5 && (
                         <div 
                           className="absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer rounded-lg hover:bg-black/70 transition-colors"
                           onClick={() => setShowAllImages(true)}
@@ -402,7 +434,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                           <div className="text-center text-white">
                             <PlusIcon className="w-8 h-8 mx-auto mb-1" />
                             <span className="text-sm font-medium">
-                              +{galleryImages.length - 4} ảnh
+                              +{galleryImages.length - 5}
                             </span>
                           </div>
                         </div>
@@ -416,9 +448,10 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
           </div>
 
           {/* Enhanced Sidebar */}
-          <div className="space-y-4">
-            {/* Enhanced Landlord Card */}
-            <EnhancedLandlordCard
+          <div className="space-y-4 lg:sticky lg:top-24">
+            {/* Enhanced Landlord Card with glass-morphism wrapper */}
+            <div className="relative bg-white rounded-xl shadow-md border border-gray-200">
+              <EnhancedLandlordCard
               landlord={{
                 _id: (property.landlord as any)?._id || 'unknown',
                 full_name: contact?.name || 'Chủ nhà',
@@ -432,13 +465,14 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 last_login: (property.landlord as any)?.last_login
               }}
               propertyId={property._id || property.id || ''}
-            />
+              />
+            </div>
           </div>
         </div>
 
         {/* Tab Navigation - Moved below image gallery */}
-        <div className="mt-4">
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200">
+        <div className="mt-6">
+          <div className="bg-white rounded-xl shadow-md border border-gray-200">
             <div className="border-b border-gray-200">
               <nav className="flex space-x-8 px-6">
                 {[
@@ -470,7 +504,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   {/* Left Column - Main Info */}
                   <div className="lg:col-span-2 space-y-4">
                     {/* Property Basic Info */}
-                    <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
               {/* Stats and Meta Info */}
                       <div className="flex flex-wrap items-center justify-between mb-4">
                         <div className="flex items-center space-x-4 text-sm">
@@ -507,107 +541,108 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               </div>
 
               {/* Title */}
-                      <h1 className="text-2xl font-bold text-gray-900 mb-4 leading-tight">
+                      <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 leading-tight">
                 {room?.title || property.title || 'Tin đăng'}
               </h1>
 
               {/* Price and Area */}
                       <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
-                          <div className="text-xs font-medium text-green-700 mb-1">Giá thuê</div>
-                          <div className="text-2xl font-bold text-green-600">
-                    {price}
-                  </div>
-                </div>
-                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-                          <div className="text-xs font-medium text-blue-700 mb-1">Diện tích</div>
+                        <div className="bg-gradient-to-br from-emerald-50 to-green-50 p-4 rounded-xl border border-emerald-200 shadow-sm hover:shadow transition-all">
+                          <div className="text-xs font-semibold text-emerald-700 mb-1">Giá thuê</div>
+                          <div className="text-2xl font-bold text-emerald-600">
+                              {price}
+                            </div>
+                        </div>
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200 shadow-sm hover:shadow transition-all">
+                          <div className="text-xs font-semibold text-blue-700 mb-1">Diện tích</div>
                           <div className="text-2xl font-bold text-blue-600">
-                    {area}
-                  </div>
-                </div>
-              </div>
+                              {area}
+                            </div>
+                        </div>
+                      </div>
 
               {/* Location */}
-                      <div className="flex items-start p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-start p-4 bg-gray-50 rounded-xl border-l-4 border-blue-500 shadow-sm">
                         <MapPinIcon className="w-5 h-5 text-blue-600 mr-3 mt-1 flex-shrink-0" />
-                <div>
-                          <p className="font-semibold text-gray-900">{location}</p>
-                          <p className="text-gray-700 text-sm">{room?.address || property.address}</p>
+                        <div>
+                          <p className="font-bold text-gray-900 mb-1">{location}</p>
+                          <p className="text-gray-600 text-sm">{room?.address || property.address}</p>
                         </div>
-                </div>
-              </div>
+                      </div>
+                    </div>
 
                     {/* Description */}
-                    <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
                       <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
                         <UserIcon className="w-5 h-5 mr-2 text-blue-600" />
-                  Mô tả chi tiết
-                </h2>
-                <div className="prose max-w-none">
-                  {((room as any)?.description || property.description || '')
-                    .split('\n')
-                    .filter(Boolean)
+                        Mô tả chi tiết
+                      </h2>
+                      <div className="prose max-w-none">
+                        {((room as any)?.description || property.description || '')
+                          .split('\n')
+                          .filter(Boolean)
                           .map((paragraph: string, index: number) => (
-                            <p key={index} className="mb-3 text-gray-700 leading-relaxed text-sm whitespace-pre-line">
-                        {paragraph}
-                      </p>
-                    ))}
-                </div>
-              </div>
+                            <p key={index} className="text-gray-700 leading-relaxed text-sm mb-3 whitespace-pre-line">
+                              {paragraph}
+                            </p>
+                          ))}
+                      </div>
+                    </div>
+
             </div>
 
                   {/* Right Column - Amenities & Rules */}
                   <div className="space-y-4">
                     {/* Amenities */}
-                    <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
                       <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                        <CheckCircleIcon className="w-5 h-5 mr-2 text-green-600" />
+                        <CheckCircleIcon className="w-5 h-5 mr-2 text-emerald-600" />
                         Tiện nghi
-              </h2>
-                      <div className="space-y-2">
+                      </h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {(room?.amenities || property.amenities || []).map((amenity: string, index: number) => (
-                          <div key={index} className="flex items-center p-2 bg-green-50 rounded-lg border border-green-200">
-                            <CheckCircleIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
+                          <div key={index} className="flex items-center gap-2 p-2.5 bg-green-50 rounded-lg border border-green-200 hover:shadow transition-all">
+                            <CheckCircleIcon className="w-4 h-4 text-emerald-600" />
                             <span className="text-gray-900 font-medium text-sm">{getAmenityLabel(amenity)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
 
                     {/* Rules */}
-                    <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
                       <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
                         <ExclamationTriangleIcon className="w-5 h-5 mr-2 text-orange-600" />
                         Nội quy
-              </h2>
-              {Array.isArray((room as any)?.rules) && (room as any).rules.length > 0 ? (
+                      </h2>
+                      {Array.isArray((room as any)?.rules) && (room as any).rules.length > 0 ? (
                         <div className="space-y-2">
-                  {(room as any).rules.map((rule: string, index: number) => (
-                            <div key={index} className="flex items-start p-2 bg-orange-50 rounded-lg border border-orange-200">
-                              <XCircleIcon className="w-4 h-4 text-orange-600 mr-2 mt-0.5 flex-shrink-0" />
+                          {(room as any).rules.map((rule: string, index: number) => (
+                            <div key={index} className="flex items-start gap-2 p-2.5 bg-orange-50 rounded-lg border border-orange-200 hover:shadow transition-all">
+                              <XCircleIcon className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
                               <span className="text-gray-900 font-medium text-sm">{rule}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
                         <div className="text-center py-4">
-                          <ExclamationTriangleIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                          <ExclamationTriangleIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
                           <p className="text-gray-500 text-sm">Chưa cập nhật nội quy.</p>
-                </div>
-              )}
-            </div>
+                        </div>
+                      )}
+                    </div>
 
                     {/* Nearby Places */}
-                    <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
                       <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
                         <MapPinIcon className="w-5 h-5 mr-2 text-blue-600" />
-                Địa điểm lân cận
-              </h2>
-              {(() => {
-                const nearbyPlaces = (room as any)?.nearbyPlaces || property.nearbyPlaces || [];
-                return Array.isArray(nearbyPlaces) && nearbyPlaces.length > 0 ? (
-                  <div className="space-y-2">
-                    {nearbyPlaces.map((place: any, index: number) => {
+                        Địa điểm lân cận
+                      </h2>
+                      {(() => {
+                        const nearbyPlaces = (room as any)?.nearbyPlaces || property.nearbyPlaces || [];
+                        return Array.isArray(nearbyPlaces) && nearbyPlaces.length > 0 ? (
+                          <div className="space-y-2">
+                            {nearbyPlaces.map((place: any, index: number) => {
                       // Xử lý dữ liệu bị lỗi format (string bị split thành object với keys là số)
                       let placeName = '';
                       let placeType = '';
@@ -628,44 +663,44 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                         }
                       }
                       
-                      return (
-                      <div key={index} className="flex items-center justify-between p-2 bg-blue-50 rounded-lg border border-blue-200 hover:shadow-md transition-shadow">
-                        <div className="flex items-center">
-                          <div className="text-blue-600 mr-2">
-                            {getPlaceIcon(placeType)}
+                              return (
+                                <div key={index} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200 hover:shadow transition-all">
+                                  <div className="flex items-center gap-2">
+                                    <div className="text-blue-600">
+                                      {getPlaceIcon(placeType)}
+                                    </div>
+                                    <div className="flex flex-col">
+                                      <span className="text-gray-900 font-medium text-sm">
+                                        {placeName || getPlaceTypeLabel(placeType) || 'Địa điểm'}
+                                      </span>
+                                      {placeName && placeType && placeName !== getPlaceTypeLabel(placeType) && (
+                                        <span className="text-xs text-blue-600">{getPlaceTypeLabel(placeType)}</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-1 rounded-full">
+                                    {placeDistance}
+                                  </span>
+                                </div>
+                              );
+                            })}
                           </div>
-                          <div className="flex flex-col">
-                            <span className="text-gray-900 font-medium text-sm">
-                              {placeName || getPlaceTypeLabel(placeType) || 'Địa điểm'}
-                            </span>
-                            {placeName && placeType && placeName !== getPlaceTypeLabel(placeType) && (
-                              <span className="text-xs text-blue-600">{getPlaceTypeLabel(placeType)}</span>
-                            )}
+                        ) : (
+                          <div className="text-center py-4">
+                            <MapPinIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                            <p className="text-gray-500 text-sm">Chưa cập nhật địa điểm lân cận.</p>
                           </div>
-                        </div>
-                        <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                          {placeDistance}
-                        </span>
-                      </div>
-                      );
-                    })}
+                        );
+                      })()}
+                    </div>
                   </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <MapPinIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-500 text-sm">Chưa cập nhật địa điểm lân cận.</p>
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
                 </div>
               )}
 
               {activeTab === 'map' && (
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {/* Simple Map */}
-                  <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
+                  <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
                     <h3 className="text-lg font-bold text-gray-900 mb-4">Vị trí phòng</h3>
                     <OpenStreetMap
                       roomId={property._id || property.id || ''}
@@ -688,6 +723,101 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
       </div>
 
       {/* Enhanced Image Modal */}
+  {/* Recommendations - separate section below tabs */}
+  <div className="max-w-7xl mx-auto px-4 pb-10 sm:px-6 lg:px-8">
+    <div className="mt-6 bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+      {/* Header */}
+      <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-yellow-50 to-orange-50">
+        <h2 className="text-xl font-bold text-gray-900 flex items-center">
+          <StarIcon className="w-6 h-6 mr-2 text-yellow-500" />
+          Gợi ý tương tự
+        </h2>
+        <p className="text-sm text-gray-600 mt-1">Những phòng trọ có thể phù hợp với bạn</p>
+      </div>
+      
+      {/* Content */}
+      <div className="p-6">
+        {recsLoading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="animate-pulse bg-gray-50 rounded-xl overflow-hidden border border-gray-200">
+                <div className="h-40 bg-gray-200" />
+                <div className="p-3 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  <div className="h-3 bg-gray-200 rounded w-2/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {!recsLoading && recsError && (
+          <div className="text-center py-12">
+            <ExclamationTriangleIcon className="w-16 h-16 text-red-400 mx-auto mb-4" />
+            <div className="text-red-600 font-semibold mb-2">Không thể tải gợi ý</div>
+            <div className="text-sm text-gray-600">{recsError}</div>
+          </div>
+        )}
+        
+        {!recsLoading && !recsError && (
+          Array.isArray(recs) && recs.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recs.map((item: any) => {
+                const r = item?.room || {};
+                const img = Array.isArray(r.images) && r.images.length > 0 ? (typeof r.images[0] === 'string' ? r.images[0] : r.images[0]?.url) : '/placeholder-room.svg';
+                return (
+                  <Link 
+                    key={item._id} 
+                    href={`/phong-tro/${item._id}`} 
+                    className="group bg-gray-50 rounded-xl overflow-hidden border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300"
+                  >
+                    <div className="relative h-40 overflow-hidden bg-gray-200">
+                      <Image 
+                        src={img || '/placeholder-room.svg'} 
+                        alt={r.title || 'Gợi ý'} 
+                        fill 
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-110 transition-transform duration-300" 
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                        {r.title || 'Tin đăng'}
+                      </h3>
+                      <div className="flex items-center text-sm text-gray-600 mb-2">
+                        <MapPinIcon className="w-4 h-4 mr-1 flex-shrink-0" />
+                        <span className="truncate">{r.address || 'Chưa cập nhật địa chỉ'}</span>
+                      </div>
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+                        <div className="text-lg font-bold text-green-600">
+                          {r.price ? `${Number(r.price).toLocaleString('vi-VN')}đ` : 'Giá liên hệ'}
+                        </div>
+                        {r.area && (
+                          <div className="text-sm text-gray-600 font-medium">
+                            {r.area}m²
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <MagnifyingGlassIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600 font-medium">Không có gợi ý phù hợp.</p>
+              <p className="text-sm text-gray-500 mt-1">Hãy thử lại sau</p>
+            </div>
+          )
+        )}
+      </div>
+    </div>
+  </div>
+
+  {/* Enhanced Image Modal */}
       {showAllImages && (
         <div 
           className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
