@@ -23,6 +23,9 @@ postRoute.get("/", catchAsync(PostController.list));
 // Get suggestions - 5 phòng trọ mới nhất
 postRoute.get("/suggestions/latest", catchAsync(PostController.suggestions));
 
+// Get recommendations - Gợi ý bài đăng tương tự dựa trên ML
+postRoute.get("/:id/recommend", catchAsync(PostController.recommendPosts));
+
 // Admin route - xem tất cả posts với query params
 postRoute.get("/admin/all", authenticate(), authorize("admin"), catchAsync(PostController.listAll));
 

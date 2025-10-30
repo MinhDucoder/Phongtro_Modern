@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   CurrencyDollarIcon,
   CheckCircleIcon,
@@ -8,53 +8,63 @@ import {
   ClockIcon,
   EyeIcon,
   MagnifyingGlassIcon,
-  FunnelIcon
+  FunnelIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { toastManager } from '@/components/ui/ToastManager';
 
 interface Payment {
   id: string;
-  user: string;
+  transactionId: string;
+  referenceId?: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    avatar?: string;
+  } | null;
+  packageName: string;
+  packageType: string;
   amount: number;
-  type: 'vip1' | 'vip2' | 'vip3';
+  currency: string;
   status: 'pending' | 'completed' | 'failed' | 'refunded';
-  method: 'bank' | 'momo' | 'zalopay';
+  paymentMethod: string;
+  packageDuration: number;
+  packageStartDate?: string;
+  packageEndDate?: string;
   createdAt: string;
   completedAt?: string;
+  failedAt?: string;
+  failureReason?: string;
+  notes?: string;
 }
 
-// Mock data
-const mockPayments: Payment[] = [
-  {
-    id: 'PAY001',
-    user: 'Lê Nhật Duy',
-    amount: 50000,
-    type: 'vip1',
-    status: 'completed',
-    method: 'bank',
-    createdAt: '2024-01-15T10:30:00Z',
-    completedAt: '2024-01-15T10:35:00Z'
-  },
-  {
-    id: 'PAY002',
-    user: 'Nhà Trọ Ngõ Sen',
-    amount: 100000,
-    type: 'vip2',
-    status: 'pending',
-    method: 'momo',
-    createdAt: '2024-01-15T11:20:00Z'
-  },
-  {
-    id: 'PAY003',
-    user: 'Hoàng Phúc',
-    amount: 200000,
-    type: 'vip3',
-    status: 'failed',
-    method: 'zalopay',
-    createdAt: '2024-01-15T12:15:00Z'
-  }
-];
+interface PaymentStats {
+  overview: {
+    totalPayments: number;
+    completedPayments: number;
+    pendingPayments: number;
+    failedPayments: number;
+    refundedPayments: number;
+    totalRevenue: number;
+    avgTransactionValue: number;
+  };
+  revenueByPackage: Array<{
+    packageType: string;
+    revenue: number;
+    count: number;
+    avgValue: number;
+  }>;
+  revenueByMethod: Array<{
+    method: string;
+    revenue: number;
+    count: number;
+  }>;
+}
 
 const statusConfig = {
   pending: { label: 'Chờ xử lý', variant: 'warning' as const, icon: ClockIcon },
@@ -63,43 +73,115 @@ const statusConfig = {
   refunded: { label: 'Hoàn tiền', variant: 'info' as const, icon: XCircleIcon }
 };
 
-const typeConfig = {
-  vip1: { label: 'VIP 1', price: 50000 },
-  vip2: { label: 'VIP 2', price: 100000 },
-  vip3: { label: 'VIP 3', price: 200000 }
-};
-
-const methodConfig = {
-  bank: 'Chuyển khoản',
-  momo: 'MoMo',
-  zalopay: 'ZaloPay'
+const methodConfig: Record<string, string> = {
+  bank: 'Chuyển khoản ngân hàng',
+  momo: 'Ví MoMo',
+  zalopay: 'Ví ZaloPay',
+  vnpay: 'VNPay',
+  paypal: 'PayPal',
+  cash: 'Tiền mặt'
 };
 
 export default function PaymentManagement() {
-  const [payments] = useState<Payment[]>(mockPayments);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [stats, setStats] = useState<PaymentStats | null>(null);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed' | 'failed' | 'refunded'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 20;
 
-  const filteredPayments = payments.filter(payment => {
-    const matchesFilter = filter === 'all' || payment.status === filter;
-    const matchesSearch = payment.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         payment.user.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesFilter && matchesSearch;
-  });
+  // Fetch payments từ API
+  useEffect(() => {
+    fetchPayments();
+    // fetchStats(); // Tạm thời comment để test
+  }, [page, filter, searchTerm]);
 
-  const getStats = () => {
-    const total = payments.length;
-    const completed = payments.filter(p => p.status === 'completed').length;
-    const pending = payments.filter(p => p.status === 'pending').length;
-    const failed = payments.filter(p => p.status === 'failed').length;
-    const totalAmount = payments
-      .filter(p => p.status === 'completed')
-      .reduce((sum, p) => sum + p.amount, 0);
+  const fetchPayments = async () => {
+    try {
+      setLoading(true);
+      
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...(filter !== 'all' && { status: filter }),
+        ...(searchTerm && { search: searchTerm })
+      });
 
-    return { total, completed, pending, failed, totalAmount };
+      console.log('Fetching payments with URL:', `/api/v1/admin/payments?${params}`);
+
+      const response = await fetch(`/api/v1/admin/payments?${params}`, {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error:', response.status, errorText);
+        throw new Error(`API returned ${response.status}: ${errorText.substring(0, 100)}`);
+      }
+
+      const result = await response.json();
+      console.log('Payment data received:', result);
+
+      if (result.success && result.data) {
+        setPayments(result.data.payments || []);
+        setTotalPages(result.data.pagination?.totalPages || 1);
+      } else {
+        console.error('Invalid response format:', result);
+        toastManager.showError(result.message || 'Không thể tải danh sách giao dịch');
+      }
+    } catch (error) {
+      console.error('Error fetching payments:', error);
+      toastManager.showError('Lỗi khi tải dữ liệu giao dịch: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const stats = getStats();
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('/api/v1/admin/payments/overview', {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        setStats(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching payment stats:', error);
+    }
+  };
+
+  const handleRefresh = () => {
+    setPage(1);
+    fetchPayments();
+    // fetchStats(); // Tạm thời comment
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -109,72 +191,82 @@ export default function PaymentManagement() {
           <h1 className="text-2xl font-bold text-darker">Quản lý thanh toán</h1>
           <p className="text-gray-600">Theo dõi và quản lý các giao dịch thanh toán</p>
         </div>
+        <Button
+          variant="outline"
+          leftIcon={<ArrowPathIcon className="w-4 h-4" />}
+          onClick={handleRefresh}
+          disabled={loading}
+        >
+          Làm mới
+        </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <CurrencyDollarIcon className="w-6 h-6 text-blue-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Tổng giao dịch</p>
-              <p className="text-2xl font-bold text-darker">{stats.total}</p>
+      {/* Stats - Tạm thời ẩn để debug */}
+      {false && stats && (
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="bg-white p-6 rounded-lg shadow">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <CurrencyDollarIcon className="w-6 h-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Tổng giao dịch</p>
+                <p className="text-2xl font-bold text-darker">{stats.overview.totalPayments}</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <CheckCircleIcon className="w-6 h-6 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Thành công</p>
-              <p className="text-2xl font-bold text-darker">{stats.completed}</p>
+          <div className="bg-white p-6 rounded-lg shadow">
+            <div className="flex items-center">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <CheckCircleIcon className="w-6 h-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Thành công</p>
+                <p className="text-2xl font-bold text-darker">{stats.overview.completedPayments}</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <ClockIcon className="w-6 h-6 text-yellow-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Chờ xử lý</p>
-              <p className="text-2xl font-bold text-darker">{stats.pending}</p>
+          <div className="bg-white p-6 rounded-lg shadow">
+            <div className="flex items-center">
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <ClockIcon className="w-6 h-6 text-yellow-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Chờ xử lý</p>
+                <p className="text-2xl font-bold text-darker">{stats.overview.pendingPayments}</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <XCircleIcon className="w-6 h-6 text-red-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Thất bại</p>
-              <p className="text-2xl font-bold text-darker">{stats.failed}</p>
+          <div className="bg-white p-6 rounded-lg shadow">
+            <div className="flex items-center">
+              <div className="p-2 bg-red-100 rounded-lg">
+                <XCircleIcon className="w-6 h-6 text-red-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Thất bại</p>
+                <p className="text-2xl font-bold text-darker">{stats.overview.failedPayments}</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <CurrencyDollarIcon className="w-6 h-6 text-purple-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Tổng thu</p>
-              <p className="text-2xl font-bold text-darker">
-                {stats.totalAmount.toLocaleString()}đ
-              </p>
+          <div className="bg-white p-6 rounded-lg shadow">
+            <div className="flex items-center">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <CurrencyDollarIcon className="w-6 h-6 text-purple-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Tổng thu</p>
+                <p className="text-xl font-bold text-darker">
+                  {formatCurrency(stats.overview.totalRevenue)}
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Filters */}
       <div className="bg-white p-6 rounded-lg shadow">
@@ -244,32 +336,68 @@ export default function PaymentManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredPayments.map((payment) => {
-                const statusInfo = statusConfig[payment.status];
-                const StatusIcon = statusInfo.icon;
-                const typeInfo = typeConfig[payment.type];
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-12">
+                    <div className="flex justify-center">
+                      <LoadingSpinner size="lg" />
+                    </div>
+                  </td>
+                </tr>
+              ) : payments.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-12">
+                    <div className="text-center">
+                      <CurrencyDollarIcon className="mx-auto h-12 w-12 text-gray-400" />
+                      <h3 className="mt-2 text-sm font-medium text-darker">Không có giao dịch nào</h3>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {searchTerm || filter !== 'all' 
+                          ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.'
+                          : 'Chưa có giao dịch thanh toán nào.'
+                        }
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                payments.map((payment) => {
+                  const statusInfo = statusConfig[payment.status];
+                  const StatusIcon = statusInfo.icon;
                 
                 return (
                   <tr key={payment.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm font-medium text-darker">{payment.id}</p>
+                      <div>
+                        <p className="text-sm font-medium text-darker">{payment.transactionId}</p>
+                        {payment.referenceId && (
+                          <p className="text-xs text-gray-500">Ref: {payment.referenceId}</p>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div>
+                        <p className="text-sm font-medium text-darker">
+                          {payment.user?.name || 'N/A'}
+                        </p>
+                        <p className="text-xs text-gray-500">{payment.user?.email || 'N/A'}</p>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm text-darker">{payment.user}</p>
+                      <div>
+                        <Badge variant="info" size="sm">
+                          {payment.packageName}
+                        </Badge>
+                        <p className="text-xs text-gray-500 mt-1">{payment.packageDuration} ngày</p>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge variant="info" size="sm">
-                        {typeInfo.label}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm font-medium text-darker">
-                        {payment.amount.toLocaleString()}đ
+                      <p className="text-sm font-bold text-darker">
+                        {formatCurrency(payment.amount)}
                       </p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <p className="text-sm text-darker">
-                        {methodConfig[payment.method]}
+                        {methodConfig[payment.paymentMethod] || payment.paymentMethod}
                       </p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -278,8 +406,20 @@ export default function PaymentManagement() {
                         {statusInfo.label}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(payment.createdAt).toLocaleDateString('vi-VN')}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        <p className="text-sm text-gray-900">{formatDate(payment.createdAt)}</p>
+                        {payment.completedAt && (
+                          <p className="text-xs text-green-600">
+                            Hoàn thành: {formatDate(payment.completedAt)}
+                          </p>
+                        )}
+                        {payment.failedAt && (
+                          <p className="text-xs text-red-600">
+                            Thất bại: {formatDate(payment.failedAt)}
+                          </p>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
@@ -290,44 +430,87 @@ export default function PaymentManagement() {
                         >
                           Xem
                         </Button>
-                        {payment.status === 'pending' && (
-                          <Button
-                            variant="primary"
-                            size="sm"
-                          >
-                            Xử lý
-                          </Button>
-                        )}
-                        {payment.status === 'completed' && (
-                          <Button
-                            variant="danger"
-                            size="sm"
-                          >
-                            Hoàn tiền
-                          </Button>
-                        )}
                       </div>
                     </td>
                   </tr>
                 );
-              })}
+              })
+              )}
             </tbody>
           </table>
         </div>
 
-        {filteredPayments.length === 0 && (
-          <div className="text-center py-12">
-            <CurrencyDollarIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-darker">Không có giao dịch nào</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {searchTerm || filter !== 'all' 
-                ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.'
-                : 'Chưa có giao dịch thanh toán nào.'
-              }
-            </p>
+        {/* Pagination */}
+        {!loading && payments.length > 0 && totalPages > 1 && (
+          <div className="px-6 py-4 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-700">
+                Trang <span className="font-medium">{page}</span> / <span className="font-medium">{totalPages}</span>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Trang trước
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                >
+                  Trang sau
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </div>
+
+      {/* Revenue Details - Tạm thời ẩn */}
+      {false && stats && stats.revenueByPackage.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Revenue by Package Type */}
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h3 className="text-lg font-semibold text-darker mb-4">Doanh thu theo gói</h3>
+            <div className="space-y-3">
+              {stats.revenueByPackage.map((pkg) => (
+                <div key={pkg.packageType} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-darker">{pkg.packageType.toUpperCase()}</p>
+                    <p className="text-sm text-gray-600">{pkg.count} giao dịch</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-darker">{formatCurrency(pkg.revenue)}</p>
+                    <p className="text-xs text-gray-600">TB: {formatCurrency(pkg.avgValue)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Revenue by Payment Method */}
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h3 className="text-lg font-semibold text-darker mb-4">Doanh thu theo phương thức</h3>
+            <div className="space-y-3">
+              {stats.revenueByMethod.map((method) => (
+                <div key={method.method} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-darker">
+                      {methodConfig[method.method] || method.method}
+                    </p>
+                    <p className="text-sm text-gray-600">{method.count} giao dịch</p>
+                  </div>
+                  <p className="font-bold text-darker">{formatCurrency(method.revenue)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

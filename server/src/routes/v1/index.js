@@ -8,6 +8,7 @@ import reviewRoute from "./review.js";
 import notificationRoute from "./notification.js";
 import reportRoute from "./report.js";
 import adminRoute from "./admin.js";
+import adminPaymentsRoute from "./adminPayments.js";
 import roleRoute from "./role.js";
 import postRoute from "./post.js";
 import userRoute from "./user.js";
@@ -55,7 +56,9 @@ const Route = (app) => {
   app.use("/api/v1/notifications", notificationRoute);
   app.use("/api/v1/reports", reportRoute);
   app.use("/api/v1/admin", adminRoute);
-  app.use("/api/v1/admin/moderation", moderationRoutes);
+  app.use("/api/v1/admin/payments", adminPaymentsRoute); // ✅ Admin payments management
+  app.use("/api/v1/admin/moderation", moderationRoutes); // Legacy admin moderation route
+  app.use("/api/v1/moderation", moderationRoutes); // ✅ Main moderation route
   app.use("/api/v1/dashboard", dashboardRoute);
   app.use("/api/v1/rental-requests", rentalRequestRoute);
   app.use("/api/v1/saved-properties", savedPropertiesRoute);

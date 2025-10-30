@@ -18,7 +18,13 @@ export async function initSearchConfig() {
     // Cấu hình cơ bản (không cần synonyms file)
     await index.updateSettings({
       typoTolerance: { enabled: true },
-      searchableAttributes: ["title", "description", "location.city", "location.district"],
+      searchableAttributes: [
+        "title", 
+        "description", 
+        "location.city", 
+        "location.district",
+        "location.address"  // Thêm address để search theo địa chỉ đầy đủ
+      ],
       filterableAttributes: ["price", "area", "type", "location.city", "location.district"],
       sortableAttributes: ["price", "area", "createdAt"],
       stopWords: ["và", "có", "ở", "tại"],
@@ -48,13 +54,23 @@ export async function searchPosts(keyword, options = {}) {
     return { hits: [], totalHits: 0, totalPages: 0, page, limit };
   }
 
-  const normalized = removeAccents(keyword.trim().toLowerCase());
+  // Thêm district vào keyword nếu có để search theo contains
+  let searchKeyword = keyword.trim();
+  if (filters.district) {
+    searchKeyword = `${searchKeyword} ${filters.district}`;
+  }
+  if (filters.province) {
+    searchKeyword = `${searchKeyword} ${filters.province}`;
+  }
+  
+  const normalized = removeAccents(searchKeyword.toLowerCase());
 
   // Build Meilisearch filter expressions
   const filterExpressions = [];
   if (filters.type) filterExpressions.push(`type = "${filters.type}"`);
-  if (filters.province) filterExpressions.push(`location.city = "${filters.province}"`);
-  if (filters.district) filterExpressions.push(`location.district = "${filters.district}"`);
+  // Bỏ filter exact match cho province và district vì đã thêm vào keyword
+  // if (filters.province) filterExpressions.push(`location.city = "${filters.province}"`);
+  // if (filters.district) filterExpressions.push(`location.district = "${filters.district}"`);
   if (filters.minPrice) filterExpressions.push(`price >= ${Number(filters.minPrice)}`);
   if (filters.maxPrice) filterExpressions.push(`price <= ${Number(filters.maxPrice)}`);
   if (filters.minArea) filterExpressions.push(`area >= ${Number(filters.minArea)}`);
@@ -88,7 +104,7 @@ export async function searchPosts(keyword, options = {}) {
       "createdAt",
       "updatedAt",
     ],
-    attributesToHighlight: ["title"],
+    attributesToHighlight: ["title", "description"],
     sort: sortParam,
     filter: filterExpressions.length > 0 ? filterExpressions : undefined,
   };
@@ -96,8 +112,8 @@ export async function searchPosts(keyword, options = {}) {
   let result = await index.search(normalized, params);
 
   // 🔄 Nếu không có kết quả → thử tìm lại bằng keyword gốc
-  if (result.hits.length === 0 && normalized !== keyword) {
-    result = await index.search(keyword, params);
+  if (result.hits.length === 0 && normalized !== searchKeyword) {
+    result = await index.search(searchKeyword, params);
   }
 
   const totalHits = result.estimatedTotalHits || 0;

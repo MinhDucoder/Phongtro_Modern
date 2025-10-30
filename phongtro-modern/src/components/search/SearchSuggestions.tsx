@@ -104,46 +104,53 @@ export default function SearchSuggestions({ keyword, isOpen, onClose }: SearchSu
             <Link
               key={room._id}
               href={`/room/${room._id}`}
-              className="p-3 hover:bg-gray-50 transition-colors flex gap-3 cursor-pointer"
+              className="p-3 hover:bg-gray-50 transition-colors flex gap-4 cursor-pointer"
               onClick={onClose}
             >
-              {/* Room Image */}
-              <div className="flex-shrink-0 w-16 h-12 bg-gray-200 rounded-md overflow-hidden">
+              {/* Room Image - Ảnh to hơn */}
+              <div className="flex-shrink-0 w-24 h-20 bg-gray-200 rounded-lg overflow-hidden">
                 {getFirstImageUrl(room.images) ? (
                   <Image
                     src={getFirstImageUrl(room.images)!}
                     alt={room.title}
-                    width={64}
-                    height={48}
+                    width={96}
+                    height={80}
                     className="w-full h-full object-cover"
+                    unoptimized
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-300 flex items-center justify-center">
-                    <MagnifyingGlassIcon className="h-4 w-4 text-gray-500" />
+                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
                   </div>
                 )}
               </div>
 
               {/* Room Info */}
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-medium text-gray-900 line-clamp-2">
+                <h4 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-1.5">
                   {room.title}
                 </h4>
                 
-                <div className="flex items-center gap-3 text-xs text-gray-600 mt-1">
+                <div className="flex items-center gap-3 text-xs text-gray-600">
                   <div className="flex items-center gap-1">
-                    <CurrencyDollarIcon className="h-3 w-3" />
+                    <CurrencyDollarIcon className="h-3.5 w-3.5 text-red-500" />
                     <span className="font-semibold text-red-600">
-                      {(room.price / 1000000).toFixed(1)}tr
+                      {(room.price / 1000000).toFixed(1)}tr/tháng
                     </span>
                   </div>
                   
                   <div className="flex items-center gap-1">
+                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                    </svg>
                     <span>{room.area}m²</span>
                   </div>
                   
-                  <div className="flex items-center gap-1">
-                    <MapPinIcon className="h-3 w-3" />
+                  <div className="flex items-center gap-1 flex-1 min-w-0">
+                    <MapPinIcon className="h-3.5 w-3.5 flex-shrink-0" />
                     <span className="truncate">{room.city}</span>
                   </div>
                 </div>

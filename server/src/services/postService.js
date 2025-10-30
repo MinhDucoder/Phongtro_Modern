@@ -125,6 +125,7 @@ class PostService {
     let provinceFilter = null;
     let districtFilter = null;
     let keywordFilter = null;
+    let priceFilter = null;
     
     // Extract special filters
     if (filters["roomId.propertyType"]) {
@@ -147,58 +148,82 @@ class PostService {
       delete filters["roomId.title"];
     }
     
-    // Match stage - filter theo Post fields
+    if (filters["roomId.price"]) {
+      priceFilter = filters["roomId.price"];
+      delete filters["roomId.price"];
+    }
+    
+    // 🚀 OPTIMIZED: Match stage TRƯỚC để giảm số documents cần lookup
     const matchStage = { $match: filters };
     pipeline.push(matchStage);
     
-    // Lookup (populate) roomId
+    // 🚀 OPTIMIZED: Lookup với chỉ lấy fields cần thiết
     pipeline.push({
       $lookup: {
         from: "rooms",
         localField: "roomId",
         foreignField: "_id",
-        as: "roomId"
+        as: "roomId",
+        // Chỉ lấy fields cần thiết để giảm data transfer
+        pipeline: [
+          {
+            $project: {
+              title: 1,
+              description: 1,
+              price: 1,
+              area: 1,
+              address: 1,
+              city: 1,
+              district: 1,
+              images: 1,
+              amenities: 1,
+              rules: 1,
+              nearbyPlaces: 1,
+              propertyType: 1,
+              roomType: 1,
+              isAvailable: 1,
+              createdAt: 1,
+              updatedAt: 1
+            }
+          }
+        ]
       }
     });
     
     // Unwind roomId (convert array to single object)
     pipeline.push({ $unwind: "$roomId" });
     
-    // Filter by propertyType if specified
-    if (propertyTypeFilter) {
-      pipeline.push({
-        $match: { "roomId.propertyType": propertyTypeFilter }
-      });
+    // 🚀 OPTIMIZED: Combine all room filters vào 1 $match stage
+    const roomMatch = {};
+    if (propertyTypeFilter) roomMatch["roomId.propertyType"] = propertyTypeFilter;
+    if (provinceFilter) roomMatch["roomId.city"] = provinceFilter;
+    if (districtFilter) roomMatch["roomId.district"] = districtFilter;
+    if (keywordFilter) roomMatch["roomId.title"] = keywordFilter;
+    if (priceFilter) roomMatch["roomId.price"] = priceFilter;
+    
+    if (Object.keys(roomMatch).length > 0) {
+      pipeline.push({ $match: roomMatch });
     }
     
-    // Filter by province/city if specified
-    if (provinceFilter) {
-      pipeline.push({
-        $match: { "roomId.city": provinceFilter }
-      });
-    }
-    
-    // Filter by district if specified
-    if (districtFilter) {
-      pipeline.push({
-        $match: { "roomId.district": districtFilter }
-      });
-    }
-    
-    // Filter by keyword if specified
-    if (keywordFilter) {
-      pipeline.push({
-        $match: { "roomId.title": keywordFilter }
-      });
-    }
-    
-    // Lookup landlord
+    // 🚀 OPTIMIZED: Lookup landlord với chỉ lấy fields cần thiết
     pipeline.push({
       $lookup: {
         from: "users",
         localField: "landlord",
         foreignField: "_id",
-        as: "landlord"
+        as: "landlord",
+        pipeline: [
+          {
+            $project: {
+              full_name: 1,
+              phone: 1,
+              email: 1,
+              role: 1,
+              avatar: 1,
+              last_login: 1
+            }
+          }
+        ]
       }
     });
     
@@ -209,7 +234,7 @@ class PostService {
     const sortStage = { $sort: sort };
     pipeline.push(sortStage);
     
-    // Facet to get both total count and paginated results
+    // 🚀 OPTIMIZED: Facet để lấy cả total count và paginated results trong 1 query
     pipeline.push({
       $facet: {
         totalCount: [{ $count: "count" }],
@@ -217,12 +242,13 @@ class PostService {
       }
     });
     
-    const result = await Post.aggregate(pipeline);
+    // 🚀 Execute aggregation với allowDiskUse cho large datasets
+    const result = await Post.aggregate(pipeline).allowDiskUse(true);
     
     const total = result[0]?.totalCount[0]?.count || 0;
     const posts = result[0]?.items || [];
 
-    // Transform data để có cấu trúc rõ ràng hơn
+    // 🚀 OPTIMIZED: Transform data inline thay vì map
     const transformedPosts = posts.map(post => {
       const room = post.roomId;
       const landlord = post.landlord;

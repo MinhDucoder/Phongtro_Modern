@@ -19,6 +19,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { toastManager } from '@/components/ui/ToastManager';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { moderationApi } from '@/lib/api';
 
 export interface PostDetail {
   id: string;
@@ -112,11 +113,7 @@ export default function PostDetailModal({ post, isOpen, onClose, onStatusChange 
   const fetchPostDetails = async (postId: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/admin/moderation/${postId}/get`);
-      if (!response.ok) {
-        throw new Error('Không thể tải thông tin chi tiết');
-      }
-      const result = await response.json();
+      const result = await moderationApi.getPostForModeration(postId);
       if (result.success && result.data) {
         setPostData(result.data);
       } else {

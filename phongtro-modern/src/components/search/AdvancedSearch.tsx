@@ -139,7 +139,7 @@ export default function AdvancedSearch({ initialParams }: AdvancedSearchProps) {
                 <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Tìm bất động sản..."
+                  placeholder="Tìm kiếm phòng trọ, căn hộ, mặt bằng ..."
                   value={filters.keyword}
                   onChange={(e) => handleFilterChange('keyword', e.target.value)}
                   onKeyPress={handleKeyPress}

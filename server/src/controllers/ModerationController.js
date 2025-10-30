@@ -4,62 +4,74 @@ import Room from "../models/roomSchema.js";
 import catchAsync from "../middlewares/catchAsync.js";
 import mongoose from "mongoose";
 import { sendPostApprovedNotification, sendPostRejectedNotification } from "../utils/notificationHelper.js";
+import { getOrSetCache, deleteCacheByPrefix } from "../services/redisService.js";
 
 class ModerationController {
   // Dashboard tổng quan
   getModerationDashboard = catchAsync(async (req, res) => {
-    const [
-      pendingPosts,
-      totalUsers,
-      bannedUsers,
-      recentReports,
-      todayStats
-    ] = await Promise.all([
-      Post.countDocuments({ status: 'pending' }),
-      User.countDocuments({ is_deleted: { $ne: true } }),
-      User.countDocuments({ is_banned: true }),
-      // TODO: Add Report model and count reports
-      0, // Placeholder for reports
-      Post.aggregate([
-        {
-          $match: {
-            createdAt: {
-              $gte: new Date(new Date().setHours(0, 0, 0, 0))
-            }
-          }
-        },
-        {
-          $group: {
-            _id: null,
-            newPosts: { $sum: 1 },
-            pendingToday: {
-              $sum: { $cond: [{ $eq: ["$status", "pending"] }, 1, 0] }
-            },
-            approvedToday: {
-              $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] }
-            }
-          }
-        }
-      ])
-    ]);
-
-    const todayStat = todayStats[0] || {
-      newPosts: 0,
-      pendingToday: 0,
-      approvedToday: 0
-    };
-
-    res.status(200).json({
-      success: true,
-      data: {
-        overview: {
+    // 🔹 Cache moderation dashboard
+    const cacheKey = 'admin:moderation:dashboard';
+    
+    const dashboardData = await getOrSetCache(
+      cacheKey,
+      async () => {
+        const [
           pendingPosts,
           totalUsers,
           bannedUsers,
-          recentReports
-        },
-        todayStats: todayStat
-      }
+          recentReports,
+          todayStats
+        ] = await Promise.all([
+          Post.countDocuments({ status: 'pending' }),
+          User.countDocuments({ is_deleted: { $ne: true } }),
+          User.countDocuments({ is_banned: true }),
+          // TODO: Add Report model and count reports
+          0, // Placeholder for reports
+          Post.aggregate([
+            {
+              $match: {
+                createdAt: {
+                  $gte: new Date(new Date().setHours(0, 0, 0, 0))
+                }
+              }
+            },
+            {
+              $group: {
+                _id: null,
+                newPosts: { $sum: 1 },
+                pendingToday: {
+                  $sum: { $cond: [{ $eq: ["$status", "pending"] }, 1, 0] }
+                },
+                approvedToday: {
+                  $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] }
+                }
+              }
+            }
+          ])
+        ]);
+
+        const todayStat = todayStats[0] || {
+          newPosts: 0,
+          pendingToday: 0,
+          approvedToday: 0
+        };
+
+        return {
+          overview: {
+            pendingPosts,
+            totalUsers,
+            bannedUsers,
+            recentReports
+          },
+          todayStats: todayStat
+        };
+      },
+      120 // TTL 2 phút
+    );
+
+    res.status(200).json({
+      success: true,
+      data: dashboardData
     });
   });
 
@@ -77,7 +89,13 @@ class ModerationController {
       sortOrder = 'desc'
     } = req.query;
 
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    // 🔹 Cache moderation queue with all filter params
+    const cacheKey = `admin:moderation:queue:p${page}:l${limit}:st${status}:pr${priority}:s${search}:c${category}:ct${city}:sort${sortBy}:${sortOrder}`;
+    
+    const queueData = await getOrSetCache(
+      cacheKey,
+      async () => {
+        const skip = (parseInt(page) - 1) * parseInt(limit);
     
     // Xây dựng điều kiện tìm kiếm cho bảng Post
     const postFilter = { 
@@ -261,24 +279,29 @@ class ModerationController {
       })
     ]);
 
+    return {
+      items,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalItems / parseInt(limit)),
+        totalItems,
+        limit: parseInt(limit)
+      },
+      stats: {
+        pending: pendingCount,
+        active: activeCount,
+        rejected: rejectedCount,
+        expired: expiredCount,
+        todayModerated
+      }
+    };
+      },
+      180 // TTL 3 phút
+    );
+
     res.status(200).json({
       success: true,
-      data: {
-        items,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(totalItems / parseInt(limit)),
-          totalItems,
-          limit: parseInt(limit)
-        },
-        stats: {
-          pending: pendingCount,
-          active: activeCount,
-          rejected: rejectedCount,
-          expired: expiredCount,
-          todayModerated
-        }
-      }
+      data: queueData
     });
   });
 
@@ -335,6 +358,13 @@ class ModerationController {
           message: 'Không tìm thấy bài đăng'
         });
       }
+
+      // 🔹 Clear cache after approval
+      await deleteCacheByPrefix('admin:moderation:');
+      await deleteCacheByPrefix('admin:dashboard:');
+      await deleteCacheByPrefix('admin:posts:');
+      await deleteCacheByPrefix('posts:list:');
+      await deleteCacheByPrefix(`posts:detail:${id}`); // Clear specific post detail cache
 
       res.status(200).json({
         success: true,
@@ -501,6 +531,13 @@ class ModerationController {
           // Non-critical error, continue with response
         }
       }
+
+      // 🔹 Clear cache after moderation
+      await deleteCacheByPrefix('admin:moderation:');
+      await deleteCacheByPrefix('admin:dashboard:');
+      await deleteCacheByPrefix('admin:posts:');
+      await deleteCacheByPrefix('posts:list:');
+      await deleteCacheByPrefix(`posts:detail:${postId}`); // Clear specific post detail cache
       
       res.status(200).json({
         success: true,
@@ -574,6 +611,13 @@ class ModerationController {
         });
       }
 
+      // 🔹 Clear cache after rejection
+      await deleteCacheByPrefix('admin:moderation:');
+      await deleteCacheByPrefix('admin:dashboard:');
+      await deleteCacheByPrefix('admin:posts:');
+      await deleteCacheByPrefix('posts:list:');
+      await deleteCacheByPrefix(`posts:detail:${id}`); // Clear specific post detail cache
+
       res.status(200).json({
         success: true,
         message: 'Đã từ chối bài đăng thành công',
@@ -625,6 +669,12 @@ class ModerationController {
       );
     }
 
+    // 🔹 Clear cache after bulk moderation
+    await deleteCacheByPrefix('admin:moderation:');
+    await deleteCacheByPrefix('admin:dashboard:');
+    await deleteCacheByPrefix('admin:posts:');
+    await deleteCacheByPrefix('posts:list:');
+
     res.status(200).json({
       success: true,
       message,
@@ -643,34 +693,45 @@ class ModerationController {
       type = 'all'
     } = req.query;
 
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const filter = { moderatedBy: { $exists: true } };
+    // 🔹 Cache moderation history
+    const cacheKey = `admin:moderation:history:p${page}:l${limit}:m${moderatorId || 'all'}:t${type}`;
+    
+    const historyData = await getOrSetCache(
+      cacheKey,
+      async () => {
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const filter = { moderatedBy: { $exists: true } };
 
-    if (moderatorId) {
-      filter.moderatedBy = moderatorId;
-    }
+        if (moderatorId) {
+          filter.moderatedBy = moderatorId;
+        }
 
-    const history = await Post.find(filter)
-      .populate('moderatedBy', 'full_name email')
-      .populate('landlord', 'full_name email')
-      .populate('roomId', 'title')
-      .sort({ moderatedAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit));
+        const history = await Post.find(filter)
+          .populate('moderatedBy', 'full_name email')
+          .populate('landlord', 'full_name email')
+          .populate('roomId', 'title')
+          .sort({ moderatedAt: -1 })
+          .skip(skip)
+          .limit(parseInt(limit));
 
-    const totalCount = await Post.countDocuments(filter);
+        const totalCount = await Post.countDocuments(filter);
+
+        return {
+          history,
+          pagination: {
+            currentPage: parseInt(page),
+            totalPages: Math.ceil(totalCount / parseInt(limit)),
+            totalCount,
+            limit: parseInt(limit)
+          }
+        };
+      },
+      300 // TTL 5 phút
+    );
 
     res.status(200).json({
       success: true,
-      data: {
-        history,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(totalCount / parseInt(limit)),
-          totalCount,
-          limit: parseInt(limit)
-        }
-      }
+      data: historyData
     });
   });
 
@@ -686,9 +747,15 @@ class ModerationController {
         message: 'ID bài đăng không hợp lệ'
       });
     }
+
+    // 🔹 Cache post for moderation
+    const cacheKey = `admin:moderation:post:${postId}`;
     
-    // Get post with all related data
-    const post = await Post.findById(postId)
+    const moderationData = await getOrSetCache(
+      cacheKey,
+      async () => {
+        // Get post with all related data
+        const post = await Post.findById(postId)
       .populate({
         path: 'landlord',
         select: 'full_name email phone_number is_verified createdAt avatar role address', 
@@ -887,20 +954,32 @@ class ModerationController {
       recommendationReason = reasons.join(', ');
     }
     
+    return {
+      post: postData,
+      roomDetails,
+      landlordDetails,
+      moderationContext: {
+        otherPostsByLandlord,
+        similarPosts,
+        waitingTime,
+        recommendedAction,
+        recommendationReason
+      }
+    };
+      },
+      180 // TTL 3 phút
+    );
+    
+    if (!moderationData.post) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy bài đăng'
+      });
+    }
+
     res.status(200).json({
       success: true,
-      data: {
-        post: postData,
-        roomDetails,
-        landlordDetails,
-        moderationContext: {
-          otherPostsByLandlord,
-          similarPosts,
-          waitingTime,
-          recommendedAction,
-          recommendationReason
-        }
-      }
+      data: moderationData
     });
   });
 }

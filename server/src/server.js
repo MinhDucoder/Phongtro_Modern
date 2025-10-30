@@ -56,7 +56,14 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET || 'your-fallback-session-secret-key',
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // Changed to true to ensure CSRF token session is created
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+    name: 'phongtro.sid', // Custom session cookie name
   })
 );
 app.use(passport.initialize());

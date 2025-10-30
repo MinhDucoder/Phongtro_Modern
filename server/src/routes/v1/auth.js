@@ -53,11 +53,22 @@ router.get("/csrf-token", (req, res) => {
   try {
     const csrfToken = crypto.randomBytes(32).toString("hex");
     if (!req.session) {
+      console.error('❌ CSRF token request: Session is not available');
       return res.status(500).json({ success: false, message: "Session is not available" });
     }
     req.session.csrfToken = csrfToken;
-    return res.status(200).json({ success: true, csrfToken });
+    
+    // Save session explicitly to ensure it persists
+    req.session.save((err) => {
+      if (err) {
+        console.error('❌ CSRF token: Session save error:', err);
+        return res.status(500).json({ success: false, message: "Failed to save CSRF token" });
+      }
+      console.log('✅ CSRF token generated and saved:', csrfToken.substring(0, 8) + '...');
+      return res.status(200).json({ success: true, csrfToken });
+    });
   } catch (err) {
+    console.error('❌ CSRF token generation failed:', err);
     return res.status(500).json({ success: false, message: "Failed to generate CSRF token" });
   }
 });
@@ -70,16 +81,47 @@ function verifyCsrf(req, res, next) {
     if (method === "GET" || method === "HEAD" || method === "OPTIONS") {
       return next();
     }
+    
     if (!req.session) {
+      console.error('❌ CSRF verify: Session not initialized');
       return res.status(500).json({ success: false, message: "Session not initialized" });
     }
+    
     const headerToken = req.headers["x-csrf-token"];
     const sessionToken = req.session.csrfToken;
+    
+    // Log for debugging
+    console.log('🔐 CSRF Verification:', {
+      method,
+      path: req.path,
+      hasHeaderToken: !!headerToken,
+      hasSessionToken: !!sessionToken,
+      headerTokenPreview: headerToken ? headerToken.substring(0, 8) + '...' : 'N/A',
+      sessionTokenPreview: sessionToken ? sessionToken.substring(0, 8) + '...' : 'N/A',
+      tokensMatch: headerToken === sessionToken
+    });
+    
     if (!headerToken || !sessionToken || headerToken !== sessionToken) {
-      return res.status(403).json({ success: false, message: "CSRF token mismatch" });
+      console.error('❌ CSRF token mismatch:', {
+        hasHeaderToken: !!headerToken,
+        hasSessionToken: !!sessionToken,
+        sessionId: req.sessionID
+      });
+      return res.status(403).json({ 
+        success: false, 
+        message: "CSRF token mismatch",
+        debug: process.env.NODE_ENV === 'development' ? {
+          hasHeaderToken: !!headerToken,
+          hasSessionToken: !!sessionToken,
+          hint: !sessionToken ? 'Session expired or not initialized. Get new CSRF token from /csrf-token' : 'Token mismatch'
+        } : undefined
+      });
     }
+    
+    console.log('✅ CSRF token verified successfully');
     return next();
   } catch (error) {
+    console.error('❌ CSRF validation error:', error);
     return res.status(403).json({ success: false, message: "CSRF validation failed" });
   }
 }

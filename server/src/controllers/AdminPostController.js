@@ -2,6 +2,7 @@ import Post from "../models/postSchema.js";
 import Room from "../models/roomSchema.js";
 import User from "../models/userSchema.js";
 import catchAsync from "../middlewares/catchAsync.js";
+import { getOrSetCache, deleteCacheByPrefix } from "../services/redisService.js";
 
 class AdminPostController {
   // Lấy danh sách tất cả posts với phân trang và filter
@@ -16,6 +17,13 @@ class AdminPostController {
       sortOrder = 'desc',
       landlordId
     } = req.query;
+
+    // 🔹 Cache key based on query params
+    const cacheKey = `admin:posts:list:p${page}:l${limit}:s${search || 'all'}:st${status || 'all'}:fv${favouriteLevel || 'all'}:ld${landlordId || 'all'}:sort${sortBy}:${sortOrder}`;
+    
+    const result = await getOrSetCache(
+      cacheKey,
+      async () => {
 
     // Build filter query
     const filter = {};
@@ -93,27 +101,32 @@ class AdminPostController {
       }
     ]);
 
+        return {
+          posts,
+          pagination: {
+            currentPage: parseInt(page),
+            totalPages: Math.ceil(totalPosts / parseInt(limit)),
+            totalPosts,
+            limit: parseInt(limit)
+          },
+          statistics: stats[0] || {
+            totalPosts: 0,
+            activePosts: 0,
+            pendingPosts: 0,
+            expiredPosts: 0,
+            freePosts: 0,
+            silverPosts: 0,
+            goldPosts: 0,
+            platinumPosts: 0
+          }
+        };
+      },
+      180 // TTL 3 phút cho admin posts list
+    );
+
     res.status(200).json({
       success: true,
-      data: {
-        posts,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(totalPosts / parseInt(limit)),
-          totalPosts,
-          limit: parseInt(limit)
-        },
-        statistics: stats[0] || {
-          totalPosts: 0,
-          activePosts: 0,
-          pendingPosts: 0,
-          expiredPosts: 0,
-          freePosts: 0,
-          silverPosts: 0,
-          goldPosts: 0,
-          platinumPosts: 0
-        }
-      }
+      data: result
     });
   });
 
@@ -173,6 +186,11 @@ class AdminPostController {
     ).populate('landlord', 'full_name email')
      .populate('roomId', 'title');
 
+    // ❌ Clear cache sau khi update status
+    await deleteCacheByPrefix('admin:posts:');
+    await deleteCacheByPrefix('admin:dashboard:');
+    await deleteCacheByPrefix('posts:list:'); // Clear public cache too
+
     // TODO: Gửi notification cho landlord
     
     res.status(200).json({
@@ -202,6 +220,10 @@ class AdminPostController {
     ).populate('landlord', 'full_name email')
      .populate('roomId', 'title');
 
+    // ❌ Clear cache
+    await deleteCacheByPrefix('admin:posts:');
+    await deleteCacheByPrefix('posts:list:');
+
     res.status(200).json({
       success: true,
       message: 'Cập nhật cấp độ ưu tiên thành công',
@@ -229,6 +251,11 @@ class AdminPostController {
       deletion_reason: reason,
       deleted_by: req.user._id
     });
+
+    // ❌ Clear cache
+    await deleteCacheByPrefix('admin:posts:');
+    await deleteCacheByPrefix('admin:dashboard:');
+    await deleteCacheByPrefix('posts:list:');
 
     res.status(200).json({
       success: true,
@@ -313,6 +340,11 @@ class AdminPostController {
       { _id: { $in: postIds } },
       updateData
     );
+
+    // ❌ Clear cache sau bulk operations
+    await deleteCacheByPrefix('admin:posts:');
+    await deleteCacheByPrefix('admin:dashboard:');
+    await deleteCacheByPrefix('posts:list:');
 
     res.status(200).json({
       success: true,

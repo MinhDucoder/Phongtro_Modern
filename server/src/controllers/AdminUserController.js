@@ -1,5 +1,6 @@
 import User from "../models/userSchema.js";
 import catchAsync from "../middlewares/catchAsync.js";
+import { getOrSetCache, deleteCacheByPrefix } from "../services/redisService.js";
 
 class AdminUserController {
   // Lấy danh sách tất cả users với phân trang và filter
@@ -13,6 +14,13 @@ class AdminUserController {
       sortBy = 'created_at',
       sortOrder = 'desc'
     } = req.query;
+
+    // 🔹 Cache key based on query params
+    const cacheKey = `admin:users:list:p${page}:l${limit}:s${search || 'all'}:r${role || 'all'}:st${status || 'all'}:sort${sortBy}:${sortOrder}`;
+    
+    const result = await getOrSetCache(
+      cacheKey,
+      async () => {
 
     // Build filter query
     const filter = {
@@ -87,24 +95,29 @@ class AdminUserController {
       }
     ]);
 
+        return {
+          users,
+          pagination: {
+            currentPage: parseInt(page),
+            totalPages: Math.ceil(totalUsers / parseInt(limit)),
+            totalUsers,
+            limit: parseInt(limit)
+          },
+          statistics: stats[0] || {
+            totalUsers: 0,
+            verifiedUsers: 0,
+            unverifiedUsers: 0,
+            landlords: 0,
+            regularUsers: 0
+          }
+        };
+      },
+      300 // TTL 5 phút cho user list
+    );
+
     res.status(200).json({
       success: true,
-      data: {
-        users,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(totalUsers / parseInt(limit)),
-          totalUsers,
-          limit: parseInt(limit)
-        },
-        statistics: stats[0] || {
-          totalUsers: 0,
-          verifiedUsers: 0,
-          unverifiedUsers: 0,
-          landlords: 0,
-          regularUsers: 0
-        }
-      }
+      data: result
     });
   });
 
@@ -261,6 +274,10 @@ class AdminUserController {
       { new: true, runValidators: true }
     ).select('-password -refresh_token -verification_token -password_reset_token');
 
+    // ❌ Clear cache sau khi update
+    await deleteCacheByPrefix('admin:users:');
+    await deleteCacheByPrefix('admin:dashboard:');
+
     res.status(200).json({
       success: true,
       message: 'Cập nhật user thành công',
@@ -312,6 +329,10 @@ class AdminUserController {
       if (updateResult.modifiedCount === 1) {
         console.log(`User ${id} has been successfully soft-deleted`);
         
+        // ❌ Clear cache sau khi delete
+        await deleteCacheByPrefix('admin:users:');
+        await deleteCacheByPrefix('admin:dashboard:');
+        
         // Fetch the updated user to return
         const deletedUser = await User.findById(id);
         
@@ -330,6 +351,10 @@ class AdminUserController {
         
         if (deletedUser) {
           console.log(`User soft-deleted with fallback: ${deletedUser.email}, deleted status: ${deletedUser.is_deleted}`);
+          
+          // ❌ Clear cache sau khi delete
+          await deleteCacheByPrefix('admin:users:');
+          await deleteCacheByPrefix('admin:dashboard:');
           
           return res.status(200).json({
             success: true,

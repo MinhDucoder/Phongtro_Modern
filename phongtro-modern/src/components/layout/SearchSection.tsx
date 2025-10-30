@@ -23,14 +23,14 @@ const propertyTypes = [
 
 const provinces = [
   'Toàn quốc',
-  'Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ',
+  'Hà Nội', 'TP.HCM', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ',
   'An Giang', 'Bà Rịa - Vũng Tàu', 'Bắc Giang', 'Bắc Kạn', 'Bạc Liêu',
 ];
 
 // Map quận/huyện theo tỉnh
 const districtsByProvince: { [key: string]: string[] } = {
   'Hà Nội': ['Cầu Giấy', 'Đống Đa', 'Ba Đình', 'Hai Bà Trưng', 'Hoàn Kiếm', 'Thanh Xuân', 'Tây Hồ', 'Bắc Từ Liêm', 'Nam Từ Liêm', 'Hoàng Mai', 'Long Biên', 'Gia Lâm', 'Thường Tín', 'Thanh Trì'],
-  'TP. Hồ Chí Minh': ['Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận 6', 'Quận 7', 'Quận 8', 'Quận 9', 'Quận 10', 'Quận 11', 'Quận 12', 'Tân Bình', 'Tân Phú', 'Phú Nhuận', 'Bình Thạnh', 'Gò Vấp', 'Thủ Đức', 'Bình Tân'],
+  'TP.HCM': ['Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận 6', 'Quận 7', 'Quận 8', 'Quận 9', 'Quận 10', 'Quận 11', 'Quận 12', 'Tân Bình', 'Tân Phú', 'Phú Nhuận', 'Bình Thạnh', 'Gò Vấp', 'Thủ Đức', 'Bình Tân'],
   'Đà Nẵng': ['Hải Châu', 'Thanh Khê', 'Sơn Trà', 'Ngũ Hành Sơn', 'Liên Chiểu', 'Cẩm Lệ'],
 };
 
@@ -58,7 +58,9 @@ export default function SearchSection() {
                            pathname.startsWith('/phong') ||
                            pathname.startsWith('/can-ho') ||
                            pathname.startsWith('/nha-nguyen-can') ||
-                           pathname.startsWith('/phong-tro');
+                           pathname.startsWith('/phong-tro') ||
+                           pathname.startsWith('/o-ghep') ||
+                           pathname.startsWith('/mat-bang');
 
   const [filters, setFilters] = useState({
     keyword: searchParams?.get('keyword') || '',
@@ -141,6 +143,11 @@ export default function SearchSection() {
       params.set('district', filters.district);
     }
     
+    // Add price range if present
+    if (filters.priceRange && filters.priceRange !== '') {
+      params.set('priceRange', filters.priceRange);
+    }
+    
     // Luôn quay về trang chủ để hiển thị kết quả tìm kiếm (YouTube style)
     router.push(`/?${params.toString()}`);
   };
@@ -168,7 +175,7 @@ export default function SearchSection() {
                 <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 z-10" />
                 <input
                   type="text"
-                  placeholder="Tìm bất động sản..."
+                  placeholder="Tìm kiếm phòng trọ, căn hộ, mặt bằng ..."
                   value={filters.keyword}
                   onChange={(e) => {
                     handleFilterChange('keyword', e.target.value);
@@ -239,7 +246,12 @@ export default function SearchSection() {
               className="w-full sm:w-auto px-6 py-3 bg-white border border-gray-300 text-gray-700 text-base font-medium rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:outline-none flex items-center justify-center gap-2"
             >
               <AdjustmentsHorizontalIcon className="h-5 w-5" />
-              <span>Bộ lọc</span>
+              <span>
+                {filters.priceRange 
+                  ? `Giá: ${priceRanges.find(r => r.value === filters.priceRange)?.label || 'Bộ lọc'}`
+                  : 'Bộ lọc'
+                }
+              </span>
             </button>
 
             {/* Search Button */}

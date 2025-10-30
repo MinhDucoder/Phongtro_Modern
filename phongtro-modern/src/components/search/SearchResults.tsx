@@ -99,6 +99,7 @@ export default function SearchResults({ initialQuery = '', initialFilters = {} }
       if (query) queryParams.set('q', query);
       if (province) queryParams.set('province', province);
       if (district) queryParams.set('district', district);
+      if (priceRange) queryParams.set('priceRange', priceRange);
       
       const fallbackUrl = `http://localhost:5000/api/v1/posts?${queryParams.toString()}`;
 
@@ -106,9 +107,25 @@ export default function SearchResults({ initialQuery = '', initialFilters = {} }
       const fallbackData: unknown = await fallbackResponse.json();
 
       if ((fallbackData as { success?: boolean })?.success) {
-        // Map dữ liệu roomId -> structure SearchResult
+        // Map dữ liệu - xử lý cả MeiliSearch và MongoDB format
         type FallbackItem = {
           _id?: string;
+          id?: string;
+          title?: string;
+          description?: string;
+          price?: number;
+          area?: number;
+          location?: { 
+            province?: string; 
+            city?: string;
+            district?: string; 
+            ward?: string; 
+            address?: string;
+          };
+          type?: string;
+          propertyType?: string;
+          amenities?: string[];
+          images?: string[] | Array<{url: string}>;
           createdAt?: string;
           updatedAt?: string;
           roomId?: {
@@ -120,7 +137,7 @@ export default function SearchResults({ initialQuery = '', initialFilters = {} }
             location?: { province?: string; district?: string; ward?: string; address?: string };
             propertyType?: string;
             amenities?: string[];
-            images?: string[];
+            images?: string[] | Array<{url: string}>;
             city?: string;
             address?: string;
           };
@@ -130,29 +147,66 @@ export default function SearchResults({ initialQuery = '', initialFilters = {} }
         const items: SearchResult[] = Array.isArray(itemsSource)
           ? itemsSource.map((pRaw) => {
               const p = pRaw as FallbackItem;
-              const rid = p.roomId ?? {};
-              const location = rid.location
-                ? {
-                    province: rid.location.province ?? (rid.city ?? ''),
-                    district: rid.location.district ?? '',
-                    ward: rid.location.ward ?? '',
-                    address: rid.location.address ?? (rid.address ?? '')
-                  }
-                : { province: rid.city ?? '', district: '', ward: '', address: rid.address ?? '' };
-              return {
-                _id: rid._id || p._id || '',
-                title: rid.title || '',
-                description: rid.description || '',
-                price: typeof rid.price === 'number' ? rid.price : 0,
-                area: typeof rid.area === 'number' ? rid.area : 0,
-                location,
-                type: rid.propertyType || '',
-                amenities: Array.isArray(rid.amenities) ? rid.amenities : [],
-                images: Array.isArray(rid.images) ? rid.images : [],
-                user: { username: '', email: '', phone: '' },
-                createdAt: p.createdAt || '',
-                updatedAt: p.updatedAt || ''
-              } as SearchResult;
+              
+              // Xử lý 2 TH: MeiliSearch (flat structure) hoặc MongoDB (nested roomId)
+              const isMeiliSearch = !p.roomId && (p.price !== undefined || p.title !== undefined);
+              
+              if (isMeiliSearch) {
+                // MeiliSearch format - dữ liệu đã flat
+                const imageUrls = Array.isArray(p.images) 
+                  ? p.images.map(img => typeof img === 'string' ? img : img?.url).filter(Boolean) as string[]
+                  : [];
+                
+                return {
+                  _id: p._id || p.id || '',
+                  title: p.title || '',
+                  description: p.description || '',
+                  price: typeof p.price === 'number' ? p.price : 0,
+                  area: typeof p.area === 'number' ? p.area : 0,
+                  location: {
+                    province: p.location?.city || p.location?.province || '',
+                    district: p.location?.district || '',
+                    ward: p.location?.ward || '',
+                    address: p.location?.address || ''
+                  },
+                  type: p.type || p.propertyType || '',
+                  amenities: Array.isArray(p.amenities) ? p.amenities : [],
+                  images: imageUrls,
+                  user: { username: '', email: '', phone: '' },
+                  createdAt: p.createdAt || '',
+                  updatedAt: p.updatedAt || ''
+                } as SearchResult;
+              } else {
+                // MongoDB format - dữ liệu nested trong roomId
+                const rid = p.roomId ?? {};
+                const imageUrls = Array.isArray(rid.images)
+                  ? rid.images.map(img => typeof img === 'string' ? img : img?.url).filter(Boolean) as string[]
+                  : [];
+                
+                const location = rid.location
+                  ? {
+                      province: rid.location.province ?? (rid.city ?? ''),
+                      district: rid.location.district ?? '',
+                      ward: rid.location.ward ?? '',
+                      address: rid.location.address ?? (rid.address ?? '')
+                    }
+                  : { province: rid.city ?? '', district: '', ward: '', address: rid.address ?? '' };
+                
+                return {
+                  _id: rid._id || p._id || '',
+                  title: rid.title || '',
+                  description: rid.description || '',
+                  price: typeof rid.price === 'number' ? rid.price : 0,
+                  area: typeof rid.area === 'number' ? rid.area : 0,
+                  location,
+                  type: rid.propertyType || '',
+                  amenities: Array.isArray(rid.amenities) ? rid.amenities : [],
+                  images: imageUrls,
+                  user: { username: '', email: '', phone: '' },
+                  createdAt: p.createdAt || '',
+                  updatedAt: p.updatedAt || ''
+                } as SearchResult;
+              }
             })
           : [];
 

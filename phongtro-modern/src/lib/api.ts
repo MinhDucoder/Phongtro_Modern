@@ -14,24 +14,57 @@ export const API_BASE_URL = 'http://localhost:5000/api/v1';
 
 // CSRF token (lazy-initialized)
 let csrfToken: string | null = null;
+let csrfTokenPromise: Promise<string> | null = null;
 
-async function ensureCsrfToken(): Promise<string> {
+async function ensureCsrfToken(force: boolean = false): Promise<string> {
   if (typeof window === 'undefined') return '';
-  if (csrfToken) return csrfToken;
-  try {
-    const res = await fetch(`${API_BASE_URL}/auth/csrf-token`, {
-      method: 'GET',
-      credentials: 'include',
-    });
-    const data = await res.json();
-    if (data && data.success && data.csrfToken) {
-      csrfToken = data.csrfToken as string;
-      return csrfToken;
+  
+  // If force refresh or no token, get new one
+  if (!force && csrfToken) return csrfToken;
+  
+  // If already fetching, return the existing promise
+  if (csrfTokenPromise) return csrfTokenPromise;
+  
+  csrfTokenPromise = (async () => {
+    try {
+      console.log('🔐 Fetching CSRF token...');
+      const res = await fetch(`${API_BASE_URL}/auth/csrf-token`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      
+      if (!res.ok) {
+        console.error('❌ CSRF token fetch failed:', res.status, res.statusText);
+        csrfToken = null;
+        csrfTokenPromise = null;
+        return '';
+      }
+      
+      const data = await res.json();
+      if (data && data.success && data.csrfToken) {
+        csrfToken = data.csrfToken as string;
+        console.log('✅ CSRF token received:', csrfToken.substring(0, 8) + '...');
+        csrfTokenPromise = null;
+        return csrfToken;
+      }
+      
+      console.warn('⚠️ CSRF token response invalid:', data);
+      csrfToken = null;
+      csrfTokenPromise = null;
+      return '';
+    } catch (error) {
+      console.error('❌ CSRF token fetch error:', error);
+      csrfToken = null;
+      csrfTokenPromise = null;
+      return '';
     }
-  } catch (_) {
-    // ignore
-  }
-  return '';
+  })();
+  
+  return csrfTokenPromise;
 }
 
 // Token management
@@ -371,10 +404,17 @@ export async function apiRequest<T>(
     const method = (config.method || 'GET').toString().toUpperCase();
     const isStateChanging = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
     const isAuthMutation = endpoint.startsWith('/auth/') || isStateChanging;
+    
+    // For auth mutations, always get fresh CSRF token if it's the first attempt
     if (isAuthMutation && !isFormData) {
-      const token = await ensureCsrfToken();
+      const isAuthEndpoint = endpoint.includes('/auth/login') || endpoint.includes('/auth/register');
+      const forceRefresh = isAuthEndpoint && retryCount === 0;
+      const token = await ensureCsrfToken(forceRefresh);
       if (token) {
         (config.headers as Record<string, string>)['X-CSRF-Token'] = token;
+        console.log('🔐 Using CSRF token:', token.substring(0, 8) + '...', 'for', endpoint);
+      } else {
+        console.warn('⚠️ No CSRF token available for', endpoint);
       }
     }
 
@@ -412,6 +452,21 @@ export async function apiRequest<T>(
       // Chỉ hiển thị các lỗi không phải 401 trên console để tránh ồn ào log
       if (response.status !== 401) {
         console.warn(`API Response (${response.status}):`, errorData);
+      }
+      
+      // Handle CSRF token mismatch (403) - retry with fresh token
+      if (response.status === 403 && 
+          errorData?.message?.includes('CSRF token mismatch') && 
+          retryCount === 0) {
+        console.warn('⚠️ CSRF token mismatch, refreshing token and retrying...');
+        // Force refresh CSRF token
+        const freshToken = await ensureCsrfToken(true);
+        if (freshToken) {
+          // Update headers with fresh token
+          (config.headers as Record<string, string>)['X-CSRF-Token'] = freshToken;
+          // Retry the original request
+          return apiRequest<T>(endpoint, options, retryCount + 1);
+        }
       }
       
       // Handle specific error cases
@@ -1375,6 +1430,168 @@ export const vipPostPaymentApi = {
   },
 };
 
+// Moderation API (Admin only)
+export const moderationApi = {
+  // Get moderation dashboard
+  async getDashboard(): Promise<ApiResponse> {
+    return apiRequest('/moderation/dashboard', {
+      method: 'GET',
+    });
+  },
+
+  // Get moderation queue
+  async getQueue(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    priority?: string;
+    search?: string;
+    category?: string;
+    city?: string;
+    sortBy?: string;
+    sortOrder?: string;
+  }): Promise<ApiResponse> {
+    const queryString = params ? `?${new URLSearchParams(
+      Object.entries(params).reduce((acc, [key, value]) => {
+        if (value !== undefined && value !== null) {
+          acc[key] = value.toString();
+        }
+        return acc;
+      }, {} as Record<string, string>)
+    ).toString()}` : '';
+    
+    return apiRequest(`/moderation/queue${queryString}`, {
+      method: 'GET',
+    });
+  },
+
+  // Get post details for moderation
+  async getPostForModeration(postId: string): Promise<ApiResponse> {
+    const response = await apiRequest(`/moderation/posts/${postId}`, {
+      method: 'GET',
+    });
+
+    // Transform API response to match component's expected structure
+    if (response.success && response.data) {
+      const { post, roomDetails, landlordDetails, moderationContext } = response.data;
+      
+      // Map the API response to the PostDetail interface
+      const transformedData = {
+        id: post._id,
+        title: roomDetails?.title || post.title || 'Không có tiêu đề',
+        description: roomDetails?.description || post.description || 'Không có mô tả',
+        author: landlordDetails?.name || post.landlord?.full_name || 'Không rõ',
+        authorId: landlordDetails?.id || post.landlord?._id || '',
+        status: post.status,
+        submittedAt: post.createdAt,
+        location: roomDetails?.address || 'Chưa có địa chỉ',
+        city: roomDetails?.city || post.city || '',
+        price: roomDetails?.price?.toString() || '0',
+        area: roomDetails?.area?.toString() || '',
+        category: post.propertyType || post.category || 'Không xác định',
+        images: roomDetails?.images || post.images || [],
+        amenities: roomDetails?.amenities || post.amenities || [],
+        rejectionReason: post.rejectionReason || '',
+        moderationNotes: post.moderationNotes || '',
+        landlordInfo: landlordDetails ? {
+          name: landlordDetails.name,
+          phone: landlordDetails.phone,
+          email: landlordDetails.email,
+          isVerified: landlordDetails.isVerified,
+          accountAge: landlordDetails.accountAge
+        } : undefined,
+        moderation: moderationContext ? {
+          priority: moderationContext.recommendedAction,
+          waitingTime: moderationContext.waitingTime,
+          otherPostsByLandlord: moderationContext.otherPostsByLandlord?.length || 0,
+          approvedPosts: landlordDetails?.statistics?.activePosts || 0,
+          rejectedPosts: landlordDetails?.statistics?.rejectedPosts || 0,
+          contentIssues: post.moderation?.contentIssues || false,
+          pricingIssues: post.moderation?.pricingIssues || false,
+          imageIssues: post.moderation?.imageIssues || false,
+          addressIssues: post.moderation?.addressIssues || false,
+          violationDetails: post.moderation?.violationDetails || ''
+        } : undefined
+      };
+
+      return {
+        ...response,
+        data: transformedData
+      };
+    }
+
+    return response;
+  },
+
+  // Quick approve post
+  async quickApprove(postId: string): Promise<ApiResponse> {
+    return apiRequest(`/moderation/posts/${postId}/approve`, {
+      method: 'PATCH',
+    });
+  },
+
+  // Quick reject post
+  async quickReject(postId: string, data: { reason?: string }): Promise<ApiResponse> {
+    return apiRequest(`/moderation/posts/${postId}/reject`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Moderate post (detailed)
+  async moderatePost(postId: string, data: {
+    status: 'approved' | 'rejected';
+    reason?: string;
+    notes?: string;
+    contentIssues?: boolean;
+    pricingIssues?: boolean;
+    imageIssues?: boolean;
+    addressIssues?: boolean;
+    violationDetails?: string;
+    updateRoomAvailability?: boolean;
+    notifyLandlord?: boolean;
+  }): Promise<ApiResponse> {
+    return apiRequest(`/moderation/posts/${postId}/moderate`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Get moderation history
+  async getHistory(params?: {
+    page?: number;
+    limit?: number;
+    moderatorId?: string;
+    type?: string;
+  }): Promise<ApiResponse> {
+    const queryString = params ? `?${new URLSearchParams(
+      Object.entries(params).reduce((acc, [key, value]) => {
+        if (value !== undefined && value !== null) {
+          acc[key] = value.toString();
+        }
+        return acc;
+      }, {} as Record<string, string>)
+    ).toString()}` : '';
+    
+    return apiRequest(`/moderation/history${queryString}`, {
+      method: 'GET',
+    });
+  },
+
+  // Bulk moderation action
+  async bulkAction(data: {
+    itemIds: string[];
+    action: 'approve' | 'reject';
+    reason?: string;
+    type?: string;
+  }): Promise<ApiResponse> {
+    return apiRequest('/moderation/bulk', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+};
+
 export default {
   auth: authApi,
   rooms: roomApi,
@@ -1387,4 +1604,5 @@ export default {
   stats: statsApi,
   notifications: notificationApi,
   vipPostPayment: vipPostPaymentApi,
+  moderation: moderationApi,
 };

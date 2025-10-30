@@ -6,7 +6,7 @@ import PackagePlan from "../models/packagePlanSchema.js";
 import dotenv from "dotenv";
 import fs from "fs/promises";
 import { generateVerificationToken, sendVerificationEmail, generatePasswordResetToken, sendPasswordResetEmail } from '../services/emailService.js';
-import { setCache } from '../services/redisService.js';
+import { setCache, deleteCacheByPrefix } from '../services/redisService.js';
 import { createHash } from 'crypto';
 import { setUserRefreshJti, getUserRefreshJti, clearUserRefreshJti, revokeRefreshJti, isRefreshJtiRevoked } from '../services/tokenStore.js';
 import { randomUUID } from 'crypto';
@@ -46,6 +46,10 @@ class AuthController {
     });
 
     await newUser.save();
+
+    // 🔥 Xóa cache dashboard vì có user mới
+    await deleteCacheByPrefix('admin:dashboard');
+    console.log('✅ Cache dashboard invalidated after new user registration');
 
     // Tự động tạo gói đăng tin miễn phí cho user mới
     try {
