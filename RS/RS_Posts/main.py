@@ -4,7 +4,7 @@ import numpy as np
 
 app = Flask(__name__)
 model = joblib.load("recommendation_model.pkl")
-
+print("Model loaded successfully.", model)
 df = model["df"]
 cosine_sim = model["cosine_sim"]
 
@@ -19,7 +19,7 @@ def recommend_posts():
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
     top_indices = [i for i, s in sim_scores[1:6]]
 
-    results = df.loc[top_indices, ["_id", "room.title", "room.price", "room.area", "room.address"]].to_dict(orient="records")
+    results = df.loc[top_indices, ["_id", "room.title", "room.price", "room.area", "room.address", "room.images"]].to_dict(orient="records")
     return jsonify({"success": True, "data": results})
 
 if __name__ == "__main__":

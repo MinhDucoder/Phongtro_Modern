@@ -51,7 +51,31 @@ def recommend(post_id, top_k=5):
     sim_scores = list(enumerate(cosine_sim[idx]))
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
     top_indices = [i for i, s in sim_scores[1:top_k+1]]
-    return df.loc[top_indices, ["_id", "room.title", "room.price", "room.area", "room.address"]]
+    
+    # lấy các cột cần thiết
+    recs = df.loc[top_indices, [
+        "_id",
+        "room.title",
+        "room.price",
+        "room.area",
+        "room.address",
+        "room.images"
+    ]]
+    
+    # chuyển DataFrame sang list[dict]
+    results = []
+    for _, row in recs.iterrows():
+        results.append({
+            "_id": row["_id"],
+            "room": {
+                "title": row["room.title"],
+                "price": row["room.price"],
+                "area": row["room.area"],
+                "address": row["room.address"],
+                "images": row["room.images"],   
+            }
+        })
+    return results
 
 # ====== TEST ======
 print(recommend(df["_id"].iloc[0]))
