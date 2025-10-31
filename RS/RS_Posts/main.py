@@ -2,17 +2,43 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import joblib
 import numpy as np
+import threading
+import time
+import subprocess
+import datetime
+import os
 
 app = Flask(__name__)
-CORS(app)
-@app.route("/health", methods=["GET"])
-def health():
-    return jsonify({"status": "ok"})
-model = joblib.load("recommendation_model.pkl")
-print("Model loaded successfully.", model)
-df = model["df"]
-cosine_sim = model["cosine_sim"]
 
+
+# === Load model ban đầu ===
+def load_model():
+    global model, df, cosine_sim
+    model = joblib.load("recommendation_model.pkl")
+    df = model["df"]
+    cosine_sim = model["cosine_sim"]
+    print("✅ Model loaded successfully.")
+
+load_model()
+
+# === Hàm retrain model định kỳ ===
+def auto_update_model(interval_minutes=15):
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # đường dẫn thư mục hiện tại
+    script_path = os.path.join(BASE_DIR, "initModel.py")   # trỏ đúng file
+
+    while True:
+        try:
+            print(f"🕒 Retraining model... ({datetime.datetime.now()})")
+            subprocess.run(["python3", script_path], check=True)
+            load_model()
+            print(f"✅ Model updated successfully at {datetime.datetime.now()}")
+        except Exception as e:
+            print(f"❌ Error updating model: {e}")
+        time.sleep(interval_minutes * 60)
+# === Chạy luồng background khi server khởi động ===
+threading.Thread(target=auto_update_model, args=(15,), daemon=True).start()
+
+# === API recommend ===
 @app.route("/recommendPosts", methods=["GET"])
 def recommend_posts():
     post_id = request.args.get("postId")
@@ -23,30 +49,18 @@ def recommend_posts():
     top_k = max(1, min(top_k, 20))
 
     if post_id not in df["_id"].values:
-        return jsonify({"success": False, "error": "Post not found"}), 404
+        return jsonify({"error": "Post not found"}), 404
 
     idx = df.index[df["_id"] == post_id][0]
     sim_scores = list(enumerate(cosine_sim[idx]))
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
     top_indices = [i for i, s in sim_scores[1:top_k+1]]
 
-    rows = df.loc[top_indices, ["_id", "roomId.title", "roomId.price", "roomId.area", "roomId.address", "roomId.images"]]
+    results = df.loc[top_indices, [
+        "_id", "room.title", "room.price", "room.area", "room.address", "room.images"
+    ]].to_dict(orient="records")
 
-    # Chuẩn hoá output sang nested room
-    results = []
-    for _, row in rows.iterrows():
-        results.append({
-            "_id": row["_id"],
-            "room": {
-                "title": row["roomId.title"],
-                "price": row["roomId.price"],
-                "area": row["roomId.area"],
-                "address": row["roomId.address"],
-                "images": row["roomId.images"],
-            }
-        })
-
-    return jsonify({"success": True, "data": results, "meta": {"topK": top_k}})
+    return jsonify({"success": True, "data": results})
 
 if __name__ == "__main__":
     app.run(port=5001)  # Đổi từ 6000 sang 5001 để tránh ERR_UNSAFE_PORT
