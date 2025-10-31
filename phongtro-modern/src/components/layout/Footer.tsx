@@ -72,11 +72,50 @@ const companyInfo = [
 ];
 
 const socialLinks = [
-  { name: 'Facebook', href: 'https://facebook.com/nhatrovn', icon: '📘' },
-  { name: 'Zalo', href: 'https://zalo.me/nhatrovn', icon: '💬' },
-  { name: 'YouTube', href: 'https://youtube.com/nhatrovn', icon: '📺' },
-  { name: 'TikTok', href: 'https://tiktok.com/@nhatrovn', icon: '🎵' },
+  { name: 'Facebook', href: 'https://facebook.com/nhatrovn' },
+  { name: 'Zalo', href: 'https://zalo.me/nhatrovn' },
+  { name: 'YouTube', href: 'https://youtube.com/nhatrovn' },
+  { name: 'TikTok', href: 'https://tiktok.com/@nhatrovn' },
 ];
+
+function SocialIcon({ name }: { name: string }) {
+  // Inline brand SVGs to avoid external deps
+  if (name === 'Facebook') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="block h-5 w-5 fill-[#1877F2]">
+        <path d="M24 12.073C24 5.406 18.627 0 12 0S0 5.406 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.356c0-3.014 1.792-4.679 4.532-4.679 1.312 0 2.686.235 2.686.235v2.963h-1.514c-1.492 0-1.956.928-1.956 1.88v2.261h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+      </svg>
+    );
+  }
+  if (name === 'YouTube') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="block h-5 w-5">
+        <path className="fill-[#FF0000]" d="M23.498 6.186a3.004 3.004 0 0 0-2.115-2.127C19.57 3.5 12 3.5 12 3.5s-7.57 0-9.383.559A3.004 3.004 0 0 0 .502 6.186C0 8.008 0 12 0 12s0 3.992.502 5.814a3.004 3.004 0 0 0 2.115 2.127C4.43 20.5 12 20.5 12 20.5s7.57 0 9.383-.559a3.004 3.004 0 0 0 2.115-2.127C24 15.992 24 12 24 12s0-3.992-.502-5.814Z"/>
+        <path className="fill-white" d="M9.75 15.5v-7l6 3.5-6 3.5Z"/>
+      </svg>
+    );
+  }
+  if (name === 'TikTok') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="block h-5 w-5">
+        <path className="fill-black" d="M12.9 2h3.007a5.94 5.94 0 0 0 1.03 2.687c.96 1.41 2.415 2.34 4.063 2.613V10.5c-1.92-.04-3.72-.64-5.1-1.61v6.946c0 3.62-2.934 6.55-6.553 6.55A6.555 6.555 0 0 1 2.8 15.84c.3-3.28 3.122-5.77 6.403-5.47.47.04.92.13 1.35.27v3.34a3.11 3.11 0 0 0-1.35-.28 3.25 3.25 0 1 0 3.25 3.25L12.9 2Z"/>
+      </svg>
+    );
+  }
+  if (name === 'Zalo') {
+    // Use external PNG icon provided
+    return (
+      <img
+        src="https://diendantructuyen.com/wp-content/uploads/2025/08/logo-zalo-vector-3.png"
+        alt="Zalo"
+        className="block h-7 w-7 object-contain transform scale-125"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+    );
+  }
+  return null;
+}
 
 export default function Footer() {
   return (
@@ -153,10 +192,10 @@ export default function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-1 p-2 bg-white border rounded hover:bg-blue-50 transition-colors"
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center bg-white border rounded hover:bg-blue-50 transition-colors"
                   title={social.name}
                 >
-                  <span className="text-sm">{social.icon}</span>
+                  <SocialIcon name={social.name} />
                 </a>
               ))}
             </div>
