@@ -1,4 +1,5 @@
 import SearchResults from '@/components/search/SearchResults';
+import { Suspense } from 'react';
 
 export default function PhongTroPage() {
   return (
@@ -11,9 +12,11 @@ export default function PhongTroPage() {
           </p>
         </div>
         
-        <SearchResults
-          initialFilters={{ propertyType: 'phong-tro' }}
-        />
+        <Suspense fallback={null}>
+          <SearchResults
+            initialFilters={{ propertyType: 'phong-tro' }}
+          />
+        </Suspense>
 
         {/* SEO Content */}
         <div className="mt-12 bg-white rounded-lg p-6 shadow-sm">

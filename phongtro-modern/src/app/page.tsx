@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Pagination from '@/components/ui/Pagination';
 import StructuredData from '@/components/seo/StructuredData';
@@ -17,7 +17,7 @@ import TrendingChart from '@/components/stats/TrendingChart';
 import Chatbot from '@/components/chatbot/chat';
 
 
-export default function Home() {
+function HomeInner() {
   const searchParams = useSearchParams();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -349,5 +349,13 @@ export default function Home() {
         endpoint="/api/chatbot"
       />
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <HomeInner />
+    </Suspense>
   );
 }
