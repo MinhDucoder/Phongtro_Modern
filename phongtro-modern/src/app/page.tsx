@@ -8,7 +8,14 @@ import SearchResults from '@/components/search/SearchResults';
 import { Post } from '@/lib/api';
 import RoomCard from '@/components/room/RoomCard';
 import { toastManager } from '@/components/ui/ToastManager';
+
 import Link from 'next/link';
+
+import StatsOverview from '@/components/stats/StatsOverview';
+import RealTimeCounter from '@/components/stats/RealTimeCounter';
+import TrendingChart from '@/components/stats/TrendingChart';
+import Chatbot from '@/components/chatbot/chat';
+
 
 export default function Home() {
   const searchParams = useSearchParams();
@@ -91,13 +98,7 @@ export default function Home() {
           }
         } else if (posts.length === 0) {
           console.log('No approved posts available');
-          toast('Chưa có tin đăng nào được duyệt. Vui lòng chờ admin duyệt tin.', {
-            icon: '⚠️',
-            style: {
-              background: '#fbbf24',
-              color: '#92400e',
-            },
-          });
+          toastManager.showWarning('Chưa có tin đăng nào được duyệt. Vui lòng chờ admin duyệt tin.');
         }
       } else {
         console.error('Invalid response structure:', data);
@@ -341,10 +342,12 @@ export default function Home() {
         </div>
       </section>
       )}
+      <Chatbot
+        title="Hỏi trợ lý AI"
+        placeholder="Nhập câu hỏi... (Enter để gửi)"
+        welcome="Xin chào 👋 Mình là trợ lý AI. Bạn cần tìm phòng hay hỗ trợ gì?"
+        endpoint="/api/chatbot"
+      />
     </>
   );
-}
-
-function toast(arg0: string, arg1: { icon: string; style: { background: string; color: string; }; }) {
-  throw new Error('Function not implemented.');
 }
