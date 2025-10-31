@@ -71,7 +71,7 @@ class PostController {
           cacheKey,
           async () => {
             const filters = {};
-            
+
             // Add filters cho MeiliSearch
             if (req.query.propertyType) {
               filters.type = req.query.propertyType;
@@ -82,7 +82,7 @@ class PostController {
             if (req.query.district) {
               filters.district = req.query.district;
             }
-            
+
             // Add price range filter
             if (req.query.priceRange) {
               const priceMap = {
@@ -95,30 +95,60 @@ class PostController {
                 '10-15-trieu': { min: 10000000, max: 15000000 },
                 'tren-15-trieu': { min: 15000000, max: 999999999 },
               };
-              
+
               const range = priceMap[req.query.priceRange];
               if (range) {
                 filters.minPrice = range.min;
                 filters.maxPrice = range.max;
               }
             }
-            
+
             const options = {
               page,
               limit,
               sortBy: req.query.sortBy || 'relevance',
               filters,
             };
-            
-            const meiliResults = await searchPosts(keyword, options);
-            
-            return {
-              total: meiliResults.totalHits,
-              items: meiliResults.hits,
-              page: meiliResults.page,
-              limit: meiliResults.limit,
-              totalPages: meiliResults.totalPages,
-            };
+
+            // Try MeiliSearch first, but if it fails (e.g. Meili returns an error for this query),
+            // fallback to MongoDB aggregation via postService.listPosts so the user still gets results
+            try {
+              const meiliResults = await searchPosts(keyword, options);
+              return {
+                total: meiliResults.totalHits,
+                items: meiliResults.hits,
+                page: meiliResults.page,
+                limit: meiliResults.limit,
+                totalPages: meiliResults.totalPages,
+              };
+            } catch (meiliErr) {
+              // Log the Meili error and fallback to DB search to avoid returning 400 to clients
+              // eslint-disable-next-line no-console
+              console.error('MeiliSearch error, falling back to MongoDB listPosts:', meiliErr?.message || meiliErr);
+
+              // Build filters for MongoDB listPosts
+              const dbFilters = { status: 'active' };
+              if (filters.type) dbFilters['roomId.propertyType'] = filters.type;
+              if (filters.province) dbFilters['roomId.city'] = filters.province;
+              if (filters.district) dbFilters['roomId.district'] = filters.district;
+              if (filters.minPrice || filters.maxPrice) {
+                const min = Number(filters.minPrice) || 0;
+                const max = Number(filters.maxPrice) || Number.MAX_SAFE_INTEGER;
+                dbFilters['roomId.price'] = { $gte: min, $lte: max };
+              }
+
+              // Use a case-insensitive regex for title search (also supports accented chars)
+              dbFilters['roomId.title'] = new RegExp(keyword, 'i');
+
+              const dbResult = await postService.listPosts({ page, limit, filters: dbFilters, sort: { createdAt: -1 } });
+              return {
+                total: dbResult.total,
+                items: dbResult.items,
+                page,
+                limit,
+                totalPages: Math.max(1, Math.ceil(dbResult.total / limit)),
+              };
+            }
           },
           600 // TTL 10 phút cho search results
         );
@@ -313,13 +343,29 @@ class PostController {
               filters: {},
             };
             
-            const meiliResults = await searchPosts(keyword, options);
-            
-            return {
-              items: meiliResults.hits,
-              total: meiliResults.totalHits,
-              limit,
-            };
+            try {
+              const meiliResults = await searchPosts(keyword, options);
+
+              return {
+                items: meiliResults.hits,
+                total: meiliResults.totalHits,
+                limit,
+              };
+            } catch (meiliErr) {
+              console.error('MeiliSearch suggestions error, fallback to DB:', meiliErr?.message || meiliErr);
+              // Fallback: use MongoDB to get latest posts
+              const dbFilters = { status: 'active' };
+              if (req.query.propertyType) dbFilters['roomId.propertyType'] = req.query.propertyType;
+              if (req.query.province) dbFilters['roomId.city'] = req.query.province;
+              if (req.query.district) dbFilters['roomId.district'] = req.query.district;
+
+              const listResult = await postService.listPosts({ page: 1, limit, filters: dbFilters, sort: { createdAt: -1 } });
+              return {
+                items: listResult.items,
+                total: listResult.total,
+                limit,
+              };
+            }
           }
           
           // Nếu không có keyword → lấy phòng trọ mới nhất
