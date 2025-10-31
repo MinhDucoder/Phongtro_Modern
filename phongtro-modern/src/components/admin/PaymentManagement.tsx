@@ -90,6 +90,8 @@ export default function PaymentManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const limit = 20;
 
   // Fetch payments từ API
@@ -136,7 +138,8 @@ export default function PaymentManagement() {
       }
     } catch (error) {
       console.error('Error fetching payments:', error);
-      toastManager.showError('Lỗi khi tải dữ liệu giao dịch: ' + error.message);
+      const message = error instanceof Error ? error.message : String(error);
+      toastManager.showError('Lỗi khi tải dữ liệu giao dịch: ' + message);
     } finally {
       setLoading(false);
     }
@@ -163,6 +166,28 @@ export default function PaymentManagement() {
     setPage(1);
     fetchPayments();
     // fetchStats(); // Tạm thời comment
+  };
+
+  const handleViewDetail = async (paymentId: string) => {
+    try {
+      const response = await fetch(`/api/v1/admin/payments/${paymentId}`, {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) {
+        throw new Error('Không thể lấy chi tiết giao dịch');
+      }
+
+      const result = await response.json();
+      if (result.success && result.data) {
+        setSelectedPayment(result.data);
+        setShowDetailModal(true);
+      }
+    } catch (error) {
+      console.error('Error fetching payment detail:', error);
+      toastManager.showError('Lỗi khi lấy chi tiết giao dịch');
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -211,7 +236,7 @@ export default function PaymentManagement() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Tổng giao dịch</p>
-                <p className="text-2xl font-bold text-darker">{stats.overview.totalPayments}</p>
+                <p className="text-2xl font-bold text-darker">{stats?.overview?.totalPayments ?? 0}</p>
               </div>
             </div>
           </div>
@@ -223,7 +248,7 @@ export default function PaymentManagement() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Thành công</p>
-                <p className="text-2xl font-bold text-darker">{stats.overview.completedPayments}</p>
+                <p className="text-2xl font-bold text-darker">{stats?.overview?.completedPayments ?? 0}</p>
               </div>
             </div>
           </div>
@@ -235,7 +260,7 @@ export default function PaymentManagement() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Chờ xử lý</p>
-                <p className="text-2xl font-bold text-darker">{stats.overview.pendingPayments}</p>
+                <p className="text-2xl font-bold text-darker">{stats?.overview?.pendingPayments ?? 0}</p>
               </div>
             </div>
           </div>
@@ -247,7 +272,7 @@ export default function PaymentManagement() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Thất bại</p>
-                <p className="text-2xl font-bold text-darker">{stats.overview.failedPayments}</p>
+                <p className="text-2xl font-bold text-darker">{stats?.overview?.failedPayments ?? 0}</p>
               </div>
             </div>
           </div>
@@ -260,7 +285,7 @@ export default function PaymentManagement() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Tổng thu</p>
                 <p className="text-xl font-bold text-darker">
-                  {formatCurrency(stats.overview.totalRevenue)}
+                  {formatCurrency(stats?.overview?.totalRevenue ?? 0)}
                 </p>
               </div>
             </div>
@@ -427,6 +452,7 @@ export default function PaymentManagement() {
                           variant="outline"
                           size="sm"
                           leftIcon={<EyeIcon className="w-4 h-4" />}
+                          onClick={() => handleViewDetail(payment.id)}
                         >
                           Xem
                         </Button>
@@ -471,13 +497,13 @@ export default function PaymentManagement() {
       </div>
 
       {/* Revenue Details - Tạm thời ẩn */}
-      {false && stats && stats.revenueByPackage.length > 0 && (
+      {false && (stats?.revenueByPackage?.length ?? 0) > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Revenue by Package Type */}
           <div className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold text-darker mb-4">Doanh thu theo gói</h3>
             <div className="space-y-3">
-              {stats.revenueByPackage.map((pkg) => (
+              {(stats?.revenueByPackage ?? []).map((pkg) => (
                 <div key={pkg.packageType} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
                     <p className="font-medium text-darker">{pkg.packageType.toUpperCase()}</p>
@@ -496,7 +522,7 @@ export default function PaymentManagement() {
           <div className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold text-darker mb-4">Doanh thu theo phương thức</h3>
             <div className="space-y-3">
-              {stats.revenueByMethod.map((method) => (
+              {(stats?.revenueByMethod ?? []).map((method) => (
                 <div key={method.method} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
                     <p className="font-medium text-darker">
@@ -507,6 +533,185 @@ export default function PaymentManagement() {
                   <p className="font-bold text-darker">{formatCurrency(method.revenue)}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Detail Modal */}
+      {showDetailModal && selectedPayment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-darker">Chi tiết giao dịch thanh toán</h2>
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="px-6 py-4 space-y-6">
+              {/* Thông tin giao dịch cơ bản */}
+              <div>
+                <h3 className="text-lg font-semibold text-darker mb-3">Thông tin giao dịch</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase">Mã giao dịch</p>
+                    <p className="text-sm font-mono text-darker mt-1">{selectedPayment.transactionId}</p>
+                  </div>
+                  {selectedPayment.referenceId && (
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase">Mã tham chiếu</p>
+                      <p className="text-sm font-mono text-darker mt-1">{selectedPayment.referenceId}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase">Trạng thái</p>
+                    <div className="mt-1">
+                      <Badge variant={statusConfig[selectedPayment.status].variant} size="sm">
+                        {statusConfig[selectedPayment.status].label}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase">Phương thức</p>
+                    <p className="text-sm text-darker mt-1">
+                      {methodConfig[selectedPayment.paymentMethod] || selectedPayment.paymentMethod}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Thông tin người dùng */}
+              {selectedPayment.user && (
+                <div>
+                  <h3 className="text-lg font-semibold text-darker mb-3">Thông tin người dùng</h3>
+                  <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase">Tên</p>
+                      <p className="text-sm text-darker mt-1">{selectedPayment.user.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase">Email</p>
+                      <p className="text-sm text-darker mt-1">{selectedPayment.user.email}</p>
+                    </div>
+                    {selectedPayment.user.phone && (
+                      <div>
+                        <p className="text-xs font-medium text-gray-500 uppercase">Số điện thoại</p>
+                        <p className="text-sm text-darker mt-1">{selectedPayment.user.phone}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Thông tin gói dịch vụ */}
+              <div>
+                <h3 className="text-lg font-semibold text-darker mb-3">Thông tin gói dịch vụ</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase">Tên gói</p>
+                    <p className="text-sm text-darker mt-1">{selectedPayment.packageName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase">Loại gói</p>
+                    <p className="text-sm text-darker mt-1">{selectedPayment.packageType}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase">Thời hạn</p>
+                    <p className="text-sm text-darker mt-1">{selectedPayment.packageDuration} ngày</p>
+                  </div>
+                  {selectedPayment.packageStartDate && (
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase">Ngày bắt đầu</p>
+                      <p className="text-sm text-darker mt-1">{formatDate(selectedPayment.packageStartDate)}</p>
+                    </div>
+                  )}
+                  {selectedPayment.packageEndDate && (
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase">Ngày kết thúc</p>
+                      <p className="text-sm text-darker mt-1">{formatDate(selectedPayment.packageEndDate)}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Thông tin thanh toán */}
+              <div>
+                <h3 className="text-lg font-semibold text-darker mb-3">Thông tin thanh toán</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase">Số tiền</p>
+                    <p className="text-2xl font-bold text-blue-600 mt-1">
+                      {formatCurrency(selectedPayment.amount)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase">Loại tiền</p>
+                    <p className="text-sm text-darker mt-1">{selectedPayment.currency}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Thời gian xử lý */}
+              <div>
+                <h3 className="text-lg font-semibold text-darker mb-3">Thời gian</h3>
+                <div className="space-y-2 bg-gray-50 p-4 rounded-lg">
+                  <div className="flex justify-between">
+                    <p className="text-sm font-medium text-gray-600">Ngày tạo</p>
+                    <p className="text-sm text-darker">{formatDate(selectedPayment.createdAt)}</p>
+                  </div>
+                  {selectedPayment.completedAt && (
+                    <div className="flex justify-between">
+                      <p className="text-sm font-medium text-gray-600">Hoàn thành</p>
+                      <p className="text-sm text-green-600 font-medium">{formatDate(selectedPayment.completedAt)}</p>
+                    </div>
+                  )}
+                  {selectedPayment.failedAt && (
+                    <div className="flex justify-between">
+                      <p className="text-sm font-medium text-gray-600">Thất bại</p>
+                      <p className="text-sm text-red-600 font-medium">{formatDate(selectedPayment.failedAt)}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Ghi chú */}
+              {selectedPayment.notes && (
+                <div>
+                  <h3 className="text-lg font-semibold text-darker mb-3">Ghi chú</h3>
+                  <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                    <p className="text-sm text-darker">{selectedPayment.notes}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Lý do thất bại */}
+              {selectedPayment.failureReason && (
+                <div>
+                  <h3 className="text-lg font-semibold text-darker mb-3">Lý do thất bại</h3>
+                  <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                    <p className="text-sm text-red-800">{selectedPayment.failureReason}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDetailModal(false)}
+              >
+                Đóng
+              </Button>
             </div>
           </div>
         </div>

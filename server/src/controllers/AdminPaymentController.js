@@ -346,45 +346,32 @@ class AdminPaymentController {
       });
     }
     
-    // Format detailed payment info
+    // Format payment info to match frontend interface
     const detailedPayment = {
       id: payment._id,
       transactionId: payment.transactionId,
       referenceId: payment.referenceId,
       user: payment.user ? {
         id: payment.user._id,
-        name: payment.user.full_name,
-        email: payment.user.email,
-        phone: payment.user.phone_number,
-        address: payment.user.address,
-        avatar: payment.user.avatar,
-        isVerified: payment.user.is_verified,
-        role: payment.user.role
+        name: payment.user.full_name || 'N/A',
+        email: payment.user.email || 'N/A',
+        phone: payment.user.phone_number || '',
+        avatar: payment.user.avatar || null
       } : null,
-      package: {
-        name: payment.packageName,
-        type: payment.packageType,
-        duration: payment.packageDuration,
-        startDate: payment.packageStartDate,
-        endDate: payment.packageEndDate
-      },
-      payment: {
-        amount: payment.amount,
-        currency: payment.currency || 'VND',
-        method: payment.paymentMethod,
-        status: payment.status
-      },
-      invoice: payment.invoice,
-      timeline: {
-        createdAt: payment.createdAt || payment.created_at,
-        completedAt: payment.completedAt,
-        failedAt: payment.failedAt,
-        refundedAt: payment.refundedAt
-      },
-      failureReason: payment.failureReason,
-      refundReason: payment.refundReason,
-      notes: payment.notes,
-      gatewayResponse: payment.gatewayResponse
+      packageName: payment.packageName,
+      packageType: payment.packageType,
+      packageDuration: payment.packageDuration,
+      packageStartDate: payment.packageStartDate,
+      packageEndDate: payment.packageEndDate,
+      amount: payment.amount,
+      currency: payment.currency || 'VND',
+      paymentMethod: payment.paymentMethod,
+      status: payment.status,
+      createdAt: payment.createdAt || payment.created_at,
+      completedAt: payment.completedAt || null,
+      failedAt: payment.failedAt || null,
+      failureReason: payment.failureReason || null,
+      notes: payment.notes || ''
     };
     
     res.status(200).json({

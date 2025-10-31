@@ -1483,7 +1483,12 @@ export const moderationApi = {
 
     // Transform API response to match component's expected structure
     if (response.success && response.data) {
-      const { post, roomDetails, landlordDetails, moderationContext } = response.data;
+      const { post, roomDetails, landlordDetails, moderationContext } = response.data as {
+        post: any;
+        roomDetails?: any;
+        landlordDetails?: any;
+        moderationContext?: any;
+      };
       
       // Map the API response to the PostDetail interface
       const transformedData = {
