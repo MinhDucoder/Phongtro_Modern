@@ -1,50 +1,72 @@
 import Rating from "~/models/ratingSchema.js";
 import Post from "~/models/postSchema.js";
 import mongoose from "mongoose";
-
+import { analyzeSentiment } from "~/utils/zaloAI";
+import { success, error } from "~/utils/responeHandler";
+import {quickFilter} from "~/utils/quickFilter.js";
 /**
  * Upsert rating (create or update)
  * payload: { postId, userId, rating, comment }
  */
 export const upsertRating = async ({ postId, userId, rating, comment }) => {
-    console.log(postId, userId, rating, comment);
-  const post = await Post.findById(postId);
-  if (!post) throw new Error("Post not found");
+  try {
+    const post = await Post.findById(postId);
+    if (!post) throw new Error("Post not found");
 
-  if (post.landlord?.toString() === userId.toString()) {
-    throw new Error("Landlord cannot rate own post");
-  }
+    if (post.landlord?.toString() === userId.toString()) {
+      throw new Error("Landlord cannot rate own post");
+    }
+    // Quick filter for bad words
+    // if (quickFilter(comment || "")) {
+    //   throw new Error("Comment contains inappropriate language");
+    // }
 
-  // Upsert rating document
-  const result = await Rating.findOneAndUpdate(
-    { post: postId, user: userId },
-    { rating, comment },
-    { new: true, upsert: true, setDefaultsOnInsert: true }
-  );
+    const sentimentResult = await analyzeSentiment(comment || "");
+    console.log("Sentiment Result:", sentimentResult);
+    if (sentimentResult) {
+      const { sentiment, confidence } = sentimentResult;
+      // Simple rule: if sentiment is negative with high confidence, reject
+      if (sentiment === "negative" && confidence >= 0.8) {
+        throw new Error("Comment contains negative sentiment");
+      }
+    }
 
-  // Recompute stats for this post
-  const stats = await Rating.aggregate([
-    { $match: { post: new mongoose.Types.ObjectId(postId) } },
-    {
-      $group: {
-        _id: "$post",
-        avgRating: { $avg: "$rating" },
-        count: { $sum: 1 },
+    // Upsert rating document
+    const result = await Rating.findOneAndUpdate(
+      { post: postId, user: userId },
+      { rating, comment },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+
+    // Recompute stats for this post
+    const stats = await Rating.aggregate([
+      { $match: { post: new mongoose.Types.ObjectId(postId) } },
+      {
+        $group: {
+          _id: "$post",
+          avgRating: { $avg: "$rating" },
+          count: { $sum: 1 },
+        },
       },
-    },
-  ]);
+    ]);
 
-  if (stats.length > 0) {
-    post.averageRating = Number(stats[0].avgRating.toFixed(2));
-    post.totalRatings = stats[0].count;
-  } else {
-    post.averageRating = 0;
-    post.totalRatings = 0;
+    if (stats.length > 0) {
+      post.averageRating = Number(stats[0].avgRating.toFixed(2));
+      post.totalRatings = stats[0].count;
+    } else {
+      post.averageRating = 0;
+      post.totalRatings = 0;
+    }
+
+    await post.save();
+
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+    // eslint-disable-next-line no-unreachable
+    return error("Failed to upsert rating", 500)
   }
-
-  await post.save();
-
-  return result;
+  
 };
 
 /** Get paginated ratings with optional sort/filter */

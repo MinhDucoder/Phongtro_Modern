@@ -1,14 +1,23 @@
 import * as ratingService from "~/services/ratingService.js";
 import { success, error } from "~/utils/responeHandler";
-
+import { isToxic, cleanText } from "~/utils/quickFilter.js";
 export const ratePost = async (req, res) => {
   try {
+
     const payload = {
       postId: req.params.id,
       userId: req.user.id,
       rating: Number(req.body.rating),
       comment: req.body.comment || "",
     };
+
+    if (isToxic(payload.comment)) {
+    return res.status(400).json({
+      status: "fail",
+      message: "Nội dung bình luận chứa từ ngữ tiêu cực.",
+      cleaned: cleanText(payload.comment) // trả về bản đã lọc
+    });
+  }
 
     if (!payload.rating || payload.rating < 1 || payload.rating > 5) {
       return res.status(400).json({ message: "rating must be between 1 and 5" });
