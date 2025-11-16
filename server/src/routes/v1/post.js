@@ -3,6 +3,7 @@ import PostController from "../../controllers/PostController.js";
 import { authenticate, authorize } from "../../middlewares/checkToken.js";
 import { checkPostPermission, usePostSlot, refundPostSlot } from "../../middlewares/subscriptionMiddleware.js";
 import catchAsync from "../../middlewares/catchAsync.js";
+import ratingRoute from "./rating.js";
 
 const postRoute = express.Router();
 
@@ -37,5 +38,7 @@ postRoute.delete("/:id",
   refundPostSlot,
   catchAsync(PostController.remove)
 );
+
+postRoute.use("/:id", ratingRoute);
 
 export default postRoute;
