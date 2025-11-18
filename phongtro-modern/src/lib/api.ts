@@ -326,6 +326,126 @@ export interface Post {
   viewCount?: number;
 }
 
+export type ReportType =
+  | 'spam'
+  | 'fake'
+  | 'inappropriate'
+  | 'harassment'
+  | 'scam'
+  | 'other';
+
+export type ReportStatus = 'pending' | 'investigating' | 'resolved' | 'dismissed';
+
+export interface ReportTargetSummary {
+  _id?: string;
+  title?: string;
+  slug?: string;
+  status?: string;
+  roomId?: { _id: string; title?: string; address?: string; images?: Array<{ url: string }> };
+  price?: number;
+  city?: string;
+  full_name?: string;
+  email?: string;
+  phone?: string;
+  role?: string;
+  avatar?: string | { url: string };
+  landlord?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+  };
+}
+
+export interface Report {
+  _id: string;
+  code: string;
+  reporter?: User;
+  targetType: 'post' | 'user';
+  targetId?: ReportTargetSummary | null;
+  type: ReportType;
+  description: string;
+  status: ReportStatus;
+  adminNote?: string;
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt?: string;
+  handledBy?: User;
+  targetSnapshot?: {
+    title?: string;
+    slug?: string;
+    address?: string;
+    price?: number;
+    status?: string;
+    url?: string;
+    landlord?: {
+      name?: string;
+      email?: string;
+      phone?: string;
+    };
+    user?: {
+      full_name?: string;
+      email?: string;
+      phone?: string;
+      role?: string;
+    };
+  };
+  adminResolution?: {
+    verificationMethod?: string;
+    actionsTaken?: string[];
+    responseMessage?: string;
+    notifyReporter?: boolean;
+    respondedAt?: string;
+  };
+}
+
+export interface ReportListResponse {
+  items: Report[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
+export interface ReportStatsResponse {
+  status: Record<ReportStatus, number>;
+  type: Record<ReportType, number>;
+  trend: Array<{ date: string; count: number }>;
+  total: number;
+}
+
+export interface CreateReportPayload {
+  targetId: string;
+  targetType: 'post' | 'user';
+  type: ReportType;
+  description: string;
+  metadata?: {
+    additionalInfo?: Record<string, any>;
+    screenshots?: Array<{ url: string; publicId?: string }>;
+  };
+}
+
+export interface UpdateReportStatusPayload {
+  status: ReportStatus;
+  adminNote?: string | null;
+  resolution?: {
+    actionsTaken?: string[];
+    responseMessage?: string | null;
+  };
+}
+
+export interface ReportListQuery {
+  page?: number;
+  limit?: number;
+  status?: ReportStatus | 'all';
+  type?: ReportType | 'all';
+  targetType?: 'post' | 'user' | 'all';
+  search?: string;
+  from?: string;
+  to?: string;
+}
+
 // Hàm gửi request API tổng quát với automatic token refresh
 export async function apiRequest<T>(
   endpoint: string,
@@ -1149,18 +1269,18 @@ export const savedPropertiesApi = {
     });
   },
 
+  // Check if a property is saved
+  async checkSavedStatus(postId: string): Promise<ApiResponse> {
+    return apiRequest(`/saved-properties/dashboard/saved/check/${postId}`, {
+      method: 'GET',
+    });
+  },
+
   // Update favorite notes and tags
   async updateFavorite(favoriteId: string, notes?: string, tags?: string[]): Promise<ApiResponse> {
     return apiRequest(`/saved-properties/${favoriteId}`, {
       method: 'PUT',
       body: JSON.stringify({ notes, tags }),
-    });
-  },
-
-  // Check if a property is saved
-  async checkSavedStatus(postId: string): Promise<ApiResponse> {
-    return apiRequest(`/saved-properties/dashboard/saved/${postId}`, {
-      method: 'GET',
     });
   },
 };
@@ -1412,6 +1532,60 @@ export const notificationApi = {
   },
 };
 
+const buildReportQueryString = (params?: Record<string, any>) => {
+  if (!params) return '';
+  const searchParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+    if (typeof value === 'string' && (value.trim() === '' || value === 'all')) return;
+    searchParams.append(key, String(value));
+  });
+
+  const query = searchParams.toString();
+  return query ? `?${query}` : '';
+};
+
+export const reportApi = {
+  createReport: (payload: CreateReportPayload) =>
+    apiRequest<Report>('/reports', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  getMyReports: (params?: Pick<ReportListQuery, 'page' | 'limit' | 'status' | 'type'>) => {
+    const queryString = buildReportQueryString(params);
+    return apiRequest<ReportListResponse>(`/reports/my${queryString}`, {
+      method: 'GET',
+    });
+  },
+
+  adminList: (params?: ReportListQuery) => {
+    const queryString = buildReportQueryString(params);
+    return apiRequest<ReportListResponse>(`/reports${queryString}`, {
+      method: 'GET',
+    });
+  },
+
+  getReport: (reportId: string) =>
+    apiRequest<Report>(`/reports/${reportId}`, {
+      method: 'GET',
+    }),
+
+  updateStatus: (reportId: string, data: UpdateReportStatusPayload) =>
+    apiRequest<Report>(`/reports/${reportId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  getStats: (params?: Pick<ReportListQuery, 'from' | 'to'>) => {
+    const queryString = buildReportQueryString(params);
+    return apiRequest<ReportStatsResponse>(`/reports/stats${queryString}`, {
+      method: 'GET',
+    });
+  },
+};
+
 // VIP Post Payment API
 export const vipPostPaymentApi = {
   // Lấy danh sách gói VIP
@@ -1607,6 +1781,48 @@ export const moderationApi = {
   },
 };
 
+// Rating API
+export const ratingApi = {
+  // Create or update rating for a post
+  async ratePost(postId: string, data: {
+    rating: number;
+    comment?: string;
+  }): Promise<ApiResponse> {
+    return apiRequest(`/posts/${postId}/rating`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Get ratings for a post
+  async getRatings(postId: string, params?: {
+    page?: number;
+    limit?: number;
+    sort?: string;
+    star?: number;
+  }): Promise<ApiResponse> {
+    const queryString = params ? `?${new URLSearchParams(
+      Object.entries(params).reduce((acc, [key, value]) => {
+        if (value !== undefined && value !== null) {
+          acc[key] = value.toString();
+        }
+        return acc;
+      }, {} as Record<string, string>)
+    ).toString()}` : '';
+    
+    return apiRequest(`/posts/${postId}/ratings${queryString}`, {
+      method: 'GET',
+    });
+  },
+
+  // Delete rating for a post
+  async deleteRating(postId: string): Promise<ApiResponse> {
+    return apiRequest(`/posts/${postId}/rating`, {
+      method: 'DELETE',
+    });
+  },
+};
+
 export default {
   auth: authApi,
   rooms: roomApi,
@@ -1620,4 +1836,5 @@ export default {
   notifications: notificationApi,
   vipPostPayment: vipPostPaymentApi,
   moderation: moderationApi,
+  rating: ratingApi,
 };

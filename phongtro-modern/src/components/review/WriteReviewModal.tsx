@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { toastManager } from '@/components/ui/ToastManager';
+import { ratingApi } from '@/lib/api';
 
 interface WriteReviewModalProps {
   isOpen: boolean;
@@ -110,38 +111,47 @@ export default function WriteReviewModal({
     setIsSubmitting(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const review = {
-        id: `REV-${Date.now()}`,
-        ...reviewData,
-        property: property,
-        submittedAt: new Date(),
-        status: 'published'
-      };
-      
-      toastManager.showSuccess('Đánh giá đã được gửi thành công!');
-      onReviewSubmitted?.(review);
-      onClose();
-      
-      // Reset form
-      setReviewData({
-        rating: 0,
-        title: '',
-        content: '',
-        categories: {
-          cleanliness: 0,
-          location: 0,
-          value: 0,
-          communication: 0,
-          amenities: 0
-        },
-        recommend: false,
-        anonymous: false
+      // Call API to submit rating
+      const response = await ratingApi.ratePost(property.id, {
+        rating: reviewData.rating,
+        comment: reviewData.content || (reviewData.title ? `${reviewData.title}\n\n${reviewData.content}` : reviewData.content)
       });
-    } catch (error) {
-      toastManager.showError('Có lỗi xảy ra. Vui lòng thử lại.');
+
+      if (response.success) {
+        const review = {
+          id: response.data?._id || `REV-${Date.now()}`,
+          ...reviewData,
+          property: property,
+          submittedAt: new Date(),
+          status: 'published'
+        };
+        
+        toastManager.showSuccess('Đánh giá đã được gửi thành công!');
+        onReviewSubmitted?.(review);
+        onClose();
+        
+        // Reset form
+        setReviewData({
+          rating: 0,
+          title: '',
+          content: '',
+          categories: {
+            cleanliness: 0,
+            location: 0,
+            value: 0,
+            communication: 0,
+            amenities: 0
+          },
+          recommend: false,
+          anonymous: false
+        });
+      } else {
+        throw new Error(response.message || 'Có lỗi xảy ra khi gửi đánh giá');
+      }
+    } catch (error: any) {
+      console.error('Error submitting review:', error);
+      const errorMessage = error?.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
+      toastManager.showError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

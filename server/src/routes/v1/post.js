@@ -39,6 +39,7 @@ postRoute.delete("/:id",
   catchAsync(PostController.remove)
 );
 
+// Rating routes
 postRoute.use("/:id", ratingRoute);
 
 export default postRoute;

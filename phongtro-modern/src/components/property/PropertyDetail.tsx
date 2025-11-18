@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { 
   HeartIcon, 
   ShareIcon, 
+  FlagIcon,
   MapPinIcon, 
   EyeIcon, 
   CalendarIcon,
@@ -36,6 +37,7 @@ import OpenStreetMap from '@/components/map/OpenStreetMap';
 import PropertyReviews from '@/components/review/PropertyReviews';
 import EnhancedLandlordCard from '@/components/property/EnhancedLandlordCard';
 import { savedPropertiesApi, rsApi } from '@/lib/api';
+import ReportModal, { ReportTarget } from '@/components/report/ReportModal';
 
 interface PropertyDetailProps {
   property: {
@@ -143,10 +145,13 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'map' | 'reviews'>('overview');
   const [isSaved, setIsSaved] = useState(false);
+  const [favoriteId, setFavoriteId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [recs, setRecs] = useState<any[]>([]);
   const [recsLoading, setRecsLoading] = useState<boolean>(false);
   const [recsError, setRecsError] = useState<string | null>(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
 
   // PropertyDetailPage đã normalize data, tin tưởng nó
   const room = property.room || {};
@@ -187,6 +192,51 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
     }
   };
 
+  const openReportModal = (targetType: 'post' | 'user') => {
+    const postId = property._id || property.id;
+    if (!postId) {
+      toastManager.showError('Không xác định được mã tin đăng để báo cáo');
+      return;
+    }
+
+    if (!isAuthenticated) {
+      toastManager.showError('🔐 Vui lòng đăng nhập để gửi báo cáo');
+      const redirectPath =
+        typeof window !== 'undefined'
+          ? `${window.location.pathname}${window.location.search}`
+          : `/phong-tro/${postId}`;
+      router.push('/dang-nhap?redirect=' + encodeURIComponent(redirectPath));
+      return;
+    }
+
+    const landlordId = (property.landlord as any)?._id;
+    if (targetType === 'user' && !landlordId) {
+      toastManager.showError('Không thể báo cáo người dùng này');
+      return;
+    }
+
+    const targetConfig: ReportTarget = {
+      targetId: targetType === 'post' ? (postId as string) : (landlordId as string),
+      targetType,
+      targetName:
+        targetType === 'post'
+          ? room?.title || property.title || 'Tin đăng'
+          : property.landlord?.full_name || contact?.name || 'Người dùng',
+      targetDescription:
+        targetType === 'post'
+          ? room?.address || property.address || ''
+          : property.landlord?.email || contact?.email || '',
+    };
+
+    setReportTarget(targetConfig);
+    setIsReportModalOpen(true);
+  };
+
+  const closeReportModal = () => {
+    setIsReportModalOpen(false);
+    setReportTarget(null);
+  };
+
   // Save functionality
   const handleSave = async () => {
     if (!isAuthenticated) {
@@ -210,13 +260,23 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
       }
       
       if (isSaved) {
-        // Remove from saved
-        await savedPropertiesApi.removeProperty(postId);
+        if (!favoriteId) {
+          toastManager.showError('Không tìm thấy mã lưu tin để hủy lưu.');
+          return;
+        }
+        await savedPropertiesApi.removeProperty(favoriteId);
         setIsSaved(false);
+        setFavoriteId(null);
         toastManager.showSuccess('💔 Đã bỏ lưu tin đăng');
       } else {
-        // Save property
-        await savedPropertiesApi.saveProperty(postId);
+        const response = await savedPropertiesApi.saveProperty(postId);
+        const savedFavoriteId =
+          (response.data as any)?.favorite?._id ||
+          (response as any)?.favorite?._id ||
+          null;
+        if (savedFavoriteId) {
+          setFavoriteId(savedFavoriteId);
+        }
         setIsSaved(true);
         toastManager.showSuccess('❤️ Đã lưu tin đăng vào danh sách yêu thích');
       }
@@ -231,6 +291,35 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    const postId = property._id || property.id;
+    if (!postId || !isAuthenticated) {
+      setIsSaved(false);
+      setFavoriteId(null);
+      return;
+    }
+    let isMountedEffect = true;
+    (async () => {
+      try {
+        const response = await savedPropertiesApi.checkSavedStatus(postId);
+        const payload = (response.data as any) || response;
+        if (!isMountedEffect) return;
+        const saved = !!(payload?.isSaved);
+        setIsSaved(saved);
+        setFavoriteId(saved ? payload?.favoriteId || null : null);
+      } catch (error) {
+        console.error('Không thể kiểm tra trạng thái lưu tin:', error);
+        if (isMountedEffect) {
+          setIsSaved(false);
+          setFavoriteId(null);
+        }
+      }
+    })();
+    return () => {
+      isMountedEffect = false;
+    };
+  }, [isAuthenticated, property._id, property.id]);
 
   // Fetch recommendations
   useEffect(() => {
@@ -378,6 +467,13 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   >
                     <ShareIcon className="w-6 h-6 text-gray-700" />
                   </button>
+                  <button
+                    onClick={() => openReportModal('post')}
+                    className="backdrop-blur-sm bg-white/85 hover:bg-white p-3 rounded-xl transition-all duration-200 hover:scale-105 shadow-sm border border-white/40"
+                    aria-label="Báo cáo tin đăng"
+                  >
+                    <FlagIcon className="w-6 h-6 text-red-500" />
+                  </button>
                 </div>
 
                 {/* Navigation Arrows */}
@@ -412,13 +508,12 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               <div className="p-4 bg-gray-50">
                 <div className="grid grid-cols-5 gap-2">
                   {galleryImages.slice(0, 5).map((image: string, index: number) => (
-                    <div key={index} className="relative group">
+                    <div key={index} className="relative group w-full aspect-[4/3]">
                       <Image
                         src={image || '/placeholder-room.svg'}
                         alt={`Ảnh ${index + 1} - ${room?.title || 'Phòng trọ'}`}
-                        width={140}
-                        height={100}
-                        sizes="140px"
+                        fill
+                        sizes="(max-width: 768px) 20vw, 15vw"
                         className={`object-cover rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 ${
                           currentImageIndex === index 
                             ? 'ring-2 ring-blue-500 shadow-md scale-105' 
@@ -428,7 +523,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                       />
                       {index === 4 && galleryImages.length > 5 && (
                         <div 
-                          className="absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer rounded-lg hover:bg-black/70 transition-colors"
+                          className="absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer rounded-lg hover:bg-black/70 transition-colors z-10"
                           onClick={() => setShowAllImages(true)}
                         >
                           <div className="text-center text-white">
@@ -448,10 +543,8 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
           </div>
 
           {/* Enhanced Sidebar */}
-          <div className="space-y-4 lg:sticky lg:top-24">
-            {/* Enhanced Landlord Card with glass-morphism wrapper */}
-            <div className="relative bg-white rounded-xl shadow-md border border-gray-200">
-              <EnhancedLandlordCard
+          <div className="space-y-4 lg:sticky lg:top-24 place-self-start">
+            <EnhancedLandlordCard
               landlord={{
                 _id: (property.landlord as any)?._id || 'unknown',
                 full_name: contact?.name || 'Chủ nhà',
@@ -462,11 +555,11 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 is_verified: contact?.isVerified || false,
                 responseTime: 'Trong vòng 1 giờ',
                 onlineStatus: 'online' as const,
-                last_login: (property.landlord as any)?.last_login
+                last_login: (property.landlord as any)?.last_login,
               }}
               propertyId={property._id || property.id || ''}
-              />
-            </div>
+              onReportPost={() => openReportModal('post')}
+            />
           </div>
         </div>
 
@@ -874,13 +967,12 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             {/* Thumbnail Grid */}
             <div className="grid grid-cols-8 gap-3">
               {galleryImages?.map((image: string, index: number) => (
-                <div key={index} className="relative">
+                <div key={index} className="relative w-full aspect-[4/3]">
                   <Image
                     src={image || '/placeholder-room.svg'}
                     alt={`Thumbnail ${index + 1} - ${room?.title || 'Phòng trọ'}`}
-                    width={100}
-                    height={75}
-                    sizes="100px"
+                    fill
+                    sizes="(max-width: 768px) 12vw, 10vw"
                     className={`object-cover rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 ${
                       currentImageIndex === index 
                         ? 'ring-2 ring-white shadow-lg' 
@@ -894,6 +986,12 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
           </div>
         </div>
       )}
+
+      <ReportModal
+        isOpen={isReportModalOpen}
+        target={reportTarget}
+        onClose={closeReportModal}
+      />
     </div>
   );
 }

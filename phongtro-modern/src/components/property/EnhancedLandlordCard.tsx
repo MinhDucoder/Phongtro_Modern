@@ -9,7 +9,8 @@ import {
   ChatBubbleLeftIcon,
   ClockIcon,
   ShieldCheckIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  FlagIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { toastManager } from '@/components/ui/ToastManager';
@@ -32,9 +33,17 @@ interface EnhancedLandlordCardProps {
   landlord: Landlord;
   propertyId: string;
   className?: string;
+  onReportPost?: () => void;
+  onReportLandlord?: () => void;
 }
 
-export default function EnhancedLandlordCard({ landlord, propertyId, className = '' }: EnhancedLandlordCardProps) {
+export default function EnhancedLandlordCard({
+  landlord,
+  propertyId,
+  className = '',
+  onReportPost,
+  onReportLandlord,
+}: EnhancedLandlordCardProps) {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
   const [isStartingChat, setIsStartingChat] = useState(false);
@@ -200,7 +209,7 @@ export default function EnhancedLandlordCard({ landlord, propertyId, className =
           <button
             onClick={handleStartChat}
             disabled={isStartingChat}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white py-4 px-6 rounded-xl font-bold flex items-center justify-center transition-all duration-200 hover:scale-105 disabled:hover:scale-100 disabled:cursor-not-allowed shadow-lg"
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white py-4 px-6 rounded-xl font-semibold flex items-center justify-center transition-all duration-200 hover:scale-105 disabled:hover:scale-100 disabled:cursor-not-allowed shadow-lg"
           >
             {isStartingChat ? (
               <>
@@ -215,17 +224,15 @@ export default function EnhancedLandlordCard({ landlord, propertyId, className =
             )}
           </button>
 
-          {/* Secondary Actions */}
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={handleCall}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-all duration-200 hover:scale-105 disabled:hover:scale-100"
+              className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-400 text-white py-3 px-4 rounded-lg font-semibold flex items-center justify-center transition-all.duration-200 hover:scale-105 disabled:hover:scale-100"
               disabled={!landlord.phone}
             >
               <PhoneIcon className="w-5 h-5 mr-2" />
               Gọi
             </button>
-            
             <button
               onClick={async () => {
                 if (!isAuthenticated) {
@@ -233,22 +240,43 @@ export default function EnhancedLandlordCard({ landlord, propertyId, className =
                   router.push('/dang-nhap?redirect=' + encodeURIComponent(window.location.pathname));
                   return;
                 }
-                
-                // Mở form yêu cầu thuê
                 setShowRentalRequestForm(true);
               }}
               disabled={isSendingRequest}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-all duration-200 hover:scale-105 disabled:hover:scale-100 disabled:cursor-not-allowed"
+              className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white py-3 px-4 rounded-lg font-semibold flex items-center justify-center transition-all.duration-200 hover:scale-105 disabled:hover:scale-100 disabled:cursor-not-allowed shadow"
             >
-              <>
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Yêu cầu thuê
-              </>
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Yêu cầu thuê
             </button>
           </div>
         </div>
+
+        {(onReportPost || onReportLandlord) && (
+          <div className="grid grid-cols-1 gap-3 pt-2">
+            {onReportPost && (
+              <button
+                type="button"
+                onClick={onReportPost}
+                className="w-full border border-red-200 bg-red-50/70 text-red-600 hover:bg-red-50 px-4 py-3 rounded-lg font-semibold flex items-center justify-center transition-colors"
+              >
+                <FlagIcon className="w-5 h-5 mr-2" />
+                Báo cáo tin đăng
+              </button>
+            )}
+            {onReportLandlord && (
+              <button
+                type="button"
+                onClick={onReportLandlord}
+                className="w-full border border-orange-200 bg-orange-50/80 text-orange-600 hover:bg-orange-50 px-4 py-3 rounded-lg font-semibold flex items-center justify-center transition-colors"
+              >
+                <FlagIcon className="w-5 h-5 mr-2" />
+                Báo cáo chủ nhà
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Response Time Info */}
         <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
