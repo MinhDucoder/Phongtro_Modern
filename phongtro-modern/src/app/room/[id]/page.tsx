@@ -17,6 +17,8 @@ import {
   ShareIcon,
 } from '@heroicons/react/24/outline';
 import { toastManager } from '@/components/ui/ToastManager';
+import ReportModal, { ReportTarget } from '@/components/report/ReportModal';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Room {
   _id: string;
@@ -50,12 +52,15 @@ interface Post {
 export default function RoomDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const roomId = params?.id as string;
   
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   useEffect(() => {
     if (!roomId) return;
@@ -131,6 +136,47 @@ export default function RoomDetailPage() {
     });
   };
 
+  const openReportModal = (targetType: 'post' | 'user') => {
+    if (!post) return;
+
+    if (!isAuthenticated) {
+      toastManager.showError('Vui lòng đăng nhập để gửi báo cáo');
+      try {
+        const redirectPath =
+          typeof window !== 'undefined'
+            ? `${window.location.pathname}${window.location.search}`
+            : '/';
+        router.push(`/dang-nhap?redirect=${encodeURIComponent(redirectPath)}`);
+      } catch {
+        router.push('/dang-nhap');
+      }
+      return;
+    }
+
+    if (targetType === 'user' && !post.landlord?._id) {
+      toastManager.showError('Không thể báo cáo người dùng này');
+      return;
+    }
+
+    const targetConfig: ReportTarget = {
+      targetId: targetType === 'post' ? post._id : (post.landlord?._id as string),
+      targetType,
+      targetName: targetType === 'post' ? room.title : post.landlord?.full_name || 'Người dùng',
+      targetDescription:
+        targetType === 'post'
+          ? `Địa chỉ: ${room.address}`
+          : `Email: ${post.landlord?.email || 'Không xác định'}`,
+    };
+
+    setReportTarget(targetConfig);
+    setIsReportModalOpen(true);
+  };
+
+  const closeReportModal = () => {
+    setIsReportModalOpen(false);
+    setReportTarget(null);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -178,16 +224,16 @@ export default function RoomDetailPage() {
                       <button
                         key={idx}
                         onClick={() => setCurrentImageIndex(idx)}
-                        className={`flex-shrink-0 h-16 w-20 rounded border-2 overflow-hidden ${
+                        className={`flex-shrink-0 relative h-20 w-20 rounded border-2 overflow-hidden ${
                           idx === currentImageIndex ? 'border-blue-600' : 'border-gray-300'
                         }`}
                       >
                         <Image
                           src={imgSrc}
                           alt={`Image ${idx + 1}`}
-                          width={80}
-                          height={64}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="80px"
+                          className="object-cover"
                         />
                       </button>
                     );
@@ -322,6 +368,21 @@ export default function RoomDetailPage() {
                   <span className="text-sm">Chia sẻ</span>
                 </button>
               </div>
+
+              <div className="mt-4 space-y-2">
+                <button
+                  onClick={() => openReportModal('post')}
+                  className="w-full rounded-lg border border-red-200 bg-red-50/40 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-400"
+                >
+                  Báo cáo tin đăng
+                </button>
+                <button
+                  onClick={() => openReportModal('user')}
+                  className="w-full rounded-lg border border-orange-200 bg-orange-50/40 px-4 py-2 text-sm font-medium text-orange-600 hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                >
+                  Báo cáo chủ nhà
+                </button>
+              </div>
             </div>
 
             {/* Posted Info */}
@@ -337,6 +398,11 @@ export default function RoomDetailPage() {
           </div>
         </div>
       </div>
+      <ReportModal
+        isOpen={isReportModalOpen}
+        target={reportTarget}
+        onClose={closeReportModal}
+      />
     </div>
   );
 }

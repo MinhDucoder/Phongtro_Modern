@@ -1,11 +1,24 @@
 import express from "express";
-import { ratePost, listRatings, removeRating } from "~/controllers/RatingController.js";
-import { authenticate } from "~/middlewares/checkToken.js"; // dùng middleware xác thực của bạn
+import { ratePost, listRatings, removeRating } from "../../controllers/RatingController.js";
+import { authenticate } from "../../middlewares/checkToken.js";
+import { moderateContentMiddleware } from "../../middlewares/contentModerationMiddleware.js";
 
 const router = express.Router({ mergeParams: true });
 
-// Create or update rating
-router.post("/rating", authenticate(), ratePost);
+// Create or update rating với content moderation
+router.post(
+  "/rating",
+  authenticate(),
+  moderateContentMiddleware({
+    fields: ["comment"],
+    censorBadWords: true,
+    strictMode: false,
+    allowUrls: false,
+    allowEmails: false,
+    allowPhones: false,
+  }),
+  ratePost
+);
 
 // List ratings (public)
 router.get("/ratings", listRatings);

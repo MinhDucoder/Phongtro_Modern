@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   StarIcon, 
   UserIcon, 
@@ -12,6 +12,9 @@ import {
   FlagIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
+import { ratingApi } from '@/lib/api';
+import { toastManager } from '@/components/ui/ToastManager';
+import WriteReviewModal from './WriteReviewModal';
 
 interface Review {
   id: string;
@@ -19,11 +22,11 @@ interface Review {
   userName: string;
   userAvatar?: string;
   rating: number;
-  title: string;
+  title?: string;
   comment: string;
   date: string;
-  verified: boolean;
-  helpful: number;
+  verified?: boolean;
+  helpful?: number;
   landlordReply?: {
     reply: string;
     date: string;
@@ -43,93 +46,97 @@ export default function PropertyReviews({ propertyId, isOwner = false, reviews: 
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'highest' | 'lowest'>('newest');
   const [filterBy, setFilterBy] = useState<'all' | '5' | '4' | '3' | '2' | '1'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  useEffect(() => {
-    const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
       try {
         setLoading(true);
         
-        // Mock data - replace with actual API call
-        const mockReviews: Review[] = [
-          {
-            id: '1',
-            userId: 'user1',
-            userName: 'Nguyễn Văn A',
-            userAvatar: '/placeholder-avatar.svg',
-            rating: 5,
-            title: 'Phòng rất đẹp và tiện nghi',
-            comment: 'Phòng ở đây rất đẹp, đầy đủ tiện nghi. Chủ nhà thân thiện, hỗ trợ nhiệt tình. Vị trí thuận tiện, gần trường và siêu thị. Giá cả hợp lý so với chất lượng.',
-            date: '2024-05-01T10:30:00Z',
-            verified: true,
-            helpful: 12,
-            photos: ['/placeholder-room.svg', '/placeholder-room.svg'],
-            landlordReply: {
-              reply: 'Cảm ơn bạn đã đánh giá tích cực! Chúc bạn có những trải nghiệm tốt đẹp tại đây.',
-              date: '2024-05-02T09:15:00Z'
-            }
-          },
-          {
-            id: '2',
-            userId: 'user2',
-            userName: 'Trần Thị B',
-            userAvatar: '/placeholder-avatar.svg',
-            rating: 4,
-            title: 'Tốt nhưng có một số điểm cần cải thiện',
-            comment: 'Phòng nhìn chung khá ổn, giá hợp lý. Tuy nhiên, wifi hơi yếu và tiếng ồn từ đường phố. Chủ nhà rất nhiệt tình và sẵn sàng hỗ trợ.',
-            date: '2024-04-28T15:45:00Z',
-            verified: false,
-            helpful: 8
-          },
-          {
-            id: '3',
-            userId: 'user3',
-            userName: 'Lê Văn C',
-            userAvatar: '/placeholder-avatar.svg',
-            rating: 5,
-            title: 'Xuất sắc! Rất hài lòng',
-            comment: 'Phòng đẹp, sạch sẽ, đầy đủ tiện nghi. Vị trí rất tốt, gần trường đại học và các tiện ích. Chủ nhà rất thân thiện và chuyên nghiệp. Sẽ giới thiệu cho bạn bè.',
-            date: '2024-04-25T08:20:00Z',
-            verified: true,
-            helpful: 15
-          },
-          {
-            id: '4',
-            userId: 'user4',
-            userName: 'Phạm Thị D',
-            userAvatar: '/placeholder-avatar.svg',
-            rating: 3,
-            title: 'Ổn nhưng chưa xuất sắc',
-            comment: 'Phòng ở được, giá cả hợp lý. Tuy nhiên, một số thiết bị cũ và cần thay thế. Chủ nhà thân thiện nhưng phản hồi hơi chậm.',
-            date: '2024-04-20T14:10:00Z',
-            verified: false,
-            helpful: 3
-          },
-          {
-            id: '5',
-            userId: 'user5',
-            userName: 'Hoàng Văn E',
-            userAvatar: '/placeholder-avatar.svg',
-            rating: 5,
-            title: 'Hoàn hảo cho sinh viên',
-            comment: 'Phòng rất phù hợp cho sinh viên. Đầy đủ tiện nghi cần thiết, wifi ổn định. Vị trí gần trường, thuận tiện đi lại. Chủ nhà rất quan tâm và hỗ trợ tận tình.',
-            date: '2024-04-18T11:30:00Z',
-            verified: true,
-            helpful: 20
-          }
-        ];
+        const response = await ratingApi.getRatings(propertyId, {
+          page: currentPage,
+          limit: 10,
+          sort: sortBy === 'newest' ? '-createdAt' : sortBy === 'oldest' ? 'createdAt' : sortBy === 'highest' ? '-rating' : 'rating',
+          star: filterBy !== 'all' ? Number(filterBy) : undefined,
+        });
 
-        setReviews(mockReviews);
+        if (response.success && response.data) {
+          const ratingData = response.data as {
+            data: any[];
+            pagination: {
+              page: number;
+              limit: number;
+              total: number;
+              totalPages: number;
+            };
+          };
+
+          // Transform API response to Review format
+        const transformedReviews: Review[] = ratingData.data.map((rating: any) => {
+          // Handle avatar - can be object { url, public_id } or string
+          let avatarUrl = '/placeholder-avatar.svg';
+          if (rating.user?.avatar) {
+            if (typeof rating.user.avatar === 'string') {
+              avatarUrl = rating.user.avatar.trim() || '/placeholder-avatar.svg';
+            } else if (typeof rating.user.avatar === 'object' && rating.user.avatar.url) {
+              avatarUrl = rating.user.avatar.url;
+            }
+          }
+
+          // Chỉ tạo title nếu comment dài hơn 50 ký tự để tránh trùng lặp
+          const commentText = rating.comment || '';
+          const title = commentText.length > 50 
+            ? commentText.substring(0, 50) + '...' 
+            : undefined; // Không có title nếu comment ngắn
+
+          return {
+            id: rating._id || rating.id,
+            userId: rating.user?._id || rating.user?.id || '',
+            userName: rating.user?.full_name || rating.user?.name || 'Người dùng',
+            userAvatar: avatarUrl,
+            rating: rating.rating,
+            title: title, // Chỉ có title khi comment dài
+            comment: commentText,
+            date: rating.createdAt || rating.date || new Date().toISOString(),
+            verified: false, // Backend không có field này, có thể thêm sau
+            helpful: 0, // Backend không có field này, có thể thêm sau
+          };
+        });
+
+          if (currentPage === 1) {
+            setReviews(transformedReviews);
+          } else {
+            setReviews(prev => [...prev, ...transformedReviews]);
+          }
+
+          setTotalPages(ratingData.pagination.totalPages);
+          setHasMore(currentPage < ratingData.pagination.totalPages);
+        } else {
+          // Fallback to empty array if API fails
+          setReviews([]);
+        }
       } catch (error) {
         console.error('Error fetching reviews:', error);
+        toastManager.showError('Không thể tải đánh giá. Vui lòng thử lại sau.');
+        setReviews([]);
       } finally {
         setLoading(false);
-      }
-    };
-
-    if (!initialReviews) {
-      fetchReviews();
     }
-  }, [propertyId]);
+  }, [propertyId, currentPage, sortBy, filterBy]);
+
+  useEffect(() => {
+    // Always fetch reviews to keep data fresh
+    fetchReviews();
+  }, [fetchReviews, refreshTrigger]);
+
+  // Reset to page 1 when filter or sort changes
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [sortBy, filterBy]);
 
   const averageRating = reviews.length > 0 
     ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
@@ -353,8 +360,10 @@ export default function PropertyReviews({ propertyId, isOwner = false, reviews: 
 
               {/* Review Content */}
               <div className="mb-4">
-                <h5 className="font-semibold text-gray-900 mb-2">{review.title}</h5>
-                <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                {review.title && (
+                  <h5 className="font-semibold text-gray-900 mb-2">{review.title}</h5>
+                )}
+                <p className="text-gray-700 leading-relaxed">{review.comment || 'Không có bình luận'}</p>
               </div>
 
               {/* Review Photos */}
@@ -390,35 +399,41 @@ export default function PropertyReviews({ propertyId, isOwner = false, reviews: 
       </div>
 
       {/* Load More */}
-      {filteredReviews.length > 0 && (
+      {hasMore && filteredReviews.length > 0 && (
         <div className="text-center">
-          <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors">
-            Xem thêm đánh giá
+          <button 
+            onClick={() => setCurrentPage(prev => prev + 1)}
+            disabled={loading}
+            className="bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors"
+          >
+            {loading ? 'Đang tải...' : 'Xem thêm đánh giá'}
           </button>
         </div>
       )}
 
-      {/* Review Form Modal would go here */}
+      {/* Review Form Modal - using WriteReviewModal */}
       {showReviewForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Viết đánh giá</h3>
-              {/* Review form content would go here */}
-              <div className="flex justify-end space-x-3 mt-6">
-                <button
-                  onClick={() => setShowReviewForm(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                >
-                  Hủy
-                </button>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                  Gửi đánh giá
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <WriteReviewModal
+          isOpen={showReviewForm}
+          onClose={() => setShowReviewForm(false)}
+          property={{
+            id: propertyId,
+            title: 'Phòng trọ',
+            location: '',
+            image: '/placeholder-room.svg',
+            landlord: {
+              name: 'Chủ nhà',
+              avatar: '/placeholder-avatar.svg'
+            }
+          }}
+          onReviewSubmitted={() => {
+            // Refresh reviews after submitting
+            setCurrentPage(1);
+            setShowReviewForm(false);
+            // Trigger refresh by updating refreshTrigger
+            setRefreshTrigger(prev => prev + 1);
+          }}
+        />
       )}
     </div>
   );

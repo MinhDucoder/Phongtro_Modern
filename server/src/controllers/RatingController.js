@@ -1,5 +1,5 @@
-import * as ratingService from "~/services/ratingService.js";
-import { success, error } from "~/utils/responeHandler";
+import * as ratingService from "../services/ratingService.js";
+import { success, error } from "../utils/responeHandler.js";
 
 export const ratePost = async (req, res) => {
   try {
@@ -33,10 +33,10 @@ export const listRatings = async (req, res) => {
       sort,
       star: star ? Number(star) : undefined,
     });
-    return res.json(result);
+    return success(res, result);
   } catch (err) {
     console.error(err);
-    return res.status(400).json({ message: err.message || "Error" });
+    return error(res, err.message || "Error", 400);
   }
 };
 
@@ -44,11 +44,11 @@ export const removeRating = async (req, res) => {
   try {
     await ratingService.deleteRating({
       postId: req.params.id,
-      userId: req.user._id,
+      userId: req.user.id,
     });
-    return res.json({ message: "Rating deleted" });
+    return success(res, { message: "Rating deleted" });
   } catch (err) {
     console.error(err);
-    return res.status(400).json({ message: err.message || "Error" });
+    return error(res, err.message || "Error", 400);
   }
 };

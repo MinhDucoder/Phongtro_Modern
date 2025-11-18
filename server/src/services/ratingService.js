@@ -1,6 +1,7 @@
-import Rating from "~/models/ratingSchema.js";
-import Post from "~/models/postSchema.js";
+import Rating from "../models/ratingSchema.js";
+import Post from "../models/postSchema.js";
 import mongoose from "mongoose";
+import { moderateContent } from "./contentModerationService.js";
 
 /**
  * Upsert rating (create or update)
@@ -9,6 +10,27 @@ import mongoose from "mongoose";
 export const upsertRating = async ({ postId, userId, rating, comment }) => {
   console.log(postId, userId, rating, comment);
 
+  let filteredComment = comment;
+  if (comment) {
+    const moderationResult = moderateContent(comment, {
+      censorBadWords: true,
+      strictMode: false,
+      allowUrls: false,
+      allowEmails: false,
+      allowPhones: false,
+    });
+    filteredComment = moderationResult.filteredText;
+
+    if (!moderationResult.isClean) {
+      console.warn(`[Rating] Filtered bad words in comment:`, {
+        postId,
+        userId,
+        violations: moderationResult.violations,
+        score: moderationResult.score,
+      });
+    }
+  }
+
   const post = await Post.findById(postId);
   if (!post) throw new Error("Post not found");
 
@@ -16,14 +38,13 @@ export const upsertRating = async ({ postId, userId, rating, comment }) => {
     throw new Error("Landlord cannot rate own post");
   }
 
-  // Upsert rating document
+  // Upsert rating document với comment đã được filter
   const result = await Rating.findOneAndUpdate(
     { post: postId, user: userId },
-    { rating, comment },
+    { rating, comment: filteredComment },
     { new: true, upsert: true, setDefaultsOnInsert: true }
   );
 
-  // Recompute stats for this post
   const stats = await Rating.aggregate([
     { $match: { post: new mongoose.Types.ObjectId(postId) } },
     {
@@ -35,15 +56,21 @@ export const upsertRating = async ({ postId, userId, rating, comment }) => {
     },
   ]);
 
-  if (stats.length > 0) {
-    post.averageRating = Number(stats[0].avgRating.toFixed(2));
-    post.totalRatings = stats[0].count;
-  } else {
-    post.averageRating = 0;
-    post.totalRatings = 0;
-  }
+  const updateData =
+    stats.length > 0
+      ? {
+          averageRating: Number(stats[0].avgRating.toFixed(2)),
+          totalRatings: stats[0].count,
+        }
+      : {
+          averageRating: 0,
+          totalRatings: 0,
+        };
 
-  await post.save();
+  await Post.findByIdAndUpdate(postId, { $set: updateData }, { runValidators: false });
+
+  await result.populate("user", "full_name avatar");
+
   return result;
 };
 
@@ -54,7 +81,7 @@ export const getRatings = async ({ postId, page = 1, limit = 10, sort = "-create
   if (star) filter.rating = star; // optional filter by star
 
   const query = Rating.find(filter)
-    .populate("user", "name avatar")
+    .populate("user", "full_name avatar")
     .sort(sort)
     .skip(skip)
     .limit(limit);
@@ -79,10 +106,6 @@ export const getRatings = async ({ postId, page = 1, limit = 10, sort = "-create
 export const deleteRating = async ({ postId, userId }) => {
   await Rating.deleteOne({ post: postId, user: userId });
 
-  // Recompute stats
-  const post = await Post.findById(postId);
-  if (!post) return true;
-
   const stats = await Rating.aggregate([
     { $match: { post: new mongoose.Types.ObjectId(postId) } },
     {
@@ -94,14 +117,18 @@ export const deleteRating = async ({ postId, userId }) => {
     },
   ]);
 
-  if (stats.length > 0) {
-    post.averageRating = Number(stats[0].avgRating.toFixed(2));
-    post.totalRatings = stats[0].count;
-  } else {
-    post.averageRating = 0;
-    post.totalRatings = 0;
-  }
+  const updateData =
+    stats.length > 0
+      ? {
+          averageRating: Number(stats[0].avgRating.toFixed(2)),
+          totalRatings: stats[0].count,
+        }
+      : {
+          averageRating: 0,
+          totalRatings: 0,
+        };
 
-  await post.save();
+  await Post.findByIdAndUpdate(postId, { $set: updateData }, { runValidators: false });
+
   return true;
 };
