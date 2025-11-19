@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start MeiliSearch",
+            "type": "shell",
+            "command": "D:/meilisearch.exe",
+            "args": [
+                "--env",
+                "development"
+            ],
+            "problemMatcher": [],
+            "isBackground": true,
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
+        }
+    ]
+}

@@ -52,9 +52,9 @@ const companyInfo = [
     icon: InformationCircleIcon,
     links: [
       { name: 'Giới thiệu', href: '/about' },
-      { name: 'Quy chế hoạt động', href: '/terms' },
+      { name: 'Quy chế hoạt động', href: '/regulations' },
       { name: 'Quy định sử dụng', href: '/terms-of-use' },
-      { name: 'Chính sách bảo mật', href: '/privacy' },
+      { name: 'Chính sách bảo mật', href: '/privacy-policy' },
       { name: 'Liên hệ', href: '/contact' }
     ] 
   },
