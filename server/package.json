@@ -6,7 +6,7 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node --loader ./src/config/loader.js src/server.js",
-    "dev": "nodemon --loader ./src/config/loader.js src/server.js",
+    "dev": "npx nodemon --loader ./src/config/loader.js src/server.js",
     "update-property-types": "node src/scripts/updatePropertyTypes.js",
     "test:rental-requests": "node --experimental-specifier-resolution=node src/tests/rentalRequest.integration.test.js",
     "create-indexes": "node --loader ./src/config/loader.js src/scripts/createIndexes.js"
@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "mongodb-memory-server": "^10.1.4",
-    "nodemon": "^3.0.1",
+    "nodemon": "^3.1.10",
     "supertest": "^7.1.1"
   }
 }
