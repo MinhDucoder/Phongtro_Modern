@@ -1,0 +1,560 @@
+Test Case ID,Module,Test Case Description,Preconditions,Test Steps,Input Data,Expected Results,Actual Results,Execution Status,Bug Severity,Bug Priority,Bug ID,Notes,Cypress Test File,Executed By,Execution Date
+TC_AUTH_01,Authentication,Login with valid credentials,User exists in database with email: user@test.com / User@123,"1. Navigate to /dang-nhap
+2. Enter valid email
+3. Enter valid password
+4. Click ""Đăng nhập"" button
+5. Verify redirect",Email: user@test.com | Password: User@123,"1. Login successful
+2. Redirected to /dashboard or /
+3. User name displayed in navbar
+4. JWT token stored in cookies/localStorage",,,,,,Related to 1-auth.cy.ts - it('Should show error on invalid credentials'),,
+TC_AUTH_02,Authentication,Login with invalid credentials,Login page is accessible,"1. Navigate to /dang-nhap
+2. Enter invalid email
+3. Enter invalid password
+4. Click ""Đăng nhập"" button",Email: wrong@test.com | Password: wrongpass,"1. Login fails
+2. Error message displayed: ""Email hoặc mật khẩu không đúng""
+3. Stays on /dang-nhap page
+4. No token stored",,,,,,Related to 1-auth.cy.ts - it('Should show error on invalid credentials'),,
+TC_AUTH_03,Authentication,Login with empty fields,Login page is accessible,"1. Navigate to /dang-nhap
+2. Leave email field empty
+3. Leave password field empty
+4. Click ""Đăng nhập"" button",Email: (empty) | Password: (empty),"1. Form validation triggered
+2. Error messages shown: ""Email là bắt buộc"", ""Mật khẩu là bắt buộc""
+3. Submit button disabled or form not submitted",,,,,,Related to 1-auth.cy.ts - it('Should have proper form validation'),,
+TC_AUTH_04,Authentication,Register new user with valid data,Registration page accessible,"1. Navigate to /dang-ky
+2. Enter unique email
+3. Enter valid password (8+ chars)
+4. Enter confirm password (matching)
+5. Enter phone number
+6. Click ""Đăng ký"" button","Email: newuser@test.com | Password: NewUser@123 | Confirm: NewUser@123 | Phone: 0912345678","1. Registration successful
+2. Confirmation message displayed
+3. Auto login or redirect to /dang-nhap
+4. Email verification sent (if enabled)",,,,,,Related to 1-auth.cy.ts - it('Should navigate to register page'),,
+TC_AUTH_05,Authentication,Register with existing email,User with test@test.com already exists,"1. Navigate to /dang-ky
+2. Enter existing email
+3. Enter password
+4. Click ""Đăng ký""",Email: test@test.com | Password: Test@123,"1. Registration fails
+2. Error message: ""Email đã được sử dụng""
+3. Stays on /dang-ky page",,,,,,New test needed in Cypress,,
+TC_AUTH_06,Authentication,Password reset flow,User exists in DB,"1. Navigate to /dang-nhap
+2. Click ""Quên mật khẩu""
+3. Enter email
+4. Click ""Gửi link đặt lại""
+5. Check email inbox
+6. Click reset link
+7. Enter new password
+8. Confirm new password
+9. Submit",Email: user@test.com | New Password: NewPass@123,"1. Redirected to /quen-mat-khau
+2. Success message after email sent
+3. Reset email received
+4. Link works and opens reset form
+5. Password updated successfully
+6. Can login with new password",,,,,,Related to 1-auth.cy.ts - it('Should navigate to forgot password page'),,
+TC_AUTH_07,Authentication,Logout functionality,User is logged in,"1. Ensure user logged in
+2. Click profile/avatar menu
+3. Click ""Đăng xuất"" button
+4. Verify redirect","N/A","1. Logout successful
+2. Token/session cleared
+3. Redirected to / or /dang-nhap
+4. Cannot access protected pages without login",,,,,,New test needed in Cypress,,
+TC_AUTH_08,Authentication,Session persistence after page refresh,User logged in,"1. Login successfully
+2. Navigate to /dashboard
+3. Refresh page (F5)
+4. Check if still logged in","N/A","1. User remains logged in
+2. User data still displayed
+3. No redirect to login page",,,,,,New test needed in Cypress,,
+TC_AUTH_09,Authentication,Protected route access without login,User not logged in,"1. Ensure logged out
+2. Directly navigate to /dashboard or /dang-tin
+3. Check behavior","N/A","1. Access denied
+2. Redirected to /dang-nhap
+3. Message: ""Vui lòng đăng nhập để tiếp tục""",,,,,,New test needed in Cypress,,
+TC_AUTH_10,Authentication,Profile display after login,User logged in successfully,"1. Login
+2. Check navbar
+3. Click profile dropdown","N/A","1. User name/email displayed
+2. Profile menu shows: Tài khoản, Đăng xuất
+3. Avatar displayed (if uploaded)",,,,,,Related to 1-auth.cy.ts - it('Should display user profile after login'),,
+TC_SEARCH_01,Search,Display homepage,Server running,"1. Navigate to http://localhost:3000
+2. Wait for page load","N/A","1. Homepage loads successfully
+2. Hero section displays: ""Kênh thông tin Phòng Trọ số 1 Việt Nam""
+3. Search bar visible
+4. Category filters visible",,,,,,Related to 2-search.cy.ts - it('Should display homepage'),,
+TC_SEARCH_02,Search,Search with basic keyword,Homepage loaded and >=1 post exists,"1. Enter keyword in search box
+2. Press Enter or click Search button
+3. Verify results","Keyword: phòng trọ","1. Navigated to /tim-kiem?q=phòng+trọ
+2. Search results displayed
+3. Results contain keyword ""phòng trọ""
+4. Pagination works if >12 results",,,,,,Related to 2-search.cy.ts - it('Should navigate to search page when searching'),,
+TC_SEARCH_03,Search,Search with Vietnamese characters,Homepage loaded,"1. Enter Vietnamese keyword
+2. Submit search","Keyword: nhà trọ giá rẻ","1. Vietnamese text handled correctly
+2. Results returned
+3. No encoding errors
+4. Accents displayed properly",,,,,,Related to 2-search.cy.ts - it('Should handle Vietnamese search queries'),,
+TC_SEARCH_04,Search,Search with no results,Homepage loaded,"1. Enter nonsense keyword
+2. Submit search","Keyword: xyzabc123notexist","1. Navigated to search page
+2. Message displayed: ""Không tìm thấy kết quả""
+3. Suggest: try different keywords
+4. No errors thrown",,,,,,Related to 2-search.cy.ts - it('Should handle empty search results'),,
+TC_SEARCH_05,Search,Filter by price range,On search results page,"1. Navigate to /tim-kiem
+2. Select price filter: 2-3 triệu
+3. Click Apply","Price: 2000000-3000000","1. Results filtered
+2. All displayed posts have price 2-3tr
+3. Result count updated
+4. URL contains price parameter",,,,,,Related to 2-search.cy.ts - it('Should support search filters'),,
+TC_SEARCH_06,Search,Filter by location,On search results page,"1. Navigate to /tim-kiem
+2. Select location: Hà Nội
+3. Click Apply","Location: Hà Nội","1. Results show only Hà Nội properties
+2. Map (if shown) centers on Hà Nội
+3. URL contains location parameter",,,,,,New test needed,,
+TC_SEARCH_07,Search,Filter by room type,On search results page,"1. Navigate to search page
+2. Select room type: Phòng trọ
+3. Apply filter","Room Type: Phòng trọ","1. Only ""Phòng trọ"" results shown
+2. No ""Chung cư"" or ""Nhà nguyên căn"" shown
+3. Filter badge displayed",,,,,,New test needed,,
+TC_SEARCH_08,Search,Multiple filters combination,On search page,"1. Select price: 2-3tr
+2. Select location: Hà Nội
+3. Select room type: Phòng trọ
+4. Apply all filters","Price: 2-3tr | Location: Hà Nội | Type: Phòng trọ","1. Results match ALL criteria
+2. Result count accurate
+3. Clear filters button works
+4. URL contains all parameters",,,,,,New test needed,,
+TC_SEARCH_09,Search,Pagination works,Search results > 12 items,"1. Search for ""phòng""
+2. Scroll to bottom
+3. Click page 2","Keyword: phòng","1. Page 2 loads
+2. Different 12 results shown
+3. Page number highlighted
+4. URL: ?page=2",,,,,,Related to 2-search.cy.ts - it('Should support pagination'),,
+TC_SEARCH_10,Search,Search suggestions,Homepage loaded,"1. Click search input
+2. Type ""ph""
+3. Wait 500ms
+4. Observe dropdown","Input: ph","1. Dropdown appears
+2. Suggestions shown: ""phòng trọ"", ""phòng cho thuê""
+3. Click suggestion → fills search box
+4. Press Enter → searches",,,,,,Related to 2-search.cy.ts - it('Should show search suggestions'),,
+TC_SEARCH_11,Search,Sort by price ascending,On search results page,"1. Navigate to search
+2. Select sort: ""Giá thấp đến cao""
+3. Verify order","N/A","1. Results sorted by price
+2. Lowest price first
+3. Highest price last
+4. Sorting indicator active",,,,,,New test needed,,
+TC_SEARCH_12,Search,Sort by newest,On search results page,"1. Select sort: ""Mới nhất""
+2. Check order","N/A","1. Most recent posts first
+2. Dates in descending order
+3. ""Hôm nay"" posts at top",,,,,,New test needed,,
+TC_SEARCH_13,Search,Search from category page,On /phong-tro page,"1. Navigate to /phong-tro
+2. Use search bar
+3. Submit","Keyword: test","1. Search includes category filter
+2. Results are ""Phòng trọ"" type only
+3. Breadcrumb shows category",,,,,,New test needed,,
+TC_SEARCH_14,Search,Clear all filters,Filters applied on search page,"1. Apply multiple filters
+2. Click ""Xóa bộ lọc"" button
+3. Verify reset","N/A","1. All filters cleared
+2. Shows all results
+3. URL parameters removed
+4. Filter badges removed",,,,,,New test needed,,
+TC_SEARCH_15,Search,Search performance,Homepage loaded,"1. Open DevTools Network
+2. Search for ""phòng""
+3. Measure response time","Keyword: phòng","1. API response < 1 second
+2. Page renders < 2 seconds
+3. Results appear smoothly
+4. No console errors",,,,,,New test needed,,
+TC_PROPERTY_01,Property Detail,Navigate to property detail,Homepage with posts displayed,"1. Navigate to /phong-tro
+2. Click on first property card
+3. Verify navigation","N/A","1. Navigated to /phong-tro/{id}
+2. Detail page loads
+3. URL contains valid post ID
+4. Page title shows property title",,,,,,Related to 3-property-detail.cy.ts - it('Should navigate to property detail page'),,
+TC_PROPERTY_02,Property Detail,Display property images,On property detail page,"1. Open a property
+2. Check image gallery
+3. Click images
+4. Navigate gallery","Post must have images","1. Main image displayed
+2. Thumbnail gallery visible
+3. Click thumbnail → changes main image
+4. Next/Previous buttons work
+5. Lightbox/modal opens on click",,,,,,Related to 3-property-detail.cy.ts - it('Should display property images'),,
+TC_PROPERTY_03,Property Detail,Display property description,On property detail page,"1. Scroll to description section
+2. Read content","Post has description","1. Description section visible
+2. Full text displayed or ""Xem thêm"" button
+3. Formatting preserved (line breaks, bold)
+4. No HTML tags visible",,,,,,Related to 3-property-detail.cy.ts - it('Should display property description'),,
+TC_PROPERTY_04,Property Detail,Display landlord contact,On property detail page,"1. Find contact section
+2. Check info displayed","Post has owner info","1. Landlord name shown
+2. Phone number visible (or ""Hiện số"" button)
+3. ""Liên hệ"" or ""Gọi điện"" button works
+4. ""Nhắn tin"" button opens chat",,,,,,Related to 3-property-detail.cy.ts - it('Should display landlord contact info'),,
+TC_PROPERTY_05,Property Detail,Display amenities list,Property has amenities,"1. Scroll to amenities section
+2. Check icons/list","Post has amenities","1. Amenities section exists
+2. Icons displayed (WiFi, parking, etc)
+3. Each amenity labeled
+4. ""Có"" items green, ""Không"" items gray",,,,,,Related to 3-property-detail.cy.ts - it('Should show amenities list'),,
+TC_PROPERTY_06,Property Detail,Display price and details,On detail page,"1. Check property info section
+2. Verify all details shown","N/A","1. Price displayed prominently
+2. Area (m²) shown
+3. Address/location shown
+4. Available date shown
+5. Deposit amount shown",,,,,,New test needed,,
+TC_PROPERTY_07,Property Detail,Display map location,Property has coordinates,"1. Scroll to map section
+2. Check map loads","Post has lat/long","1. Google Map embedded
+2. Marker placed at correct location
+3. Map interactive (zoom, pan)
+4. ""Xem bản đồ lớn"" link works",,,,,,New test needed,,
+TC_PROPERTY_08,Property Detail,Navigate between properties,On detail page,"1. Scroll to bottom
+2. Look for related/next posts
+3. Click next property","N/A","1. ""Tin liên quan"" section exists
+2. Shows 3-5 similar properties
+3. Click → navigates to that property
+4. Breadcrumb updates",,,,,,Related to 3-property-detail.cy.ts - it('Should allow navigation between properties'),,
+TC_PROPERTY_09,Property Detail,Share property,On detail page,"1. Find share button
+2. Click share
+3. Check options","N/A","1. Share modal opens
+2. Options: Facebook, Zalo, Copy link
+3. Click copy → link copied to clipboard
+4. Notification: ""Đã sao chép liên kết""",,,,,,New test needed,,
+TC_PROPERTY_10,Property Detail,Invalid property ID,N/A,"1. Navigate to /phong-tro/invalid123
+2. Check response","Invalid ID: invalid123","1. 404 page displayed or error message
+2. Message: ""Tin đã bị xóa hoặc không tồn tại""
+3. Button: ""Về trang chủ""
+4. No system crash",,,,,,New test needed,,
+TC_RATING_01,Rating,Display rating section,On property detail page,"1. Navigate to property
+2. Scroll to rating/review section","Post exists","1. ""Đánh giá"" section visible
+2. Star rating display
+3. Average rating shown (e.g., 4.5/5)
+4. Total reviews count shown",,,,,,Related to 4-rating.cy.ts - it('Should display rating section'),,
+TC_RATING_02,Rating,Submit rating when logged in,User logged in and on property page,"1. Scroll to rating section
+2. Click 4 stars
+3. Enter comment: ""Phòng đẹp, chủ nhà tốt""
+4. Click ""Gửi đánh giá""","Rating: 4 stars | Comment: Phòng đẹp, chủ nhà tốt","1. Rating submitted successfully
+2. Success message shown
+3. New rating appears in list
+4. Average rating updated
+5. Star selector disabled/hidden",,,,,,New test needed,,
+TC_RATING_03,Rating,Cannot rate without login,User not logged in,"1. Scroll to rating section
+2. Try to click stars or comment box","N/A","1. Rating form disabled or hidden
+2. Message: ""Đăng nhập để đánh giá""
+3. ""Đăng nhập"" link provided
+4. Click → redirects to /dang-nhap",,,,,,New test needed,,
+TC_RATING_04,Rating,Cannot rate twice,User already rated this property,"1. Try to rate same property again
+2. Check form state","User rated before","1. Rating form hidden
+2. User's rating shown with ""Đã đánh giá""
+3. ""Sửa"" button to edit rating (optional)
+4. Cannot submit duplicate",,,,,,New test needed,,
+TC_RATING_05,Rating,View all ratings,Property has >=5 ratings,"1. Scroll to rating section
+2. Click ""Xem tất cả đánh giá""
+3. Check display","N/A","1. Modal or expanded list opens
+2. All ratings displayed with pagination
+3. Each rating shows: stars, comment, user name, date
+4. Sorted by newest first",,,,,,New test needed,,
+TC_RATING_06,Rating,Filter ratings by star,Property has multiple ratings,"1. In rating section
+2. Click ""5 sao"" filter
+3. Check results","Filter: 5 stars","1. Only 5-star ratings shown
+2. Count updated
+3. Can click ""Tất cả"" to reset
+4. URL parameter updated (optional)",,,,,,New test needed,,
+TC_RATING_07,Rating,Report inappropriate rating,Logged in and viewing ratings,"1. Find a rating
+2. Click ""Báo cáo"" icon
+3. Select reason
+4. Submit","Reason: Spam","1. Report submitted
+2. Success message
+3. Marked for admin review
+4. User cannot report again",,,,,,New test needed,,
+TC_RATING_08,Rating,Rating statistics display,Property has ratings,"1. View rating section
+2. Check statistics","N/A","1. Bar chart or breakdown shown
+2. 5 sao: X reviews
+3. 4 sao: Y reviews
+4. etc.
+5. Percentages calculated correctly",,,,,,New test needed,,
+TC_INTEGRATION_01,Integration,Search via frontend calls backend API,Backend running at localhost:5000,"1. Open DevTools Network tab
+2. Search ""phòng trọ"" from frontend
+3. Monitor API calls","Keyword: phòng trọ","1. API call made to /api/v1/posts?search=...
+2. Response status 200
+3. Response body contains posts array
+4. Frontend renders results from API data",,,,,,Related to 5-full-integration.cy.ts - it('Should search posts via frontend'),,
+TC_INTEGRATION_02,Integration,Property detail loads from backend,Backend running,"1. Click a property
+2. Monitor network
+3. Check API call","N/A","1. API call: GET /api/v1/posts/{id}
+2. Response 200
+3. Response contains post data
+4. Frontend displays data from API",,,,,,Related to 5-full-integration.cy.ts - it('Should view property detail with backend'),,
+TC_INTEGRATION_03,Integration,Login authenticates via backend API,Backend running,"1. Open Network tab
+2. Login with valid user
+3. Check API calls","Email: user@test.com | Password: User@123","1. POST /api/v1/auth/login
+2. Response 200
+3. Response contains: token, user data
+4. Token stored in cookie/localStorage
+5. Frontend uses token for auth",,,,,,New test needed,,
+TC_INTEGRATION_04,Integration,Rating submission stores in database,Backend + DB running,"1. Login
+2. Rate a property
+3. Check API call
+4. Verify database","Rating: 5 stars | Comment: Tuyệt vời","1. POST /api/v1/posts/{id}/rating
+2. Response 200
+3. Rating saved in MongoDB
+4. Can query rating from API
+5. Frontend shows updated rating",,,,,,Related to 5-full-integration.cy.ts - it('Should display ratings from backend'),,
+TC_INTEGRATION_05,Integration,Pagination queries backend correctly,Backend has >12 posts,"1. Go to page 1
+2. Monitor API: /api/v1/posts?page=1&limit=12
+3. Go to page 2
+4. Monitor API: /api/v1/posts?page=2&limit=12","N/A","1. Page 1: API called with page=1
+2. 12 items returned
+3. Page 2: API called with page=2
+4. Next 12 items returned
+5. No duplicate items",,,,,,Related to 5-full-integration.cy.ts - it('Should display posts from backend'),,
+TC_INTEGRATION_06,Integration,Image upload integration,Backend supports uploads,"1. Login
+2. Create new post
+3. Upload image
+4. Submit post","Image: test.jpg (< 5MB)","1. POST /api/v1/upload
+2. Image saved to /uploads or S3
+3. Response: { url: ""..."" }
+4. Post created with image URL
+5. Image displays on detail page",,,,,,New test needed,,
+TC_INTEGRATION_07,Integration,Real-time chat via WebSocket,Backend WebSocket server running,"1. Login as User A
+2. Open chat with User B
+3. User B sends message
+4. Check User A receives","Message: Xin chào","1. WebSocket connection established
+2. Message sent via WS
+3. User A receives message instantly
+4. Message saved in DB
+5. Chat UI updates without refresh",,,,,,New test needed,,
+TC_INTEGRATION_08,Integration,Payment gateway integration,Backend + Payment API,"1. Select payment package
+2. Click ""Thanh toán""
+3. Redirected to payment page
+4. Complete payment
+5. Return to site","Amount: 50000 VND | Method: Momo","1. POST /api/v1/payment/create
+2. Payment URL returned
+3. Redirect to gateway
+4. Payment successful
+5. Callback to /api/v1/payment/callback
+6. Order status updated
+7. User balance updated",,,,,,New test needed,,
+TC_INTEGRATION_09,Integration,Cache updates after post creation,Redis cache enabled,"1. View homepage (posts cached)
+2. Create new post
+3. Homepage auto-refreshes or cache invalidated
+4. New post appears","N/A","1. New post saved to MongoDB
+2. Redis cache key invalidated
+3. Next request fetches fresh data
+4. New post visible on frontend
+5. No stale data shown",,,,,,New test needed,,
+TC_INTEGRATION_10,Integration,Handle backend error gracefully,Backend returns 500 error,"1. Simulate API error (stop backend or modify route)
+2. Try to search
+3. Check frontend behavior","N/A","1. Frontend catches error
+2. User-friendly message: ""Đã có lỗi xảy ra, vui lòng thử lại""
+3. No white screen or crash
+4. Retry button or redirect to home",,,,,,Related to 5-full-integration.cy.ts - it('Should handle backend errors'),,
+TC_POST_01,Post Management,Create new post,User logged in as landlord,"1. Login
+2. Navigate to /dang-tin
+3. Fill all fields: title, description, price, location, images
+4. Click ""Đăng tin""","Title: Phòng trọ Q1 | Price: 3000000 | Location: Quận 1, HCMC | Images: 3 files","1. Form validation passes
+2. Images uploaded successfully
+3. Post created
+4. Success message: ""Đăng tin thành công""
+5. Redirect to post detail or my posts
+6. Post status: ""Chờ duyệt"" or ""Đã đăng""",,,,,,New test needed,,
+TC_POST_02,Post Management,Edit existing post,User owns the post,"1. Navigate to /dashboard/my-posts
+2. Click ""Sửa"" on a post
+3. Edit title, price
+4. Click ""Cập nhật""","New title: Updated Title | New price: 3500000","1. Form pre-filled with existing data
+2. Changes saved successfully
+3. Success message
+4. Post updated in database
+5. Changes visible on detail page",,,,,,New test needed,,
+TC_POST_03,Post Management,Delete post,User owns the post,"1. Go to My Posts
+2. Click ""Xóa"" on a post
+3. Confirm deletion","N/A","1. Confirmation modal appears
+2. Click ""Xác nhận xóa""
+3. Post deleted from database
+4. Success message
+5. Post removed from list
+6. Post detail returns 404",,,,,,New test needed,,
+TC_POST_04,Post Management,Upload multiple images,On create/edit post page,"1. Click ""Tải ảnh lên""
+2. Select 5 images
+3. Wait for upload
+4. Submit post","5 images: img1.jpg, img2.jpg, ... img5.jpg","1. All 5 images upload successfully
+2. Thumbnails shown
+3. Can reorder images (drag-drop)
+4. Can delete individual image
+5. Max limit enforced (e.g., 10 images)",,,,,,New test needed,,
+TC_POST_05,Post Management,Validate required fields,On create post page,"1. Navigate to /dang-tin
+2. Leave title empty
+3. Try to submit","All fields empty","1. Validation errors shown
+2. ""Tiêu đề là bắt buộc""
+3. ""Giá là bắt buộc""
+4. ""Địa chỉ là bắt buộc""
+5. Form not submitted",,,,,,New test needed,,
+TC_POST_06,Post Management,Image size limit,On create post page,"1. Try to upload image > 5MB
+2. Check validation","Image: large.jpg (10MB)","1. Error message: ""Kích thước ảnh tối đa 5MB""
+2. Image not uploaded
+3. Other images (valid size) still work",,,,,,New test needed,,
+TC_POST_07,Post Management,View my posts list,User logged in and has posts,"1. Navigate to /dashboard
+2. Click ""Tin đăng của tôi""
+3. View list","N/A","1. List of user's posts displayed
+2. Shows: title, price, status, views, date
+3. Actions: Sửa, Xóa, Ẩn/Hiện
+4. Pagination if >10 posts",,,,,,New test needed,,
+TC_POST_08,Post Management,Post status management,User has posts with different statuses,"1. View my posts
+2. Check status labels","Posts with status: Đang hiển thị, Chờ duyệt, Đã ẩn, Hết hạn","1. Each post shows correct status
+2. Color-coded badges (green, yellow, gray, red)
+3. Can click ""Ẩn tin"" to hide
+4. Can click ""Đăng lại"" to reactivate",,,,,,New test needed,,
+TC_POST_09,Post Management,Cannot edit other user's post,User A tries to edit User B's post,"1. Get URL of User B's post edit page
+2. User A tries to access /dashboard/posts/{userB_postId}/edit","Post belongs to User B","1. Access denied
+2. Error 403 or redirect
+3. Message: ""Bạn không có quyền chỉnh sửa tin này""
+4. Backend validates ownership",,,,,,New test needed,,
+TC_POST_10,Post Management,Post view count increments,Published post exists,"1. View post detail
+2. Check view count
+3. Refresh page
+4. Check view count again","N/A","1. Initial view count: X
+2. After refresh: X+1 (or X+1 per unique user)
+3. Counter updates in real-time or on page load
+4. Stored in database",,,,,,New test needed,,
+TC_POST_11,Post Management,Extend post expiration,Post is near expiration (< 7 days),"1. Go to My Posts
+2. See ""Gia hạn"" button on expiring post
+3. Click ""Gia hạn""
+4. Confirm","Post expiring in 2 days","1. Modal: ""Gia hạn thêm 30 ngày - 50,000đ""
+2. Click ""Xác nhận""
+3. Payment processed or balance deducted
+4. Expiry date extended +30 days
+5. Status remains ""Đang hiển thị""",,,,,,New test needed,,
+TC_POST_12,Post Management,Duplicate post,User has existing post,"1. Go to My Posts
+2. Click ""Sao chép"" on a post
+3. Edit duplicated post
+4. Submit","N/A","1. New form opens with data from original post
+2. Title appended with ""(Copy)""
+3. Can edit before submitting
+4. New post created (separate ID)
+5. Original post unchanged",,,,,,New test needed,,
+TC_PAYMENT_01,Payment,View pricing packages,Not logged in or logged in,"1. Navigate to /bang-gia
+2. View packages","N/A","1. Pricing table displayed
+2. Packages: Cơ bản (Free), Nổi bật (50k), VIP (100k)
+3. Features listed for each
+4. ""Mua ngay"" or ""Chọn gói"" button",,,,,,New test needed,,
+TC_PAYMENT_02,Payment,Purchase package when logged in,User logged in,"1. Navigate to /bang-gia
+2. Click ""Mua gói VIP""
+3. Choose payment method
+4. Proceed to payment","Package: VIP | Price: 100000","1. Redirect to /thanh-toan
+2. Order summary shown
+3. Payment methods: Momo, VNPay, Thẻ
+4. Click Momo → redirect to Momo page",,,,,,New test needed,,
+TC_PAYMENT_03,Payment,Payment success flow,During payment process,"1. Complete payment on gateway
+2. Return to website
+3. Check result","Payment successful","1. Redirected to /ket-qua-thanh-toan?success=true
+2. Success message
+3. Order status: ""Thành công""
+4. User balance/credits updated
+5. Email confirmation sent",,,,,,New test needed,,
+TC_PAYMENT_04,Payment,Payment failure flow,Payment gateway returns error,"1. Start payment
+2. Cancel or payment fails
+3. Return to website","Payment failed","1. Redirected to /ket-qua-thanh-toan?success=false
+2. Error message: ""Thanh toán thất bại""
+3. Order status: ""Thất bại""
+4. Retry button available
+5. Balance not deducted",,,,,,New test needed,,
+TC_PAYMENT_05,Payment,View transaction history,User has made payments,"1. Login
+2. Navigate to /dashboard/transactions
+3. View history","N/A","1. List of transactions displayed
+2. Each shows: date, amount, package, status
+3. Filter: Tất cả, Thành công, Thất bại
+4. Download invoice (PDF) button",,,,,,New test needed,,
+TC_PAYMENT_06,Payment,Cannot purchase without login,User not logged in,"1. Navigate to /bang-gia
+2. Click ""Mua gói""","N/A","1. Redirect to /dang-nhap
+2. Message: ""Vui lòng đăng nhập để mua gói""
+3. After login, return to pricing page",,,,,,New test needed,,
+TC_PAYMENT_07,Payment,Apply discount code,During checkout,"1. Select package
+2. Enter discount code: DISCOUNT10
+3. Click ""Áp dụng""
+4. Proceed payment","Code: DISCOUNT10 (10% off)","1. Code validated
+2. Discount applied: 100k → 90k
+3. New total displayed
+4. Code marked as used after payment
+5. Cannot use expired/invalid code",,,,,,New test needed,,
+TC_PAYMENT_08,Payment,Insufficient balance,User has low balance,"1. Try to extend post (requires 50k)
+2. User balance: 20k
+3. Proceed","Balance: 20000 | Required: 50000","1. Error: ""Số dư không đủ""
+2. Suggest: ""Nạp thêm tiền""
+3. Link to /nap-tien
+4. Transaction not created",,,,,,New test needed,,
+TC_ADMIN_01,Admin Dashboard,Admin login,Admin account exists,"1. Login as admin
+2. Check dashboard access","Email: admin@phongtro.com | Password: Admin@123","1. Login successful
+2. Redirect to /admin
+3. Admin sidebar shows: Users, Posts, Reports, Analytics
+4. Cannot access as normal user",,,,,,New test needed,,
+TC_ADMIN_02,Admin Dashboard,View all users,Admin logged in,"1. Navigate to /admin/users
+2. View user list","N/A","1. Table of users displayed
+2. Columns: ID, Name, Email, Role, Status, Created
+3. Search by email
+4. Filter by role: User, Landlord, Admin
+5. Pagination",,,,,,New test needed,,
+TC_ADMIN_03,Admin Dashboard,View pending posts,Admin logged in,"1. Navigate to /admin/posts
+2. Filter: ""Chờ duyệt""","N/A","1. List of pending posts
+2. Each shows: Title, Author, Date submitted
+3. Actions: Duyệt, Từ chối
+4. Can view post detail",,,,,,New test needed,,
+TC_ADMIN_04,Admin Dashboard,Approve post,Post status = Pending,"1. Select a pending post
+2. Click ""Duyệt""
+3. Confirm","N/A","1. Post status → ""Đã duyệt""
+2. Post visible on website
+3. Notification sent to author
+4. Removed from pending list",,,,,,New test needed,,
+TC_ADMIN_05,Admin Dashboard,Reject post,Post status = Pending,"1. Select a pending post
+2. Click ""Từ chối""
+3. Enter reason: ""Vi phạm quy định""
+4. Confirm","Reason: Vi phạm quy định","1. Post status → ""Đã từ chối""
+2. Post not visible
+3. Notification + reason sent to author
+4. Author can edit & resubmit",,,,,,New test needed,,
+TC_ADMIN_06,Admin Dashboard,Ban user,User account active,"1. Navigate to user detail
+2. Click ""Khóa tài khoản""
+3. Enter reason
+4. Confirm","User: spammer@test.com | Reason: Spam","1. User status → ""Banned""
+2. User cannot login
+3. All user's posts hidden
+4. Email notification sent",,,,,,New test needed,,
+TC_ADMIN_07,Admin Dashboard,Unban user,User is banned,"1. Find banned user
+2. Click ""Mở khóa""
+3. Confirm","N/A","1. User status → ""Active""
+2. User can login again
+3. Posts restored (if not deleted)
+4. Email notification",,,,,,New test needed,,
+TC_ADMIN_08,Admin Dashboard,View reports,Users have reported posts/comments,"1. Navigate to /admin/reports
+2. View report list","N/A","1. List of reports displayed
+2. Shows: Reporter, Content, Reason, Date
+3. Status: New, In Review, Resolved
+4. Actions: View, Resolve, Dismiss",,,,,,New test needed,,
+TC_ADMIN_09,Admin Dashboard,Delete reported content,Report is valid,"1. View report detail
+2. Review content
+3. Click ""Xóa nội dung""
+4. Confirm","Reported content: Spam rating","1. Content deleted
+2. Report status → ""Resolved""
+3. Content author notified
+4. Reporter notified (optional)",,,,,,New test needed,,
+TC_ADMIN_10,Admin Dashboard,View analytics dashboard,Admin logged in,"1. Navigate to /admin/analytics
+2. View charts","N/A","1. Total users count
+2. Total posts count
+3. Revenue chart (by month)
+4. User growth chart
+5. Popular posts/categories
+6. Can filter by date range",,,,,,New test needed,,
+TC_ADMIN_11,Admin Dashboard,Export data,Admin logged in,"1. Navigate to /admin/users or /admin/posts
+2. Click ""Xuất Excel""
+3. Download file","N/A","1. Excel file generated
+2. Downloaded: users_export.xlsx
+3. Contains all data from table
+4. File size reasonable",,,,,,New test needed,,
+TC_ADMIN_12,Admin Dashboard,Search users by email,User list loaded,"1. Enter email in search box
+2. Click search","Email: test@example.com","1. Results filtered
+2. Shows only matching users
+3. Partial match works (test@ → shows test@example.com)
+4. Case insensitive",,,,,,New test needed,,
+TC_ADMIN_13,Admin Dashboard,Edit user role,On user detail page,"1. Open user detail
+2. Change role: User → Landlord
+3. Save","User: user@test.com | New role: Landlord","1. Role updated
+2. Success message
+3. User gains landlord permissions
+4. Change logged in admin history",,,,,,New test needed,,
+TC_ADMIN_14,Admin Dashboard,View system logs,Admin logged in,"1. Navigate to /admin/logs
+2. View logs","N/A","1. Log entries displayed
+2. Shows: Timestamp, User, Action, Details
+3. Filter by: Date, User, Action type
+4. Pagination",,,,,,New test needed,,
+TC_ADMIN_15,Admin Dashboard,Normal user cannot access admin,Normal user logged in,"1. Login as normal user
+2. Try to access /admin","User: normaluser@test.com","1. Access denied
+2. Error 403 or redirect to /
+3. Message: ""Bạn không có quyền truy cập trang này""
+4. Backend validates admin role",,,,,,New test needed,,

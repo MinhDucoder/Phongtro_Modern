@@ -6,7 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:e2e": "start-server-and-test dev http://localhost:3000 cypress:open",
+    "test:e2e:headless": "start-server-and-test dev http://localhost:3000 cypress:run"
   },
   "dependencies": {
     "@google/genai": "^1.23.0",
@@ -46,6 +50,7 @@
     "has-flag": "^5.0.1",
     "nodemon": "^3.1.10",
     "puppeteer": "^24.22.3",
+    "start-server-and-test": "^2.1.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

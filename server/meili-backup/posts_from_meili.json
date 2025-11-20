@@ -1,0 +1,2588 @@
+﻿[
+    {
+        "id":  "68d611489f3c9c01ecd12caa",
+        "_id":  "68d611489f3c9c01ecd12caa",
+        "title":  "PhÃ²ng trá» view Äáº¹p, thoÃ¡ng mÃ¡t, thÆ° giÃ£n cho má»i Äá»i tÆ°á»£ng",
+        "description":  "PhÃ²ng trá» cÃ³ view Äáº¹p, thoÃ¡ng mÃ¡t, phÃ¹ há»£p lÃ m viá»c tá»« xa",
+        "price":  3800000,
+        "area":  30,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Sá» 999, Phá» Báº¡ch Äáº±ng"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "aircon",
+                          "balcony"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T04:06:32.258Z",
+        "updatedAt":  "2025-10-09T08:25:09.580Z"
+    },
+    {
+        "id":  "68d611489f3c9c01ecd12cab",
+        "_id":  "68d611489f3c9c01ecd12cab",
+        "title":  "CÄn há» studio hiá»n Äáº¡i, phÃ¹ há»£p cho viá»c há»c vÃ  lÃ m",
+        "description":  "CÄn há» studio hiá»n Äáº¡i, thuáº­n tiá»n di chuyá»n",
+        "price":  5200000,
+        "area":  40,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Sá» 888, ÄÆ°á»ng LÃ¡ng"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "aircon",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T04:06:32.258Z",
+        "updatedAt":  "2025-10-09T08:25:09.683Z"
+    },
+    {
+        "id":  "68d62079975ae9f5aa5ca68d",
+        "_id":  "68d62079975ae9f5aa5ca68d",
+        "title":  "PhÃ²ng trá» cao cáº¥p gáº§n ÄH BÃ¡ch Khoa, full ná»i tháº¥t",
+        "description":  "PhÃ²ng trá» Äáº§y Äá»§ tiá»n nghi, gáº§n trÆ°á»ng ÄH BÃ¡ch Khoa, thuáº­n tiá»n di chuyá»n",
+        "price":  4200000,
+        "area":  28,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Sá» 123, NgÃµ 45, ÄÆ°á»ng Tráº§n KhÃ¡t ChÃ¢n"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "aircon",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:21.833Z",
+        "updatedAt":  "2025-10-09T08:25:09.779Z"
+    },
+    {
+        "id":  "68d62079975ae9f5aa5ca68f",
+        "_id":  "68d62079975ae9f5aa5ca68f",
+        "title":  "CÄn há» mini 1PN, cÃ³ ban cÃ´ng, view Äáº¹p",
+        "description":  "CÄn há» mini hiá»n Äáº¡i, cÃ³ ban cÃ´ng thoÃ¡ng mÃ¡t, view Äáº¹p",
+        "price":  5500000,
+        "area":  35,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Sá» 456, Phá» Nguyá»\u0085n TrÃ£i"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "aircon",
+                          "fridge",
+                          "balcony"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:21.883Z",
+        "updatedAt":  "2025-10-09T08:25:09.877Z"
+    },
+    {
+        "id":  "68d62079975ae9f5aa5ca691",
+        "_id":  "68d62079975ae9f5aa5ca691",
+        "title":  "PhÃ²ng trá» giÃ¡ ráº», gáº§n trÆ°á»ng ÄH Kinh táº¿",
+        "description":  "PhÃ²ng trá» giÃ¡ ráº», phÃ¹ há»£p sinh viÃªn, gáº§n cÃ¡c trÆ°á»ng Äáº¡i há»c",
+        "price":  3000000,
+        "area":  25,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Sá» 789, ÄÆ°á»ng Giáº£i PhÃ³ng"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "fridge"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:21.938Z",
+        "updatedAt":  "2025-10-09T08:25:09.972Z"
+    },
+    {
+        "id":  "68d62079975ae9f5aa5ca693",
+        "_id":  "68d62079975ae9f5aa5ca693",
+        "title":  "PhÃ²ng trá» cao cáº¥p view Äáº¹p, full ná»i tháº¥t",
+        "description":  "PhÃ²ng trá» view Äáº¹p vá»i Äáº§y Äá»§ tiá»n nghi hiá»n Äáº¡i. Äáº§y Äá»§ ná»i tháº¥t Äiá»u hÃ²a, tá»§ láº¡nh, mÃ¡y giáº·t riÃªng.",
+        "price":  8500000,
+        "area":  35,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "123 ÄÆ°á»ng VÃµ VÄn Táº§n, PhÆ°á»ng 6, Quáº­n 3"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine",
+                          "balcony"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:21.981Z",
+        "updatedAt":  "2025-10-09T08:25:10.060Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca695",
+        "_id":  "68d6207a975ae9f5aa5ca695",
+        "title":  "CÄn há» studio sang trá»ng, gáº§n trung tÃ¢m",
+        "description":  "Studio hiá»n Äáº¡i vá»i thiáº¿t káº¿ tá»i Æ°u, phÃ¹ há»£p cho ngÆ°á»i Äi lÃ m. Gáº§n cÃ¡c trung tÃ¢m thÆ°Æ¡ng máº¡i, bá»nh viá»n, trÆ°á»ng há»c.",
+        "price":  7000000,
+        "area":  45,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "456 Nguyá»\u0085n Huá», PhÆ°á»ng Báº¿n NghÃ©, Quáº­n 1"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.023Z",
+        "updatedAt":  "2025-10-09T08:25:10.148Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca697",
+        "_id":  "68d6207a975ae9f5aa5ca697",
+        "title":  "PhÃ²ng trá» giÃ¡ ráº» cho sinh viÃªn, gáº§n ÄH SÆ° pháº¡m",
+        "description":  "PhÃ²ng trá» giÃ¡ cáº£ pháº£i chÄng, phÃ¹ há»£p cho sinh viÃªn. CÃ³ khu báº¿p chung, wifi miá»\u0085n phÃ­, gáº§n trÆ°á»ng Äáº¡i há»c.",
+        "price":  2500000,
+        "area":  25,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "789 ÄÆ°á»ng Cáº§u Giáº¥y, PhÆ°á»ng Dá»ch Vá»ng, Quáº­n Cáº§u Giáº¥y"
+                     },
+        "amenities":  [
+                          "wifi"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.066Z",
+        "updatedAt":  "2025-10-09T08:25:10.239Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca699",
+        "_id":  "68d6207a975ae9f5aa5ca699",
+        "title":  "CÄn há» 2PN, cÃ³ Äáº§y Äá»§ dá»ch vá»¥ tiá»n nghi",
+        "description":  "CÄn há» 2 phÃ²ng ngá»§ phÃ¹ há»£p cho gia ÄÃ¬nh nhá» hoáº·c nhÃ³m báº¡n.",
+        "price":  10000000,
+        "area":  65,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "321 ÄÆ°á»ng Thá»§ Äá»©c, PhÆ°á»ng Linh Trung, Quáº­n Thá»§ Äá»©c"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.108Z",
+        "updatedAt":  "2025-10-09T08:25:10.328Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca69b",
+        "_id":  "68d6207a975ae9f5aa5ca69b",
+        "title":  "PhÃ²ng trá» cao cáº¥p view thoÃ¡ng mÃ¡t, nhiá»u dá»ch vá»¥ tiá»n nghi",
+        "description":  "PhÃ²ng trá» view biá»n tuyá»t Äáº¹p vá»i Äáº§y Äá»§ tiá»n nghi hiá»n Äáº¡i.",
+        "price":  6500000,
+        "area":  35,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "123 ÄÆ°á»ng VÃµ VÄn Táº§n, PhÆ°á»ng 6, Quáº­n 3"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine",
+                          "balcony"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.151Z",
+        "updatedAt":  "2025-10-09T08:25:10.421Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca69d",
+        "_id":  "68d6207a975ae9f5aa5ca69d",
+        "title":  "CÄn há» studio sang trá»ng, gáº§n trung tÃ¢m",
+        "description":  "Studio hiá»n Äáº¡i vá»i thiáº¿t káº¿ tá»i Æ°u, phÃ¹ há»£p cho ngÆ°á»i Äi lÃ m. Gáº§n cÃ¡c trung tÃ¢m thÆ°Æ¡ng máº¡i, bá»nh viá»n, trÆ°á»ng há»c.",
+        "price":  12000000,
+        "area":  45,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "456 Nguyá»\u0085n Huá», PhÆ°á»ng Báº¿n NghÃ©, Quáº­n 1"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.196Z",
+        "updatedAt":  "2025-10-09T08:25:10.510Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca69f",
+        "_id":  "68d6207a975ae9f5aa5ca69f",
+        "title":  "PhÃ²ng trá» giÃ¡ ráº» cho sinh viÃªn, gáº§n ÄH SÆ° pháº¡m",
+        "description":  "PhÃ²ng trá» giÃ¡ cáº£ pháº£i chÄng, phÃ¹ há»£p cho sinh viÃªn. CÃ³ khu báº¿p chung, wifi miá»\u0085n phÃ­, gáº§n trÆ°á»ng Äáº¡i há»c.",
+        "price":  3000000,
+        "area":  20,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "789 ÄÆ°á»ng Cáº§u Giáº¥y, PhÆ°á»ng Dá»ch Vá»ng, Quáº­n Cáº§u Giáº¥y"
+                     },
+        "amenities":  [
+                          "wifi"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.244Z",
+        "updatedAt":  "2025-10-09T08:25:10.597Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca6a1",
+        "_id":  "68d6207a975ae9f5aa5ca6a1",
+        "title":  "CÄn há» 2PN, cÃ³ giáº£m giÃ¡ náº¿u chá»t deal sá»m",
+        "description":  "CÄn há» 2 phÃ²ng ngá»§ vá»i nhiá»u tiá»n Ã­ch, phÃ¹ há»£p tá»« 3-4 ngÆ°á»i",
+        "price":  15000000,
+        "area":  65,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "321 ÄÆ°á»ng Thá»§ Äá»©c, PhÆ°á»ng Linh Trung, Quáº­n Thá»§ Äá»©c"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.287Z",
+        "updatedAt":  "2025-10-09T08:25:10.682Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca6a5",
+        "_id":  "68d6207a975ae9f5aa5ca6a5",
+        "title":  "CÄn há» studio sang trá»ng, gáº§n trung tÃ¢m",
+        "description":  "Studio hiá»n Äáº¡i vá»i thiáº¿t káº¿ tá»i Æ°u, phÃ¹ há»£p cho ngÆ°á»i Äi lÃ m. Gáº§n cÃ¡c trung tÃ¢m thÆ°Æ¡ng máº¡i, bá»nh viá»n, trÆ°á»ng há»c.",
+        "price":  8500000,
+        "area":  45,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "456 Nguyá»\u0085n Huá», PhÆ°á»ng Báº¿n NghÃ©, Quáº­n 1"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.379Z",
+        "updatedAt":  "2025-10-09T08:25:10.873Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca6a9",
+        "_id":  "68d6207a975ae9f5aa5ca6a9",
+        "title":  "CÄn há» 2PN, cÃ³ gara xe, gáº§n metro",
+        "description":  "CÄn há» 2 phÃ²ng ngá»§ vá»i gara xe riÃªng, gáº§n ga metro. PhÃ¹ há»£p cho gia ÄÃ¬nh nhá» hoáº·c nhÃ³m báº¡n.",
+        "price":  15000000,
+        "area":  65,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "321 ÄÆ°á»ng Thá»§ Äá»©c, PhÆ°á»ng Linh Trung, Quáº­n Thá»§ Äá»©c"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/duc9118an/image/upload/v1759208004/PhongTroVN/uvdelhm5knfsaqc3uh1x.png",
+                       "https://res.cloudinary.com/duc9118an/image/upload/v1759208005/PhongTroVN/bsemhhncbcm2wez2xan3.png",
+                       "https://res.cloudinary.com/duc9118an/image/upload/v1759208006/PhongTroVN/vvt2oe9rhodvifpyswzo.png"
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.468Z",
+        "updatedAt":  "2025-10-29T10:58:26.738Z"
+    },
+    {
+        "id":  "68d9086a3aaa7d44d9b5b94d",
+        "_id":  "68d9086a3aaa7d44d9b5b94d",
+        "title":  "áº¡kdhfghjasdgfhjagf",
+        "description":  "2fkgndfgkgkdfjfgjdh",
+        "price":  32183712,
+        "area":  1293891,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "hÃ  ná»i",
+                         "district":  "",
+                         "address":  "12312asdasd"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/duc9118an/image/upload/v1759053824/PhongTroVN/yguo1ms5dy1ypzjnsstn.png",
+                       "https://res.cloudinary.com/duc9118an/image/upload/v1759053825/PhongTroVN/mndggms83paxhzjikxcv.png",
+                       "https://res.cloudinary.com/duc9118an/image/upload/v1759053827/PhongTroVN/fjhn0wcatlr3guvkqq6s.png"
+                   ],
+        "createdAt":  "2025-09-28T10:05:30.682Z",
+        "updatedAt":  "2025-10-09T08:25:11.249Z"
+    },
+    {
+        "id":  "68de8c759dd1380c2e6ed21a",
+        "_id":  "68de8c759dd1380c2e6ed21a",
+        "title":  "123",
+        "description":  "12312",
+        "price":  1231,
+        "area":  312,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "12",
+                         "district":  "",
+                         "address":  "312"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/duc9118an/image/upload/v1759415406/PhongTroVN/il441tj30yvr6ama8uyh.png"
+                   ],
+        "createdAt":  "2025-10-02T14:30:13.698Z",
+        "updatedAt":  "2025-10-30T13:28:00.126Z"
+    },
+    {
+        "id":  "68e53570a9ea9563a75e0d0b",
+        "_id":  "68e53570a9ea9563a75e0d0b",
+        "title":  "Cho ThuÃª phÃ²ng trá» Äá»§ Äá» cÆ¡ báº£n, an ninh Äáº£m báº£o táº¡i trung tÃ¢m Kiá»u Mai",
+        "description":  " Cho ThuÃª phÃ²ng trá» Äá»§ Äá» cÆ¡ báº£n, an ninh Äáº£m báº£o táº¡i trung tÃ¢m Kiá»u Mai",
+        "price":  2600000,
+        "area":  25,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Sá» nhÃ  10, ngÃµ 40 PhÃº Kiá»u, PhÆ°á»ng PhÃºc Diá»\u0085n, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "private_wc",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579459/phongtro_images/mvw66gtuwky1tbb3dwbe.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579376/phongtro_images/zwdjxdfgm26svow3h0ph.jpg"
+                   ],
+        "createdAt":  "2025-10-07T14:45:32.715Z",
+        "updatedAt":  "2025-10-09T08:25:12.258Z"
+    },
+    {
+        "id":  "68e601b74c319e0e57397327",
+        "_id":  "68e601b74c319e0e57397327",
+        "title":  "Cho thuÃª nhÃ  riÃªng 41m2 - 2 phÃ²ng ngá»§, Äiá»u hÃ²a, nÃ³ng láº¡nh, phÃ²ng báº¿p Än - Äiá»n nÆ°á»c nÃ©t tÃ­nh theo hÃ³a ÄÆ¡n",
+        "description":  " Cho thuÃª nhÃ  riÃªng 41m2 - 2 phÃ²ng ngá»§, Äiá»u hÃ²a, nÃ³ng láº¡nh, phÃ²ng báº¿p Än - Äiá»n nÆ°á»c nÃ©t tÃ­nh theo hÃ³a ÄÆ¡n",
+        "price":  6000000,
+        "area":  41,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "NgÃµ 295 Phá» Báº¡ch Mai, PhÆ°á»ng BaÌ£ch Mai, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "washing_machine",
+                          "wifi",
+                          "aircon",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579695/phongtro_images/ecxx8uewq1hkspetlmt7.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579778/phongtro_images/jqbaojuhdoopixmyl06w.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:12.626Z"
+    },
+    {
+        "id":  "68e601b74c319e0e57397326",
+        "_id":  "68e601b74c319e0e57397326",
+        "title":  "PhÃ²ng trá» nhÃ  dÃ¢n khÃ´ng chung chá»§ phÆ°á»ng Báº¡ch Mai, Hai BÃ  TrÆ°ng",
+        "description":  " PhÃ²ng trá» nhÃ  dÃ¢n khÃ´ng chung chá»§ phÆ°á»ng Báº¡ch Mai, Hai BÃ  TrÆ°ng",
+        "price":  5900000,
+        "area":  30,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Phá» BÃ¹i Ngá»c DÆ°Æ¡ng, PhÆ°á»ng BaÌ£ch Mai, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "washing_machine",
+                          "wifi",
+                          "balcony",
+                          "aircon",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579467/phongtro_images/b9mgxcivjsmikecokjhl.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579698/phongtro_images/hs4z5lqn8xcjvsun7rxa.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:12.528Z"
+    },
+    {
+        "id":  "68e601b74c319e0e57397328",
+        "_id":  "68e601b74c319e0e57397328",
+        "title":  "PhÃ²ng khÃ©p kÃ­n 25m Äá»§ Äá» á» Cá» Nhuáº¿",
+        "description":  " PhÃ²ng khÃ©p kÃ­n 25m Äá»§ Äá» á» Cá» Nhuáº¿",
+        "price":  2700000,
+        "area":  25,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "30 ÄÆ°á»ng Cá» Nhuáº¿, PhÆ°á»ng Cá» Nhuáº¿ 2, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "washing_machine",
+                          "fridge",
+                          "private_wc",
+                          "wifi",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579407/phongtro_images/j9m3hqmoxd4hley158oa.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579540/phongtro_images/immx5cjm9qeqcyewk9xg.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:12.730Z"
+    },
+    {
+        "id":  "68e602864c319e0e57397332",
+        "_id":  "68e602864c319e0e57397332",
+        "title":  "Cho thuÃª phÃ²ng trá» gáº§n cá»ng Äáº¡i há»c má» Äá»a cháº¥t",
+        "description":  " Cho thuÃª phÃ²ng trá» gáº§n cá»ng Äáº¡i há»c má» Äá»a cháº¥t",
+        "price":  1500000,
+        "area":  20,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "sá» 8 ÄÆ°á»ng Phá» ViÃªn, PhÆ°á»ng Cá» Nhuáº¿ 2, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "balcony",
+                          "wifi",
+                          "fridge",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579561/phongtro_images/vg4jo4lylaxvbaswyjix.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579652/phongtro_images/tvgstlnlvpxxdazsxbgn.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:12.913Z"
+    },
+    {
+        "id":  "68e602864c319e0e57397333",
+        "_id":  "68e602864c319e0e57397333",
+        "title":  "Cho ná»¯ thuÃª phÃ²ng, phÃ²ng Äáº¹p á» táº§ng 2 mÃ¡t máº» khu vá»±c gáº§n trÆ°á»ng, chá»£",
+        "description":  " Cho ná»¯ thuÃª phÃ²ng, phÃ²ng Äáº¹p á» táº§ng 2 mÃ¡t máº» khu vá»±c gáº§n trÆ°á»ng, chá»£",
+        "price":  4800000,
+        "area":  35,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "19 ngÃµ 30 phá» Há»ng Mai BaÌ£ch Mai, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579418/phongtro_images/pkaei49qzeq47ef5daom.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579778/phongtro_images/n7xj6fsb7pnsppydh1bu.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:13.005Z"
+    },
+    {
+        "id":  "68e604714c319e0e57397349",
+        "_id":  "68e604714c319e0e57397349",
+        "title":  "Cho thuÃª phÃ²ng phá» BÃ¹i Ngá»c DÆ°Æ¡ng, gáº§n ÄH Kinh Táº¿ Quá»c DÃ¢n, XÃ¢y Dá»±ng, BÃ¡ch Khoa, riÃªng chá»§",
+        "description":  " Cho thuÃª phÃ²ng phá» BÃ¹i Ngá»c DÆ°Æ¡ng, gáº§n ÄH Kinh Táº¿ Quá»c DÃ¢n, XÃ¢y Dá»±ng, BÃ¡ch Khoa, riÃªng chá»§",
+        "price":  4500000,
+        "area":  40,
+        "type":  "can_ho_chung_cu",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Phá» BÃ¹i Ngá»c DÆ°Æ¡ng, PhÆ°á»ng BaÌ£ch Mai, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579700/phongtro_images/mjrmoxcazlzqean9ivax.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579723/phongtro_images/bgwif9x0cgtgmgdtdv0p.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579670/phongtro_images/kjih609y0vahyaagustw.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:13.737Z"
+    },
+    {
+        "id":  "68e604714c319e0e5739734a",
+        "_id":  "68e604714c319e0e5739734a",
+        "title":  "CHO THUÃ PHÃNG Táº¦NG 3 TRONG NHÃ 4 Táº¦NG - NGÃ 313 THANH NHÃN Q.HAI BÃ TRÆ¯NG",
+        "description":  " CHO THUÃ PHÃNG Táº¦NG 3 TRONG NHÃ 4 Táº¦NG - NGÃ 313 THANH NHÃN Q.HAI BÃ TRÆ¯NG",
+        "price":  3900000,
+        "area":  30,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Thanh NhÃ n, PhÆ°á»ng BaÌ£ch Mai, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "balcony",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579700/phongtro_images/smk700sxoy30sxp8zvla.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579651/phongtro_images/gpoxgd6rh606zdokkjxa.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:13.823Z"
+    },
+    {
+        "id":  "68e604714c319e0e57397348",
+        "_id":  "68e604714c319e0e57397348",
+        "title":  "Cho thuÃª phÃ²ng khÃ©p kÃ­n Hai BÃ  TrÆ°ng",
+        "description":  " Cho thuÃª phÃ²ng khÃ©p kÃ­n Hai BÃ  TrÆ°ng",
+        "price":  1800000,
+        "area":  20,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Báº¡ch Mai, PhÆ°á»ng Báº¡ch Mai, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "aircon",
+                          "balcony",
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579513/phongtro_images/atb3krtbc6cdjpepuiw3.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579753/phongtro_images/bpclefs9trn9lrfoxmf8.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:13.643Z"
+    },
+    {
+        "id":  "68e604714c319e0e57397347",
+        "_id":  "68e604714c319e0e57397347",
+        "title":  "Cho thuÃª phÃ²ng trá» táº¡i 11 ngÃµ 357 phá» Báº¡ch Mai",
+        "description":  " Cho thuÃª phÃ²ng trá» táº¡i 11 ngÃµ 357 phá» Báº¡ch Mai",
+        "price":  4000000,
+        "area":  30,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "11 ngoÌ 357 Phá» Báº¡ch Mai, PhÆ°á»ng BaÌ£ch Mai, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "washing_machine",
+                          "balcony",
+                          "wifi",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579752/phongtro_images/cgorska1kkijvylrnql0.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579349/phongtro_images/ffh6hugqtutfaxpsvbmx.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:13.560Z"
+    },
+    {
+        "id":  "68e604714c319e0e5739734b",
+        "_id":  "68e604714c319e0e5739734b",
+        "title":  "PhÃ²ng trá» táº§ng 3 gáº§n ÄH BÃ¡ch Khoa, Kinh táº¿, XÃ¢y dá»±ng",
+        "description":  " PhÃ²ng trá» táº§ng 3 gáº§n ÄH BÃ¡ch Khoa, Kinh táº¿, XÃ¢y dá»±ng",
+        "price":  4600000,
+        "area":  40,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Báº¡ch Mai, PhÆ°á»ng Báº¡ch Mai, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "washing_machine",
+                          "balcony",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579319/phongtro_images/llzflrqcnksuxgxxjbbs.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579176/phongtro_images/chvkjzhae7rgyajrfmdv.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579576/phongtro_images/ty1the7wfz8hif9md7jl.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:13.908Z"
+    },
+    {
+        "id":  "68e6053f4c319e0e57397355",
+        "_id":  "68e6053f4c319e0e57397355",
+        "title":  "Cho sinh viÃªn thuÃª nhÃ  trong ngÃµ phá» Báº¡ch Mai",
+        "description":  " Cho sinh viÃªn thuÃª nhÃ  trong ngÃµ phá» Báº¡ch Mai",
+        "price":  1600000,
+        "area":  20,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Phá» Báº¡ch Mai, PhÆ°á»ng BaÌ£ch Mai, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "balcony",
+                          "aircon",
+                          "fridge",
+                          "private_wc",
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579548/phongtro_images/cjrnszvu6u72gqad5bbg.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579347/phongtro_images/e9qw390njjalaflpn5sa.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:14.178Z"
+    },
+    {
+        "id":  "68e605ca4c319e0e57397360",
+        "_id":  "68e605ca4c319e0e57397360",
+        "title":  "PhÃ²ng khÃ©p kÃ­n gáº§n kinh táº¿ xÃ¢y dá»±ng bÃ¡ch khoa, cÃ³ thá» á» tá»« 1-2 ngÆ°á»i",
+        "description":  " PhÃ²ng khÃ©p kÃ­n gáº§n kinh táº¿ xÃ¢y dá»±ng bÃ¡ch khoa, Diá»n tÃ­ch tá»« 18m2 Äáº¿n 22m2 Äáº¿n 25m2, GiÃ¡ phÃ²ng: 2200 -3000k",
+        "price":  2500000,
+        "area":  20,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "NhÃ  thuá»c nghi Báº¡ch Mai, PhÆ°á»ng BaÌ£ch Mai, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579416/phongtro_images/ykqcze8e2ddypwuhn3hs.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579661/phongtro_images/zvyknsrxyclsyznal550.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579205/phongtro_images/kumgyhhmxrj0ucorjxnb.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579581/phongtro_images/v7dy4xlwvinegiejpb7c.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:14.550Z"
+    },
+    {
+        "id":  "68e6064f4c319e0e57397370",
+        "_id":  "68e6064f4c319e0e57397370",
+        "title":  "cho thuÃª phÃ²ng trá» táº¡i Z8B, khu TT bá» GD \u0026ÄT, phÆ°á»ng BÃ¡ch Khoa, HÃ  Ná»i",
+        "description":  " cho thuÃª phÃ²ng trá» táº¡i Z8B, khu TT bá» GD \u0026ÄT, phÆ°á»ng BÃ¡ch Khoa, HÃ  Ná»i",
+        "price":  3000000,
+        "area":  20,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Táº¡ Quang Bá»­u, PhÆ°á»ng BaÌch Khoa, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579635/phongtro_images/nsiohdmfdluzij3pg3tl.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579766/phongtro_images/jj3qnsfq5g1dramkqvgd.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579731/phongtro_images/ord20b2zx0h4mppcgbuq.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:15.265Z"
+    },
+    {
+        "id":  "68e606de4c319e0e5739737c",
+        "_id":  "68e606de4c319e0e5739737c",
+        "title":  "MÃ¬nh cho thuÃª phÃ²ng kiá»u má»i giá» giáº¥c thoáº£i mÃ¡i gáº§n LÃª VÄn Hiáº¿n gáº§n Há»c Viá»n TÃ i ChÃ­nh cÃ³ private_wc",
+        "description":  " MÃ¬nh cho thuÃª phÃ²ng kiá»u má»i giá» giáº¥c thoáº£i mÃ¡i gáº§n LÃª VÄn Hiáº¿n gáº§n Há»c Viá»n TÃ i ChÃ­nh cÃ³ private_wc",
+        "price":  2600000,
+        "area":  25,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "ÄÆ°á»ng HoÃ ng TÄng BÃ­, PhÆ°á»ng Cá» Nhuáº¿ 2, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "washing_machine",
+                          "wifi",
+                          "private_wc",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579398/phongtro_images/vkrojkzuqchvz2ljvdka.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579648/phongtro_images/wmtqp4rvkdagbepndoil.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579762/phongtro_images/ss5gnai3ty6v5w52rkg2.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:15.636Z"
+    },
+    {
+        "id":  "68e606de4c319e0e5739737a",
+        "_id":  "68e606de4c319e0e5739737a",
+        "title":  "Cho ná»¯ thuÃª phÃ²ng gáº§n kinh táº¿ quÃ´c dÃ¢n 1tr2",
+        "description":  " Cho ná»¯ thuÃª phÃ²ng gáº§n kinh táº¿ quÃ´c dÃ¢n 1tr2",
+        "price":  1200000,
+        "area":  15,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Äáº¡i La, PhÆ°á»ng BaÌch Khoa, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "fridge",
+                          "private_wc",
+                          "washing_machine",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579675/phongtro_images/qfjg1dglfouq8njxwhoe.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579491/phongtro_images/oqspjaorf0y4eehryfpb.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:15.451Z"
+    },
+    {
+        "id":  "68e606de4c319e0e5739737d",
+        "_id":  "68e606de4c319e0e5739737d",
+        "title":  "Cho thuÃª nhÃ  má»i xÃ¢y, cÃ¡ch máº·t ÄÆ°á»ng 5m.",
+        "description":  " Cho thuÃª nhÃ  má»i xÃ¢y, máº·t ÄÆ°á»ng 5m.",
+        "price":  2000000,
+        "area":  20,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Khu B TÄáº¡i Há»c Má»-Äá»a cháº¥t Cáº§u Noi, PhÆ°á»ng Cá» Nhuáº¿ 2, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579448/phongtro_images/i3ss5fxugzd7mmrykqwr.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579387/phongtro_images/btwpd2brqvujcvvxwrnj.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579683/phongtro_images/ryqv7pzeu7rmkfb648vd.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579671/phongtro_images/tlj6zjhg1xhpzbhvtfux.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:15.724Z"
+    },
+    {
+        "id":  "68e606de4c319e0e5739737b",
+        "_id":  "68e606de4c319e0e5739737b",
+        "title":  "NhÃ  MÃ¬nh Äang cÃ³ phÃ²ng tiá»n nghi giÃ¡ sinh viÃªn mÃ¡t máº» á» quáº­n Báº¯c Tá»« LiÃªm gáº§n Äáº¡i Há»c Y Táº¿ khÃ©p kin",
+        "description":  " NhÃ  MÃ¬nh Äang cÃ³ phÃ²ng tiá»n nghi giÃ¡ sinh viÃªn mÃ¡t máº» á» quáº­n Báº¯c Tá»« LiÃªm gáº§n Äáº¡i Há»c Y Táº¿ khÃ©p kin",
+        "price":  3900000,
+        "area":  30,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "HoÃ ng TÄng BÃ­, PhÆ°á»ng Cá» Nhuáº¿ 2, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "private_wc",
+                          "wifi",
+                          "washing_machine",
+                          "balcony",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579737/phongtro_images/pu1tihncp5cnqwln6fmi.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579200/phongtro_images/bab1mumcpgbngt5dtqim.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:15.540Z"
+    },
+    {
+        "id":  "68e607644c319e0e57397386",
+        "_id":  "68e607644c319e0e57397386",
+        "title":  "CÃ³ 2 phÃ²ng cho thuÃª Äáº§y Äá»§ tiá»n nghi, sáº¡ch sáº½, thoÃ¡ng mÃ¡t",
+        "description":  " CÃ³ 2 phÃ²ng cho thuÃª Äáº§y Äá»§ tiá»n nghi, sáº¡ch sáº½, thoÃ¡ng mÃ¡t",
+        "price":  4000000,
+        "area":  40,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Khu b Äáº¡i há»c má» Äá»a cháº¥t Pháº¡m VÄn Nghá», PhÆ°á»ng Cá» Nhuáº¿ 2, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579746/phongtro_images/pnuxmzidfhn3tnrxervo.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579424/phongtro_images/n6ggza2tthjyimqfoce3.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:15.895Z"
+    },
+    {
+        "id":  "68e607644c319e0e57397389",
+        "_id":  "68e607644c319e0e57397389",
+        "title":  "Cho thuÃª phÃ²ng trá» khÃ©p kÃ­n 25m2 giÃ¡ 2tr5 táº¡i ngÃ¡ch 43/33, ÄÆ°á»ng Cá» Nhuáº¿",
+        "description":  " Cho thuÃª phÃ²ng trá» khÃ©p kÃ­n 25m2 giÃ¡ 2tr5 táº¡i ngÃ¡ch 43/33, ÄÆ°á»ng Cá» Nhuáº¿",
+        "price":  2500000,
+        "area":  25,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "NgÃ¡ch 43/33 Cá» Nhuáº¿, PhÆ°á»ng Cá» Nhuáº¿ 2, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "aircon",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579514/phongtro_images/alycnahxdzhdksujdlfv.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579619/phongtro_images/kjnrcmbixnjoamv7vwyw.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579738/phongtro_images/iz8mfji4eo4iuk0iz8xe.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579521/phongtro_images/xdsy96dfmw5vuceagrcy.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:16.162Z"
+    },
+    {
+        "id":  "68e6086a4c319e0e57397395",
+        "_id":  "68e6086a4c319e0e57397395",
+        "title":  "Cho thuÃª nhÃ  trá» sinh viÃªn Äáº¡i Há»c Má» Äá»a cháº¥t, Há»c viá»n tÃ i chÃ­nh, TÃ i nguyÃªn MÃ´i TrÆ°á»ng",
+        "description":  " Cho thuÃª nhÃ  trá» sinh viÃªn Äáº¡i Há»c Má» Äá»a cháº¥t, Há»c viá»n tÃ i chÃ­nh, TÃ i nguyÃªn MÃ´i TrÆ°á»ng",
+        "price":  1200000,
+        "area":  15,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "ÄÆ°á»ng Cá» Nhuáº¿, PhÆ°á»ng Cá» Nhuáº¿ 2, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "washing_machine",
+                          "private_wc",
+                          "aircon",
+                          "fridge",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579724/phongtro_images/vgpnrrxmvnqmy7lo5qho.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579708/phongtro_images/dysgk7lfuz4i5zlsfgp9.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579342/phongtro_images/lgqqbzsdyulqu0nzggur.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579364/phongtro_images/m1xvucibca0znujgtcao.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:16.623Z"
+    },
+    {
+        "id":  "68e609334c319e0e5739739f",
+        "_id":  "68e609334c319e0e5739739f",
+        "title":  "Cáº§n 01 ná»¯ cho phÃ²ng trong CÄn Há» Chung cÆ° BCA",
+        "description":  " Cáº§n 01 ná»¯ cho phÃ²ng trong CÄn Há» Chung cÆ° BCA",
+        "price":  2000000,
+        "area":  20,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Chung cÆ° CT1 Pháº¡m VÄn Äá»ng, PhÆ°á»ng Cá» Nhuáº¿ 2, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "wifi",
+                          "washing_machine",
+                          "fridge",
+                          "aircon",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579467/phongtro_images/iq5nfb0hmgo5muds924c.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579527/phongtro_images/weogccxc6qqnnm8ekzme.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579654/phongtro_images/ybzis6mpb6z5pm9pkhl6.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:16.907Z"
+    },
+    {
+        "id":  "68e609d44c319e0e573973ab",
+        "_id":  "68e609d44c319e0e573973ab",
+        "title":  "PhÃ²ng trá» khÃ©p kÃ­n gáº§n ÄÆ°á»ng HoÃ ng Quá»c Viá»t vÃ  6 trÆ°á»ng Äáº¡i há»c",
+        "description":  " PhÃ²ng trá» khÃ©p kÃ­n gáº§n ÄÆ°á»ng HoÃ ng Quá»c Viá»t vÃ  6 trÆ°á»ng Äáº¡i há»c",
+        "price":  3100000,
+        "area":  30,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579577/phongtro_images/je5bn2jpglwneplfnb2x.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579391/phongtro_images/o81l2yld3u3zpbiumnrp.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579428/phongtro_images/l6n1ap0eytajb0zyzuwi.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:17.373Z"
+    },
+    {
+        "id":  "68e609d44c319e0e573973ad",
+        "_id":  "68e609d44c319e0e573973ad",
+        "title":  "Cho thuÃª cÄn há» chung cÆ° mini 67m2 á» BÃ¡ch Khoa",
+        "description":  " Cho thuÃª cÄn há» chung cÆ° mini 67m2 á» BÃ¡ch Khoa",
+        "price":  9000000,
+        "area":  67,
+        "type":  "can_ho_chung_cu",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "22 NgÃ¡ch 17/2 Táº¡ Quang Bá»­u, PhÆ°á»ng BaÌch Khoa, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "fridge",
+                          "private_wc",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579300/phongtro_images/tqjtsv3orbondbuf6gve.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579567/phongtro_images/gtedwk4nihlcolrcnkqr.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579412/phongtro_images/nrorg0emm71vpqpm2m6a.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:17.554Z"
+    },
+    {
+        "id":  "68e60b034c319e0e573973b7",
+        "_id":  "68e60b034c319e0e573973b7",
+        "title":  "Cho thuÃª phÃ²ng táº¡i khu vá»±c Táº¡ Quang Bá»­u, BÃ¡ch Khoa",
+        "description":  " Cho thuÃª phÃ²ng táº¡i khu vá»±c Táº¡ Quang Bá»­u, BÃ¡ch Khoa",
+        "price":  5900000,
+        "area":  45,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "ÄÆ°á»ng Äáº¡i Cá» Viá»t, PhÆ°á»ng BaÌch Khoa, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "private_wc",
+                          "wifi",
+                          "aircon",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579557/phongtro_images/usurryyrhcxexuhjttxd.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579659/phongtro_images/idytcyiwa4xxwszig8hc.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579236/phongtro_images/svlgthb79xwllrznbngq.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:17.847Z"
+    },
+    {
+        "id":  "68e60b034c319e0e573973b5",
+        "_id":  "68e60b034c319e0e573973b5",
+        "title":  "Cho thuÃª nhÃ  khu táº­p thá» BÃ¡ch Khoa 100m2",
+        "description":  " Cho thuÃª nhÃ  khu táº­p thá» BÃ¡ch Khoa 100m2",
+        "price":  12500000,
+        "area":  100,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "K10A ÄÆ°á»ng Nguyá»\u0085n Hiá»n, PhÆ°á»ng BaÌch Khoa, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "balcony",
+                          "fridge",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579626/phongtro_images/jkuwehggkox9xpui3fmc.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579301/phongtro_images/sclvl0ph1dfuywtwsbqy.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579464/phongtro_images/fjmrsjmdrtaivdeoy56x.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579701/phongtro_images/wgwjxwc1b33qropxeq5l.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:17.651Z"
+    },
+    {
+        "id":  "68e60b034c319e0e573973b9",
+        "_id":  "68e60b034c319e0e573973b9",
+        "title":  "ChÃ­nh chá»§ cáº§n cho thuÃª cÃ²n 1 phÃ²ng táº¡i sá» nhÃ  20 háº»m 10 ngÃµ 67 LÃª Thanh Nghá»",
+        "description":  " ChÃ­nh chá»§ cáº§n cho thuÃª cÃ²n 1 phÃ²ng táº¡i sá» nhÃ  20 háº»m 10 ngÃµ 67 LÃª Thanh Nghá»",
+        "price":  3500000,
+        "area":  25,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "67 Phá» LÃª Thanh Nghá», PhÆ°á»ng BaÌch Khoa, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579423/phongtro_images/yvwejzd94cg1bo3jwrye.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579660/phongtro_images/o9zwrdmzjquuia0mg36b.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579503/phongtro_images/bgrxidv0tojses0gbalo.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:18.030Z"
+    },
+    {
+        "id":  "68e60bd74c319e0e573973c4",
+        "_id":  "68e60bd74c319e0e573973c4",
+        "title":  "CHO THUÃ PHÃNG KÃP KÃN GIÃ Ráºº GIÃ Ráºº NHáº¤T THá»¦ ÄÃ HÃ Ná»I",
+        "description":  " CHO THUÃ PHÃNG KÃP KÃN GIÃ Ráºº GIÃ Ráºº NHáº¤T THá»¦ ÄÃ HÃ Ná»I",
+        "price":  6500000,
+        "area":  20,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "ÄÆ°á»ng Tráº§n Cung, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "aircon",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579196/phongtro_images/aadxkjmygmcwo69q8yjm.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579522/phongtro_images/uvboeiosglpakmqywkpq.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579658/phongtro_images/j4dnpmyvtbixkdxicb1h.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579731/phongtro_images/flm1vfxmbe0ugscxipme.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:18.380Z"
+    },
+    {
+        "id":  "68e60bd74c319e0e573973c1",
+        "_id":  "68e60bd74c319e0e573973c1",
+        "title":  "PhÃ²ng trá» sáº¡ch Äáº¹p tiá»n nghi khu vá»±c Táº¡ Quang Bá»­u - Hai BÃ  TrÆ°ng",
+        "description":  " PhÃ²ng trá» sáº¡ch Äáº¹p tiá»n nghi khu vá»±c Táº¡ Quang Bá»­u - Hai BÃ  TrÆ°ng",
+        "price":  3100000,
+        "area":  40,
+        "type":  "can_ho_chung_cu",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Phá» Táº¡ Quang Bá»­u, PhÆ°á»ng BaÌch Khoa, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "private_wc",
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579709/phongtro_images/jqd5m01lycldr5rlqepb.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579575/phongtro_images/esvim472y8liezmhehnf.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:18.116Z"
+    },
+    {
+        "id":  "68e60bd74c319e0e573973c5",
+        "_id":  "68e60bd74c319e0e573973c5",
+        "title":  "Cho thuÃª phÃ²ng táº¡i Tráº§n Cung, phÆ°á»ng Cá» Nhuáº¿ 1",
+        "description":  " Cho thuÃª phÃ²ng táº¡i Tráº§n Cung, phÆ°á»ng Cá» Nhuáº¿ 1",
+        "price":  1500000,
+        "area":  15,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Tráº§n Cung, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579685/phongtro_images/vhqcuckgy5blb2xz9ugv.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579298/phongtro_images/bjk8h0gh7x8wqmzhbphw.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579610/phongtro_images/fstu85hravveou1j57k3.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579667/phongtro_images/prqvqs08panw6kvhrhu1.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:18.475Z"
+    },
+    {
+        "id":  "68e60dab4c319e0e573973d2",
+        "_id":  "68e60dab4c319e0e573973d2",
+        "title":  "Cho thuÃª phÃ²ng trá» ÄÆ°á»ng Tráº§n Äáº¡i NghÄ©a",
+        "description":  " Cho thuÃª phÃ²ng trá» ÄÆ°á»ng Tráº§n Äáº¡i NghÄ©a",
+        "price":  6900000,
+        "area":  30,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Phá» Tráº§n Äáº¡i NghÄ©a, PhÆ°á»ng BaÌch Khoa, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "washing_machine",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579380/phongtro_images/vby2fqf4hcrkh0qzdfjv.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579346/phongtro_images/wrhmh19cksnmteisjumd.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579543/phongtro_images/zyfdfa4zkhwrw8trb8ek.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:18.565Z"
+    },
+    {
+        "id":  "68e60dab4c319e0e573973d4",
+        "_id":  "68e60dab4c319e0e573973d4",
+        "title":  "PhÃ²ng trá» á» ghÃ©p ngay giá»¯a BÃ¡ch-Kinh-XÃ¢y ÄÆ°á»ng Tráº§n Äáº¡i NghÄ©a",
+        "description":  " PhÃ²ng trá» á» ghÃ©p ngay giá»¯a BÃ¡ch-Kinh-XÃ¢y ÄÆ°á»ng Tráº§n Äáº¡i NghÄ©a",
+        "price":  5400000,
+        "area":  40,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "34 Tráº§n Äáº¡i NghÄ©a, PhÆ°á»ng BaÌch Khoa, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "private_wc",
+                          "fridge",
+                          "balcony",
+                          "aircon",
+                          "wifi",
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579263/phongtro_images/sqx7pegkvvcymzetykla.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579259/phongtro_images/spo02bgj22q3zokbmxwi.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579480/phongtro_images/gkkrzvuqdq4dq8evfv2n.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579468/phongtro_images/qvcdhupzgwgbajglzqvi.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:18.745Z"
+    },
+    {
+        "id":  "68e60dab4c319e0e573973d3",
+        "_id":  "68e60dab4c319e0e573973d3",
+        "title":  "Cho thuÃª 1 phÃ²ng trá» Äá»§ tiá»n nghi, thoÃ¡ng mÃ¡t",
+        "description":  " Cho thuÃª 1 phÃ²ng trá» Äá»§ tiá»n nghi, thoÃ¡ng mÃ¡t",
+        "price":  5000000,
+        "area":  15,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "ÄÆ°á»ng Giáº£i PhÃ³ng, PhÆ°á»ng BaÌch Khoa, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "private_wc",
+                          "washing_machine",
+                          "wifi",
+                          "balcony",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579424/phongtro_images/i4sbneshctrbmye2gq66.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579542/phongtro_images/bt8bbjxlg6lp9tck8zp2.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:18.655Z"
+    },
+    {
+        "id":  "68e60e4f4c319e0e573973de",
+        "_id":  "68e60e4f4c319e0e573973de",
+        "title":  "CHO THUÃ PHÃNG á» 220 Cá» NHUáº¾ - 20M2 - 1.9TR",
+        "description":  " CHO THUÃ PHÃNG á» 220 Cá» NHUáº¾ - 20M2 - 1.9TR",
+        "price":  1900000,
+        "area":  20,
+        "type":  "can_ho_chung_cu",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "220 ÄÆ°á»ng Cá» Nhuáº¿, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579690/phongtro_images/zt7jqzh3airc5e2ej6ad.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579600/phongtro_images/tmyt0z1o3z5m5yzzb5md.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579706/phongtro_images/jegtcvmsbup19q1vb1eb.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579353/phongtro_images/zkr8em8eazfrybn32zzb.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:19.007Z"
+    },
+    {
+        "id":  "68e60e4f4c319e0e573973df",
+        "_id":  "68e60e4f4c319e0e573973df",
+        "title":  "[HÃ Ná»I] - PHÃNG TRá» SINH VIÃN GIÃ Ráºº ",
+        "description":  " [HÃ Ná»I] - PHÃNG TRá» SINH VIÃN GIÃ Ráºº ",
+        "price":  1800000,
+        "area":  20,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "499 ÄÆ°á»ng PhÃº Diá»\u0085n, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "private_wc",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579206/phongtro_images/yjc10lvlou5mf2qkfhhy.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579674/phongtro_images/wv02sqywmfevnsn6loff.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579365/phongtro_images/w4uvewmd1vbnqn6l1jyg.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579377/phongtro_images/eswgx4b0fdwxsr1qcaqf.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:19.098Z"
+    },
+    {
+        "id":  "68e60e4f4c319e0e573973e0",
+        "_id":  "68e60e4f4c319e0e573973e0",
+        "title":  "PhÃ²ng trá» 26m2, táº¡i 430 phá» tráº§n cung.cá» nhuáº¿1, BÃ¡c tá»« liÃªm",
+        "description":  " PhÃ²ng trá» 26m2, táº¡i 430 phá» tráº§n cung.cá» nhuáº¿1, BÃ¡c tá»« liÃªm",
+        "price":  3200000,
+        "area":  26,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "wifi",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579594/phongtro_images/c4syzbxbeagnqkevjmtb.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579406/phongtro_images/frqohsyffp8bmmte4rry.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:19.192Z"
+    },
+    {
+        "id":  "68e60e4f4c319e0e573973e2",
+        "_id":  "68e60e4f4c319e0e573973e2",
+        "title":  "Cho thuÃª chung cÆ° mini giÃ¡ ráº» táº¡i ÄÆ°á»ng Cá» Nhuáº¿, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i",
+        "description":  " Cho thuÃª chung cÆ° mini giÃ¡ ráº» táº¡i ÄÆ°á»ng Cá» Nhuáº¿, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i",
+        "price":  1700000,
+        "area":  25,
+        "type":  "can_ho_chung_cu",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "ÄÆ°á»ng Cá» Nhuáº¿, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579707/phongtro_images/eknntvyn962jh2aaoxt2.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579252/phongtro_images/eyxbmfsfmc2xbp3pssep.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579767/phongtro_images/d63y5ggqlxyxeddbndia.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579720/phongtro_images/e4zop1zbkslq9wpznybr.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:19.367Z"
+    },
+    {
+        "id":  "68e60edb4c319e0e573973ec",
+        "_id":  "68e60edb4c319e0e573973ec",
+        "title":  "Cho thuÃª phÃ²ng tá»« 18m2 Äáº¿n 20m2 táº¡i ngÃµ 117 Tráº§n Cung",
+        "description":  " Cho thuÃª phÃ²ng tá»« 18m2 Äáº¿n 20m2 táº¡i ngÃµ 117 Tráº§n Cung",
+        "price":  2100000,
+        "area":  20,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "22/15/117 Tráº§n Cung, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "washing_machine",
+                          "balcony",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579382/phongtro_images/kxye3mlhjnmpcrw8mvhw.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579764/phongtro_images/ki5ggsjrsazwv0hga7rk.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579565/phongtro_images/zrudjct8p8tvi4qnkswk.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:27:53.752Z"
+    },
+    {
+        "id":  "68e60edb4c319e0e573973ea",
+        "_id":  "68e60edb4c319e0e573973ea",
+        "title":  "PhÃ²ng trá» tai 430 tráº§n cung, cá» nhuáº¿1, báº¯c tá»« liÃªm, 26m2",
+        "description":  " PhÃ²ng trá» tai 430 tráº§n cung, cá» nhuáº¿1, báº¯c tá»« liÃªm, 26m2",
+        "price":  3200000,
+        "area":  26,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579533/phongtro_images/i4mb6xhdlqzaclqjywl2.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579617/phongtro_images/nu4pildw7oq4bu8ibaud.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:19.461Z"
+    },
+    {
+        "id":  "68e60edb4c319e0e573973eb",
+        "_id":  "68e60edb4c319e0e573973eb",
+        "title":  "Cho thuÃª phÃ²ng á» khÃ©p kÃ­n Äá»i diá»n bá»nh viá»n E",
+        "description":  " Cho thuÃª phÃ²ng á» khÃ©p kÃ­n Äá»i diá»n bá»nh viá»n E",
+        "price":  3600000,
+        "area":  40,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "sá» 7 ngÃ¡ch 1 ngÃµ 198 ÄÆ°á»ng Cá» Nhuáº¿, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579512/phongtro_images/i7h7iztm8io4kxbjnqcm.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579655/phongtro_images/zhti4hjv5nsnqb0awdds.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:19.547Z"
+    },
+    {
+        "id":  "68e60edb4c319e0e573973ed",
+        "_id":  "68e60edb4c319e0e573973ed",
+        "title":  "Cáº§n cho thuÃª phÃ²ng trá» khÃ©p kÃ­n Äáº§y Äá»§ tiá»n nghi táº¡i TÃ´n Quang Phiá»t, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm",
+        "description":  " Cáº§n cho thuÃª phÃ²ng trá» khÃ©p kÃ­n Äáº§y Äá»§ tiá»n nghi táº¡i TÃ´n Quang Phiá»t, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm",
+        "price":  4200000,
+        "area":  35,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "TÃ´n Quang Phiá»t, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579455/phongtro_images/bbg117v95s0xjgckotvg.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579370/phongtro_images/a7ymkjvjcyx3xpkcfr53.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-30T13:08:58.672Z"
+    },
+    {
+        "id":  "68e60edb4c319e0e573973ee",
+        "_id":  "68e60edb4c319e0e573973ee",
+        "title":  "PhÃ²ng cho thuÃª 30m2 - Äá»§ ná»i tháº¥t cÆ¡ báº£n - cÃ³ balconythoÃ¡ng, cÃ³ washing_machine - ÄÆ°á»ng rá»ng rÃ£i",
+        "description":  " PhÃ²ng cho thuÃª 30m2 - Äá»§ ná»i tháº¥t cÆ¡ báº£n - cÃ³ balconythoÃ¡ng, cÃ³ washing_machine - ÄÆ°á»ng rá»ng rÃ£i",
+        "price":  4200000,
+        "area":  30,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "ÄÆ°á»ng Pháº¡m VÄn Äá»ng, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "fridge",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579530/phongtro_images/jlkojkhrdfrhq341fotp.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579765/phongtro_images/mermsged8aise8etawa0.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579389/phongtro_images/xcx14q8aluhee8swjwch.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579280/phongtro_images/snhn4odkcgmezr9xsyx1.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:27:54.566Z"
+    },
+    {
+        "id":  "68e60fe54c319e0e573973f6",
+        "_id":  "68e60fe54c319e0e573973f6",
+        "title":  "PhÃ²ng tro 40m2 HoÃ ng Quá»c Viá»t, Cá» Nhuáº¿ 1, Báº¯c tá»« liÃªm, HÃ  ná»i",
+        "description":  " PhÃ²ng tro 18m2 HoÃ ng Quá»c Viá»t, Cá» Nhuáº¿ 1, Báº¯c tá»« liÃªm, HÃ  ná»i",
+        "price":  4800000,
+        "area":  40,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "5/487 ÄÆ°á»ng HoÃ ng Quá»c Viá»t, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "fridge",
+                          "washing_machine",
+                          "aircon",
+                          "private_wc",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579748/phongtro_images/um7bdkkknxsgvcekpmsz.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579772/phongtro_images/nn26kdfufu1am3qchs4j.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579399/phongtro_images/xymfl8m4xcaarc8obvem.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579437/phongtro_images/nkdmrmdqf4vj5sehkg3t.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T10:53:11.605Z"
+    },
+    {
+        "id":  "68e60fe54c319e0e573973f7",
+        "_id":  "68e60fe54c319e0e573973f7",
+        "title":  "PhÃ²ng trá» Äáº¹p 14c /ngÃµ 319 tráº§n cung giÃ¡ ráº»",
+        "description":  " PhÃ²ng trá» Äáº¹p 14c /ngÃµ 319 tráº§n cung giÃ¡ ráº»",
+        "price":  2500000,
+        "area":  30,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "ÄÆ°á»ng Tráº§n Cung, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "washing_machine",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579775/phongtro_images/wspaum0xtynjhx2v2s3j.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579307/phongtro_images/cr2prappghkmakz29lg1.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:19.987Z"
+    },
+    {
+        "id":  "68e60fe54c319e0e573973fa",
+        "_id":  "68e60fe54c319e0e573973fa",
+        "title":  "PhÃ²ng trá» khÃ©p kÃ­n giÃ¡ ráº» táº¡i 430 Tráº§n Cung, Cá» Nhuáº¿ 1, Báº¯c Tá»« LiÃªm, HÃ  Ná»i.",
+        "description":  " PhÃ²ng trá» khÃ©p kÃ­n giÃ¡ ráº» táº¡i 430 Tráº§n Cung, Cá» Nhuáº¿ 1, Báº¯c Tá»« LiÃªm, HÃ  Ná»i.",
+        "price":  3800000,
+        "area":  45,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Tráº§n Cung, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "private_wc",
+                          "wifi",
+                          "washing_machine",
+                          "fridge",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579636/phongtro_images/ftk4rbt1mbiicxyw5wcl.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579735/phongtro_images/m3iuf2p2bskbhkyuweyh.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:27:56.423Z"
+    },
+    {
+        "id":  "68e60fe54c319e0e573973f9",
+        "_id":  "68e60fe54c319e0e573973f9",
+        "title":  "ChÃ­nh chá»§ cho thuÃª phÃ²ng táº¡i 488 Tráº§n Cung, Cá» Nhuáº¿.",
+        "description":  " ChÃ­nh chá»§ cho thuÃª phÃ²ng táº¡i 488 Tráº§n Cung, Cá» Nhuáº¿.",
+        "price":  2500000,
+        "area":  30,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Tráº§n Cung, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579767/phongtro_images/sujywdhdcrhhir65xnw9.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579586/phongtro_images/gb3ov3cuhbfsuw7d0psc.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:20.168Z"
+    },
+    {
+        "id":  "68e60fe54c319e0e573973f8",
+        "_id":  "68e60fe54c319e0e573973f8",
+        "title":  "MÃ¬nh cho thuÃª táº§ng 3 vÃ  táº§ng 2 lÃ  vÄn phÃ²ng hoáº·c á» táº¡i 17 HoÃ ng Quá»c Viá»t, Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm",
+        "description":  " MÃ¬nh cho thuÃª táº§ng 3 vÃ  táº§ng 2 lÃ  vÄn phÃ²ng hoáº·c á» táº¡i 17 HoÃ ng Quá»c Viá»t, Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm",
+        "price":  2100000,
+        "area":  25,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "17 HoÃ ng Quá»c Viá»t, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579607/phongtro_images/ryj3bhyucnimmgfu0oj4.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579256/phongtro_images/wwnb7hlmmlzql7xfqfch.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:27:55.395Z"
+    },
+    {
+        "id":  "68e610664c319e0e57397402",
+        "_id":  "68e610664c319e0e57397402",
+        "title":  "PhÃ²ng trá» 25m2 táº¡i ngÃµ 562 tráº§n cung, Cá» Nhuáº¿ 1, Báº¯c Tá»« LiÃªm, HÃ  Ná»i",
+        "description":  " PhÃ²ng trá» 25m2 táº¡i ngÃµ 562 tráº§n cung, Cá» Nhuáº¿ 1, Báº¯c Tá»« LiÃªm, HÃ  Ná»i",
+        "price":  3000000,
+        "area":  25,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "26/78/562 ÄÆ°á»ng Tráº§n Cung, PhÆ°á»ng Cá» Nhuáº¿ 1, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579273/phongtro_images/l7lkde8evp9pfcx8xhoo.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579638/phongtro_images/d7e5z97qybnchrk8nc2g.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579223/phongtro_images/txhkhtxofxl5kqfgwkrl.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579482/phongtro_images/nex2pcmncrrhcd4l5cau.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:20.365Z"
+    },
+    {
+        "id":  "68e610664c319e0e57397403",
+        "_id":  "68e610664c319e0e57397403",
+        "title":  "Cho thuÃª phÃ²ng há» gia ÄÃ¬nh",
+        "description":  " Cho thuÃª phÃ²ng há» gia ÄÃ¬nh",
+        "price":  6000000,
+        "area":  50,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Sá» 17B ngÃµ 804 - ÄÆ°á»ng Báº¡ch Äáº±ng, PhÆ°á»ng BaÌ£ch ÄÄÌng, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579760/phongtro_images/i9oi2rk9asunsbgkuo1c.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579289/phongtro_images/ul3ap1eledjt7zs7ya7x.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579483/phongtro_images/mzfem06rgyhdn9pe1x4s.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-30T16:35:42.684Z"
+    },
+    {
+        "id":  "68e610664c319e0e57397404",
+        "_id":  "68e610664c319e0e57397404",
+        "title":  "Cho thuÃª phÃ²ng á» Nguyá»\u0085n Cao",
+        "description":  " Cho thuÃª phÃ²ng á» Nguyá»\u0085n Cao",
+        "price":  3200000,
+        "area":  30,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "31 Nguyá»\u0085n Cao, PhÆ°á»ng BaÌ£ch ÄÄÌng, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "aircon",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579192/phongtro_images/emfnw8fyp7wbmfey4vzo.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579485/phongtro_images/xk7x6waujmjuv52lkdcf.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:20.545Z"
+    },
+    {
+        "id":  "68e610664c319e0e57397405",
+        "_id":  "68e610664c319e0e57397405",
+        "title":  "Cho thuÃª phÃ²ng trá» 20m2 giÃ¡ ráº»",
+        "description":  " Cho thuÃª phÃ²ng trá» 15-20m2 ngÃµ 784 Báº¡ch Äáº±ng, gáº§n Tráº§n KhÃ¡t TrÃ¢n, báº¿n xe LÆ°Æ¡ng YÃªn",
+        "price":  2300000,
+        "area":  20,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Báº¡ch Äáº±ng, PhÆ°á»ng Báº¡ch Äáº±ng, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "wifi",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579337/phongtro_images/cehezjb3lqgsbtj8a28j.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579751/phongtro_images/a4z04blm44wxlyzbmc9r.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:27:57.938Z"
+    },
+    {
+        "id":  "68e610664c319e0e57397406",
+        "_id":  "68e610664c319e0e57397406",
+        "title":  "PhÃ²ng 28m2 sÃ n gá», riÃªng chá»§ táº¡i sá» 18 LÃ£ng YÃªn",
+        "description":  " PhÃ²ng 28m2 sÃ n gá», riÃªng chá»§ táº¡i sá» 18 LÃ£ng YÃªn",
+        "price":  3100000,
+        "area":  28,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "LÃ£ng YÃªn, PhÆ°á»ng BaÌ£ch ÄÄÌng, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "private_wc",
+                          "washing_machine",
+                          "wifi",
+                          "balcony",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579666/phongtro_images/sx1uqxqtikgapdruxsbl.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579702/phongtro_images/vhx3qzj5pyvnpzlszwck.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579243/phongtro_images/mawpojw2t3subymtf2xl.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:20.723Z"
+    },
+    {
+        "id":  "68e611e94c319e0e57397410",
+        "_id":  "68e611e94c319e0e57397410",
+        "title":  "Cho thuÃª phoÌng taÌ£i sÃ´Ì 23 ngoÌ 53 NguyÃªÌn KhoaÌi",
+        "description":  " Cho thuÃª phoÌng taÌ£i sÃ´Ì 23 ngoÌ 53 NguyÃªÌn KhoaÌi",
+        "price":  5600000,
+        "area":  40,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "ÄÆ°á»ng Nguyá»\u0085n KhoÃ¡i, PhÆ°á»ng BaÌ£ch ÄÄÌng, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "wifi",
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579657/phongtro_images/xzyjsix0ku1m77c9wdku.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579486/phongtro_images/gffr5yryh8qy7go0uuql.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579392/phongtro_images/bx3xw9ukcsq8ufsgefco.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579399/phongtro_images/nfqju8sqp4ee2vxtj0la.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:27:59.696Z"
+    },
+    {
+        "id":  "68e611e94c319e0e57397412",
+        "_id":  "68e611e94c319e0e57397412",
+        "title":  "ChÃ­nh chá»§ cho thuÃª phÃ²ng mini 30m2 táº§ng 2 khu phÃ¢n lÃ´ ngÃµ 651 Minh Khai",
+        "description":  " ChÃ­nh chá»§ cho thuÃª phÃ²ng mini 30m2 táº§ng 2 khu phÃ¢n lÃ´ ngÃµ 651 Minh Khai",
+        "price":  2800000,
+        "area":  30,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "PhÆ°á»ng BaÌ£ch ÄÄÌng, Quáº­n Hai BÃ  TrÆ°ngng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579726/phongtro_images/ixxhe8gdjzzm0rfsqafw.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579440/phongtro_images/ntxrb4ozzqfsz5eywcvo.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:21.170Z"
+    },
+    {
+        "id":  "68e611e94c319e0e5739740f",
+        "_id":  "68e611e94c319e0e5739740f",
+        "title":  "Cho thuÃª phoÌng taÌ£i ngoÌ 53 NguyÃªÌn KhoaÌi",
+        "description":  " Cho thuÃª phoÌng taÌ£i ngoÌ 53 NguyÃªÌn KhoaÌi",
+        "price":  2500000,
+        "area":  30,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "ngoÌ 53 ÄÆ°á»ng Nguyá»\u0085n KhoÃ¡i, PhÆ°á»ng BaÌ£ch ÄÄÌng, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579440/phongtro_images/kq7itmhxysmcowrnt6zj.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579241/phongtro_images/tzlbo52hhy5bngvlzn76.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579390/phongtro_images/ari9ssvsrxsmytdkgwx9.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579712/phongtro_images/wlrilmx5fdplkyhlx4xb.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:20.899Z"
+    },
+    {
+        "id":  "68e611e94c319e0e5739740e",
+        "_id":  "68e611e94c319e0e5739740e",
+        "title":  "Cho thuÃª nhÃ  28D, ngÃµ 459 TrÆ°Æ¡ng Äá»nh",
+        "description":  " Cho thuÃª nhÃ  28D, ngÃµ 459 TrÆ°Æ¡ng Äá»nh",
+        "price":  5500000,
+        "area":  45,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "ÄÆ°á»ng Báº¡ch Äáº±ng, PhÆ°á»ng BaÌ£ch ÄÄÌng, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "washing_machine",
+                          "private_wc",
+                          "fridge",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579375/phongtro_images/hqpwfbxwrmphc5huknzr.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579788/phongtro_images/jljqpefm7lnsb2dkkb8y.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579593/phongtro_images/zrtcbtvdgjxi5oztzej8.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579713/phongtro_images/sis2zm4ddilssmmkk2pj.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:27:58.689Z"
+    },
+    {
+        "id":  "68e611e94c319e0e57397411",
+        "_id":  "68e611e94c319e0e57397411",
+        "title":  "Cho thuÃª phÃ²ng khu trung tÃ¢m phá» LÃª QuÃ½ ÄÃ´n, HBT, HN",
+        "description":  " Cho thuÃª phÃ²ng khu trung tÃ¢m phá» LÃª QuÃ½ ÄÃ´n, HBT, HN",
+        "price":  6300000,
+        "area":  40,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "ÄÆ°á»ng LÃª QuÃ½ ÄÃ´n, PhÆ°á»ng Báº¡ch Äáº±ng, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "washing_machine",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579688/phongtro_images/q9k5j8g53d4jxcjytaby.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579419/phongtro_images/czyswzpctx3fbhimmmdd.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579777/phongtro_images/gpichi7uckhmdrpysub8.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579747/phongtro_images/b4ufsipi3s8sqpsqm8u8.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:21.076Z"
+    },
+    {
+        "id":  "68e612744c319e0e5739741a",
+        "_id":  "68e612744c319e0e5739741a",
+        "title":  "cho thuÃª phoÌng ÄeÌ£p Æ¡Ì caÌm hÃ´Ì£i loÌ ÄuÌc",
+        "description":  " cho thuÃª phoÌng ÄeÌ£p Æ¡Ì caÌm hÃ´Ì£i loÌ ÄuÌc",
+        "price":  3400000,
+        "area":  27,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "23 Phá» Cáº£m Há»i, PhÆ°á»ng BaÌ£ch ÄÄÌng, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "washing_machine",
+                          "wifi",
+                          "fridge",
+                          "private_wc",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579386/phongtro_images/mbhx6walynz3ywv1pabq.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579723/phongtro_images/snj1zh8sq7alxerynqdt.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579642/phongtro_images/ahwdrs3xxndmy8zncnwn.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579758/phongtro_images/ptdmmelrepo1iwzdkv3n.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:28:00.401Z"
+    },
+    {
+        "id":  "68e612744c319e0e5739741b",
+        "_id":  "68e612744c319e0e5739741b",
+        "title":  "Cho thuÃª nhÃ  táº­p thá» 70m2 táº§ng 5, táº­p thá» Há» Viá»t XÃ´",
+        "description":  " Cho thuÃª nhÃ  táº­p thá» 70m2 táº§ng 5, táº­p thá» Há» Viá»t XÃ´",
+        "price":  8600000,
+        "area":  70,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "ÄÆ°á»ng TÃ¢y Káº¿t, PhÆ°á»ng BaÌ£ch ÄÄÌng, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "balcony",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579457/phongtro_images/hxw1zhbzvzhrxfloppas.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579551/phongtro_images/co3adsxpdg9fib7cghhn.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579549/phongtro_images/n48rhi0wecapu4w3yhus.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579358/phongtro_images/sivqcmcw1jhzubdjurpg.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:28:01.190Z"
+    },
+    {
+        "id":  "68e612744c319e0e5739741e",
+        "_id":  "68e612744c319e0e5739741e",
+        "title":  "Cho thuÃª phÃ²ng trá», khu vá»±c Hai BÃ  TrÆ°ng",
+        "description":  " Cho thuÃª phÃ²ng trá», khu vá»±c Hai BÃ  TrÆ°ng",
+        "price":  2200000,
+        "area":  20,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "31, ngÃµ 524 ÄÆ°á»ng Báº¡ch Äáº±ng, PhÆ°á»ng BaÌ£ch ÄÄÌng, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "aircon",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579562/phongtro_images/xjajegmwh0vpyxnflwuz.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579599/phongtro_images/cdmhup8epvzvrknn7x4h.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579449/phongtro_images/ss4sdufov8fonjqircru.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:21.620Z"
+    },
+    {
+        "id":  "68e612744c319e0e5739741d",
+        "_id":  "68e612744c319e0e5739741d",
+        "title":  "Cho thuÃª phÃ²ng trá» 1.2 triá»u giÃ¡ bÃ¬nh dÃ¢n",
+        "description":  " Cho thuÃª phÃ²ng trá» 1.2 triá»u giÃ¡ bÃ¬nh dÃ¢n",
+        "price":  1200000,
+        "area":  20,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "784 ÄÆ°á»ng Báº¡ch Äáº±ng, PhÆ°á»ng Báº¡ch Äáº±ng, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "wifi",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579710/phongtro_images/t0gzrdwgddannsfmn9i7.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579580/phongtro_images/gn0bksregyxck6tutidr.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579540/phongtro_images/rovppvaadivg4glji1vy.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579471/phongtro_images/getp9clccdclnm9hzrmy.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:21.528Z"
+    },
+    {
+        "id":  "68e613094c319e0e57397427",
+        "_id":  "68e613094c319e0e57397427",
+        "title":  "Cho thuÃª 2 phÃ²ng trá» sinh viÃªn á» LÃª Thanh Nghá»",
+        "description":  " Cho thuÃª 2 phÃ²ng trá» sinh viÃªn á» LÃª Thanh Nghá»",
+        "price":  4100000,
+        "area":  35,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "16A NgoÌ 36 LÃª Thanh NghiÌ£, Cáº§u Dá»n, Quáº­n Hai BÃ  TrÆ°ng, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579568/phongtro_images/iaugglzqohfivtdnojnf.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579600/phongtro_images/ozjmsdcqmmrmq8gqdsyz.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579641/phongtro_images/vgrsbkg49ykbph485v6u.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:21.802Z"
+    },
+    {
+        "id":  "68e613094c319e0e57397426",
+        "_id":  "68e613094c319e0e57397426",
+        "title":  "PhÃ²ng trá»ng táº§ng 1 cho thuÃª",
+        "description":  " PhÃ²ng trá»ng táº§ng 1 cho thuÃª",
+        "price":  5900000,
+        "area":  40,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "NgÃ¡ch 55 ngÃµ chÃ¹a liÃªn phÃ¡i, Hai BÃ  TrÆ°ng"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579609/phongtro_images/edimxu3uua0a4n0o0oid.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579249/phongtro_images/ohtndbtlzvqcsymyz3nr.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579734/phongtro_images/uob28iugutpuzrkdmrdr.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T17:00:34.891Z"
+    },
+    {
+        "id":  "68e614274c319e0e57397435",
+        "_id":  "68e614274c319e0e57397435",
+        "title":  "Cho thuÃª cÄn há» 20m2 - 40m2. PhÃ²ng ÄÆ¡n, phÃ²ng ÄÃ´i. CÃ³ camera, khÃ³a vÃ¢n tay, khÃ´ng chung chá»§, Lh ChÃ­nh chá»§: 0966 205 569",
+        "description":  " Cho thuÃª cÄn há» 20m2 - 40m2. PhÃ²ng ÄÆ¡n, phÃ²ng ÄÃ´i. CÃ³ camera, khÃ³a vÃ¢n tay, khÃ´ng chung chá»§, Lh ChÃ­nh chá»§: 0966 205 569",
+        "price":  5300000,
+        "area":  40,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Sá» nhÃ  52, NgÃµ 136, ÄÆ°á»ng Cáº§u Diá»\u0085n, PhÆ°á»ng Minh Khai, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579676/phongtro_images/jvkhlrnat9mrpmriflv9.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579733/phongtro_images/qsux1ql9cx5hsqt8w2rd.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579492/phongtro_images/u4tdxsioewospcttqetv.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579663/phongtro_images/xl6naee6hspygb7hhtlv.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:22.438Z"
+    },
+    {
+        "id":  "68e614ca4c319e0e57397442",
+        "_id":  "68e614ca4c319e0e57397442",
+        "title":  "NhÃ  trá» 25m2 má»i xÃ¢y cÃ³ thang mÃ¡y táº¡i ÄÆ°á»ng Cáº§u Diá»\u0085n ( Gáº§n ÄÆ°á»ng NguyÃªn XÃ¡, XuÃ¢n PhÆ°Æ¡ng, ...)",
+        "description":  " NhÃ  trá» 25m2 má»i xÃ¢y cÃ³ thang mÃ¡y táº¡i ÄÆ°á»ng Cáº§u Diá»\u0085n ( Gáº§n ÄÆ°á»ng NguyÃªn XÃ¡, XuÃ¢n PhÆ°Æ¡ng, ...)",
+        "price":  3000000,
+        "area":  25,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "NgÃµ 134 ÄÆ°á»ng Cáº§u Diá»\u0085n, PhÆ°á»ng Minh Khai, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579574/phongtro_images/hpai4tdemtfx9ui4pio5.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579519/phongtro_images/rcikpuzwbvtfhiggqmsu.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579475/phongtro_images/njhoc1axsx5moexyi72l.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:22.978Z"
+    },
+    {
+        "id":  "68e6155a4c319e0e5739744c",
+        "_id":  "68e6155a4c319e0e5739744c",
+        "title":  "CCMN 30M2 NgÃµ 59 ÄÆ°á»ng VÄn Tiáº¿n DÅ©ng ( Gáº§n Cáº§u Diá»\u0085n, PhÃºc Diá»\u0085n, PhÃº Diá»\u0085n, NguyÃªn XÃ¡)",
+        "description":  " CCMN 30M2 NgÃµ 59 ÄÆ°á»ng VÄn Tiáº¿n DÅ©ng ( Gáº§n Cáº§u Diá»\u0085n, PhÃºc Diá»\u0085n, PhÃº Diá»\u0085n, NguyÃªn XÃ¡)",
+        "price":  3200000,
+        "area":  30,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "59 ÄÆ°á»ng VÄn Tiáº¿n DÅ©ng, PhÆ°á»ng PhÃº Diá»\u0085n, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579463/phongtro_images/fkocqkymb4cheolbfarf.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579547/phongtro_images/nqvps1zt50bn2puvzpgw.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579330/phongtro_images/qpz15qdpw61diizzmog0.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:23.245Z"
+    },
+    {
+        "id":  "68e6155a4c319e0e5739744d",
+        "_id":  "68e6155a4c319e0e5739744d",
+        "title":  "PhÃ²ng trá» cho há» gia ÄÃ¬nh thuÃª diá»n tÃ­ch 35 m2",
+        "description":  " PhÃ²ng trá» cho há» gia ÄÃ¬nh thuÃª diá»n tÃ­ch 35 m2, GiÃ¡ thuÃª 2,7 Triá»u/ThÃ¡ng",
+        "price":  2700000,
+        "area":  35,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Sá» 111, ngÃ¡ch 193/220 ÄÆ°á»ng PhÃº Diá»\u0085n, PhÆ°á»ng PhÃº Diá»\u0085n, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "balcony",
+                          "wifi",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579506/phongtro_images/hfdl1fmcexqiixtu31jx.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579594/phongtro_images/aqgjvxnbvmjixtoaqgta.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579648/phongtro_images/g5k00cr38ycenxa5nq1a.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:23.331Z"
+    },
+    {
+        "id":  "68e615df4c319e0e57397457",
+        "_id":  "68e615df4c319e0e57397457",
+        "title":  "Cho thuÃª phÃ²ng trá» táº¡i Kiá»u Mai, PhÃºc Diá»\u0085n, Báº¯c Tá»« LiÃªm, HÃ  Ná»i",
+        "description":  " Cho thuÃª phÃ²ng trá» táº¡i Kiá»u Mai, PhÃºc Diá»\u0085n, Báº¯c Tá»« LiÃªm, HÃ  Ná»i",
+        "price":  3900000,
+        "area":  40,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "15/82 ÄÆ°á»ng PhÃº Kiá»u, PhÆ°á»ng PhÃºc Diá»\u0085n, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "balcony",
+                          "aircon",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579528/phongtro_images/isslfbvwz98gjbx5dn6z.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579426/phongtro_images/j8mpsbeug0pr7aptvyve.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579481/phongtro_images/hr2x5r7cimexuzksnjhq.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579219/phongtro_images/w8lxgn0j2i6ljpbl7ouv.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:23.597Z"
+    },
+    {
+        "id":  "68e615df4c319e0e57397456",
+        "_id":  "68e615df4c319e0e57397456",
+        "title":  "Cho thuÃª nhÃ  trá» Äáº§y Äá»§ ná»i tháº¥t",
+        "description":  " Cho thuÃª nhÃ  trá» Äáº§y Äá»§ ná»i tháº¥t",
+        "price":  5300000,
+        "area":  40,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "NhÃ  55b ÄÆ°á»ng Thá»¥y PhÆ°Æ¡ng, PhÆ°á»ng Thá»¥y PhÆ°Æ¡ng, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579262/phongtro_images/llpmq3gikcichzcuqeci.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579508/phongtro_images/bhbccbnvt3urz0hiuefk.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579523/phongtro_images/juyup2iheekcw5q5roo4.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:23.508Z"
+    },
+    {
+        "id":  "68e615df4c319e0e5739745a",
+        "_id":  "68e615df4c319e0e5739745a",
+        "title":  "PhÃ²ng trá» giÃ¡ ráº» thoÃ¡ng mÃ¡t, sinh hoáº¡t giá» tá»± do",
+        "description":  " PhÃ²ng trá» giÃ¡ ráº» thoÃ¡ng mÃ¡t, sinh hoáº¡t giá» tá»± do, cÃ³ thá» thÆ°Æ¡ng lÆ°á»£ng giÃ¡",
+        "price":  3000000,
+        "area":  35,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "ÄÆ°á»ng sá» 69, PhÆ°á»ng Thá»¥y PhÆ°Æ¡ng, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579358/phongtro_images/mu3fqpf2afeq0aeexgih.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579199/phongtro_images/vbgg36svmpfyxar5cmt0.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:23.861Z"
+    },
+    {
+        "id":  "68e616614c319e0e57397464",
+        "_id":  "68e616614c319e0e57397464",
+        "title":  "PhÃ²ng khÃ©p kÃ­n 30m2, cÃ³ gÃ¡c xÃ©p 2,5 triá»u. ÄÆ°á»ng 32 cÃ¡ch chá»£ 50m, cÃ¡ch Äiá»m xe buÃ½t 100m.",
+        "description":  " PhÃ²ng khÃ©p kÃ­n 30m2, cÃ³ gÃ¡c xÃ©p 2,5 triá»u. ÄÆ°á»ng 32 cÃ¡ch chá»£ 50m, cÃ¡ch Äiá»m xe buÃ½t 100m.",
+        "price":  2500000,
+        "area":  30,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "PhÆ°á»ng PhÃºc Diá»\u0085n, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579201/phongtro_images/ompazdcmdfrwnpwb4eb3.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579420/phongtro_images/gmeam8wbykfygwazv5ke.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579601/phongtro_images/aapni4nicd28yuy0hq9z.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.127Z"
+    },
+    {
+        "id":  "68e616614c319e0e57397462",
+        "_id":  "68e616614c319e0e57397462",
+        "title":  "CHO THUÃ PHÃNG TRá» CÃ VS KHÃP KÃN",
+        "description":  " CHO THUÃ PHÃNG TRá» VS KHÃP KÃN",
+        "price":  3500000,
+        "area":  40,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Sá» 6 ngÃµ 56 ÄÆ°á»ng PhÃº Kiá»u, PhÆ°á»ng PhÃºc Diá»\u0085n, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "fridge",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579359/phongtro_images/gxlfgqwzlua3ioiw3l5h.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579596/phongtro_images/nwwbuo1nmzvkmuzfzoyi.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:23.949Z"
+    },
+    {
+        "id":  "68e616614c319e0e57397463",
+        "_id":  "68e616614c319e0e57397463",
+        "title":  "Cho thuÃª nhÃ  gáº§n Äáº¡i há»c Má», TÃ i chÃ­nh, Bá»nh viá»n PhÆ°Æ¡ng ÄÃ´ng, KCN Nam ThÄng Long",
+        "description":  " Cho thuÃª nhÃ  gáº§n Äáº¡i há»c Má», TÃ i chÃ­nh, Bá»nh viá»n PhÆ°Æ¡ng ÄÃ´ng, KCN Nam ThÄng Long",
+        "price":  5800000,
+        "area":  40,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "19E ÄÆ°á»ng TÃ¢n Phong, PhÆ°á»ng Thá»¥y PhÆ°Æ¡ng, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579432/phongtro_images/mm0tdybm6nnoqvqbwnxa.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579340/phongtro_images/ss2dx1etttz46jqkrk1a.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579608/phongtro_images/tylhqvo0toj0v8vlifty.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579562/phongtro_images/hmobjwgoszupwvvdludr.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.037Z"
+    },
+    {
+        "id":  "68e616614c319e0e57397466",
+        "_id":  "68e616614c319e0e57397466",
+        "title":  "Cho ThuÃª PhÃ²ng Trá» Cáº§u Diá»\u0085n, Há» TÃ¹ng Máº«u Äiá»n 2.5k/Sá» GiÃ¡ Tá»« 1Tr8/ThÃ¡ng",
+        "description":  " Cho ThuÃª PhÃ²ng Trá» Cáº§u Diá»\u0085n, Há» TÃ¹ng Máº«u Äiá»n 2.5k/Sá» GiÃ¡ Tá»« 1Tr8/ThÃ¡ng",
+        "price":  1800000,
+        "area":  20,
+        "type":  "can_ho_chung_cu",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "177 Cáº§u Diá»\u0085n, PhÆ°á»ng PhÃºc Diá»\u0085n, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "balcony",
+                          "washing_machine",
+                          "private_wc",
+                          "wifi",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579728/phongtro_images/prwrsgbalpzc5ip0pkkd.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579276/phongtro_images/kqwlcjumk6nuo5zr4qye.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579779/phongtro_images/vv8hcwqn5njdatrq2zhs.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579208/phongtro_images/gksw7saiskojf5ndrpag.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.305Z"
+    },
+    {
+        "id":  "68e617104c319e0e5739746e",
+        "_id":  "68e617104c319e0e5739746e",
+        "title":  "Cho ThuÃª phÃ²ng trá» Äá»§ Äá» cÆ¡ báº£n, an ninh Äáº£m báº£o táº¡i trung tÃ¢m Kiá»u Mai",
+        "description":  " Cho ThuÃª phÃ²ng trá» Äá»§ Äá» cÆ¡ báº£n, an ninh Äáº£m báº£o táº¡i trung tÃ¢m Kiá»u Mai",
+        "price":  2600000,
+        "area":  20,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Sá» nhÃ  10, ngÃµ 40 PhÃº Kiá»u, PhÆ°á»ng PhÃºc Diá»\u0085n, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "private_wc",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579459/phongtro_images/mvw66gtuwky1tbb3dwbe.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579376/phongtro_images/zwdjxdfgm26svow3h0ph.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.391Z"
+    },
+    {
+        "id":  "68e617104c319e0e5739746f",
+        "_id":  "68e617104c319e0e5739746f",
+        "title":  "PhÃ²ng Trá» PhÃº Minh - PhÃºc Diá»\u0085n - Báº¯c Tá»« LiÃªm",
+        "description":  " PhÃ²ng Trá» PhÃº Minh - PhÃºc Diá»\u0085n - Báº¯c Tá»« LiÃªm",
+        "price":  3600000,
+        "area":  40,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "03 PhÃº Minh, PhÆ°á»ng PhÃºc Diá»\u0085n, Quáº­n Báº¯c Tá»« LiÃªm, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "private_wc",
+                          "washing_machine",
+                          "aircon",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579598/phongtro_images/zebuvdqbcdaasdnwzesm.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579742/phongtro_images/vgqwooaj5nqhtnk1unja.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579649/phongtro_images/rm1fudjirmeffyjkrukd.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.477Z"
+    },
+    {
+        "id":  "68e617104c319e0e57397472",
+        "_id":  "68e617104c319e0e57397472",
+        "title":  "Cáº§n thuÃª phÃ²ng trá» táº¡i (ÄÃ o táº¥n Ba ÄÃ¬nh HÃ  Ná»i) ai cÃ³ liÃªn há» vá»i mÃ¬nh áº¡",
+        "description":  " Cáº§n thuÃª phÃ²ng trá» táº¡i (ÄÃ o táº¥n Ba ÄÃ¬nh HÃ  Ná»i) ai cÃ³ liÃªn há» vá»i mÃ¬nh áº¡",
+        "price":  2700000,
+        "area":  20,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "PhÆ°á»ng CÃ´Ìng ViÌ£, Quáº­n Ba ÄÃ¬nh, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "balcony",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579269/phongtro_images/p3srthavz1ctk0xpnsdb.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579774/phongtro_images/gmkbmhyijykcagn5fjf5.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579230/phongtro_images/ydejpvvhpjz2l0kyago4.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.743Z"
+    },
+    {
+        "id":  "68e6183f4c319e0e5739747a",
+        "_id":  "68e6183f4c319e0e5739747a",
+        "title":  "Cho thuÃª phÃ²ng táº§ng 4 nhÃ  sá» 42 phá» VÄ©nh PhÃºc",
+        "description":  " Cho thuÃª phÃ²ng táº§ng 4 nhÃ  sá» 42 phá» VÄ©nh PhÃºc",
+        "price":  2700000,
+        "area":  30,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "42 ÄÆ°á»ng VÄ©nh PhÃºc, PhÆ°á»ng CÃ´Ìng ViÌ£, Quáº­n Ba ÄÃ¬nh, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "balcony",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579431/phongtro_images/fdd6wjf5odn1p49vrjkv.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579556/phongtro_images/os4e6ufxphle4krp2ewf.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579439/phongtro_images/vkpsofyufdypzeuziywm.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.827Z"
+    },
+    {
+        "id":  "68e6183f4c319e0e5739747e",
+        "_id":  "68e6183f4c319e0e5739747e",
+        "title":  "Cho thuÃª phÃ²ng trá» khÃ©p kÃ­n gáº§n trung tÃ¢m ÄÆ°á»ng BÆ°á»i, PhÆ°á»ng Cá»ng Vá», Quáº­n Ba ÄÃ¬nh",
+        "description":  " Cho thuÃª phÃ²ng trá» khÃ©p kÃ­n gáº§n trung tÃ¢m ÄÆ°á»ng BÆ°á»i, PhÆ°á»ng Cá»ng Vá», Quáº­n Ba ÄÃ¬nh",
+        "price":  2600000,
+        "area":  25,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Sá» 29 ngÃ¡ch 254/1 ÄÆ°á»ng BÆ°á»i, PhÆ°á»ng CÃ´Ìng ViÌ£, Quáº­n Ba ÄÃ¬nh, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "balcony",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579456/phongtro_images/ani9lnbwtaqkjwpfuheh.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579682/phongtro_images/e8mglzhxkmks0hxcsppa.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:25.198Z"
+    },
+    {
+        "id":  "68e6183f4c319e0e5739747b",
+        "_id":  "68e6183f4c319e0e5739747b",
+        "title":  "Cho ThuÃª PhÃ²ng trá» Quáº­n Ba ÄÃ¬nh 35mÂ²",
+        "description":  " Cho ThuÃª PhÃ²ng trá» Quáº­n Ba ÄÃ¬nh 35mÂ²",
+        "price":  4200000,
+        "area":  35,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "Sá» 29 nghÃµ 60 linh lang ÄÆ°á»ng Äá»i Cáº¥n, PhÆ°á»ng CÃ´Ìng ViÌ£, Quáº­n Ba ÄÃ¬nh, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "private_wc",
+                          "washing_machine",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579367/phongtro_images/xmygnrhyeuvgwn5lt093.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579417/phongtro_images/q19gfu8opfmwotbjplbz.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579782/phongtro_images/euw5ylho4kjztqc7qmts.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.913Z"
+    },
+    {
+        "id":  "68e619574c319e0e57397493",
+        "_id":  "68e619574c319e0e57397493",
+        "title":  "CHO THUÃ PHÃNG TRá» KV PHá» Cá»",
+        "description":  " CHO THUÃ PHÃNG TRá» KV PHá» Cá»",
+        "price":  3000000,
+        "area":  40,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "PhÆ°á»ng QuÃ¡n ThÃ¡nh, Quáº­n Ba ÄÃ¬nh, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "fridge",
+                          "private_wc",
+                          "aircon",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579553/phongtro_images/hssdejioi2rlzih6sjin.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579361/phongtro_images/czk93tydsdjpbdnaht9s.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:25.751Z"
+    },
+    {
+        "id":  "68e619574c319e0e57397497",
+        "_id":  "68e619574c319e0e57397497",
+        "title":  "Cho thuÃª 2 PhÃ²ng trá» á» Há» Äáº¯c Di, Äá»ng Äa",
+        "description":  " Cho thuÃª 2 PhÃ²ng trá» á» Há» Äáº¯c Di, Äá»ng Äa",
+        "price":  4900000,
+        "area":  40,
+        "type":  "can_ho_chung_cu",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "NhÃ  sá» 1, ngÃµ 145 (cáº¡nh nhÃ  nghá» ThiÃªn Anh), ÄÆ°á»ng Tráº§n Há»¯u TÆ°á»c, PhÆ°á»ng Nam ÄÃ´Ìng, Quáº­n Äá»ng Äa, HÃ  Ná»i"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579304/phongtro_images/bcbqdy8jqmt4exgkp6ey.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579612/phongtro_images/jnpgfphgkjebyv9mot6q.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579679/phongtro_images/idg4lryedhqixnqmwgfs.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:26.133Z"
+    },
+    {
+        "id":  "68e619574c319e0e57397495",
+        "_id":  "68e619574c319e0e57397495",
+        "title":  "PhÃ²ng trá» táº¡i ngÃµ XÃ£ ÄÃ n 2, PhÆ°á»ng Nam Äá»ng, Quáº­n Äá»ng Äa",
+        "description":  " PhÃ²ng trá» táº¡i ngÃµ XÃ£ ÄÃ n 2, PhÆ°á»ng Nam Äá»ng, Quáº­n Äá»ng Äa",
+        "price":  5300000,
+        "area":  40,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "HÃ  Ná»i",
+                         "district":  "",
+                         "address":  "NgÃµ XÃ£ ÄÃ n 2, PhÆ°á»ng Nam Äá»ng, Quáº­n Äá»ng Äa"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579465/phongtro_images/quqyygky0vpk6zowxxil.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579656/phongtro_images/ohzwrayj5bstop7icghc.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579633/phongtro_images/ffl9sx3a3xkip8htpm2p.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:25.926Z"
+    }
+]

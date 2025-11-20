@@ -1,0 +1,2588 @@
+﻿[
+    {
+        "id":  "68d611489f3c9c01ecd12caa",
+        "_id":  "68d611489f3c9c01ecd12caa",
+        "title":  "Phòng trọ view đẹp, thoáng mát, thư giãn cho mọi đối tượng",
+        "description":  "Phòng trọ có view đẹp, thoáng mát, phù hợp làm việc từ xa",
+        "price":  3800000,
+        "area":  30,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Số 999, Phố Bạch Đằng"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "aircon",
+                          "balcony"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T04:06:32.258Z",
+        "updatedAt":  "2025-10-09T08:25:09.580Z"
+    },
+    {
+        "id":  "68d611489f3c9c01ecd12cab",
+        "_id":  "68d611489f3c9c01ecd12cab",
+        "title":  "Căn hộ studio hiện đại, phù hợp cho việc học và làm",
+        "description":  "Căn hộ studio hiện đại, thuận tiện di chuyển",
+        "price":  5200000,
+        "area":  40,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Số 888, Đường Láng"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "aircon",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T04:06:32.258Z",
+        "updatedAt":  "2025-10-09T08:25:09.683Z"
+    },
+    {
+        "id":  "68d62079975ae9f5aa5ca68d",
+        "_id":  "68d62079975ae9f5aa5ca68d",
+        "title":  "Phòng trọ cao cấp gần ĐH Bách Khoa, full nội thất",
+        "description":  "Phòng trọ đầy đủ tiện nghi, gần trường ĐH Bách Khoa, thuận tiện di chuyển",
+        "price":  4200000,
+        "area":  28,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Số 123, Ngõ 45, Đường Trần Khát Chân"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "aircon",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:21.833Z",
+        "updatedAt":  "2025-10-09T08:25:09.779Z"
+    },
+    {
+        "id":  "68d62079975ae9f5aa5ca68f",
+        "_id":  "68d62079975ae9f5aa5ca68f",
+        "title":  "Căn hộ mini 1PN, có ban công, view đẹp",
+        "description":  "Căn hộ mini hiện đại, có ban công thoáng mát, view đẹp",
+        "price":  5500000,
+        "area":  35,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Số 456, Phố Nguy�\u0085n Trãi"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "aircon",
+                          "fridge",
+                          "balcony"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:21.883Z",
+        "updatedAt":  "2025-10-09T08:25:09.877Z"
+    },
+    {
+        "id":  "68d62079975ae9f5aa5ca691",
+        "_id":  "68d62079975ae9f5aa5ca691",
+        "title":  "Phòng trọ giá rẻ, gần trường ĐH Kinh tế",
+        "description":  "Phòng trọ giá rẻ, phù hợp sinh viên, gần các trường đại học",
+        "price":  3000000,
+        "area":  25,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Số 789, Đường Giải Phóng"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "fridge"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:21.938Z",
+        "updatedAt":  "2025-10-09T08:25:09.972Z"
+    },
+    {
+        "id":  "68d62079975ae9f5aa5ca693",
+        "_id":  "68d62079975ae9f5aa5ca693",
+        "title":  "Phòng trọ cao cấp view đẹp, full nội thất",
+        "description":  "Phòng trọ view đẹp với đầy đủ tiện nghi hiện đại. Đầy đủ nội thất điều hòa, tủ lạnh, máy giặt riêng.",
+        "price":  8500000,
+        "area":  35,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "123 Đường Võ Văn Tần, Phường 6, Quận 3"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine",
+                          "balcony"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:21.981Z",
+        "updatedAt":  "2025-10-09T08:25:10.060Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca695",
+        "_id":  "68d6207a975ae9f5aa5ca695",
+        "title":  "Căn hộ studio sang trọng, gần trung tâm",
+        "description":  "Studio hiện đại với thiết kế tối ưu, phù hợp cho người đi làm. Gần các trung tâm thương mại, bệnh viện, trường học.",
+        "price":  7000000,
+        "area":  45,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "456 Nguy�\u0085n Huệ, Phường Bến Nghé, Quận 1"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.023Z",
+        "updatedAt":  "2025-10-09T08:25:10.148Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca697",
+        "_id":  "68d6207a975ae9f5aa5ca697",
+        "title":  "Phòng trọ giá rẻ cho sinh viên, gần ĐH Sư phạm",
+        "description":  "Phòng trọ giá cả phải chăng, phù hợp cho sinh viên. Có khu bếp chung, wifi mi�\u0085n phí, gần trường đại học.",
+        "price":  2500000,
+        "area":  25,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "789 Đường Cầu Giấy, Phường Dịch Vọng, Quận Cầu Giấy"
+                     },
+        "amenities":  [
+                          "wifi"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.066Z",
+        "updatedAt":  "2025-10-09T08:25:10.239Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca699",
+        "_id":  "68d6207a975ae9f5aa5ca699",
+        "title":  "Căn hộ 2PN, có đầy đủ dịch vụ tiện nghi",
+        "description":  "Căn hộ 2 phòng ngủ phù hợp cho gia đình nhỏ hoặc nhóm bạn.",
+        "price":  10000000,
+        "area":  65,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "321 Đường Thủ Đức, Phường Linh Trung, Quận Thủ Đức"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.108Z",
+        "updatedAt":  "2025-10-09T08:25:10.328Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca69b",
+        "_id":  "68d6207a975ae9f5aa5ca69b",
+        "title":  "Phòng trọ cao cấp view thoáng mát, nhiều dịch vụ tiện nghi",
+        "description":  "Phòng trọ view biển tuyệt đẹp với đầy đủ tiện nghi hiện đại.",
+        "price":  6500000,
+        "area":  35,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "123 Đường Võ Văn Tần, Phường 6, Quận 3"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine",
+                          "balcony"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.151Z",
+        "updatedAt":  "2025-10-09T08:25:10.421Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca69d",
+        "_id":  "68d6207a975ae9f5aa5ca69d",
+        "title":  "Căn hộ studio sang trọng, gần trung tâm",
+        "description":  "Studio hiện đại với thiết kế tối ưu, phù hợp cho người đi làm. Gần các trung tâm thương mại, bệnh viện, trường học.",
+        "price":  12000000,
+        "area":  45,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "456 Nguy�\u0085n Huệ, Phường Bến Nghé, Quận 1"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.196Z",
+        "updatedAt":  "2025-10-09T08:25:10.510Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca69f",
+        "_id":  "68d6207a975ae9f5aa5ca69f",
+        "title":  "Phòng trọ giá rẻ cho sinh viên, gần ĐH Sư phạm",
+        "description":  "Phòng trọ giá cả phải chăng, phù hợp cho sinh viên. Có khu bếp chung, wifi mi�\u0085n phí, gần trường đại học.",
+        "price":  3000000,
+        "area":  20,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "789 Đường Cầu Giấy, Phường Dịch Vọng, Quận Cầu Giấy"
+                     },
+        "amenities":  [
+                          "wifi"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.244Z",
+        "updatedAt":  "2025-10-09T08:25:10.597Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca6a1",
+        "_id":  "68d6207a975ae9f5aa5ca6a1",
+        "title":  "Căn hộ 2PN, có giảm giá nếu chốt deal sớm",
+        "description":  "Căn hộ 2 phòng ngủ với nhiều tiện ích, phù hợp từ 3-4 người",
+        "price":  15000000,
+        "area":  65,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "321 Đường Thủ Đức, Phường Linh Trung, Quận Thủ Đức"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.287Z",
+        "updatedAt":  "2025-10-09T08:25:10.682Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca6a5",
+        "_id":  "68d6207a975ae9f5aa5ca6a5",
+        "title":  "Căn hộ studio sang trọng, gần trung tâm",
+        "description":  "Studio hiện đại với thiết kế tối ưu, phù hợp cho người đi làm. Gần các trung tâm thương mại, bệnh viện, trường học.",
+        "price":  8500000,
+        "area":  45,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "456 Nguy�\u0085n Huệ, Phường Bến Nghé, Quận 1"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.379Z",
+        "updatedAt":  "2025-10-09T08:25:10.873Z"
+    },
+    {
+        "id":  "68d6207a975ae9f5aa5ca6a9",
+        "_id":  "68d6207a975ae9f5aa5ca6a9",
+        "title":  "Căn hộ 2PN, có gara xe, gần metro",
+        "description":  "Căn hộ 2 phòng ngủ với gara xe riêng, gần ga metro. Phù hợp cho gia đình nhỏ hoặc nhóm bạn.",
+        "price":  15000000,
+        "area":  65,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "TP.HCM",
+                         "district":  "",
+                         "address":  "321 Đường Thủ Đức, Phường Linh Trung, Quận Thủ Đức"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/duc9118an/image/upload/v1759208004/PhongTroVN/uvdelhm5knfsaqc3uh1x.png",
+                       "https://res.cloudinary.com/duc9118an/image/upload/v1759208005/PhongTroVN/bsemhhncbcm2wez2xan3.png",
+                       "https://res.cloudinary.com/duc9118an/image/upload/v1759208006/PhongTroVN/vvt2oe9rhodvifpyswzo.png"
+                   ],
+        "createdAt":  "2025-09-26T05:11:22.468Z",
+        "updatedAt":  "2025-10-29T10:58:26.738Z"
+    },
+    {
+        "id":  "68d9086a3aaa7d44d9b5b94d",
+        "_id":  "68d9086a3aaa7d44d9b5b94d",
+        "title":  "ạkdhfghjasdgfhjagf",
+        "description":  "2fkgndfgkgkdfjfgjdh",
+        "price":  32183712,
+        "area":  1293891,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "hà nội",
+                         "district":  "",
+                         "address":  "12312asdasd"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/duc9118an/image/upload/v1759053824/PhongTroVN/yguo1ms5dy1ypzjnsstn.png",
+                       "https://res.cloudinary.com/duc9118an/image/upload/v1759053825/PhongTroVN/mndggms83paxhzjikxcv.png",
+                       "https://res.cloudinary.com/duc9118an/image/upload/v1759053827/PhongTroVN/fjhn0wcatlr3guvkqq6s.png"
+                   ],
+        "createdAt":  "2025-09-28T10:05:30.682Z",
+        "updatedAt":  "2025-10-09T08:25:11.249Z"
+    },
+    {
+        "id":  "68de8c759dd1380c2e6ed21a",
+        "_id":  "68de8c759dd1380c2e6ed21a",
+        "title":  "123",
+        "description":  "12312",
+        "price":  1231,
+        "area":  312,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "12",
+                         "district":  "",
+                         "address":  "312"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/duc9118an/image/upload/v1759415406/PhongTroVN/il441tj30yvr6ama8uyh.png"
+                   ],
+        "createdAt":  "2025-10-02T14:30:13.698Z",
+        "updatedAt":  "2025-10-30T13:28:00.126Z"
+    },
+    {
+        "id":  "68e53570a9ea9563a75e0d0b",
+        "_id":  "68e53570a9ea9563a75e0d0b",
+        "title":  "Cho Thuê phòng trọ đủ đồ cơ bản, an ninh đảm bảo tại trung tâm Kiều Mai",
+        "description":  " Cho Thuê phòng trọ đủ đồ cơ bản, an ninh đảm bảo tại trung tâm Kiều Mai",
+        "price":  2600000,
+        "area":  25,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Số nhà 10, ngõ 40 Phú Kiều, Phường Phúc Di�\u0085n, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "private_wc",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579459/phongtro_images/mvw66gtuwky1tbb3dwbe.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579376/phongtro_images/zwdjxdfgm26svow3h0ph.jpg"
+                   ],
+        "createdAt":  "2025-10-07T14:45:32.715Z",
+        "updatedAt":  "2025-10-09T08:25:12.258Z"
+    },
+    {
+        "id":  "68e601b74c319e0e57397327",
+        "_id":  "68e601b74c319e0e57397327",
+        "title":  "Cho thuê nhà riêng 41m2 - 2 phòng ngủ, điều hòa, nóng lạnh, phòng bếp ăn - điện nước nét tính theo hóa đơn",
+        "description":  " Cho thuê nhà riêng 41m2 - 2 phòng ngủ, điều hòa, nóng lạnh, phòng bếp ăn - điện nước nét tính theo hóa đơn",
+        "price":  6000000,
+        "area":  41,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Ngõ 295 Phố Bạch Mai, Phường Bạch Mai, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "washing_machine",
+                          "wifi",
+                          "aircon",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579695/phongtro_images/ecxx8uewq1hkspetlmt7.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579778/phongtro_images/jqbaojuhdoopixmyl06w.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:12.626Z"
+    },
+    {
+        "id":  "68e601b74c319e0e57397326",
+        "_id":  "68e601b74c319e0e57397326",
+        "title":  "Phòng trọ nhà dân không chung chủ phường Bạch Mai, Hai Bà Trưng",
+        "description":  " Phòng trọ nhà dân không chung chủ phường Bạch Mai, Hai Bà Trưng",
+        "price":  5900000,
+        "area":  30,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Phố Bùi Ngọc Dương, Phường Bạch Mai, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "washing_machine",
+                          "wifi",
+                          "balcony",
+                          "aircon",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579467/phongtro_images/b9mgxcivjsmikecokjhl.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579698/phongtro_images/hs4z5lqn8xcjvsun7rxa.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:12.528Z"
+    },
+    {
+        "id":  "68e601b74c319e0e57397328",
+        "_id":  "68e601b74c319e0e57397328",
+        "title":  "Phòng khép kín 25m đủ đồ ở Cổ Nhuế",
+        "description":  " Phòng khép kín 25m đủ đồ ở Cổ Nhuế",
+        "price":  2700000,
+        "area":  25,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "30 Đường Cổ Nhuế, Phường Cổ Nhuế 2, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "washing_machine",
+                          "fridge",
+                          "private_wc",
+                          "wifi",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579407/phongtro_images/j9m3hqmoxd4hley158oa.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579540/phongtro_images/immx5cjm9qeqcyewk9xg.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:12.730Z"
+    },
+    {
+        "id":  "68e602864c319e0e57397332",
+        "_id":  "68e602864c319e0e57397332",
+        "title":  "Cho thuê phòng trọ gần cổng đại học mỏ địa chất",
+        "description":  " Cho thuê phòng trọ gần cổng đại học mỏ địa chất",
+        "price":  1500000,
+        "area":  20,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "số 8 Đường Phố Viên, Phường Cổ Nhuế 2, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "balcony",
+                          "wifi",
+                          "fridge",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579561/phongtro_images/vg4jo4lylaxvbaswyjix.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579652/phongtro_images/tvgstlnlvpxxdazsxbgn.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:12.913Z"
+    },
+    {
+        "id":  "68e602864c319e0e57397333",
+        "_id":  "68e602864c319e0e57397333",
+        "title":  "Cho nữ thuê phòng, phòng đẹp ở tầng 2 mát mẻ khu vực gần trường, chợ",
+        "description":  " Cho nữ thuê phòng, phòng đẹp ở tầng 2 mát mẻ khu vực gần trường, chợ",
+        "price":  4800000,
+        "area":  35,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "19 ngõ 30 phố Hồng Mai Bạch Mai, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579418/phongtro_images/pkaei49qzeq47ef5daom.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579778/phongtro_images/n7xj6fsb7pnsppydh1bu.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:13.005Z"
+    },
+    {
+        "id":  "68e604714c319e0e57397349",
+        "_id":  "68e604714c319e0e57397349",
+        "title":  "Cho thuê phòng phố Bùi Ngọc Dương, gần ĐH Kinh Tế Quốc Dân, Xây Dựng, Bách Khoa, riêng chủ",
+        "description":  " Cho thuê phòng phố Bùi Ngọc Dương, gần ĐH Kinh Tế Quốc Dân, Xây Dựng, Bách Khoa, riêng chủ",
+        "price":  4500000,
+        "area":  40,
+        "type":  "can_ho_chung_cu",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Phố Bùi Ngọc Dương, Phường Bạch Mai, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579700/phongtro_images/mjrmoxcazlzqean9ivax.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579723/phongtro_images/bgwif9x0cgtgmgdtdv0p.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579670/phongtro_images/kjih609y0vahyaagustw.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:13.737Z"
+    },
+    {
+        "id":  "68e604714c319e0e5739734a",
+        "_id":  "68e604714c319e0e5739734a",
+        "title":  "CHO THUÊ PHÒNG TẦNG 3 TRONG NHÀ 4 TẦNG - NGÕ 313 THANH NHÀN Q.HAI BÀ TRƯNG",
+        "description":  " CHO THUÊ PHÒNG TẦNG 3 TRONG NHÀ 4 TẦNG - NGÕ 313 THANH NHÀN Q.HAI BÀ TRƯNG",
+        "price":  3900000,
+        "area":  30,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Thanh Nhàn, Phường Bạch Mai, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "balcony",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579700/phongtro_images/smk700sxoy30sxp8zvla.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579651/phongtro_images/gpoxgd6rh606zdokkjxa.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:13.823Z"
+    },
+    {
+        "id":  "68e604714c319e0e57397348",
+        "_id":  "68e604714c319e0e57397348",
+        "title":  "Cho thuê phòng khép kín Hai Bà Trưng",
+        "description":  " Cho thuê phòng khép kín Hai Bà Trưng",
+        "price":  1800000,
+        "area":  20,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Bạch Mai, Phường Bạch Mai, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "aircon",
+                          "balcony",
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579513/phongtro_images/atb3krtbc6cdjpepuiw3.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579753/phongtro_images/bpclefs9trn9lrfoxmf8.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:13.643Z"
+    },
+    {
+        "id":  "68e604714c319e0e57397347",
+        "_id":  "68e604714c319e0e57397347",
+        "title":  "Cho thuê phòng trọ tại 11 ngõ 357 phố Bạch Mai",
+        "description":  " Cho thuê phòng trọ tại 11 ngõ 357 phố Bạch Mai",
+        "price":  4000000,
+        "area":  30,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "11 ngõ 357 Phố Bạch Mai, Phường Bạch Mai, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "washing_machine",
+                          "balcony",
+                          "wifi",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579752/phongtro_images/cgorska1kkijvylrnql0.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579349/phongtro_images/ffh6hugqtutfaxpsvbmx.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:13.560Z"
+    },
+    {
+        "id":  "68e604714c319e0e5739734b",
+        "_id":  "68e604714c319e0e5739734b",
+        "title":  "Phòng trọ tầng 3 gần ĐH Bách Khoa, Kinh tế, Xây dựng",
+        "description":  " Phòng trọ tầng 3 gần ĐH Bách Khoa, Kinh tế, Xây dựng",
+        "price":  4600000,
+        "area":  40,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Bạch Mai, Phường Bạch Mai, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "washing_machine",
+                          "balcony",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579319/phongtro_images/llzflrqcnksuxgxxjbbs.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579176/phongtro_images/chvkjzhae7rgyajrfmdv.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579576/phongtro_images/ty1the7wfz8hif9md7jl.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:13.908Z"
+    },
+    {
+        "id":  "68e6053f4c319e0e57397355",
+        "_id":  "68e6053f4c319e0e57397355",
+        "title":  "Cho sinh viên thuê nhà trong ngõ phố Bạch Mai",
+        "description":  " Cho sinh viên thuê nhà trong ngõ phố Bạch Mai",
+        "price":  1600000,
+        "area":  20,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Phố Bạch Mai, Phường Bạch Mai, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "balcony",
+                          "aircon",
+                          "fridge",
+                          "private_wc",
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579548/phongtro_images/cjrnszvu6u72gqad5bbg.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579347/phongtro_images/e9qw390njjalaflpn5sa.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:14.178Z"
+    },
+    {
+        "id":  "68e605ca4c319e0e57397360",
+        "_id":  "68e605ca4c319e0e57397360",
+        "title":  "Phòng khép kín gần kinh tế xây dựng bách khoa, có thể ở từ 1-2 người",
+        "description":  " Phòng khép kín gần kinh tế xây dựng bách khoa, Diện tích từ 18m2 đến 22m2 đến 25m2, Giá phòng: 2200 -3000k",
+        "price":  2500000,
+        "area":  20,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Nhà thuốc nghi Bạch Mai, Phường Bạch Mai, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579416/phongtro_images/ykqcze8e2ddypwuhn3hs.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579661/phongtro_images/zvyknsrxyclsyznal550.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579205/phongtro_images/kumgyhhmxrj0ucorjxnb.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579581/phongtro_images/v7dy4xlwvinegiejpb7c.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:14.550Z"
+    },
+    {
+        "id":  "68e6064f4c319e0e57397370",
+        "_id":  "68e6064f4c319e0e57397370",
+        "title":  "cho thuê phòng trọ tại Z8B, khu TT bộ GD \u0026ĐT, phường Bách Khoa, Hà Nội",
+        "description":  " cho thuê phòng trọ tại Z8B, khu TT bộ GD \u0026ĐT, phường Bách Khoa, Hà Nội",
+        "price":  3000000,
+        "area":  20,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Tạ Quang Bửu, Phường Bách Khoa, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579635/phongtro_images/nsiohdmfdluzij3pg3tl.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579766/phongtro_images/jj3qnsfq5g1dramkqvgd.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579731/phongtro_images/ord20b2zx0h4mppcgbuq.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:15.265Z"
+    },
+    {
+        "id":  "68e606de4c319e0e5739737c",
+        "_id":  "68e606de4c319e0e5739737c",
+        "title":  "Mình cho thuê phòng kiểu mới giờ giấc thoải mái gần Lê Văn Hiến gần Học Viện Tài Chính có private_wc",
+        "description":  " Mình cho thuê phòng kiểu mới giờ giấc thoải mái gần Lê Văn Hiến gần Học Viện Tài Chính có private_wc",
+        "price":  2600000,
+        "area":  25,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Đường Hoàng Tăng Bí, Phường Cổ Nhuế 2, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "washing_machine",
+                          "wifi",
+                          "private_wc",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579398/phongtro_images/vkrojkzuqchvz2ljvdka.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579648/phongtro_images/wmtqp4rvkdagbepndoil.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579762/phongtro_images/ss5gnai3ty6v5w52rkg2.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:15.636Z"
+    },
+    {
+        "id":  "68e606de4c319e0e5739737a",
+        "_id":  "68e606de4c319e0e5739737a",
+        "title":  "Cho nữ thuê phòng gần kinh tế quôc dân 1tr2",
+        "description":  " Cho nữ thuê phòng gần kinh tế quôc dân 1tr2",
+        "price":  1200000,
+        "area":  15,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Đại La, Phường Bách Khoa, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "fridge",
+                          "private_wc",
+                          "washing_machine",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579675/phongtro_images/qfjg1dglfouq8njxwhoe.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579491/phongtro_images/oqspjaorf0y4eehryfpb.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:15.451Z"
+    },
+    {
+        "id":  "68e606de4c319e0e5739737d",
+        "_id":  "68e606de4c319e0e5739737d",
+        "title":  "Cho thuê nhà mới xây, cách mặt đường 5m.",
+        "description":  " Cho thuê nhà mới xây, mặt đường 5m.",
+        "price":  2000000,
+        "area":  20,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Khu B TĐại Học Mỏ-Địa chất Cầu Noi, Phường Cổ Nhuế 2, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579448/phongtro_images/i3ss5fxugzd7mmrykqwr.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579387/phongtro_images/btwpd2brqvujcvvxwrnj.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579683/phongtro_images/ryqv7pzeu7rmkfb648vd.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579671/phongtro_images/tlj6zjhg1xhpzbhvtfux.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:15.724Z"
+    },
+    {
+        "id":  "68e606de4c319e0e5739737b",
+        "_id":  "68e606de4c319e0e5739737b",
+        "title":  "Nhà Mình đang có phòng tiện nghi giá sinh viên mát mẻ ở quận Bắc Từ Liêm gần Đại Học Y Tế khép kin",
+        "description":  " Nhà Mình đang có phòng tiện nghi giá sinh viên mát mẻ ở quận Bắc Từ Liêm gần Đại Học Y Tế khép kin",
+        "price":  3900000,
+        "area":  30,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Hoàng Tăng Bí, Phường Cổ Nhuế 2, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "private_wc",
+                          "wifi",
+                          "washing_machine",
+                          "balcony",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579737/phongtro_images/pu1tihncp5cnqwln6fmi.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579200/phongtro_images/bab1mumcpgbngt5dtqim.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:15.540Z"
+    },
+    {
+        "id":  "68e607644c319e0e57397386",
+        "_id":  "68e607644c319e0e57397386",
+        "title":  "Có 2 phòng cho thuê đầy đủ tiện nghi, sạch sẽ, thoáng mát",
+        "description":  " Có 2 phòng cho thuê đầy đủ tiện nghi, sạch sẽ, thoáng mát",
+        "price":  4000000,
+        "area":  40,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Khu b đại học mỏ địa chất Phạm Văn Nghị, Phường Cổ Nhuế 2, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579746/phongtro_images/pnuxmzidfhn3tnrxervo.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579424/phongtro_images/n6ggza2tthjyimqfoce3.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:15.895Z"
+    },
+    {
+        "id":  "68e607644c319e0e57397389",
+        "_id":  "68e607644c319e0e57397389",
+        "title":  "Cho thuê phòng trọ khép kín 25m2 giá 2tr5 tại ngách 43/33, đường Cổ Nhuế",
+        "description":  " Cho thuê phòng trọ khép kín 25m2 giá 2tr5 tại ngách 43/33, đường Cổ Nhuế",
+        "price":  2500000,
+        "area":  25,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Ngách 43/33 Cổ Nhuế, Phường Cổ Nhuế 2, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "aircon",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579514/phongtro_images/alycnahxdzhdksujdlfv.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579619/phongtro_images/kjnrcmbixnjoamv7vwyw.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579738/phongtro_images/iz8mfji4eo4iuk0iz8xe.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579521/phongtro_images/xdsy96dfmw5vuceagrcy.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:16.162Z"
+    },
+    {
+        "id":  "68e6086a4c319e0e57397395",
+        "_id":  "68e6086a4c319e0e57397395",
+        "title":  "Cho thuê nhà trọ sinh viên Đại Học Mỏ Địa chất, Học viện tài chính, Tài nguyên Môi Trường",
+        "description":  " Cho thuê nhà trọ sinh viên Đại Học Mỏ Địa chất, Học viện tài chính, Tài nguyên Môi Trường",
+        "price":  1200000,
+        "area":  15,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Đường Cổ Nhuế, Phường Cổ Nhuế 2, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "washing_machine",
+                          "private_wc",
+                          "aircon",
+                          "fridge",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579724/phongtro_images/vgpnrrxmvnqmy7lo5qho.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579708/phongtro_images/dysgk7lfuz4i5zlsfgp9.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579342/phongtro_images/lgqqbzsdyulqu0nzggur.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579364/phongtro_images/m1xvucibca0znujgtcao.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:16.623Z"
+    },
+    {
+        "id":  "68e609334c319e0e5739739f",
+        "_id":  "68e609334c319e0e5739739f",
+        "title":  "Cần 01 nữ cho phòng trong Căn Hộ Chung cư BCA",
+        "description":  " Cần 01 nữ cho phòng trong Căn Hộ Chung cư BCA",
+        "price":  2000000,
+        "area":  20,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Chung cư CT1 Phạm Văn Đồng, Phường Cổ Nhuế 2, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "wifi",
+                          "washing_machine",
+                          "fridge",
+                          "aircon",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579467/phongtro_images/iq5nfb0hmgo5muds924c.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579527/phongtro_images/weogccxc6qqnnm8ekzme.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579654/phongtro_images/ybzis6mpb6z5pm9pkhl6.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:16.907Z"
+    },
+    {
+        "id":  "68e609d44c319e0e573973ab",
+        "_id":  "68e609d44c319e0e573973ab",
+        "title":  "Phòng trọ khép kín gần đường Hoàng Quốc Việt và 6 trường đại học",
+        "description":  " Phòng trọ khép kín gần đường Hoàng Quốc Việt và 6 trường đại học",
+        "price":  3100000,
+        "area":  30,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579577/phongtro_images/je5bn2jpglwneplfnb2x.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579391/phongtro_images/o81l2yld3u3zpbiumnrp.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579428/phongtro_images/l6n1ap0eytajb0zyzuwi.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:17.373Z"
+    },
+    {
+        "id":  "68e609d44c319e0e573973ad",
+        "_id":  "68e609d44c319e0e573973ad",
+        "title":  "Cho thuê căn hộ chung cư mini 67m2 ở Bách Khoa",
+        "description":  " Cho thuê căn hộ chung cư mini 67m2 ở Bách Khoa",
+        "price":  9000000,
+        "area":  67,
+        "type":  "can_ho_chung_cu",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "22 Ngách 17/2 Tạ Quang Bửu, Phường Bách Khoa, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "fridge",
+                          "private_wc",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579300/phongtro_images/tqjtsv3orbondbuf6gve.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579567/phongtro_images/gtedwk4nihlcolrcnkqr.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579412/phongtro_images/nrorg0emm71vpqpm2m6a.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:17.554Z"
+    },
+    {
+        "id":  "68e60b034c319e0e573973b7",
+        "_id":  "68e60b034c319e0e573973b7",
+        "title":  "Cho thuê phòng tại khu vực Tạ Quang Bửu, Bách Khoa",
+        "description":  " Cho thuê phòng tại khu vực Tạ Quang Bửu, Bách Khoa",
+        "price":  5900000,
+        "area":  45,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Đường Đại Cồ Việt, Phường Bách Khoa, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "private_wc",
+                          "wifi",
+                          "aircon",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579557/phongtro_images/usurryyrhcxexuhjttxd.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579659/phongtro_images/idytcyiwa4xxwszig8hc.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579236/phongtro_images/svlgthb79xwllrznbngq.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:17.847Z"
+    },
+    {
+        "id":  "68e60b034c319e0e573973b5",
+        "_id":  "68e60b034c319e0e573973b5",
+        "title":  "Cho thuê nhà khu tập thể Bách Khoa 100m2",
+        "description":  " Cho thuê nhà khu tập thể Bách Khoa 100m2",
+        "price":  12500000,
+        "area":  100,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "K10A Đường Nguy�\u0085n Hiền, Phường Bách Khoa, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "balcony",
+                          "fridge",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579626/phongtro_images/jkuwehggkox9xpui3fmc.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579301/phongtro_images/sclvl0ph1dfuywtwsbqy.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579464/phongtro_images/fjmrsjmdrtaivdeoy56x.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579701/phongtro_images/wgwjxwc1b33qropxeq5l.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:17.651Z"
+    },
+    {
+        "id":  "68e60b034c319e0e573973b9",
+        "_id":  "68e60b034c319e0e573973b9",
+        "title":  "Chính chủ cần cho thuê còn 1 phòng tại số nhà 20 hẻm 10 ngõ 67 Lê Thanh Nghị",
+        "description":  " Chính chủ cần cho thuê còn 1 phòng tại số nhà 20 hẻm 10 ngõ 67 Lê Thanh Nghị",
+        "price":  3500000,
+        "area":  25,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "67 Phố Lê Thanh Nghị, Phường Bách Khoa, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579423/phongtro_images/yvwejzd94cg1bo3jwrye.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579660/phongtro_images/o9zwrdmzjquuia0mg36b.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579503/phongtro_images/bgrxidv0tojses0gbalo.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:18.030Z"
+    },
+    {
+        "id":  "68e60bd74c319e0e573973c4",
+        "_id":  "68e60bd74c319e0e573973c4",
+        "title":  "CHO THUÊ PHÒNG KÉP KÍN GIÁ RẺ GIÁ RẺ NHẤT THỦ ĐÔ HÀ NỘI",
+        "description":  " CHO THUÊ PHÒNG KÉP KÍN GIÁ RẺ GIÁ RẺ NHẤT THỦ ĐÔ HÀ NỘI",
+        "price":  6500000,
+        "area":  20,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Đường Trần Cung, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "aircon",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579196/phongtro_images/aadxkjmygmcwo69q8yjm.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579522/phongtro_images/uvboeiosglpakmqywkpq.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579658/phongtro_images/j4dnpmyvtbixkdxicb1h.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579731/phongtro_images/flm1vfxmbe0ugscxipme.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:18.380Z"
+    },
+    {
+        "id":  "68e60bd74c319e0e573973c1",
+        "_id":  "68e60bd74c319e0e573973c1",
+        "title":  "Phòng trọ sạch đẹp tiện nghi khu vực Tạ Quang Bửu - Hai Bà Trưng",
+        "description":  " Phòng trọ sạch đẹp tiện nghi khu vực Tạ Quang Bửu - Hai Bà Trưng",
+        "price":  3100000,
+        "area":  40,
+        "type":  "can_ho_chung_cu",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Phố Tạ Quang Bửu, Phường Bách Khoa, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "private_wc",
+                          "aircon",
+                          "wifi",
+                          "fridge",
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579709/phongtro_images/jqd5m01lycldr5rlqepb.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579575/phongtro_images/esvim472y8liezmhehnf.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:18.116Z"
+    },
+    {
+        "id":  "68e60bd74c319e0e573973c5",
+        "_id":  "68e60bd74c319e0e573973c5",
+        "title":  "Cho thuê phòng tại Trần Cung, phường Cổ Nhuế 1",
+        "description":  " Cho thuê phòng tại Trần Cung, phường Cổ Nhuế 1",
+        "price":  1500000,
+        "area":  15,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Trần Cung, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579685/phongtro_images/vhqcuckgy5blb2xz9ugv.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579298/phongtro_images/bjk8h0gh7x8wqmzhbphw.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579610/phongtro_images/fstu85hravveou1j57k3.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579667/phongtro_images/prqvqs08panw6kvhrhu1.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:18.475Z"
+    },
+    {
+        "id":  "68e60dab4c319e0e573973d2",
+        "_id":  "68e60dab4c319e0e573973d2",
+        "title":  "Cho thuê phòng trọ đường Trần Đại Nghĩa",
+        "description":  " Cho thuê phòng trọ đường Trần Đại Nghĩa",
+        "price":  6900000,
+        "area":  30,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Phố Trần Đại Nghĩa, Phường Bách Khoa, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "washing_machine",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579380/phongtro_images/vby2fqf4hcrkh0qzdfjv.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579346/phongtro_images/wrhmh19cksnmteisjumd.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579543/phongtro_images/zyfdfa4zkhwrw8trb8ek.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:18.565Z"
+    },
+    {
+        "id":  "68e60dab4c319e0e573973d4",
+        "_id":  "68e60dab4c319e0e573973d4",
+        "title":  "Phòng trọ ở ghép ngay giữa Bách-Kinh-Xây Đường Trần Đại Nghĩa",
+        "description":  " Phòng trọ ở ghép ngay giữa Bách-Kinh-Xây Đường Trần Đại Nghĩa",
+        "price":  5400000,
+        "area":  40,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "34 Trần Đại Nghĩa, Phường Bách Khoa, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "private_wc",
+                          "fridge",
+                          "balcony",
+                          "aircon",
+                          "wifi",
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579263/phongtro_images/sqx7pegkvvcymzetykla.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579259/phongtro_images/spo02bgj22q3zokbmxwi.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579480/phongtro_images/gkkrzvuqdq4dq8evfv2n.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579468/phongtro_images/qvcdhupzgwgbajglzqvi.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:18.745Z"
+    },
+    {
+        "id":  "68e60dab4c319e0e573973d3",
+        "_id":  "68e60dab4c319e0e573973d3",
+        "title":  "Cho thuê 1 phòng trọ đủ tiện nghi, thoáng mát",
+        "description":  " Cho thuê 1 phòng trọ đủ tiện nghi, thoáng mát",
+        "price":  5000000,
+        "area":  15,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Đường Giải Phóng, Phường Bách Khoa, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "private_wc",
+                          "washing_machine",
+                          "wifi",
+                          "balcony",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579424/phongtro_images/i4sbneshctrbmye2gq66.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579542/phongtro_images/bt8bbjxlg6lp9tck8zp2.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:18.655Z"
+    },
+    {
+        "id":  "68e60e4f4c319e0e573973de",
+        "_id":  "68e60e4f4c319e0e573973de",
+        "title":  "CHO THUÊ PHÒNG Ở 220 CỔ NHUẾ - 20M2 - 1.9TR",
+        "description":  " CHO THUÊ PHÒNG Ở 220 CỔ NHUẾ - 20M2 - 1.9TR",
+        "price":  1900000,
+        "area":  20,
+        "type":  "can_ho_chung_cu",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "220 Đường Cổ Nhuế, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579690/phongtro_images/zt7jqzh3airc5e2ej6ad.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579600/phongtro_images/tmyt0z1o3z5m5yzzb5md.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579706/phongtro_images/jegtcvmsbup19q1vb1eb.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579353/phongtro_images/zkr8em8eazfrybn32zzb.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:19.007Z"
+    },
+    {
+        "id":  "68e60e4f4c319e0e573973df",
+        "_id":  "68e60e4f4c319e0e573973df",
+        "title":  "[HÀ NỘI] - PHÒNG TRỌ SINH VIÊN GIÁ RẺ ",
+        "description":  " [HÀ NỘI] - PHÒNG TRỌ SINH VIÊN GIÁ RẺ ",
+        "price":  1800000,
+        "area":  20,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "499 Đường Phú Di�\u0085n, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "private_wc",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579206/phongtro_images/yjc10lvlou5mf2qkfhhy.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579674/phongtro_images/wv02sqywmfevnsn6loff.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579365/phongtro_images/w4uvewmd1vbnqn6l1jyg.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579377/phongtro_images/eswgx4b0fdwxsr1qcaqf.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:19.098Z"
+    },
+    {
+        "id":  "68e60e4f4c319e0e573973e0",
+        "_id":  "68e60e4f4c319e0e573973e0",
+        "title":  "Phòng trọ 26m2, tại 430 phố trần cung.cổ nhuế1, Bác từ liêm",
+        "description":  " Phòng trọ 26m2, tại 430 phố trần cung.cổ nhuế1, Bác từ liêm",
+        "price":  3200000,
+        "area":  26,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "wifi",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579594/phongtro_images/c4syzbxbeagnqkevjmtb.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579406/phongtro_images/frqohsyffp8bmmte4rry.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:19.192Z"
+    },
+    {
+        "id":  "68e60e4f4c319e0e573973e2",
+        "_id":  "68e60e4f4c319e0e573973e2",
+        "title":  "Cho thuê chung cư mini giá rẻ tại Đường Cổ Nhuế, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội",
+        "description":  " Cho thuê chung cư mini giá rẻ tại Đường Cổ Nhuế, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội",
+        "price":  1700000,
+        "area":  25,
+        "type":  "can_ho_chung_cu",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Đường Cổ Nhuế, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579707/phongtro_images/eknntvyn962jh2aaoxt2.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579252/phongtro_images/eyxbmfsfmc2xbp3pssep.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579767/phongtro_images/d63y5ggqlxyxeddbndia.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579720/phongtro_images/e4zop1zbkslq9wpznybr.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:19.367Z"
+    },
+    {
+        "id":  "68e60edb4c319e0e573973ec",
+        "_id":  "68e60edb4c319e0e573973ec",
+        "title":  "Cho thuê phòng từ 18m2 đến 20m2 tại ngõ 117 Trần Cung",
+        "description":  " Cho thuê phòng từ 18m2 đến 20m2 tại ngõ 117 Trần Cung",
+        "price":  2100000,
+        "area":  20,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "22/15/117 Trần Cung, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "washing_machine",
+                          "balcony",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579382/phongtro_images/kxye3mlhjnmpcrw8mvhw.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579764/phongtro_images/ki5ggsjrsazwv0hga7rk.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579565/phongtro_images/zrudjct8p8tvi4qnkswk.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:27:53.752Z"
+    },
+    {
+        "id":  "68e60edb4c319e0e573973ea",
+        "_id":  "68e60edb4c319e0e573973ea",
+        "title":  "Phòng trọ tai 430 trần cung, cổ nhuế1, bắc từ liêm, 26m2",
+        "description":  " Phòng trọ tai 430 trần cung, cổ nhuế1, bắc từ liêm, 26m2",
+        "price":  3200000,
+        "area":  26,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579533/phongtro_images/i4mb6xhdlqzaclqjywl2.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579617/phongtro_images/nu4pildw7oq4bu8ibaud.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.604Z",
+        "updatedAt":  "2025-10-09T08:25:19.461Z"
+    },
+    {
+        "id":  "68e60edb4c319e0e573973eb",
+        "_id":  "68e60edb4c319e0e573973eb",
+        "title":  "Cho thuê phòng ở khép kín đối diện bệnh viện E",
+        "description":  " Cho thuê phòng ở khép kín đối diện bệnh viện E",
+        "price":  3600000,
+        "area":  40,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "số 7 ngách 1 ngõ 198 Đường Cổ Nhuế, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579512/phongtro_images/i7h7iztm8io4kxbjnqcm.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579655/phongtro_images/zhti4hjv5nsnqb0awdds.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:19.547Z"
+    },
+    {
+        "id":  "68e60edb4c319e0e573973ed",
+        "_id":  "68e60edb4c319e0e573973ed",
+        "title":  "Cần cho thuê phòng trọ khép kín đầy đủ tiện nghi tại Tôn Quang Phiệt, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm",
+        "description":  " Cần cho thuê phòng trọ khép kín đầy đủ tiện nghi tại Tôn Quang Phiệt, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm",
+        "price":  4200000,
+        "area":  35,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Tôn Quang Phiệt, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579455/phongtro_images/bbg117v95s0xjgckotvg.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579370/phongtro_images/a7ymkjvjcyx3xpkcfr53.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-30T13:08:58.672Z"
+    },
+    {
+        "id":  "68e60edb4c319e0e573973ee",
+        "_id":  "68e60edb4c319e0e573973ee",
+        "title":  "Phòng cho thuê 30m2 - đủ nội thất cơ bản - có balconythoáng, có washing_machine - đường rộng rãi",
+        "description":  " Phòng cho thuê 30m2 - đủ nội thất cơ bản - có balconythoáng, có washing_machine - đường rộng rãi",
+        "price":  4200000,
+        "area":  30,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Đường Phạm Văn Đồng, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "fridge",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579530/phongtro_images/jlkojkhrdfrhq341fotp.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579765/phongtro_images/mermsged8aise8etawa0.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579389/phongtro_images/xcx14q8aluhee8swjwch.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579280/phongtro_images/snhn4odkcgmezr9xsyx1.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:27:54.566Z"
+    },
+    {
+        "id":  "68e60fe54c319e0e573973f6",
+        "_id":  "68e60fe54c319e0e573973f6",
+        "title":  "Phòng tro 40m2 Hoàng Quốc Việt, Cổ Nhuế 1, Bắc từ liêm, Hà nội",
+        "description":  " Phòng tro 18m2 Hoàng Quốc Việt, Cổ Nhuế 1, Bắc từ liêm, Hà nội",
+        "price":  4800000,
+        "area":  40,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "5/487 Đường Hoàng Quốc Việt, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "fridge",
+                          "washing_machine",
+                          "aircon",
+                          "private_wc",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579748/phongtro_images/um7bdkkknxsgvcekpmsz.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579772/phongtro_images/nn26kdfufu1am3qchs4j.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579399/phongtro_images/xymfl8m4xcaarc8obvem.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579437/phongtro_images/nkdmrmdqf4vj5sehkg3t.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T10:53:11.605Z"
+    },
+    {
+        "id":  "68e60fe54c319e0e573973f7",
+        "_id":  "68e60fe54c319e0e573973f7",
+        "title":  "Phòng trọ đẹp 14c /ngõ 319 trần cung giá rẻ",
+        "description":  " Phòng trọ đẹp 14c /ngõ 319 trần cung giá rẻ",
+        "price":  2500000,
+        "area":  30,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Đường Trần Cung, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "washing_machine",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579775/phongtro_images/wspaum0xtynjhx2v2s3j.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579307/phongtro_images/cr2prappghkmakz29lg1.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:19.987Z"
+    },
+    {
+        "id":  "68e60fe54c319e0e573973fa",
+        "_id":  "68e60fe54c319e0e573973fa",
+        "title":  "Phòng trọ khép kín giá rẻ tại 430 Trần Cung, Cổ Nhuế 1, Bắc Từ Liêm, Hà Nội.",
+        "description":  " Phòng trọ khép kín giá rẻ tại 430 Trần Cung, Cổ Nhuế 1, Bắc Từ Liêm, Hà Nội.",
+        "price":  3800000,
+        "area":  45,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Trần Cung, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "private_wc",
+                          "wifi",
+                          "washing_machine",
+                          "fridge",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579636/phongtro_images/ftk4rbt1mbiicxyw5wcl.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579735/phongtro_images/m3iuf2p2bskbhkyuweyh.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:27:56.423Z"
+    },
+    {
+        "id":  "68e60fe54c319e0e573973f9",
+        "_id":  "68e60fe54c319e0e573973f9",
+        "title":  "Chính chủ cho thuê phòng tại 488 Trần Cung, Cổ Nhuế.",
+        "description":  " Chính chủ cho thuê phòng tại 488 Trần Cung, Cổ Nhuế.",
+        "price":  2500000,
+        "area":  30,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Trần Cung, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579767/phongtro_images/sujywdhdcrhhir65xnw9.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579586/phongtro_images/gb3ov3cuhbfsuw7d0psc.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:20.168Z"
+    },
+    {
+        "id":  "68e60fe54c319e0e573973f8",
+        "_id":  "68e60fe54c319e0e573973f8",
+        "title":  "Mình cho thuê tầng 3 và tầng 2 là văn phòng hoặc ở tại 17 Hoàng Quốc Việt, Cổ Nhuế 1, Quận Bắc Từ Liêm",
+        "description":  " Mình cho thuê tầng 3 và tầng 2 là văn phòng hoặc ở tại 17 Hoàng Quốc Việt, Cổ Nhuế 1, Quận Bắc Từ Liêm",
+        "price":  2100000,
+        "area":  25,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "17 Hoàng Quốc Việt, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579607/phongtro_images/ryj3bhyucnimmgfu0oj4.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579256/phongtro_images/wwnb7hlmmlzql7xfqfch.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:27:55.395Z"
+    },
+    {
+        "id":  "68e610664c319e0e57397402",
+        "_id":  "68e610664c319e0e57397402",
+        "title":  "Phòng trọ 25m2 tại ngõ 562 trần cung, Cổ Nhuế 1, Bắc Từ Liêm, Hà Nội",
+        "description":  " Phòng trọ 25m2 tại ngõ 562 trần cung, Cổ Nhuế 1, Bắc Từ Liêm, Hà Nội",
+        "price":  3000000,
+        "area":  25,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "26/78/562 Đường Trần Cung, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579273/phongtro_images/l7lkde8evp9pfcx8xhoo.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579638/phongtro_images/d7e5z97qybnchrk8nc2g.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579223/phongtro_images/txhkhtxofxl5kqfgwkrl.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579482/phongtro_images/nex2pcmncrrhcd4l5cau.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:20.365Z"
+    },
+    {
+        "id":  "68e610664c319e0e57397403",
+        "_id":  "68e610664c319e0e57397403",
+        "title":  "Cho thuê phòng hộ gia đình",
+        "description":  " Cho thuê phòng hộ gia đình",
+        "price":  6000000,
+        "area":  50,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Số 17B ngõ 804 - đường Bạch Đằng, Phường Bạch Đằng, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579760/phongtro_images/i9oi2rk9asunsbgkuo1c.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579289/phongtro_images/ul3ap1eledjt7zs7ya7x.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579483/phongtro_images/mzfem06rgyhdn9pe1x4s.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-30T16:35:42.684Z"
+    },
+    {
+        "id":  "68e610664c319e0e57397404",
+        "_id":  "68e610664c319e0e57397404",
+        "title":  "Cho thuê phòng ở Nguy�\u0085n Cao",
+        "description":  " Cho thuê phòng ở Nguy�\u0085n Cao",
+        "price":  3200000,
+        "area":  30,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "31 Nguy�\u0085n Cao, Phường Bạch Đằng, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "aircon",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579192/phongtro_images/emfnw8fyp7wbmfey4vzo.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579485/phongtro_images/xk7x6waujmjuv52lkdcf.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:20.545Z"
+    },
+    {
+        "id":  "68e610664c319e0e57397405",
+        "_id":  "68e610664c319e0e57397405",
+        "title":  "Cho thuê phòng trọ 20m2 giá rẻ",
+        "description":  " Cho thuê phòng trọ 15-20m2 ngõ 784 Bạch Đằng, gần Trần Khát Trân, bến xe Lương Yên",
+        "price":  2300000,
+        "area":  20,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Bạch Đằng, Phường Bạch Đằng, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "wifi",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579337/phongtro_images/cehezjb3lqgsbtj8a28j.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579751/phongtro_images/a4z04blm44wxlyzbmc9r.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:27:57.938Z"
+    },
+    {
+        "id":  "68e610664c319e0e57397406",
+        "_id":  "68e610664c319e0e57397406",
+        "title":  "Phòng 28m2 sàn gỗ, riêng chủ tại số 18 Lãng Yên",
+        "description":  " Phòng 28m2 sàn gỗ, riêng chủ tại số 18 Lãng Yên",
+        "price":  3100000,
+        "area":  28,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Lãng Yên, Phường Bạch Đằng, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "private_wc",
+                          "washing_machine",
+                          "wifi",
+                          "balcony",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579666/phongtro_images/sx1uqxqtikgapdruxsbl.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579702/phongtro_images/vhx3qzj5pyvnpzlszwck.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579243/phongtro_images/mawpojw2t3subymtf2xl.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:20.723Z"
+    },
+    {
+        "id":  "68e611e94c319e0e57397410",
+        "_id":  "68e611e94c319e0e57397410",
+        "title":  "Cho thuê phòng tại số 23 ngõ 53 Nguyễn Khoái",
+        "description":  " Cho thuê phòng tại số 23 ngõ 53 Nguyễn Khoái",
+        "price":  5600000,
+        "area":  40,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Đường Nguy�\u0085n Khoái, Phường Bạch Đằng, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "wifi",
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579657/phongtro_images/xzyjsix0ku1m77c9wdku.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579486/phongtro_images/gffr5yryh8qy7go0uuql.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579392/phongtro_images/bx3xw9ukcsq8ufsgefco.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579399/phongtro_images/nfqju8sqp4ee2vxtj0la.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:27:59.696Z"
+    },
+    {
+        "id":  "68e611e94c319e0e57397412",
+        "_id":  "68e611e94c319e0e57397412",
+        "title":  "Chính chủ cho thuê phòng mini 30m2 tầng 2 khu phân lô ngõ 651 Minh Khai",
+        "description":  " Chính chủ cho thuê phòng mini 30m2 tầng 2 khu phân lô ngõ 651 Minh Khai",
+        "price":  2800000,
+        "area":  30,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Phường Bạch Đằng, Quận Hai Bà Trưngng, Hà Nội"
+                     },
+        "amenities":  [
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579726/phongtro_images/ixxhe8gdjzzm0rfsqafw.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579440/phongtro_images/ntxrb4ozzqfsz5eywcvo.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:21.170Z"
+    },
+    {
+        "id":  "68e611e94c319e0e5739740f",
+        "_id":  "68e611e94c319e0e5739740f",
+        "title":  "Cho thuê phòng tại ngõ 53 Nguyễn Khoái",
+        "description":  " Cho thuê phòng tại ngõ 53 Nguyễn Khoái",
+        "price":  2500000,
+        "area":  30,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "ngõ 53 Đường Nguy�\u0085n Khoái, Phường Bạch Đằng, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579440/phongtro_images/kq7itmhxysmcowrnt6zj.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579241/phongtro_images/tzlbo52hhy5bngvlzn76.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579390/phongtro_images/ari9ssvsrxsmytdkgwx9.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579712/phongtro_images/wlrilmx5fdplkyhlx4xb.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:20.899Z"
+    },
+    {
+        "id":  "68e611e94c319e0e5739740e",
+        "_id":  "68e611e94c319e0e5739740e",
+        "title":  "Cho thuê nhà 28D, ngõ 459 Trương Định",
+        "description":  " Cho thuê nhà 28D, ngõ 459 Trương Định",
+        "price":  5500000,
+        "area":  45,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Đường Bạch Đằng, Phường Bạch Đằng, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "washing_machine",
+                          "private_wc",
+                          "fridge",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579375/phongtro_images/hqpwfbxwrmphc5huknzr.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579788/phongtro_images/jljqpefm7lnsb2dkkb8y.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579593/phongtro_images/zrtcbtvdgjxi5oztzej8.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579713/phongtro_images/sis2zm4ddilssmmkk2pj.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:27:58.689Z"
+    },
+    {
+        "id":  "68e611e94c319e0e57397411",
+        "_id":  "68e611e94c319e0e57397411",
+        "title":  "Cho thuê phòng khu trung tâm phố Lê Quý Đôn, HBT, HN",
+        "description":  " Cho thuê phòng khu trung tâm phố Lê Quý Đôn, HBT, HN",
+        "price":  6300000,
+        "area":  40,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Đường Lê Quý Đôn, Phường Bạch Đằng, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "washing_machine",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579688/phongtro_images/q9k5j8g53d4jxcjytaby.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579419/phongtro_images/czyswzpctx3fbhimmmdd.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579777/phongtro_images/gpichi7uckhmdrpysub8.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579747/phongtro_images/b4ufsipi3s8sqpsqm8u8.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:21.076Z"
+    },
+    {
+        "id":  "68e612744c319e0e5739741a",
+        "_id":  "68e612744c319e0e5739741a",
+        "title":  "cho thuê phòng đẹp ở cảm hội lò đúc",
+        "description":  " cho thuê phòng đẹp ở cảm hội lò đúc",
+        "price":  3400000,
+        "area":  27,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "23 Phố Cảm Hội, Phường Bạch Đằng, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "washing_machine",
+                          "wifi",
+                          "fridge",
+                          "private_wc",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579386/phongtro_images/mbhx6walynz3ywv1pabq.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579723/phongtro_images/snj1zh8sq7alxerynqdt.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579642/phongtro_images/ahwdrs3xxndmy8zncnwn.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579758/phongtro_images/ptdmmelrepo1iwzdkv3n.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:28:00.401Z"
+    },
+    {
+        "id":  "68e612744c319e0e5739741b",
+        "_id":  "68e612744c319e0e5739741b",
+        "title":  "Cho thuê nhà tập thể 70m2 tầng 5, tập thể Hồ Việt Xô",
+        "description":  " Cho thuê nhà tập thể 70m2 tầng 5, tập thể Hồ Việt Xô",
+        "price":  8600000,
+        "area":  70,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Đường Tây Kết, Phường Bạch Đằng, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "balcony",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579457/phongtro_images/hxw1zhbzvzhrxfloppas.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579551/phongtro_images/co3adsxpdg9fib7cghhn.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579549/phongtro_images/n48rhi0wecapu4w3yhus.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579358/phongtro_images/sivqcmcw1jhzubdjurpg.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T13:28:01.190Z"
+    },
+    {
+        "id":  "68e612744c319e0e5739741e",
+        "_id":  "68e612744c319e0e5739741e",
+        "title":  "Cho thuê phòng trọ, khu vực Hai Bà Trưng",
+        "description":  " Cho thuê phòng trọ, khu vực Hai Bà Trưng",
+        "price":  2200000,
+        "area":  20,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "31, ngõ 524 Đường Bạch Đằng, Phường Bạch Đằng, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "aircon",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579562/phongtro_images/xjajegmwh0vpyxnflwuz.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579599/phongtro_images/cdmhup8epvzvrknn7x4h.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579449/phongtro_images/ss4sdufov8fonjqircru.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:21.620Z"
+    },
+    {
+        "id":  "68e612744c319e0e5739741d",
+        "_id":  "68e612744c319e0e5739741d",
+        "title":  "Cho thuê phòng trọ 1.2 triệu giá bình dân",
+        "description":  " Cho thuê phòng trọ 1.2 triệu giá bình dân",
+        "price":  1200000,
+        "area":  20,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "784 Đường Bạch Đằng, Phường Bạch Đằng, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "wifi",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579710/phongtro_images/t0gzrdwgddannsfmn9i7.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579580/phongtro_images/gn0bksregyxck6tutidr.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579540/phongtro_images/rovppvaadivg4glji1vy.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579471/phongtro_images/getp9clccdclnm9hzrmy.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:21.528Z"
+    },
+    {
+        "id":  "68e613094c319e0e57397427",
+        "_id":  "68e613094c319e0e57397427",
+        "title":  "Cho thuê 2 phòng trọ sinh viên ở Lê Thanh Nghị",
+        "description":  " Cho thuê 2 phòng trọ sinh viên ở Lê Thanh Nghị",
+        "price":  4100000,
+        "area":  35,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "16A Ngõ 36 Lê Thanh Nghị, Cầu Dền, Quận Hai Bà Trưng, Hà Nội"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579568/phongtro_images/iaugglzqohfivtdnojnf.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579600/phongtro_images/ozjmsdcqmmrmq8gqdsyz.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579641/phongtro_images/vgrsbkg49ykbph485v6u.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:21.802Z"
+    },
+    {
+        "id":  "68e613094c319e0e57397426",
+        "_id":  "68e613094c319e0e57397426",
+        "title":  "Phòng trống tầng 1 cho thuê",
+        "description":  " Phòng trống tầng 1 cho thuê",
+        "price":  5900000,
+        "area":  40,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Ngách 55 ngõ chùa liên phái, Hai Bà Trưng"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579609/phongtro_images/edimxu3uua0a4n0o0oid.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579249/phongtro_images/ohtndbtlzvqcsymyz3nr.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579734/phongtro_images/uob28iugutpuzrkdmrdr.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T17:00:34.891Z"
+    },
+    {
+        "id":  "68e614274c319e0e57397435",
+        "_id":  "68e614274c319e0e57397435",
+        "title":  "Cho thuê căn hộ 20m2 - 40m2. Phòng đơn, phòng đôi. Có camera, khóa vân tay, không chung chủ, Lh Chính chủ: 0966 205 569",
+        "description":  " Cho thuê căn hộ 20m2 - 40m2. Phòng đơn, phòng đôi. Có camera, khóa vân tay, không chung chủ, Lh Chính chủ: 0966 205 569",
+        "price":  5300000,
+        "area":  40,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Số nhà 52, Ngõ 136, Đường Cầu Di�\u0085n, Phường Minh Khai, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579676/phongtro_images/jvkhlrnat9mrpmriflv9.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579733/phongtro_images/qsux1ql9cx5hsqt8w2rd.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579492/phongtro_images/u4tdxsioewospcttqetv.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579663/phongtro_images/xl6naee6hspygb7hhtlv.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:22.438Z"
+    },
+    {
+        "id":  "68e614ca4c319e0e57397442",
+        "_id":  "68e614ca4c319e0e57397442",
+        "title":  "Nhà trọ 25m2 mới xây có thang máy tại đường Cầu Di�\u0085n ( Gần đường Nguyên Xá, Xuân Phương, ...)",
+        "description":  " Nhà trọ 25m2 mới xây có thang máy tại đường Cầu Di�\u0085n ( Gần đường Nguyên Xá, Xuân Phương, ...)",
+        "price":  3000000,
+        "area":  25,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Ngõ 134 Đường Cầu Di�\u0085n, Phường Minh Khai, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579574/phongtro_images/hpai4tdemtfx9ui4pio5.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579519/phongtro_images/rcikpuzwbvtfhiggqmsu.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579475/phongtro_images/njhoc1axsx5moexyi72l.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:22.978Z"
+    },
+    {
+        "id":  "68e6155a4c319e0e5739744c",
+        "_id":  "68e6155a4c319e0e5739744c",
+        "title":  "CCMN 30M2 Ngõ 59 đường Văn Tiến Dũng ( Gần Cầu Di�\u0085n, Phúc Di�\u0085n, Phú Di�\u0085n, Nguyên Xá)",
+        "description":  " CCMN 30M2 Ngõ 59 đường Văn Tiến Dũng ( Gần Cầu Di�\u0085n, Phúc Di�\u0085n, Phú Di�\u0085n, Nguyên Xá)",
+        "price":  3200000,
+        "area":  30,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "59 Đường Văn Tiến Dũng, Phường Phú Di�\u0085n, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579463/phongtro_images/fkocqkymb4cheolbfarf.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579547/phongtro_images/nqvps1zt50bn2puvzpgw.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579330/phongtro_images/qpz15qdpw61diizzmog0.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:23.245Z"
+    },
+    {
+        "id":  "68e6155a4c319e0e5739744d",
+        "_id":  "68e6155a4c319e0e5739744d",
+        "title":  "Phòng trọ cho hộ gia đình thuê diện tích 35 m2",
+        "description":  " Phòng trọ cho hộ gia đình thuê diện tích 35 m2, Giá thuê 2,7 Triệu/Tháng",
+        "price":  2700000,
+        "area":  35,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Số 111, ngách 193/220 Đường Phú Di�\u0085n, Phường Phú Di�\u0085n, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "balcony",
+                          "wifi",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579506/phongtro_images/hfdl1fmcexqiixtu31jx.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579594/phongtro_images/aqgjvxnbvmjixtoaqgta.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579648/phongtro_images/g5k00cr38ycenxa5nq1a.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:23.331Z"
+    },
+    {
+        "id":  "68e615df4c319e0e57397457",
+        "_id":  "68e615df4c319e0e57397457",
+        "title":  "Cho thuê phòng trọ tại Kiều Mai, Phúc Di�\u0085n, Bắc Từ Liêm, Hà Nội",
+        "description":  " Cho thuê phòng trọ tại Kiều Mai, Phúc Di�\u0085n, Bắc Từ Liêm, Hà Nội",
+        "price":  3900000,
+        "area":  40,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "15/82 Đường Phú Kiều, Phường Phúc Di�\u0085n, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "balcony",
+                          "aircon",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579528/phongtro_images/isslfbvwz98gjbx5dn6z.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579426/phongtro_images/j8mpsbeug0pr7aptvyve.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579481/phongtro_images/hr2x5r7cimexuzksnjhq.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579219/phongtro_images/w8lxgn0j2i6ljpbl7ouv.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:23.597Z"
+    },
+    {
+        "id":  "68e615df4c319e0e57397456",
+        "_id":  "68e615df4c319e0e57397456",
+        "title":  "Cho thuê nhà trọ đầy đủ nội thất",
+        "description":  " Cho thuê nhà trọ đầy đủ nội thất",
+        "price":  5300000,
+        "area":  40,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Nhà 55b Đường Thụy Phương, Phường Thụy Phương, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579262/phongtro_images/llpmq3gikcichzcuqeci.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579508/phongtro_images/bhbccbnvt3urz0hiuefk.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579523/phongtro_images/juyup2iheekcw5q5roo4.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:23.508Z"
+    },
+    {
+        "id":  "68e615df4c319e0e5739745a",
+        "_id":  "68e615df4c319e0e5739745a",
+        "title":  "Phòng trọ giá rẻ thoáng mát, sinh hoạt giờ tự do",
+        "description":  " Phòng trọ giá rẻ thoáng mát, sinh hoạt giờ tự do, có thể thương lượng giá",
+        "price":  3000000,
+        "area":  35,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Đường số 69, Phường Thụy Phương, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579358/phongtro_images/mu3fqpf2afeq0aeexgih.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579199/phongtro_images/vbgg36svmpfyxar5cmt0.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:23.861Z"
+    },
+    {
+        "id":  "68e616614c319e0e57397464",
+        "_id":  "68e616614c319e0e57397464",
+        "title":  "Phòng khép kín 30m2, có gác xép 2,5 triệu. đường 32 cách chợ 50m, cách điểm xe buýt 100m.",
+        "description":  " Phòng khép kín 30m2, có gác xép 2,5 triệu. đường 32 cách chợ 50m, cách điểm xe buýt 100m.",
+        "price":  2500000,
+        "area":  30,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Phường Phúc Di�\u0085n, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579201/phongtro_images/ompazdcmdfrwnpwb4eb3.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579420/phongtro_images/gmeam8wbykfygwazv5ke.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579601/phongtro_images/aapni4nicd28yuy0hq9z.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.127Z"
+    },
+    {
+        "id":  "68e616614c319e0e57397462",
+        "_id":  "68e616614c319e0e57397462",
+        "title":  "CHO THUÊ PHÒNG TRỌ CÓ VS KHÉP KÍN",
+        "description":  " CHO THUÊ PHÒNG TRỌ VS KHÉP KÍN",
+        "price":  3500000,
+        "area":  40,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Số 6 ngõ 56 Đường Phú Kiều, Phường Phúc Di�\u0085n, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "fridge",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579359/phongtro_images/gxlfgqwzlua3ioiw3l5h.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579596/phongtro_images/nwwbuo1nmzvkmuzfzoyi.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:23.949Z"
+    },
+    {
+        "id":  "68e616614c319e0e57397463",
+        "_id":  "68e616614c319e0e57397463",
+        "title":  "Cho thuê nhà gần Đại học Mỏ, Tài chính, Bệnh viện Phương Đông, KCN Nam Thăng Long",
+        "description":  " Cho thuê nhà gần Đại học Mỏ, Tài chính, Bệnh viện Phương Đông, KCN Nam Thăng Long",
+        "price":  5800000,
+        "area":  40,
+        "type":  "phong_tro",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "19E Đường Tân Phong, Phường Thụy Phương, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579432/phongtro_images/mm0tdybm6nnoqvqbwnxa.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579340/phongtro_images/ss2dx1etttz46jqkrk1a.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579608/phongtro_images/tylhqvo0toj0v8vlifty.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579562/phongtro_images/hmobjwgoszupwvvdludr.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.037Z"
+    },
+    {
+        "id":  "68e616614c319e0e57397466",
+        "_id":  "68e616614c319e0e57397466",
+        "title":  "Cho Thuê Phòng Trọ Cầu Di�\u0085n, Hồ Tùng Mẫu Điện 2.5k/Số Giá Từ 1Tr8/Tháng",
+        "description":  " Cho Thuê Phòng Trọ Cầu Di�\u0085n, Hồ Tùng Mẫu Điện 2.5k/Số Giá Từ 1Tr8/Tháng",
+        "price":  1800000,
+        "area":  20,
+        "type":  "can_ho_chung_cu",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "177 Cầu Di�\u0085n, Phường Phúc Di�\u0085n, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "balcony",
+                          "washing_machine",
+                          "private_wc",
+                          "wifi",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579728/phongtro_images/prwrsgbalpzc5ip0pkkd.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579276/phongtro_images/kqwlcjumk6nuo5zr4qye.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579779/phongtro_images/vv8hcwqn5njdatrq2zhs.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579208/phongtro_images/gksw7saiskojf5ndrpag.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.305Z"
+    },
+    {
+        "id":  "68e617104c319e0e5739746e",
+        "_id":  "68e617104c319e0e5739746e",
+        "title":  "Cho Thuê phòng trọ đủ đồ cơ bản, an ninh đảm bảo tại trung tâm Kiều Mai",
+        "description":  " Cho Thuê phòng trọ đủ đồ cơ bản, an ninh đảm bảo tại trung tâm Kiều Mai",
+        "price":  2600000,
+        "area":  20,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Số nhà 10, ngõ 40 Phú Kiều, Phường Phúc Di�\u0085n, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "fridge",
+                          "private_wc",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579459/phongtro_images/mvw66gtuwky1tbb3dwbe.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579376/phongtro_images/zwdjxdfgm26svow3h0ph.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.391Z"
+    },
+    {
+        "id":  "68e617104c319e0e5739746f",
+        "_id":  "68e617104c319e0e5739746f",
+        "title":  "Phòng Trọ Phú Minh - Phúc Di�\u0085n - Bắc Từ Liêm",
+        "description":  " Phòng Trọ Phú Minh - Phúc Di�\u0085n - Bắc Từ Liêm",
+        "price":  3600000,
+        "area":  40,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "03 Phú Minh, Phường Phúc Di�\u0085n, Quận Bắc Từ Liêm, Hà Nội"
+                     },
+        "amenities":  [
+                          "balcony",
+                          "private_wc",
+                          "washing_machine",
+                          "aircon",
+                          "wifi"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579598/phongtro_images/zebuvdqbcdaasdnwzesm.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579742/phongtro_images/vgqwooaj5nqhtnk1unja.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579649/phongtro_images/rm1fudjirmeffyjkrukd.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.477Z"
+    },
+    {
+        "id":  "68e617104c319e0e57397472",
+        "_id":  "68e617104c319e0e57397472",
+        "title":  "Cần thuê phòng trọ tại (đào tấn Ba đình Hà Nội) ai có liên hệ với mình ạ",
+        "description":  " Cần thuê phòng trọ tại (đào tấn Ba đình Hà Nội) ai có liên hệ với mình ạ",
+        "price":  2700000,
+        "area":  20,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Phường Cống Vị, Quận Ba Đình, Hà Nội"
+                     },
+        "amenities":  [
+                          "wifi",
+                          "balcony",
+                          "aircon"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579269/phongtro_images/p3srthavz1ctk0xpnsdb.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579774/phongtro_images/gmkbmhyijykcagn5fjf5.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579230/phongtro_images/ydejpvvhpjz2l0kyago4.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.743Z"
+    },
+    {
+        "id":  "68e6183f4c319e0e5739747a",
+        "_id":  "68e6183f4c319e0e5739747a",
+        "title":  "Cho thuê phòng tầng 4 nhà số 42 phố Vĩnh Phúc",
+        "description":  " Cho thuê phòng tầng 4 nhà số 42 phố Vĩnh Phúc",
+        "price":  2700000,
+        "area":  30,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "42 Đường Vĩnh Phúc, Phường Cống Vị, Quận Ba Đình, Hà Nội"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "balcony",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579431/phongtro_images/fdd6wjf5odn1p49vrjkv.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579556/phongtro_images/os4e6ufxphle4krp2ewf.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579439/phongtro_images/vkpsofyufdypzeuziywm.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.827Z"
+    },
+    {
+        "id":  "68e6183f4c319e0e5739747e",
+        "_id":  "68e6183f4c319e0e5739747e",
+        "title":  "Cho thuê phòng trọ khép kín gần trung tâm Đường Bưởi, Phường Cống Vị, Quận Ba Đình",
+        "description":  " Cho thuê phòng trọ khép kín gần trung tâm Đường Bưởi, Phường Cống Vị, Quận Ba Đình",
+        "price":  2600000,
+        "area":  25,
+        "type":  "can_ho_mini",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Số 29 ngách 254/1 Đường Bưởi, Phường Cống Vị, Quận Ba Đình, Hà Nội"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "balcony",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579456/phongtro_images/ani9lnbwtaqkjwpfuheh.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579682/phongtro_images/e8mglzhxkmks0hxcsppa.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:25.198Z"
+    },
+    {
+        "id":  "68e6183f4c319e0e5739747b",
+        "_id":  "68e6183f4c319e0e5739747b",
+        "title":  "Cho Thuê Phòng trọ Quận Ba Đình 35m²",
+        "description":  " Cho Thuê Phòng trọ Quận Ba Đình 35m²",
+        "price":  4200000,
+        "area":  35,
+        "type":  "o_ghep",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Số 29 nghõ 60 linh lang Đường Đội Cấn, Phường Cống Vị, Quận Ba Đình, Hà Nội"
+                     },
+        "amenities":  [
+                          "private_wc",
+                          "washing_machine",
+                          "fridge"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579367/phongtro_images/xmygnrhyeuvgwn5lt093.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579417/phongtro_images/q19gfu8opfmwotbjplbz.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579782/phongtro_images/euw5ylho4kjztqc7qmts.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:24.913Z"
+    },
+    {
+        "id":  "68e619574c319e0e57397493",
+        "_id":  "68e619574c319e0e57397493",
+        "title":  "CHO THUÊ PHÒNG TRỌ KV PHỐ CỔ",
+        "description":  " CHO THUÊ PHÒNG TRỌ KV PHỐ CỔ",
+        "price":  3000000,
+        "area":  40,
+        "type":  "mat_bang",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Phường Quán Thánh, Quận Ba Đình, Hà Nội"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "fridge",
+                          "private_wc",
+                          "aircon",
+                          "balcony"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579553/phongtro_images/hssdejioi2rlzih6sjin.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579361/phongtro_images/czk93tydsdjpbdnaht9s.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:25.751Z"
+    },
+    {
+        "id":  "68e619574c319e0e57397497",
+        "_id":  "68e619574c319e0e57397497",
+        "title":  "Cho thuê 2 Phòng trọ ở Hồ Đắc Di, Đống Đa",
+        "description":  " Cho thuê 2 Phòng trọ ở Hồ Đắc Di, Đống Đa",
+        "price":  4900000,
+        "area":  40,
+        "type":  "can_ho_chung_cu",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Nhà số 1, ngõ 145 (cạnh nhà nghỉ Thiên Anh), Đường Trần Hữu Tước, Phường Nam Đồng, Quận Đống Đa, Hà Nội"
+                     },
+        "amenities":  [
+                          "aircon",
+                          "washing_machine"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579304/phongtro_images/bcbqdy8jqmt4exgkp6ey.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579612/phongtro_images/jnpgfphgkjebyv9mot6q.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579679/phongtro_images/idg4lryedhqixnqmwgfs.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:26.133Z"
+    },
+    {
+        "id":  "68e619574c319e0e57397495",
+        "_id":  "68e619574c319e0e57397495",
+        "title":  "Phòng trọ tại ngõ Xã Đàn 2, Phường Nam Đồng, Quận Đống Đa",
+        "description":  " Phòng trọ tại ngõ Xã Đàn 2, Phường Nam Đồng, Quận Đống Đa",
+        "price":  5300000,
+        "area":  40,
+        "type":  "nha_nguyen_can",
+        "location":  {
+                         "city":  "Hà Nội",
+                         "district":  "",
+                         "address":  "Ngõ Xã Đàn 2, Phường Nam Đồng, Quận Đống Đa"
+                     },
+        "amenities":  [
+                          "washing_machine",
+                          "private_wc"
+                      ],
+        "images":  [
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579465/phongtro_images/quqyygky0vpk6zowxxil.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579656/phongtro_images/ohzwrayj5bstop7icghc.jpg",
+                       "https://res.cloudinary.com/ddeuh2xni/image/upload/v1759579633/phongtro_images/ffl9sx3a3xkip8htpm2p.jpg"
+                   ],
+        "createdAt":  "2025-10-07T16:03:13.605Z",
+        "updatedAt":  "2025-10-09T08:25:25.926Z"
+    }
+]

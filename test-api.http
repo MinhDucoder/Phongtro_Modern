@@ -1,0 +1,91 @@
+### Test API Backend - PhongTro Modern
+### Cài VSCode extension: REST Client hoặc Thunder Client
+
+@baseUrl = http://localhost:5000/api/v1
+@token = your_token_here
+
+### 1. Health Check
+GET {{baseUrl}}/posts
+Accept: application/json
+
+### 2. Register User
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "full_name": "Test User",
+  "email": "test@example.com",
+  "password": "Test@123",
+  "phone": "0912345678",
+  "role": "user"
+}
+
+### 3. Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Test@123"
+}
+
+### 4. Get Posts (Public)
+GET {{baseUrl}}/posts?page=1&limit=10&city=Hà Nội
+Accept: application/json
+
+### 5. Search Posts
+GET {{baseUrl}}/posts?search=phòng trọ&minPrice=1000000&maxPrice=5000000
+Accept: application/json
+
+### 6. Get Post Detail
+GET {{baseUrl}}/posts/68d611489f3c9c01ecd12caa
+Accept: application/json
+
+### 7. Get User Profile (Auth required)
+GET {{baseUrl}}/user/me
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 8. Get Stats
+GET {{baseUrl}}/stats/overview
+Accept: application/json
+
+### 9. Create Post (Auth required - Landlord)
+POST {{baseUrl}}/posts
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Phòng trọ test",
+  "price": 3000000,
+  "area": 25,
+  "address": "Test address",
+  "city": "Hà Nội"
+}
+
+### 10. Update Post (Auth required)
+PUT {{baseUrl}}/posts/post_id_here
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Phòng trọ updated"
+}
+
+### 11. Delete Post (Auth required)
+DELETE {{baseUrl}}/posts/post_id_here
+Authorization: Bearer {{token}}
+
+### 12. Get Saved Properties (Auth required)
+GET {{baseUrl}}/saved-properties/dashboard/saved
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 13. Save Property (Auth required)
+POST {{baseUrl}}/saved-properties
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "postId": "68d611489f3c9c01ecd12caa"
+}

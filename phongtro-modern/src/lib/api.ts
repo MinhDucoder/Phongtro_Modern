@@ -1271,7 +1271,8 @@ export const savedPropertiesApi = {
 
   // Check if a property is saved
   async checkSavedStatus(postId: string): Promise<ApiResponse> {
-    return apiRequest(`/saved-properties/dashboard/saved/check/${postId}`, {
+    // Server implements check by GET /saved-properties/dashboard/saved/:id
+    return apiRequest(`/saved-properties/dashboard/saved/${postId}`, {
       method: 'GET',
     });
   },
