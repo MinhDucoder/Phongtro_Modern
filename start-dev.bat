@@ -1,20 +1,35 @@
 @echo off
-echo Starting Phongtro Modern Development Environment...
+chcp 65001 >nul
+cls
+
+:: Lay duong dan thu muc chua file .bat
+set PROJECT_ROOT=%~dp0
+
+echo Starting all services...
 echo.
 
-echo Starting Backend Server...
-start "Backend Server" cmd /k "cd server && npm run dev"
+:: Khoi dong Backend
+echo [1/3] Starting Backend Server...
+start "Backend" cmd /k "cd /d %PROJECT_ROOT%server && npm run dev"
 
-echo Waiting for backend to start...
-timeout /t 3 /nobreak > nul
+timeout /t 2 /nobreak > nul
 
-echo Starting Frontend Server...
-start "Frontend Server" cmd /k "cd phongtro-modern && npm run dev"
+:: Khoi dong Frontend
+echo [2/3] Starting Frontend Server...
+start "Frontend" cmd /k "cd /d %PROJECT_ROOT%phongtro-modern && npm run dev"
+
+timeout /t 2 /nobreak > nul
+
+:: Khoi dong RS-Posts
+echo [3/3] Starting RS-Posts...
+start "RS-Posts" cmd /k "cd /d %PROJECT_ROOT%RS\RS_Posts && env\Scripts\activate && python main.py"
+
+timeout /t 1 /nobreak > nul
 
 echo.
-echo Both servers are starting...
-echo Backend: http://localhost:5000
-echo Frontend: http://localhost:3000
+echo All services started!
+echo - Backend: http://localhost:5000
+echo - Frontend: http://localhost:3000
+echo - RS-Posts: http://localhost:5001
 echo.
-echo Press any key to exit...
-pause > nul
+pause

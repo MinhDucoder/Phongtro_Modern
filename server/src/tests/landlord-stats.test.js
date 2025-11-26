@@ -27,3 +27,19 @@ describe('Landlord Stats endpoints', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

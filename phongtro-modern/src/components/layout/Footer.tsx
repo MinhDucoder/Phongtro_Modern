@@ -119,19 +119,19 @@ function SocialIcon({ name }: { name: string }) {
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-50 border-t">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <footer className="bg-white text-slate-900 border-t border-slate-200">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 space-y-10">
         {/* Main footer content - Compact layout */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
           {Object.entries(footerSections).map(([title, links]) => (
             <div key={title}>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">{title}</h3>
+              <h3 className="text-sm font-semibold text-slate-900 mb-3">{title}</h3>
               <ul className="space-y-1">
                 {links.slice(0, 4).map((link) => (
                   <li key={link.name}>
                     <Link 
                       href={link.href} 
-                      className="text-xs text-gray-600 hover:text-blue-600 transition-colors"
+                      className="text-xs text-slate-500 hover:text-blue-600 transition-colors"
                     >
                       {link.name}
                     </Link>
@@ -139,7 +139,7 @@ export default function Footer() {
                 ))}
                 {links.length > 4 && (
                   <li>
-                    <span className="text-xs text-gray-500">+{links.length - 4} khác</span>
+                    <span className="text-xs text-slate-400">+{links.length - 4} khác</span>
                   </li>
                 )}
               </ul>
@@ -148,14 +148,14 @@ export default function Footer() {
         </div>
 
         {/* Company info & Contact - Combined */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 pt-6 border-t border-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-slate-200">
           {/* Company Info */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Về NhaTroVN</h3>
+            <h3 className="text-sm font-semibold text-slate-900 mb-3">Về NhaTroVN</h3>
             <ul className="space-y-1">
               {companyInfo[0].links.slice(0, 3).map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-xs text-gray-600 hover:text-blue-600 transition-colors">
+                  <Link href={link.href} className="text-xs text-slate-500 hover:text-blue-600 transition-colors">
                     {link.name}
                   </Link>
                 </li>
@@ -165,26 +165,26 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Liên hệ</h3>
-            <div className="space-y-2 text-xs text-gray-600">
+            <h3 className="text-sm font-semibold text-slate-900 mb-3">Liên hệ</h3>
+            <div className="space-y-2 text-xs text-slate-600">
               <div className="flex items-center space-x-2">
-                <PhoneIcon className="h-3 w-3" />
+                <PhoneIcon className="h-3 w-3 text-blue-500" />
                 <span>0909 316 890</span>
               </div>
               <div className="flex items-center space-x-2">
-                <EnvelopeIcon className="h-3 w-3" />
+                <EnvelopeIcon className="h-3 w-3 text-blue-500" />
                 <span>contact@nhatrovn.com</span>
               </div>
               <div className="flex items-center space-x-2">
-                <MapPinIcon className="h-3 w-3" />
-                <span className="text-xs">TP.HCM, Việt Nam</span>
+                <MapPinIcon className="h-3 w-3 text-blue-500" />
+                <span className="text-xs text-slate-600">TP.HCM, Việt Nam</span>
               </div>
             </div>
           </div>
 
           {/* Social Media */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Mạng xã hội</h3>
+            <h3 className="text-sm font-semibold text-slate-900 mb-3">Mạng xã hội</h3>
             <div className="flex space-x-2">
               {socialLinks.map((social) => (
                 <a
@@ -192,7 +192,7 @@ export default function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center bg-white border rounded hover:bg-blue-50 transition-colors"
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center bg-slate-100 border border-slate-200 rounded-lg hover:bg-blue-50 transition-colors"
                   title={social.name}
                 >
                   <SocialIcon name={social.name} />
@@ -203,10 +203,10 @@ export default function Footer() {
         </div>
 
         {/* Bottom section - Legal & Support combined */}
-        <div className="pt-6 border-t border-gray-200">
+        <div className="pt-8 border-t border-slate-200">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
             {/* Legal Info */}
-            <div className="text-xs text-gray-600 space-y-1">
+            <div className="text-xs text-slate-600 space-y-1">
               <p>© 2024 NhaTroVN. Tất cả quyền được bảo lưu.</p>
               <p>Giấy phép: 0313588502 - Sở KH&ĐT TP.HCM</p>
               <div className="flex space-x-4">
@@ -216,13 +216,14 @@ export default function Footer() {
             </div>
 
             {/* Support - Compact */}
-            <div className="bg-blue-50 rounded-lg p-3 text-xs">
-              <div className="flex items-center space-x-2 mb-1">
+            <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-xs shadow">
+              <div className="flex items-center space-x-2 mb-1 text-blue-900">
                 <ChatBubbleLeftRightIcon className="h-4 w-4 text-blue-600" />
-                <span className="font-medium text-blue-900">Hỗ trợ đăng tin</span>
+                <span className="font-semibold tracking-wide">Hỗ trợ đăng tin</span>
               </div>
-              <div className="text-blue-800">
-                <div>📞 0909 316 890 | 💬 Zalo: 0909316890</div>
+              <div className="text-slate-700 space-y-1">
+                <div>📞 0909 316 890</div>
+                <div>💬 Zalo / Messenger: 0909316890</div>
               </div>
             </div>
           </div>

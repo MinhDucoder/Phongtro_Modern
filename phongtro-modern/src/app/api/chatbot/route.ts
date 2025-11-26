@@ -9,7 +9,24 @@ import {
 } from "@google/genai";
 
 // Optional: để ai gõ thẳng URL /api/chatbot vẫn 200
-export async function GET() {
+export async function GET(req: Request) {
+  // Dev debug: /api/chatbot?debug=1 để kiểm tra biến môi trường đã nạp
+  try {
+    const url = new URL(req.url);
+    const debug = url.searchParams.get("debug");
+    if (process.env.NODE_ENV !== "production" && debug === "1") {
+      const info = {
+        GEMINI_API_KEY: Boolean(process.env.GEMINI_API_KEY),
+        GOOGLE_GENAI_API_KEY: Boolean(process.env.GOOGLE_GENAI_API_KEY),
+        GOOGLE_API_KEY: Boolean(process.env.GOOGLE_API_KEY),
+        MODEL: process.env.MODEL || null,
+        runtime: "nodejs",
+      } as const;
+      return new Response(JSON.stringify(info), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+  } catch {}
   return new Response("Chat API OK", { status: 200 });
 }
 
@@ -24,8 +41,15 @@ export async function POST(req: Request) {
       );
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) throw new Error("Missing GEMINI_API_KEY ");
+    const apiKey =
+      process.env.GEMINI_API_KEY ||
+      process.env.GOOGLE_GENAI_API_KEY ||
+      process.env.GOOGLE_API_KEY;
+    if (!apiKey) {
+      throw new Error(
+        "Missing API key. Set GEMINI_API_KEY (or GOOGLE_GENAI_API_KEY/GOOGLE_API_KEY) in .env.local"
+      );
+    }
 
     const modelName = process.env.MODEL || "gemini-2.0-flash";
     const ai = new GoogleGenAI({ apiKey });

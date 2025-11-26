@@ -95,11 +95,13 @@ export default function RoomDetailPage() {
   };
 
   const getStatusColor = (isAvailable: boolean) => {
-    return isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+    // Luôn hiển thị màu xanh (còn trống) cho tất cả phòng
+    return 'bg-green-100 text-green-800';
   };
 
   const getStatusLabel = (isAvailable: boolean) => {
-    return isAvailable ? 'Còn trống' : 'Đã thuê';
+    // Luôn hiển thị "Còn trống" cho tất cả phòng
+    return 'Còn trống';
   };
 
   const handleToggleFavorite = () => {

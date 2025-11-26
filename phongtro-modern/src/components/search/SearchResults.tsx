@@ -243,12 +243,14 @@ export default function SearchResults({ initialQuery = '', initialFilters = {} }
     );
   };
 
-  const handleToggleSaved = (roomId: string) => {
-    setSavedProperties(prev =>
-      prev.includes(roomId)
-        ? prev.filter(id => id !== roomId)
-        : [...prev, roomId]
-    );
+  const handleToggleSaved = (roomId: string, payload: { isSaved: boolean; favoriteId?: string | null }) => {
+    setSavedProperties((prev) => {
+      const isSaved = payload.isSaved;
+      if (isSaved) {
+        return prev.includes(roomId) ? prev : [...prev, roomId];
+      }
+      return prev.filter((id) => id !== roomId);
+    });
   };
 
   const getSearchSummary = () => {

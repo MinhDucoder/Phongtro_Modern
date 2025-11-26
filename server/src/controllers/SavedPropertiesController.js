@@ -264,7 +264,11 @@ class SavedPropertiesController {
   async checkSavedStatus(req, res, next) {
     try {
       const userId = req.user.id;
-      const postId = req.params.postId;
+      const postId = req.params.postId || req.params.id;
+
+      if (!postId) {
+        return error(res, "Missing postId", 400);
+      }
 
       const favorite = await Favorite.findOne({ user: userId, post: postId });
 

@@ -11,7 +11,7 @@ savedPropertiesRoute.use(authenticate());
 // Dashboard routes for saved properties
 savedPropertiesRoute.get('/dashboard/saved', catchAsync(SavedPropertiesController.getSavedProperties));
 savedPropertiesRoute.get('/dashboard/saved/stats', catchAsync(SavedPropertiesController.getSavedPropertiesStats));
-savedPropertiesRoute.get('/dashboard/saved/:id', catchAsync(SavedPropertiesController.checkSavedStatus));
+savedPropertiesRoute.get('/dashboard/saved/check/:postId', catchAsync(SavedPropertiesController.checkSavedStatus));
 
 // CRUD operations for saved properties
 savedPropertiesRoute.post('/', catchAsync(SavedPropertiesController.saveProperty));

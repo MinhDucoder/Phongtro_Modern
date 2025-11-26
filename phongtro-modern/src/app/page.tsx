@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Pagination from '@/components/ui/Pagination';
 import StructuredData from '@/components/seo/StructuredData';
 import SearchResults from '@/components/search/SearchResults';
-import { Post } from '@/lib/api';
+import { Post, savedPropertiesApi } from '@/lib/api';
 import RoomCard from '@/components/room/RoomCard';
 import { toastManager } from '@/components/ui/ToastManager';
+import { useAuth } from '@/contexts/AuthContext';
 
 import Link from 'next/link';
 
@@ -22,7 +23,7 @@ function HomeInner() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [savedProperties, setSavedProperties] = useState<string[]>([]);
+  const [savedStatuses, setSavedStatuses] = useState<Record<string, { isSaved: boolean; favoriteId: string | null }>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [hasShownToast, setHasShownToast] = useState(() => {
@@ -31,7 +32,8 @@ function HomeInner() {
     }
     return false;
   });
-  const ITEMS_PER_PAGE = 6;
+  const ITEMS_PER_PAGE = 12;
+  const { isAuthenticated } = useAuth();
 
   // Check if we have search params (keyword, province, or propertyType)
   const hasSearchParams = searchParams?.has('keyword') || searchParams?.has('province') || searchParams?.has('propertyType');
@@ -128,13 +130,73 @@ function HomeInner() {
     );
   };
 
-  const handleToggleSaved = (roomId: string) => {
-    setSavedProperties(prev =>
-      prev.includes(roomId)
-        ? prev.filter(id => id !== roomId)
-        : [...prev, roomId]
-    );
+  const handleSavedChange = (roomId: string, payload: { isSaved: boolean; favoriteId?: string | null }) => {
+    setSavedStatuses((prev) => ({
+      ...prev,
+      [roomId]: {
+        isSaved: payload.isSaved,
+        favoriteId: payload.favoriteId ?? null,
+      },
+    }));
   };
+
+  const postIdsKey = useMemo(() => posts.map((post) => post._id).join('|'), [posts]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setSavedStatuses({});
+      return;
+    }
+    if (!posts.length) return;
+
+    let isCancelled = false;
+
+    const fetchSavedStatuses = async () => {
+      try {
+        const results = await Promise.all(
+          posts.map(async (post) => {
+            try {
+              const response = await savedPropertiesApi.checkSavedStatus(post._id);
+              const payload = (response?.data ?? response) as { isSaved?: boolean; favoriteId?: string };
+              return {
+                postId: post._id,
+                isSaved: !!payload?.isSaved,
+                favoriteId: payload?.favoriteId ?? null,
+              };
+            } catch (error) {
+              console.error('Không thể kiểm tra trạng thái lưu tin:', post._id, error);
+              return {
+                postId: post._id,
+                isSaved: false,
+                favoriteId: null,
+              };
+            }
+          })
+        );
+
+        if (isCancelled) return;
+
+        setSavedStatuses((prev) => {
+          const next = { ...prev };
+          results.forEach((result) => {
+            next[result.postId] = {
+              isSaved: result.isSaved,
+              favoriteId: result.favoriteId,
+            };
+          });
+          return next;
+        });
+      } catch (error) {
+        console.error('Lỗi khi tải trạng thái lưu tin:', error);
+      }
+    };
+
+    fetchSavedStatuses();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isAuthenticated, postIdsKey]);
 
   return (
     <>
@@ -245,9 +307,9 @@ function HomeInner() {
                   }}
                   onToggleFavorite={handleToggleFavorite}
                   isFavorite={favorites.includes(post._id)}
-                  onToggleSaved={handleToggleSaved}
-                  isSaved={savedProperties.includes(post._id)}
-                  favoriteId={undefined} // TODO: Get from API response
+                  onToggleSaved={handleSavedChange}
+                  isSaved={savedStatuses[post._id]?.isSaved ?? false}
+                  favoriteId={savedStatuses[post._id]?.favoriteId ?? null}
                 />
               ) : (
                 <div key={post._id} className="bg-red-100 p-4 rounded">

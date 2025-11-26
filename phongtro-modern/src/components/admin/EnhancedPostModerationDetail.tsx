@@ -400,7 +400,7 @@ export default function EnhancedPostModerationDetail({
                           {roomDetails.images.map((image: string, index: number) => (
                             <div 
                               key={index} 
-                              className={`relative h-20 cursor-pointer rounded-md overflow-hidden border-2 ${
+                              className={`relative w-full aspect-square cursor-pointer rounded-md overflow-hidden border-2 ${
                                 index === currentImageIndex ? 'border-blue-500' : 'border-transparent'
                               }`}
                               onClick={() => setCurrentImageIndex(index)}
@@ -409,7 +409,7 @@ export default function EnhancedPostModerationDetail({
                                 src={image} 
                                 alt={`Thumbnail ${index + 1}`}
                                 fill
-                                sizes="100px"
+                                sizes="(max-width: 768px) 20vw, 15vw"
                                 className="object-cover"
                               />
                             </div>

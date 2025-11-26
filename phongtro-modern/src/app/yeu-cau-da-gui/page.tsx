@@ -1,4 +1,5 @@
 import YeuCauDaGuiClient from './YeuCauDaGuiClient';
+import { Suspense } from 'react';
 import { AuthRequired } from '@/components/auth/ProtectedRoute';
 
 export const metadata = {
@@ -9,7 +10,9 @@ export const metadata = {
 export default function YeuCauDaGuiPage() {
   return (
     <AuthRequired>
-      <YeuCauDaGuiClient />
+      <Suspense fallback={null}>
+        <YeuCauDaGuiClient />
+      </Suspense>
     </AuthRequired>
   );
 }

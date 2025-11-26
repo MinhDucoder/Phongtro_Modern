@@ -144,6 +144,17 @@ const postSchema = new mongoose.Schema(
     visits: {
       total: { type: Number, default: 0 }
     },
+    // Rating fields
+    averageRating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5
+    },
+    totalRatings: {
+      type: Number,
+      default: 0
+    },
     // When rejected, expiry date for resubmission
     resubmissionEligibleDate: {
       type: Date

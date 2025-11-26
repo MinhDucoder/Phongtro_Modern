@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { SocketProvider } from "@/contexts/SocketContext";
 import { ChatProvider } from "@/contexts/ChatContext";
 import { ToastProvider } from "@/components/ui/ToastManager";
+import { Suspense } from "react";
 
 const geistSans = Inter({
   variable: "--font-geist-sans",
@@ -92,9 +93,11 @@ export default function RootLayout({
             <SocketProvider>
               <ChatProvider>
                 <ToastProvider />
-                <ConditionalLayout>
-                  {children}
-                </ConditionalLayout>
+                <Suspense fallback={null}>
+                  <ConditionalLayout>
+                    {children}
+                  </ConditionalLayout>
+                </Suspense>
                 {/* <ConnectionStatus /> */}
               </ChatProvider>
             </SocketProvider>

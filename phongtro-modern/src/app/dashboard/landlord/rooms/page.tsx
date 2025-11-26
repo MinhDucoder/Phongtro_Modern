@@ -85,7 +85,7 @@ function Content() {
                 <td className="px-4 py-2">{r.title || '-'}</td>
                 <td className="px-4 py-2">{r.price ?? 0}</td>
                 <td className="px-4 py-2">{r.city || '-'}</td>
-                <td className="px-4 py-2">{r.isAvailable ? 'Còn trống' : 'Đã thuê'}</td>
+                <td className="px-4 py-2">Còn trống</td>
                 <td className="px-4 py-2 space-x-2">
                   <button onClick={() => onEdit(r)} className="px-2 py-1 rounded border">Sửa</button>
                   <button onClick={() => onDelete(r._id)} className="px-2 py-1 rounded border text-red-600">Xóa</button>
@@ -168,6 +168,16 @@ function RoomFormModal({ initial, onClose, onSaved }: { initial: any | null; onC
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

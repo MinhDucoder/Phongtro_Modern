@@ -314,16 +314,16 @@ export default function MapLibreMap({
 
         // Check for coordinates in various possible locations
         if (post?.roomId?.location?.coordinates && post.roomId.location.coordinates.length === 2) {
-          // Database format: [latitude, longitude] (not GeoJSON)
-          const [lat, lng] = post.roomId.location.coordinates;
+          // MongoDB GeoJSON format: [longitude, latitude]
+          const [lng, lat] = post.roomId.location.coordinates;
           coordinates = { lat, lng };
         } else if (post?.location?.coordinates && post.location.coordinates.length === 2) {
-          // Fallback: check if coordinates are in post.location
-          const [lat, lng] = post.location.coordinates;
+          // Fallback: check if coordinates are in post.location (also GeoJSON [lng, lat])
+          const [lng, lat] = post.location.coordinates;
           coordinates = { lat, lng };
         } else if (post?.coordinates && post.coordinates.length === 2) {
-          // Another fallback: direct coordinates
-          const [lat, lng] = post.coordinates;
+          // Another fallback: direct coordinates (assume [lng, lat] for consistency)
+          const [lng, lat] = post.coordinates;
           coordinates = { lat, lng };
         } else if (post?.lat && post?.lng) {
           // Direct lat/lng properties

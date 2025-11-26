@@ -21,12 +21,19 @@ interface RoomCardProps {
   room: Room;
   onToggleFavorite?: (roomId: string) => void;
   isFavorite?: boolean;
-  onToggleSaved?: (roomId: string) => void;
+  onToggleSaved?: (roomId: string, payload: { isSaved: boolean; favoriteId?: string | null }) => void;
   isSaved?: boolean;
-  favoriteId?: string; // ID của favorite record trong database
+  favoriteId?: string | null; // ID của favorite record trong database
 }
 
-export default function RoomCard({ room, onToggleFavorite, isFavorite = false, onToggleSaved, isSaved = false, favoriteId }: RoomCardProps) {
+export default function RoomCard({
+  room,
+  onToggleFavorite,
+  isFavorite = false,
+  onToggleSaved,
+  isSaved = false,
+  favoriteId,
+}: RoomCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { isAuthenticated } = useAuth();
@@ -43,11 +50,24 @@ export default function RoomCard({ room, onToggleFavorite, isFavorite = false, o
   };
 
   const getStatusColor = (isAvailable: boolean) => {
-    return isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+    // Luôn hiển thị màu xanh (còn trống) cho tất cả phòng
+    return 'bg-green-100 text-green-800';
   };
 
   const getStatusLabel = (isAvailable: boolean) => {
-    return isAvailable ? 'Còn trống' : 'Đã thuê';
+    // Luôn hiển thị "Còn trống" cho tất cả phòng
+    return 'Còn trống';
+  };
+
+  const extractFavoriteId = (response: any): string | null => {
+    if (!response) return null;
+    return (
+      response?.data?.favorite?._id ||
+      response?.data?.favoriteId ||
+      response?.favorite?._id ||
+      response?.favoriteId ||
+      null
+    );
   };
 
   const handleSaveProperty = async () => {
@@ -75,17 +95,20 @@ export default function RoomCard({ room, onToggleFavorite, isFavorite = false, o
       if (isSaved) {
         // Remove from saved
         console.log('🗑️ Removing property from saved...');
-        if (favoriteId) {
-          await savedPropertiesApi.removeProperty(favoriteId);
+        if (!favoriteId) {
+          toastManager.showError('Không tìm thấy mã lưu tin để hủy lưu');
+          return;
         }
-        onToggleSaved?.(room._id);
+        await savedPropertiesApi.removeProperty(favoriteId);
+        onToggleSaved?.(room._id, { isSaved: false, favoriteId: null });
         toastManager.showSuccess('Đã bỏ lưu tin');
       } else {
         // Add to saved
         console.log('💾 Saving property...', { postId: room._id });
         const response = await savedPropertiesApi.saveProperty(room._id);
         console.log('✅ Save response:', response);
-        onToggleSaved?.(room._id);
+        const newFavoriteId = extractFavoriteId(response);
+        onToggleSaved?.(room._id, { isSaved: true, favoriteId: newFavoriteId });
         toastManager.showSuccess('Đã lưu tin thành công');
       }
     } catch (err: unknown) {
