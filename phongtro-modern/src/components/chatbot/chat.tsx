@@ -99,6 +99,18 @@ export default function Chatbot({
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
 
+  // Scroll to bottom when chat opens
+  useEffect(() => {
+    if (open && bodyRef.current) {
+      setTimeout(() => {
+        if (bodyRef.current) {
+          bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+        }
+      }, 0);
+    }
+  }, [open]);
+
+  // Scroll to bottom on new message if user is near bottom
   useEffect(() => {
     if (!open) return;
     const el = bodyRef.current;
@@ -106,7 +118,7 @@ export default function Chatbot({
       const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
       if (nearBottom) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
     }
-  }, [messages, open]);
+  }, [messages]);
   useEffect(() => () => abortRef.current?.abort(), []);
   useEffect(() => { if (!open) abortRef.current?.abort(); }, [open]);
   // Load history once on mount
@@ -134,7 +146,7 @@ export default function Chatbot({
           }));
         if (restored.length > 0) setMessages(restored.slice(-80));
       }
-    } catch (_) {}
+    } catch (_) { }
   }, []);
   // Persist history on change
   useEffect(() => {
@@ -142,7 +154,7 @@ export default function Chatbot({
       if (typeof window === "undefined") return;
       const toSave = messages.map((m) => ({ ...m, pending: false })).slice(-80);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
-    } catch (_) {}
+    } catch (_) { }
   }, [messages]);
 
   const push = (m: Msg) => setMessages((prev) => [...prev, m]);
@@ -271,8 +283,8 @@ export default function Chatbot({
     const cls = isUser
       ? "bg-blue-600 text-white rounded-br-md"
       : msg.kind === "status"
-      ? "bg-white text-gray-600 border border-gray-100 rounded-bl-md"
-      : "bg-white text-gray-900 border border-gray-100 rounded-bl-md";
+        ? "bg-white text-gray-600 border border-gray-100 rounded-bl-md"
+        : "bg-white text-gray-900 border border-gray-100 rounded-bl-md";
     const html = msg.content
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
       .replace(/(https?:\/\/[^\s]+)/g, '<a class="text-blue-600 underline" href="$1" rel="nofollow">$1</a>');
