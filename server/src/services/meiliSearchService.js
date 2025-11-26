@@ -44,7 +44,7 @@ export async function initSearchConfig() {
       ],
       filterableAttributes: ["price", "area", "type", "location.city", "location.district", "location.address"],
       sortableAttributes: ["price", "area", "createdAt"],
-      stopWords: ["và", "có", "ở", "tại", "phòng", "trọ", "nhà", "cho", "thuê"],
+      stopWords: ["và", "có", "ở", "tại", "cho", "thuê"], // Đã xóa "phòng", "trọ", "nhà" vì là từ khóa quan trọng
     });
 
     console.log("✅ Meilisearch index configured successfully!");
@@ -142,9 +142,26 @@ export async function searchPosts(keyword, options = {}) {
 
   let result = await index.search(normalized, params);
 
-  // 🔄 Nếu không có kết quả → thử tìm lại bằng keyword gốc
-  if (result.hits.length === 0 && normalized !== searchKeyword) {
-    result = await index.search(searchKeyword, params);
+  // 🔄 Nếu không có kết quả → thử nhiều cách khác nhau
+  if (result.hits.length === 0) {
+    // Thử 1: Tìm bằng keyword gốc (có dấu)
+    if (normalized !== searchKeyword) {
+      result = await index.search(searchKeyword, params);
+    }
+    
+    // Thử 2: Nếu vẫn không có kết quả, tìm theo từng từ riêng lẻ
+    if (result.hits.length === 0 && normalized.includes(' ')) {
+      const words = normalized.split(' ').filter(w => w.length > 0);
+      if (words.length > 1) {
+        // Tìm với từ đầu tiên (thường là từ quan trọng nhất)
+        result = await index.search(words[0], params);
+        
+        // Nếu vẫn không có, thử với từ cuối cùng
+        if (result.hits.length === 0 && words.length > 1) {
+          result = await index.search(words[words.length - 1], params);
+        }
+      }
+    }
   }
 
   const totalHits = result.estimatedTotalHits || 0;

@@ -33,8 +33,8 @@ function HomeInner() {
   });
   const ITEMS_PER_PAGE = 6;
 
-  // Check if we have search params (keyword or province)
-  const hasSearchParams = searchParams?.has('keyword') || searchParams?.has('province');
+  // Check if we have search params (keyword, province, or propertyType)
+  const hasSearchParams = searchParams?.has('keyword') || searchParams?.has('province') || searchParams?.has('propertyType');
 
   useEffect(() => {
     // Reset toast flag khi F5 (reload trang)

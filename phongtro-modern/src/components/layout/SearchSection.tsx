@@ -76,6 +76,17 @@ export default function SearchSection() {
     filters.propertyType ? [filters.propertyType] : []
   );
 
+  // Sync filters with URL params when they change
+  useEffect(() => {
+    setFilters({
+      keyword: searchParams?.get('keyword') || '',
+      province: searchParams?.get('province') || '',
+      district: searchParams?.get('district') || '',
+      propertyType: searchParams?.get('propertyType') || '',
+      priceRange: searchParams?.get('priceRange') || '',
+    });
+  }, [searchParams]);
+
   // Close filter popup when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -126,6 +137,9 @@ export default function SearchSection() {
   };
 
   const handleSearch = () => {
+    // Đóng suggestions khi bấm tìm kiếm
+    setIsSuggestionsOpen(false);
+    
     const params = new URLSearchParams();
     
     // Add keyword if present
@@ -190,15 +204,19 @@ export default function SearchSection() {
                   isOpen={isSuggestionsOpen}
                   onClose={() => setIsSuggestionsOpen(false)}
                   onSelectSuggestion={(selectedKeyword) => {
+                    // Cập nhật keyword vào input
                     handleFilterChange('keyword', selectedKeyword);
                     setIsSuggestionsOpen(false);
-                    // Chuyển đến trang tìm kiếm
+                    
+                    // Tự động thực hiện tìm kiếm ngay lập tức
                     const params = new URLSearchParams();
                     params.set('keyword', selectedKeyword);
                     if (filters.province) params.set('province', filters.province);
                     if (filters.district) params.set('district', filters.district);
                     if (filters.propertyType) params.set('propertyType', filters.propertyType);
                     if (filters.priceRange) params.set('priceRange', filters.priceRange);
+                    
+                    // Chuyển đến trang tìm kiếm để hiển thị kết quả
                     router.push(`/tim-kiem?${params.toString()}`);
                   }}
                 />

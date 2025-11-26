@@ -15,6 +15,7 @@ import {
 
 interface SearchResult {
   _id: string;
+  postId?: string; // ID của post (quan trọng để link đến trang chi tiết)
   title: string;
   description: string;
   price: number;
@@ -153,12 +154,14 @@ export default function SearchResults({ initialQuery = '', initialFilters = {} }
               
               if (isMeiliSearch) {
                 // MeiliSearch format - dữ liệu đã flat
+                // Trong MeiliSearch, _id là post ID
                 const imageUrls = Array.isArray(p.images) 
                   ? p.images.map(img => typeof img === 'string' ? img : img?.url).filter(Boolean) as string[]
                   : [];
                 
                 return {
-                  _id: p._id || p.id || '',
+                  _id: p._id || p.id || '', // Room ID (nếu có)
+                  postId: p._id || p.id || '', // Post ID (quan trọng!)
                   title: p.title || '',
                   description: p.description || '',
                   price: typeof p.price === 'number' ? p.price : 0,
@@ -193,7 +196,8 @@ export default function SearchResults({ initialQuery = '', initialFilters = {} }
                   : { province: rid.city ?? '', district: '', ward: '', address: rid.address ?? '' };
                 
                 return {
-                  _id: rid._id || p._id || '',
+                  _id: rid._id || '', // Room ID
+                  postId: p._id || p.id || '', // Post ID (quan trọng!)
                   title: rid.title || '',
                   description: rid.description || '',
                   price: typeof rid.price === 'number' ? rid.price : 0,
@@ -327,6 +331,7 @@ export default function SearchResults({ initialQuery = '', initialFilters = {} }
                   key={result._id}
                   room={{
                     _id: result._id,
+                    postId: result.postId, // Thêm postId để link đến trang chi tiết
                     title: result.title,
                     description: result.description,
                     price: result.price,
