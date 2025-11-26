@@ -5,6 +5,7 @@ import Post from "../models/postSchema.js";
 import Room from "../models/roomSchema.js";
 import fs from "fs";
 import path from "path";
+import { extractProvince, extractDistrict } from "../utils/addressParser.js";
 dotenv.config();
 
 const indexName = process.env.MEILISEARCH_INDEX || "posts";
@@ -15,19 +16,35 @@ const index = meiliClient.index(indexName);
  */
 export async function initSearchConfig() {
   try {
-    // Cấu hình cơ bản (không cần synonyms file)
+    // Cấu hình nâng cao cho search tốt hơn
     await index.updateSettings({
-      typoTolerance: { enabled: true },
+      typoTolerance: { 
+        enabled: true,
+        minWordSizeForTypos: {
+          oneTypo: 4,
+          twoTypos: 8
+        }
+      },
+      // Ranking attributes: ưu tiên title > address > description
       searchableAttributes: [
-        "title", 
-        "description", 
-        "location.city", 
-        "location.district",
-        "location.address"  // Thêm address để search theo địa chỉ đầy đủ
+        "title",           // Ưu tiên cao nhất
+        "location.address", // Địa chỉ đầy đủ
+        "location.district", // Quận/huyện
+        "location.city",    // Tỉnh/thành phố
+        "description"       // Mô tả
       ],
-      filterableAttributes: ["price", "area", "type", "location.city", "location.district"],
+      // Ranking rules: ưu tiên kết quả khớp chính xác hơn
+      rankingRules: [
+        "words",           // Ưu tiên số từ khớp
+        "typo",            // Ưu tiên ít lỗi chính tả
+        "proximity",       // Ưu tiên từ khóa gần nhau
+        "attribute",       // Ưu tiên theo thứ tự searchableAttributes
+        "sort",            // Ưu tiên theo sort
+        "exactness"        // Ưu tiên khớp chính xác
+      ],
+      filterableAttributes: ["price", "area", "type", "location.city", "location.district", "location.address"],
       sortableAttributes: ["price", "area", "createdAt"],
-      stopWords: ["và", "có", "ở", "tại"],
+      stopWords: ["và", "có", "ở", "tại", "phòng", "trọ", "nhà", "cho", "thuê"],
     });
 
     console.log("✅ Meilisearch index configured successfully!");
@@ -68,16 +85,28 @@ export async function searchPosts(keyword, options = {}) {
   // Build Meilisearch filter expressions
   const filterExpressions = [];
   if (filters.type) filterExpressions.push(`type = "${filters.type}"`);
-  // Bỏ filter exact match cho province và district vì đã thêm vào keyword
-  // if (filters.province) filterExpressions.push(`location.city = "${filters.province}"`);
-  // if (filters.district) filterExpressions.push(`location.district = "${filters.district}"`);
+  
+  // 🔍 SMART FILTER: Filter theo province - kiểm tra cả city và address
+  // MeiliSearch filter: dùng array để OR
+  if (filters.province) {
+    // Thêm vào keyword để search tốt hơn, filter sẽ được xử lý ở backend
+    // Filter sẽ được thực hiện bằng cách thêm vào keyword search
+  }
+  
+  // 🔍 SMART FILTER: Filter theo district - tìm trong address
+  // Thêm vào keyword để search tốt hơn
+  if (filters.district) {
+    // Filter sẽ được thực hiện bằng cách thêm vào keyword search
+  }
+  
   if (filters.minPrice) filterExpressions.push(`price >= ${Number(filters.minPrice)}`);
   if (filters.maxPrice) filterExpressions.push(`price <= ${Number(filters.maxPrice)}`);
   if (filters.minArea) filterExpressions.push(`area >= ${Number(filters.minArea)}`);
   if (filters.maxArea) filterExpressions.push(`area <= ${Number(filters.maxArea)}`);
   if (Array.isArray(filters.amenities) && filters.amenities.length > 0) {
-    // amenities contains all of selected
-    filterExpressions.push(filters.amenities.map((a) => `amenities = "${a}"`));
+    // amenities contains all of selected - MeiliSearch dùng array cho OR
+    const amenityFilters = filters.amenities.map((a) => `amenities = "${a}"`);
+    filterExpressions.push(amenityFilters);
   }
 
   // Sort mapping
@@ -88,26 +117,28 @@ export async function searchPosts(keyword, options = {}) {
   else if (sortBy === "area_desc") sortParam = ["area:desc"];
   // relevance: default undefined to keep ranking
 
-  const params = {
-    limit,
-    offset: (page - 1) * limit,
-    attributesToRetrieve: [
-      "_id",
-      "id",
-      "title",
-      "description",
-      "price",
-      "area",
-      "location",
-      "images",
-      "amenities",
-      "createdAt",
-      "updatedAt",
-    ],
-    attributesToHighlight: ["title", "description"],
-    sort: sortParam,
-    filter: filterExpressions.length > 0 ? filterExpressions : undefined,
-  };
+    const params = {
+      limit,
+      offset: (page - 1) * limit,
+      attributesToRetrieve: [
+        "_id",
+        "id",
+        "title",
+        "description",
+        "price",
+        "area",
+        "location",
+        "images",
+        "amenities",
+        "createdAt",
+        "updatedAt",
+      ],
+      attributesToHighlight: ["title", "description"],
+      highlightPreTag: "<mark>",
+      highlightPostTag: "</mark>",
+      sort: sortParam,
+      filter: filterExpressions.length > 0 ? filterExpressions : undefined,
+    };
 
   let result = await index.search(normalized, params);
 
@@ -164,8 +195,8 @@ export async function syncDataToMeiliSearch() {
         area: post.roomId.area || 0,
         type: post.roomId.propertyType || "unknown",
         location: {
-          city: post.roomId.city || "",
-          district: post.roomId.district || "",
+          city: post.roomId.city || extractProvince(post.roomId.address) || "",
+          district: extractDistrict(post.roomId.address) || "",
           address: post.roomId.address || ""
         },
         amenities: post.roomId.amenities || [],
@@ -219,8 +250,8 @@ export async function addOrUpdatePostInMeiliSearch(post) {
       area: post.roomId.area || 0,
       type: post.roomId.propertyType || "unknown",
       location: {
-        city: post.roomId.city || "",
-        district: post.roomId.district || "",
+        city: post.roomId.city || extractProvince(post.roomId.address) || "",
+        district: extractDistrict(post.roomId.address) || "",
         address: post.roomId.address || ""
       },
       amenities: post.roomId.amenities || [],
@@ -250,5 +281,163 @@ export async function deletePostFromMeiliSearch(postId) {
     console.log(`✅ Post ${postId} deleted from MeiliSearch`);
   } catch (err) {
     console.error("❌ Failed to delete post from MeiliSearch:", err.message);
+  }
+}
+
+/**
+ * 🔍 Autocomplete/Suggestions - Tìm kiếm gợi ý nhanh
+ * @param {string} keyword - Từ khóa người dùng nhập
+ * @param {number} limit - Số lượng kết quả (mặc định 5)
+ * @returns {Promise<Array>} - Danh sách suggestions
+ */
+export async function getSearchSuggestions(keyword, limit = 5) {
+  if (!keyword || keyword.trim().length === 0) {
+    return [];
+  }
+
+  try {
+    const normalized = removeAccents(keyword.trim().toLowerCase());
+    
+    const params = {
+      limit: Math.min(limit, 10), // Tối đa 10 suggestions
+      attributesToRetrieve: ["_id", "id", "title", "location", "price", "area", "images"],
+      attributesToHighlight: ["title", "location.address"],
+      showMatchesPosition: true,
+    };
+
+    const result = await index.search(normalized, params);
+    
+    return result.hits.map((hit) => ({
+      _id: hit._id || hit.id,
+      title: hit.title,
+      location: hit.location,
+      price: hit.price,
+      area: hit.area,
+      images: hit.images || [],
+      highlight: hit._formatted?.title || hit.title,
+    }));
+  } catch (err) {
+    console.error("❌ Autocomplete error:", err.message);
+    return [];
+  }
+}
+
+/**
+ * 🏠 Tìm phòng trọ tương tự dựa trên một phòng trọ cụ thể
+ * @param {string} postId - ID của post hiện tại
+ * @param {object} roomData - Thông tin phòng trọ (title, location, price, area, type)
+ * @param {number} limit - Số lượng kết quả (mặc định 6)
+ * @returns {Promise<Array>} - Danh sách phòng trọ tương tự
+ */
+export async function findSimilarRooms(postId, roomData = {}, limit = 6) {
+  try {
+    if (!roomData || !roomData.title) {
+      // Nếu không có roomData, lấy từ MeiliSearch
+      const doc = await index.getDocument(postId.toString());
+      if (!doc) return [];
+      
+      roomData = {
+        title: doc.title,
+        location: doc.location,
+        price: doc.price,
+        area: doc.area,
+        type: doc.type,
+      };
+    }
+
+    // Xây dựng query để tìm phòng trọ tương tự
+    // Ưu tiên: cùng khu vực, cùng loại, giá và diện tích gần nhau
+    const searchQueries = [];
+    
+    // Query 1: Tìm theo địa chỉ/quận (ưu tiên cao nhất)
+    if (roomData.location?.district) {
+      searchQueries.push(roomData.location.district);
+    }
+    if (roomData.location?.city) {
+      searchQueries.push(roomData.location.city);
+    }
+    
+    // Query 2: Tìm theo từ khóa trong title (loại bỏ các từ dừng)
+    const titleWords = roomData.title
+      .split(/\s+/)
+      .filter(word => word.length > 2)
+      .slice(0, 3) // Lấy 3 từ đầu tiên
+      .join(' ');
+    if (titleWords) {
+      searchQueries.push(titleWords);
+    }
+
+    // Kết hợp các query
+    const combinedQuery = searchQueries.join(' ').trim() || roomData.title;
+    
+    // Build filters
+    const filterExpressions = [];
+    
+    // Loại trừ post hiện tại
+    filterExpressions.push(`_id != "${postId}"`);
+    
+    // Filter theo loại phòng nếu có
+    if (roomData.type) {
+      filterExpressions.push(`type = "${roomData.type}"`);
+    }
+    
+    // Filter theo giá (khoảng ±30%)
+    if (roomData.price) {
+      const minPrice = Math.max(0, Math.floor(roomData.price * 0.7));
+      const maxPrice = Math.ceil(roomData.price * 1.3);
+      filterExpressions.push(`price >= ${minPrice} AND price <= ${maxPrice}`);
+    }
+    
+    // Filter theo diện tích (khoảng ±20%)
+    if (roomData.area) {
+      const minArea = Math.max(0, Math.floor(roomData.area * 0.8));
+      const maxArea = Math.ceil(roomData.area * 1.2);
+      filterExpressions.push(`area >= ${minArea} AND area <= ${maxArea}`);
+    }
+    
+    // Filter theo khu vực (tỉnh/thành phố)
+    if (roomData.location?.city) {
+      filterExpressions.push(`location.city = "${roomData.location.city}"`);
+    }
+
+    const normalized = removeAccents(combinedQuery.toLowerCase());
+    
+    const params = {
+      limit: Math.min(limit, 12),
+      filter: filterExpressions.length > 0 ? filterExpressions : undefined,
+      attributesToRetrieve: [
+        "_id",
+        "id",
+        "title",
+        "description",
+        "price",
+        "area",
+        "location",
+        "images",
+        "amenities",
+        "type",
+        "createdAt",
+      ],
+      attributesToHighlight: ["title", "location.address"],
+    };
+
+    const result = await index.search(normalized, params);
+    
+    return result.hits.map((hit) => ({
+      _id: hit._id || hit.id,
+      title: hit.title,
+      description: hit.description,
+      price: hit.price,
+      area: hit.area,
+      location: hit.location,
+      images: hit.images || [],
+      amenities: hit.amenities || [],
+      type: hit.type,
+      createdAt: hit.createdAt,
+      highlight: hit._formatted?.title || hit.title,
+    }));
+  } catch (err) {
+    console.error("❌ Find similar rooms error:", err.message);
+    return [];
   }
 }

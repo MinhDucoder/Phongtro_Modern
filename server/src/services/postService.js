@@ -5,6 +5,7 @@ import Room from "../models/roomSchema.js";
 import PostAnalytics from "../models/postAnalyticsSchema.js";
 import Subscription from "../models/subscriptionSchema.js";
 import { LANDLORD_PROJECTION, ROOM_PROJECTION } from "../utils/constants.js";
+import { matchesProvince, matchesDistrict, matchesLocation } from "../utils/addressParser.js";
 
 class PostService {
   async createPost(userId, postData) {
@@ -195,13 +196,59 @@ class PostService {
     
     // 🚀 OPTIMIZED: Combine all room filters vào 1 $match stage
     const roomMatch = {};
+    const roomMatchExpr = [];
+    
     if (propertyTypeFilter) roomMatch["roomId.propertyType"] = propertyTypeFilter;
-    if (provinceFilter) roomMatch["roomId.city"] = provinceFilter;
-    if (districtFilter) roomMatch["roomId.district"] = districtFilter;
     if (keywordFilter) roomMatch["roomId.title"] = keywordFilter;
     if (priceFilter) roomMatch["roomId.price"] = priceFilter;
     
-    if (Object.keys(roomMatch).length > 0) {
+    // 🔍 SMART FILTER: Filter theo province - kiểm tra cả city field và address
+    if (provinceFilter) {
+      // Escape special regex characters
+      const escapedProvince = provinceFilter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      roomMatchExpr.push({
+        $or: [
+          { "roomId.city": provinceFilter },
+          { 
+            $expr: {
+              $regexMatch: {
+                input: { $toLower: { $ifNull: ["$roomId.address", ""] } },
+                regex: escapedProvince,
+                options: "i"
+              }
+            }
+          }
+        ]
+      });
+    }
+    
+    // 🔍 SMART FILTER: Filter theo district - tìm trong address vì không có district field riêng
+    if (districtFilter) {
+      // Tạo regex pattern để tìm district trong address (không phân biệt dấu)
+      // Escape special characters và cho phép khoảng trắng linh hoạt
+      const escapedDistrict = districtFilter
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        .replace(/\s+/g, '\\s*');
+      
+      roomMatchExpr.push({
+        $expr: {
+          $regexMatch: {
+            input: { $toLower: { $ifNull: ["$roomId.address", ""] } },
+            regex: `(?:quận|huyện)?\\s*${escapedDistrict}`,
+            options: "i"
+          }
+        }
+      });
+    }
+    
+    // Nếu có roomMatchExpr, thêm vào pipeline riêng
+    if (roomMatchExpr.length > 0) {
+      if (Object.keys(roomMatch).length > 0) {
+        pipeline.push({ $match: roomMatch });
+      }
+      // Thêm $match với $expr cho address-based filters
+      pipeline.push({ $match: { $and: roomMatchExpr } });
+    } else if (Object.keys(roomMatch).length > 0) {
       pipeline.push({ $match: roomMatch });
     }
     

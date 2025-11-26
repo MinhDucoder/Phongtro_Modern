@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { MagnifyingGlassIcon, MapPinIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
@@ -12,15 +13,24 @@ interface Room {
   area: number;
   city: string;
   images: any[];
+  location?: {
+    city?: string;
+    district?: string;
+    address?: string;
+  };
 }
 
 interface SearchSuggestionsProps {
   keyword: string;
   isOpen: boolean;
   onClose: () => void;
+  onSelectSuggestion?: (keyword: string) => void;
 }
 
-export default function SearchSuggestions({ keyword, isOpen, onClose }: SearchSuggestionsProps) {
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1';
+
+export default function SearchSuggestions({ keyword, isOpen, onClose, onSelectSuggestion }: SearchSuggestionsProps) {
+  const router = useRouter();
   const [suggestions, setSuggestions] = useState<Room[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -44,7 +54,7 @@ export default function SearchSuggestions({ keyword, isOpen, onClose }: SearchSu
   };
 
   useEffect(() => {
-    // Chỉ hiển thị suggestions khi có keyword
+    // Chỉ hiển thị suggestions khi có keyword và isOpen
     if (!isOpen || !keyword.trim()) {
       setSuggestions([]);
       return;
@@ -54,28 +64,31 @@ export default function SearchSuggestions({ keyword, isOpen, onClose }: SearchSu
       try {
         setLoading(true);
         
-        // Tìm kiếm theo keyword
+        // Đơn giản: Gọi API posts với keyword để lấy 5 phòng gần nhất
         const params = new URLSearchParams();
         params.set('q', keyword.trim());
-        params.set('limit', '5'); // Hiển thị 5 kết quả
+        params.set('limit', '5'); // Lấy 5 phòng gần nhất
         
-        const response = await fetch(`http://localhost:5000/api/v1/posts?${params.toString()}`);
+        const response = await fetch(`${API_BASE_URL}/posts?${params.toString()}`);
         const data = await response.json();
         
-        if (data.success) {
-          const items = data.data?.items || [];
+        if (data.success && data.data?.items) {
+          const items = data.data.items;
           
           // Map dữ liệu từ Post -> Room
           const rooms = items.map((post: any) => ({
             _id: post._id || post.roomId?._id || post.id,
-            title: post.title || post.roomId?.title,
-            price: post.price || post.roomId?.price,
-            area: post.area || post.roomId?.area,
-            city: post.location?.city || post.roomId?.city,
+            title: post.title || post.roomId?.title || '',
+            price: post.price || post.roomId?.price || 0,
+            area: post.area || post.roomId?.area || 0,
+            city: post.location?.city || post.roomId?.city || '',
+            location: post.location || { city: post.roomId?.city, address: post.roomId?.address },
             images: post.images || post.roomId?.images || []
           }));
           
           setSuggestions(rooms.filter((room: any) => room._id && room.title));
+        } else {
+          setSuggestions([]);
         }
       } catch (error) {
         console.error('Error fetching suggestions:', error);
@@ -85,10 +98,27 @@ export default function SearchSuggestions({ keyword, isOpen, onClose }: SearchSu
       }
     };
 
-    // Real-time debounce - fetch sau 200ms
+    // Real-time debounce - fetch sau 200ms để giảm số lần gọi API
     const timer = setTimeout(fetchSuggestions, 200);
     return () => clearTimeout(timer);
   }, [keyword, isOpen]);
+
+  // Xử lý khi click vào suggestion - chuyển đến trang tìm kiếm
+  const handleSuggestionClick = (room: Room) => {
+    // Tạo keyword từ title hoặc location để search
+    const searchKeyword = room.title || 
+      (room.location?.address ? room.location.address : 
+      (room.location?.district ? room.location.district : 
+      (room.city || '')));
+    
+    if (onSelectSuggestion) {
+      onSelectSuggestion(searchKeyword);
+    } else {
+      // Chuyển đến trang tìm kiếm với keyword
+      router.push(`/tim-kiem?keyword=${encodeURIComponent(searchKeyword)}`);
+    }
+    onClose();
+  };
 
   if (!isOpen || !keyword.trim()) return null;
 
@@ -101,13 +131,12 @@ export default function SearchSuggestions({ keyword, isOpen, onClose }: SearchSu
       ) : suggestions.length > 0 ? (
         <div className="divide-y divide-gray-200">
           {suggestions.map((room) => (
-            <Link
+            <div
               key={room._id}
-              href={`/room/${room._id}`}
+              onClick={() => handleSuggestionClick(room)}
               className="p-3 hover:bg-gray-50 transition-colors flex gap-4 cursor-pointer"
-              onClick={onClose}
             >
-              {/* Room Image - Ảnh to hơn */}
+              {/* Room Image */}
               <div className="flex-shrink-0 w-24 h-20 bg-gray-200 rounded-lg overflow-hidden">
                 {getFirstImageUrl(room.images) ? (
                   <Image
@@ -155,7 +184,7 @@ export default function SearchSuggestions({ keyword, isOpen, onClose }: SearchSu
                   </div>
                 </div>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       ) : (

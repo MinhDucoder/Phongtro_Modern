@@ -149,6 +149,12 @@ export default function SearchFilter() {
                 keyword={searchKeyword}
                 isOpen={showSuggestions}
                 onClose={() => setShowSuggestions(false)}
+                onSelectSuggestion={(selectedKeyword) => {
+                  setSearchKeyword(selectedKeyword);
+                  setShowSuggestions(false);
+                  // Trigger search với keyword mới
+                  router.push(`/tim-kiem?keyword=${encodeURIComponent(selectedKeyword)}`);
+                }}
               />
             </div>
 

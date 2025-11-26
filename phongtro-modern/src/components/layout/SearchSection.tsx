@@ -189,6 +189,18 @@ export default function SearchSection() {
                   keyword={filters.keyword} 
                   isOpen={isSuggestionsOpen}
                   onClose={() => setIsSuggestionsOpen(false)}
+                  onSelectSuggestion={(selectedKeyword) => {
+                    handleFilterChange('keyword', selectedKeyword);
+                    setIsSuggestionsOpen(false);
+                    // Chuyển đến trang tìm kiếm
+                    const params = new URLSearchParams();
+                    params.set('keyword', selectedKeyword);
+                    if (filters.province) params.set('province', filters.province);
+                    if (filters.district) params.set('district', filters.district);
+                    if (filters.propertyType) params.set('propertyType', filters.propertyType);
+                    if (filters.priceRange) params.set('priceRange', filters.priceRange);
+                    router.push(`/tim-kiem?${params.toString()}`);
+                  }}
                 />
               </div>
             </div>
