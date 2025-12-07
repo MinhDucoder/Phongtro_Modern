@@ -1393,9 +1393,28 @@ export const postPublicApi = {
 export const rsApi = {
   async recommendPosts(postId: string, topK: number = 5): Promise<any> {
     // Gọi qua proxy nội bộ để tránh CORS/mixed content
+    if (!postId) {
+      console.error('[rsApi] postId is required but was:', postId);
+      return { success: false, error: 'postId is required' };
+    }
+    
     const url = `/api/rs/recommendPosts?postId=${encodeURIComponent(postId)}&topK=${topK}`;
-    const res = await fetch(url, { method: 'GET' });
-    return res.json();
+    console.log('[rsApi] Calling URL:', url);
+    
+    try {
+      const res = await fetch(url, { 
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await res.json();
+      console.log('[rsApi] Response status:', res.status, 'data:', data);
+      return data;
+    } catch (error) {
+      console.error('[rsApi] Fetch error:', error);
+      return { success: false, error: String(error) };
+    }
   },
 };
 

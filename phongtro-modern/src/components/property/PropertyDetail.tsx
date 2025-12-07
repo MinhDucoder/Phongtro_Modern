@@ -324,22 +324,47 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   // Fetch recommendations
   useEffect(() => {
     const postId = property._id || property.id;
-    if (!postId) return;
+    if (!postId) {
+      console.log('[Recommendations] No postId, skipping fetch');
+      return;
+    }
 
     let isActive = true;
     (async () => {
       try {
         setRecsLoading(true);
         setRecsError(null);
+        console.log('[Recommendations] Fetching recommendations for postId:', postId);
         const resp = await rsApi.recommendPosts(postId as string, 6);
+        console.log('[Recommendations] Response received:', resp);
         if (!isActive) return;
-        if (resp?.success && Array.isArray(resp.data)) {
-          setRecs(resp.data as any[]);
+        
+        // Handle different response formats
+        if (resp?.success) {
+          if (Array.isArray(resp.data)) {
+            console.log('[Recommendations] Setting recommendations:', resp.data.length, 'items');
+            setRecs(resp.data as any[]);
+          } else if (Array.isArray(resp)) {
+            // Handle case where response is directly an array
+            console.log('[Recommendations] Response is array, setting:', resp.length, 'items');
+            setRecs(resp as any[]);
+          } else {
+            console.warn('[Recommendations] Invalid response format:', resp);
+            setRecs([]);
+          }
         } else {
+          console.warn('[Recommendations] Response not successful:', resp);
           setRecs([]);
+          if (resp?.error) {
+            setRecsError(resp.error);
+          }
         }
       } catch (e: any) {
-        if (isActive) setRecsError(e?.message || 'Không thể tải gợi ý.');
+        console.error('[Recommendations] Error fetching recommendations:', e);
+        if (isActive) {
+          setRecsError(e?.message || 'Không thể tải gợi ý.');
+          setRecs([]);
+        }
       } finally {
         if (isActive) setRecsLoading(false);
       }
@@ -847,18 +872,43 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
         
         {!recsLoading && recsError && (
           <div className="text-center py-12">
-            <ExclamationTriangleIcon className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <div className="text-red-600 font-semibold mb-2">Không thể tải gợi ý</div>
-            <div className="text-sm text-gray-600">{recsError}</div>
+            <ExclamationTriangleIcon className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
+            <div className="text-yellow-600 font-semibold mb-2">Không thể tải gợi ý</div>
+            <div className="text-sm text-gray-600 mb-2">{recsError}</div>
+            {(recsError.includes('timeout') || recsError.includes('network') || recsError.includes('RS') || recsError.includes('không chạy') || recsError.includes('Service')) ? (
+              <div className="text-xs text-gray-500 mt-2 space-y-1">
+                <div className="font-semibold mb-1">💡 Cách khắc phục:</div>
+                <div className="ml-4 space-y-1">
+                  <div>1. Chạy script khởi động:</div>
+                  <div className="ml-4 font-mono text-xs bg-gray-100 p-2 rounded mt-1">
+                    RS\RS_Posts\start-rs.bat
+                  </div>
+                  <div className="mt-2">Hoặc chạy thủ công:</div>
+                  <div className="ml-4 font-mono text-xs bg-gray-100 p-2 rounded mt-1">
+                    cd RS\RS_Posts<br/>
+                    python main.py
+                  </div>
+                  <div className="mt-2 text-blue-600">Service sẽ chạy trên: http://localhost:6000</div>
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
         
-        {!recsLoading && !recsError && (
-          Array.isArray(recs) && recs.length > 0 ? (
+        {!recsLoading && !recsError && Array.isArray(recs) && recs.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {recs.map((item: any) => {
                 const r = item?.room || {};
-                const img = Array.isArray(r.images) && r.images.length > 0 ? (typeof r.images[0] === 'string' ? r.images[0] : r.images[0]?.url) : '/placeholder-room.svg';
+                // Handle images: có thể là array hoặc string (space-separated URLs)
+                let imgUrl = '/placeholder-room.svg';
+                if (r.images) {
+                  if (Array.isArray(r.images) && r.images.length > 0) {
+                    imgUrl = typeof r.images[0] === 'string' ? r.images[0] : (r.images[0]?.url || '/placeholder-room.svg');
+                  } else if (typeof r.images === 'string' && r.images.trim()) {
+                    // Split by space và lấy URL đầu tiên
+                    imgUrl = r.images.split(' ')[0] || '/placeholder-room.svg';
+                  }
+                }
                 return (
                   <Link 
                     key={item._id} 
@@ -867,7 +917,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   >
                     <div className="relative h-40 overflow-hidden bg-gray-200">
                       <Image 
-                        src={img || '/placeholder-room.svg'} 
+                        src={imgUrl} 
                         alt={r.title || 'Gợi ý'} 
                         fill 
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -898,14 +948,13 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 );
               })}
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <MagnifyingGlassIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 font-medium">Không có gợi ý phù hợp.</p>
-              <p className="text-sm text-gray-500 mt-1">Hãy thử lại sau</p>
-            </div>
-          )
-        )}
+        ) : !recsLoading && !recsError ? (
+          <div className="text-center py-12">
+            <MagnifyingGlassIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600 font-medium">Không có gợi ý phù hợp.</p>
+            <p className="text-sm text-gray-500 mt-1">Hãy thử lại sau</p>
+          </div>
+        ) : null}
       </div>
     </div>
   </div>

@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(_request: NextRequest) {
   try {
-    const rsBase = process.env.NEXT_PUBLIC_RS_URL || 'http://localhost:5001';
+    // Use 127.0.0.1 instead of localhost for better server-side compatibility
+    const rsBase = process.env.NEXT_PUBLIC_RS_URL || 'http://127.0.0.1:6000';
     const url = `${rsBase}/health`;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 4000);
