@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,8 +14,14 @@ export default function AuthForm({ type }: AuthFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, register, isLoading, user } = useAuth();
+  const [mounted, setMounted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Fix hydration mismatch by only showing loading state after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -464,10 +470,10 @@ export default function AuthForm({ type }: AuthFormProps) {
         <div>
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={mounted && isLoading}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? (
+            {mounted && isLoading ? (
               <div className="flex items-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                 {type === 'login' ? 'Đang đăng nhập...' : 'Đang đăng ký...'}
